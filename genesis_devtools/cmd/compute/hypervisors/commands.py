@@ -112,11 +112,6 @@ def _print_entities(hypervisors: tp.List[dict]) -> None:
     print_table(table)
 
 
-def _is_superuser() -> bool:
-    """Check if running with superuser privileges."""
-    return os.geteuid() == 0
-
-
 def _install_packages() -> None:
     """Install required Debian packages."""
     packages = [
@@ -125,6 +120,7 @@ def _install_packages() -> None:
         "libvirt-daemon-system",
         "libvirt-dev",
         "genisoimage",
+        "unzip",
     ]
     cmd = ["apt-get", "update"]
     run_command(cmd)
@@ -176,7 +172,7 @@ def _download_rom_file(version: str) -> None:
     rom_path = f"/usr/share/qemu/{rom_filename}"
     if not os.path.exists(rom_path):
         runsh(
-            f"wget -O {rom_path} https://repository.genesis-core.tech/seed_os/{version}/{rom_filename}"
+            f"wget -O {rom_path} --timeout=30 https://repository.genesis-core.tech/seed_os/{version}/{rom_filename}"
         ).raise_on_result()
 
     else:
@@ -292,10 +288,12 @@ def init_cmd(romfile_version: str, pool_name: str, packer: bool) -> None:
             "This command is only supported on Debian-based systems."
         )
 
-    if not _is_superuser():
-        raise click.ClickException(
-            "This command requires superuser privileges. Please run with sudo."
-        )
+    import subprocess
+
+    if subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0:
+        click.secho("Sudo privileges are required to proceed.", fg="yellow")
+        if subprocess.call(["sudo", "-v"]) != 0:
+            raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
 
     log = ClickLogger()
 

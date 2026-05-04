@@ -16,17 +16,15 @@
 from __future__ import annotations
 
 import os
-from rich.prompt import Prompt
+from rich.prompt import Prompt, Confirm
 import subprocess
 import tempfile
 import time
 import typing as tp
-import yaml
 
 import rich_click as click
 
 from bazooka import exceptions as bazooka_exc
-from gcl_sdk.clients.http import base as http_client
 
 from genesis_devtools.common.table import get_table, print_table, show_data
 from genesis_devtools import utils
@@ -34,6 +32,9 @@ from genesis_devtools.clients import base_client
 from genesis_devtools.clients import repo as repo_lib
 import genesis_devtools.constants as c
 from genesis_devtools.logger import ClickLogger
+
+if tp.TYPE_CHECKING:
+    from genesis_devtools.clients.base import CollectionBaseClient
 
 
 ENTITY = "element"
@@ -152,7 +153,7 @@ def show_element_ips(ctx: click.Context, name: str) -> None:
 
 
 def _apply_with_cleanup(
-    client: http_client.CollectionBaseClient,
+    client: "CollectionBaseClient",
     manifest_data: dict[str, tp.Any],
     install_only: bool = False,
     update_manifest: bool = False,
@@ -209,7 +210,7 @@ def _apply_with_cleanup(
 
 
 def upgrade_manifest(
-    client: http_client.CollectionBaseClient,
+    client: "CollectionBaseClient",
     repository: str,
     path_or_name: str,
     install_only: bool = False,
@@ -226,8 +227,7 @@ def upgrade_manifest(
     if os.path.exists(path_or_name):
         if not os.path.isfile(path_or_name):
             raise click.ClickException(f"{path_or_name} is not a file")
-        with open(path_or_name, "r", encoding="utf-8") as f:
-            manifest = yaml.safe_load(f)
+        manifest = utils.load_yaml(path_or_name)
     else:
         manifest = repo_lib.download_manifest(repository, path_or_name, version)
 
@@ -251,32 +251,43 @@ def upgrade_manifest(
     installed_elements = {
         e["name"] for e in base_client.list_entities(client, ENTITY_COLLECTION)
     }
-    required_elements = set(requirements.keys()) - installed_elements
-
-    all_installed_elements = required_elements.union({manifest["name"]})
+    required_elements = [
+        item for item in requirements.keys() if item not in installed_elements
+    ]
+    all_installed_elements = required_elements.copy()
+    all_installed_elements.append(manifest["name"])
     click.echo(
         f"The following elements will be {'installed' if install_only else 'upgraded'}: "
         f"{click.style(', '.join(all_installed_elements), fg='green')}"
     )
 
     while required_elements:
-        # TODO(akremenetsky): Use queue to resolve dependencies
         requirement = required_elements.pop()
         req_manifest = repo_lib.download_manifest(repository, requirement)
 
         # Determine requirements for the element
-        requirements = set(req_manifest.get("requirements", {}).keys())
-        requirements = requirements - installed_elements
-        required_elements.update(requirements)
+        req_requirements = req_manifest.get("requirements", {})
+        req_required_elements = [
+            item for item in req_requirements.keys() if item not in installed_elements
+        ]
+        required_elements.extend(req_required_elements)
+        required_elements = list(set(required_elements))
 
         # NOTE(akremenetsky): We should install the element since there are
         # unresolved dependencies but for the simplicity we will install it here
         req_manifest = base_client.add_entity(
             client, c.MANIFEST_COLLECTION, req_manifest
         )
-        base_client.action_entity(
-            client, c.MANIFEST_COLLECTION, "install", req_manifest["uuid"]
-        )
+        try:
+            base_client.action_entity(
+                client, c.MANIFEST_COLLECTION, "install", req_manifest["uuid"]
+            )
+        except bazooka_exc.BaseHTTPException as e:
+            if e.code == 400 and e.cause.response.json().get("code") == 1000:
+                required_elements.insert(0, req_manifest["name"])
+                continue
+            else:
+                raise
         installed_name = f"{req_manifest['name']} ({req_manifest['version']})"
         click.echo(
             f"Element {click.style(installed_name, fg='green')} was installed successfully"
@@ -314,8 +325,6 @@ def install_manifest_cmd(
     ctx: click.Context, repository: str, version: str | None, path_or_name: str | None
 ) -> None:
     """Install manifest from a YAML file"""
-    log = ClickLogger()
-
     if not path_or_name:
         all_elements = repo_lib.get_all_elements(repository)
         path_or_name = Prompt.ask(
@@ -329,8 +338,9 @@ def install_manifest_cmd(
         install_only=True,
         version=version,
     )
-    log.important(
-        f"Element {manifest['name']} ({manifest['version']}) was installed successfully"
+    installed_name = f"{manifest['name']} ({manifest['version']})"
+    click.echo(
+        f"Element {click.style(installed_name, fg='green')} was installed successfully"
     )
 
 
@@ -455,23 +465,11 @@ def uninstall_manifest_cmd(ctx: click.Context, path_uuid_name: str) -> None:
         _uninstall(uuid, name)
         return
     elif len(manifests) > 1:
-
-        manifest_choice = Prompt.ask(
-            "Select manifest to uninstall",
-            choices=[f"{manifest['name']} {manifest['version']}" for manifest in manifests],
-        )
-        m_name, m_version = manifest_choice.split(" ")
-        for manifest in manifests:
-            if manifest["name"] == m_name and manifest["version"] == m_version:
-                uuid = manifest["uuid"]
-                _uninstall(uuid, name)
-                break
-        return
+        raise click.ClickException(f"Multiple elements found with name {name}")
 
     # Path
     if os.path.exists(path_uuid_name):
-        with open(path_uuid_name, "r") as f:
-            manifest = yaml.safe_load(f)
+        manifest = utils.load_yaml(path_uuid_name)
         if "uuid" in manifest:
             filters = {"uuid": manifest["uuid"]}
         elif "name" in manifest:
@@ -490,6 +488,17 @@ def uninstall_manifest_cmd(ctx: click.Context, path_uuid_name: str) -> None:
         return
 
     log.warn(f"Element {path_uuid_name} not found")
+
+
+@elements_group.command("un", help="Uninstall manifest by UUID, path or name")
+@click.argument("path_uuid_name", type=str)
+@click.pass_context
+def un(ctx: click.Context, path_or_name: str | None) -> None:
+    ctx.invoke(
+        uninstall_manifest_cmd,
+        path_or_name=path_or_name,
+    )
+    return None
 
 
 @elements_group.command("available", help="Print available elements in repository")
@@ -524,7 +533,7 @@ def edit_data(data: str, editor: str = "nano") -> tp.Tuple[str, dict]:
     finally:
         if tf_path and os.path.exists(tf_path):
             os.remove(tf_path)
-    json_data = yaml.load(new_data, Loader=yaml.FullLoader)
+    json_data = utils.load_yaml(new_data)
     return new_data, json_data
 
 
@@ -551,7 +560,7 @@ def edit(ctx: click.Context, uuid_name: str, editor: str, repository: str) -> No
     tf_path = None
     try:
         with tempfile.NamedTemporaryFile(suffix=".yaml", mode="a+", delete=False) as tf:
-            yaml.dump(data, tf)
+            utils.dump_yaml(data, tf)
             tf.flush()
             tf_path = tf.name
             subprocess.call([editor, tf_path])
@@ -569,6 +578,23 @@ def edit(ctx: click.Context, uuid_name: str, editor: str, repository: str) -> No
     click.echo(
         f"Element {click.style(manifest['name'], fg='green')} was successfully edited"
     )
+
+
+@elements_group.command("clear", help="Uninstall all elements, except base")
+@click.option(
+    "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+)
+@click.pass_context
+def clear(ctx: click.Context, y: bool) -> None:  # pragma: no cover
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    entities = base_client.list_entities(client, ENTITY_COLLECTION)
+    for entity in entities:
+        if entity["name"] in c.BASE_ELEMENTS:
+            click.echo(f"Skipping base element {entity['name']}")
+            continue
+        if y or Confirm.ask(f"Do you want to uninstall {entity['name']}?"):
+            base_client.delete_entity(client, ENTITY_COLLECTION, entity["uuid"])
+    return None
 
 
 def _print_entities(entities: tp.List[dict]) -> None:
