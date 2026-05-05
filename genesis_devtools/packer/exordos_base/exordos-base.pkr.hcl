@@ -38,9 +38,9 @@ data "sshkey" "install" {
   name = "packer"
 }
 
-source "qemu" "genesis-base" {
-  iso_url                   = "http://repository.genesis-core.tech:8081/genesis-base/latest/genesis-base.qcow2"
-  iso_checksum              = "file:http://repository.genesis-core.tech:8081/genesis-base/latest/SHA256SUMS"
+source "qemu" "exordos-base" {
+  iso_url                   = "http://repository.genesis-core.tech:8081/exordos-base/latest/exordos-base.qcow2"
+  iso_checksum              = "file:http://repository.genesis-core.tech:8081/exordos-base/latest/SHA256SUMS"
   accelerator               = "kvm"
   cpu_model                 = "host"
   boot_wait                 = "5s"
@@ -77,9 +77,6 @@ set -ex
 
 # Logs
 sudo find /var/log -type f -maxdepth 3 -delete
-
-# Temporary remove genesis config in old installations due to new config 90-exordos-net-base-config.yaml
-sudo rm -f /etc/netplan/90-genesis-net-base-config.yaml
 
 # Remove temporary keys
 # Disable removing host keys temporarily
