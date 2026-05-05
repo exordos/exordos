@@ -76,7 +76,7 @@ source "qemu" "debian-12" {
 set -ex
 
 # Default network settings
-cat << EOF1 | sudo tee /etc/netplan/90-genesis-net-base-config.yaml
+cat << EOF1 | sudo tee /etc/netplan/90-exordos-net-base-config.yaml
 network:
   version: 2
   renderer: networkd
