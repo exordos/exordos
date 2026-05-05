@@ -78,6 +78,9 @@ set -ex
 # Logs
 sudo find /var/log -type f -maxdepth 3 -delete
 
+# Temporary remove genesis config in old installations due to new config 90-exordos-net-base-config.yaml
+sudo rm -f /etc/netplan/90-genesis-net-base-config.yaml
+
 # Remove temporary keys
 # Disable removing host keys temporarily
 # sudo rm -f /etc/ssh/*host*key*
