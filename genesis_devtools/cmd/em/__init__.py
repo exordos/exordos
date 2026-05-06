@@ -13,8 +13,10 @@
 import rich_click as click
 
 from genesis_devtools.cmd.aliases import ClickAliasedGroup
+from genesis_devtools.cmd.em.elements import commands as elements_commands
 from genesis_devtools.cmd.em.exports import commands as exports_commands
 from genesis_devtools.cmd.em.imports import commands as imports_commands
+from genesis_devtools.cmd.em.manifests import commands as manifests_commands
 from genesis_devtools.cmd.em.resources import commands as resources_commands
 from genesis_devtools.cmd.em.services import commands as services_commands
 
@@ -26,7 +28,9 @@ def elements_group():
     pass
 
 
+elements_group.add_command(elements_commands.elements_group, aliases=["e"])
 elements_group.add_command(exports_commands.exports_group)
 elements_group.add_command(imports_commands.imports_group, aliases=["i"])
+elements_group.add_command(manifests_commands.manifests_group, aliases=["m"])
 elements_group.add_command(resources_commands.resources_group, aliases=["r"])
 elements_group.add_command(services_commands.services_group, aliases=["s"])

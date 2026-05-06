@@ -29,7 +29,7 @@ import socket
 from importlib.metadata import entry_points
 
 import git
-import yaml
+import ruamel.yaml
 import rich_click as click
 from cryptography.hazmat.primitives import ciphers
 from cryptography.hazmat.primitives.ciphers import modes as cipher_models
@@ -37,6 +37,18 @@ from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat import backends as crypto_back
 
 import genesis_devtools.constants as c
+
+yaml = ruamel.yaml.YAML()
+
+
+def load_yaml(file_path: str) -> tp.Any:
+    """Load YAML file."""
+    with open(file_path, "r") as f:
+        return yaml.load(f)
+
+
+def dump_yaml(data, tf) -> tp.Any:
+    yaml.dump(data, tf)
 
 
 def load_from_entry_point(group: str, name: str) -> tp.Any:
@@ -53,8 +65,7 @@ def load_driver(config_file: str, group: str = c.EP_BACKUP_DRIVERS) -> tp.Any:
     if not os.path.exists(config_file):
         raise FileNotFoundError(f"Configuration file {config_file} not found")
 
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+    config = load_yaml(config_file)
 
     driver = config.get("driver")
     if driver is None:
@@ -80,8 +91,7 @@ def get_genesis_config(
 
     for alt in alternatives:
         if os.path.exists(alt):
-            with open(alt, "r") as f:
-                return yaml.safe_load(f)
+            return load_yaml(alt)
 
     raise FileNotFoundError("Genesis configuration file not found")
 
@@ -510,28 +520,25 @@ PROJECT_PATH = get_project_path()
 
 
 def validate_config(data: dict, schema: tp.Optional[dict]) -> None:
-    import openapi_schema_validator
-    from jsonschema.exceptions import ValidationError
+    try:
+        import openapi_schema_validator
+        from jsonschema.exceptions import ValidationError
 
-    if data and schema:
-        try:
-            openapi_schema_validator.validate(
-                data, schema, cls=openapi_schema_validator.OAS30Validator
-            )
-        except ValidationError as err:
-            raise ValueError(f"{err.message} in {err.json_path}")
+        if data and schema:
+            try:
+                openapi_schema_validator.validate(
+                    data, schema, cls=openapi_schema_validator.OAS30Validator
+                )
+            except ValidationError as err:
+                raise ValueError(f"{err.message} in {err.json_path}")
+    except ModuleNotFoundError:
+        pass
     return None
 
 
 def load_spec() -> dict:
     spec_path = os.path.join(PROJECT_PATH, c.PKG_NAME, "spec", "genesis_spec.yaml")
-    # if not os.path.exists(spec_path):
-    #     return {}
-    with open(
-        spec_path,
-        "r",
-    ) as f:
-        return yaml.safe_load(f)
+    return load_yaml(spec_path)
 
 
 def convert_input_multiply(params: tuple[str, ...]) -> dict[str, str]:

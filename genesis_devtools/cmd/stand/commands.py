@@ -13,7 +13,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from __future__ import annotations
 
 import hashlib
 import json
@@ -36,6 +35,7 @@ from genesis_devtools.builder import base as base_builder
 import genesis_devtools.constants as c
 from genesis_devtools.logger import ClickLogger
 from genesis_devtools import utils
+from genesis_devtools.cmd.stand.constants import BackupPeriod, Profile
 from genesis_devtools.stand import models as stand_models
 from genesis_devtools.infra.driver import libvirt as libvirt_infra
 from genesis_devtools.infra.libvirt import libvirt
@@ -317,7 +317,7 @@ def _register_core(
 def _bootstrap_core(
     image_path: str | None,
     image_uri: str | None,
-    profile: c.Profile,
+    profile: Profile,
     name: str,
     stand_spec: tp.Dict[str, tp.Any] | None,
     stand_main_network: stand_models.Network,
@@ -481,10 +481,10 @@ def _bootstrap_core(
 )
 @click.option(
     "--profile",
-    default=c.Profile.SMALL.value,
+    default=Profile.SMALL.value,
     show_default=True,
     help="Profile for the installation.",
-    type=click.Choice([p.value for p in c.Profile]),
+    type=click.Choice([p.value for p in Profile]),
 )
 @click.option(
     "--name",
@@ -712,7 +712,7 @@ def bootstrap_cmd(
     elif not os.path.exists(inventory):
         raise click.UsageError(f"Inventory path not found: {inventory}")
 
-    profile = c.Profile[profile.upper()]
+    profile = Profile[profile.upper()]
 
     # Determine the IP address for the core VM
     if core_ip is None:
@@ -941,8 +941,8 @@ def _domains_for_backup(
 @click.option(
     "-p",
     "--period",
-    default=c.BackupPeriod.D1.value,
-    type=click.Choice([p.value for p in c.BackupPeriod]),
+    default=BackupPeriod.D1.value,
+    type=click.Choice([p.value for p in BackupPeriod]),
     show_default=True,
     help="the regularity of backups",
 )
@@ -950,7 +950,7 @@ def _domains_for_backup(
     "-o",
     "--offset",
     default=None,
-    type=click.Choice([p.value for p in c.BackupPeriod]),
+    type=click.Choice([p.value for p in BackupPeriod]),
     show_default=True,
     help=(
         "The time offset of the first backup. If not provided, "
@@ -1036,9 +1036,9 @@ def backup_cmd(
     min_free_space: int,
     rotate: int,
 ) -> None:
-    period = c.BackupPeriod(period)
+    period = BackupPeriod(period)
     if offset:
-        offset = c.BackupPeriod(offset)
+        offset = BackupPeriod(offset)
 
     # Forbid using both include and exclude options
     if name and exclude_name:
@@ -1102,7 +1102,7 @@ def backup_cmd(
             )
 
         # If --start is specified, period must be at least daily
-        if period.timeout < c.BackupPeriod.D1.timeout:
+        if period.timeout < BackupPeriod.D1.timeout:
             raise click.UsageError(
                 "The '--start' option requires the period to be at least 1 day (1d)."
             )
