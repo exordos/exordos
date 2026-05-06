@@ -16,7 +16,6 @@
 
 import hashlib
 import json
-import enum
 import os
 import subprocess
 import time
@@ -36,6 +35,7 @@ from genesis_devtools.builder import base as base_builder
 import genesis_devtools.constants as c
 from genesis_devtools.logger import ClickLogger
 from genesis_devtools import utils
+from genesis_devtools.cmd.stand.constants import BackupPeriod, Profile
 from genesis_devtools.stand import models as stand_models
 from genesis_devtools.infra.driver import libvirt as libvirt_infra
 from genesis_devtools.infra.libvirt import libvirt
@@ -202,70 +202,6 @@ def _resolve_inventory_from_url(url: str) -> pathlib.Path:
         _download_inventory_files(session, base_url, raw, cache_dir)
 
     return cache_dir
-
-
-class Profile(str, enum.Enum):
-    DEVELOP = "develop"
-    SMALL = "small"
-    MEDIUM = "medium"
-    LARGE = "large"
-    LEGACY = "legacy"
-
-    @property
-    def ram(self) -> int:
-        """Return memory in Mb based on current element in enum."""
-        memory = {
-            self.DEVELOP: 1024,
-            self.SMALL: 2048,
-            self.MEDIUM: 8192,
-            self.LARGE: 16384,
-            self.LEGACY: 4096,
-        }
-        return memory[self]
-
-    @property
-    def cores(self) -> int:
-        """Return CPU cores based on current element in enum."""
-        cores = {
-            self.DEVELOP: 1,
-            self.SMALL: 2,
-            self.MEDIUM: 4,
-            self.LARGE: 8,
-            self.LEGACY: 2,
-        }
-        return cores[self]
-
-
-class BackupPeriod(str, enum.Enum):
-    M1 = "1m"
-    M5 = "5m"
-    M15 = "15m"
-    M30 = "30m"
-    H1 = "1h"
-    H3 = "3h"
-    H6 = "6h"
-    H12 = "12h"
-    D1 = "1d"
-    D3 = "3d"
-    D7 = "7d"
-
-    @property
-    def timeout(self) -> int:
-        """Return timeout in seconds based on current element in enum."""
-        timeouts = {
-            self.M1: 60,
-            self.M5: 60 * 5,
-            self.M15: 60 * 15,
-            self.M30: 60 * 30,
-            self.H1: 60 * 60,
-            self.H3: 60 * 60 * 3,
-            self.H6: 60 * 60 * 6,
-            self.H12: 60 * 60 * 12,
-            self.D1: 60 * 60 * 24,
-            self.D3: 60 * 60 * 24 * 3,
-            self.D7: 60 * 60 * 24 * 7,
-        }
-        return timeouts[self]
 
 
 def _get_core_image_uri_from_manifest(manifest_path: str) -> str:

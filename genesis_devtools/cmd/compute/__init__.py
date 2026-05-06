@@ -14,6 +14,7 @@ import rich_click as click
 
 from genesis_devtools.cmd.aliases import ClickAliasedGroup
 from genesis_devtools.cmd.compute.hypervisors import commands as hypervisors_commands
+from genesis_devtools.cmd.compute.nodes import commands as nodes_commands
 from genesis_devtools.cmd.compute.sets import commands as sets_commands
 
 
@@ -25,4 +26,5 @@ def compute_group():
 
 
 compute_group.add_command(hypervisors_commands.hypervisors_group, aliases=["h"])  # noqa
+compute_group.add_command(nodes_commands.nodes_group, aliases=["n"])  # noqa
 compute_group.add_command(sets_commands.sets_group, aliases=["s"])  # noqa

@@ -86,16 +86,12 @@ def hello() -> None:
 
 def get_grandparent_process_name() -> str:
     try:
-        # Получаем PID родительского процесса
         ppid = os.getppid()
 
-        # Получаем PID родителя родителя (прадедушки)
         with open(f"/proc/{ppid}/stat", "r") as f:
             stat_info = f.read().split()
-            # В поле 4 содержится PID родителя
             grandparent_pid = int(stat_info[3])
 
-        # Получаем имя прадедушки из /proc/<pid>/comm
         with open(f"/proc/{grandparent_pid}/comm", "r") as f:
             name = f.read().strip()
             if name:
@@ -103,7 +99,6 @@ def get_grandparent_process_name() -> str:
     except (FileNotFoundError, PermissionError, ValueError, IndexError):
         pass
 
-    # Альтернативный способ через ps
     try:
         result = subprocess.run(
             ["ps", "-o", "comm=", "-p", str(ppid)],
