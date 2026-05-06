@@ -753,6 +753,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../elements_u/" class="md-nav__link">
+        elements_u
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../elements_uninstall/" class="md-nav__link">
         elements_uninstall
       </a>
@@ -3548,7 +3562,7 @@
 </ul>
 </li>
 </ul>
-<p>Path to the genesis inventory file or directory with inventory.json</p>
+<p>Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under ~/.cache/genesis/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to <a href="https://repository.genesis-core.tech/genesis-elements/core/">https://repository.genesis-core.tech/genesis-elements/core/</a><version>/. Examples: 0.0.6  /path/to/core/0.0.6  <a href="https://repository.example.com/genesis-elements/core/0.0.6/">https://repository.example.com/genesis-elements/core/0.0.6/</a>  <a href="https://repository.example.com/genesis-elements/core/0.0.6/inventory.json">https://repository.example.com/genesis-elements/core/0.0.6/inventory.json</a></version></version></name></p>
 <ul>
 <li><code>profile</code>:<ul>
 <li>Type: choice</li>
@@ -3770,6 +3784,15 @@
 </ul>
 <p>Interactively create a genesis settings file</p>
 <ul>
+<li><code>ssh_public_key</code>:<ul>
+<li>Type: path</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--ssh-public-key</code></li>
+</ul>
+</li>
+</ul>
+<p>Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -3785,7 +3808,10 @@
 <span class="go"> Bootstrap genesis locally                                                                                                                                                                                                                                                                                 </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --inventory                 -i  TEXT                                 Path to the genesis inventory file or directory with inventory.json                                                                                                                                                                │</span>
+<span class="go">│ --inventory                 -i  TEXT                                 Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under               │</span>
+<span class="go">│                                                                      ~/.cache/genesis/&lt;name&gt;/&lt;version&gt;/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to                           │</span>
+<span class="go">│                                                                      https://repository.genesis-core.tech/genesis-elements/core/&lt;version&gt;/. Examples: 0.0.6  /path/to/core/0.0.6  https://repository.example.com/genesis-elements/core/0.0.6/                                                           │</span>
+<span class="go">│                                                                      https://repository.example.com/genesis-elements/core/0.0.6/inventory.json                                                                                                                                                          │</span>
 <span class="go">│ --profile                       [develop|small|medium|large|legacy]  Profile for the installation. [default: small]                                                                                                                                                                                     │</span>
 <span class="go">│ --name                          TEXT                                 Name of the installation                                                                                                                                                                                                           │</span>
 <span class="go">│ --launch-mode               -m  [core|element|custom]                Launch mode for start element, core or custom configuration [default: element]                                                                                                                                                     │</span>
@@ -3810,6 +3836,7 @@
 <span class="go">│ --org-token                     TEXT                                 Organization token, used to register stand in ecosystem                                                                                                                                                                            │</span>
 <span class="go">│ --ecosystem-endpoint            TEXT                                 Ecosystem's endpoint to connect to                                                                                                                                                                                                 │</span>
 <span class="go">│ --settings                                                           Interactively create a genesis settings file                                                                                                                                                                                       │</span>
+<span class="go">│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.                                                                                    │</span>
 <span class="go">│ --help                                                               Show this message and exit.                                                                                                                                                                                                        │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
