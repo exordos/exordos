@@ -4,7 +4,7 @@
 
 # Exordos cli
 
-The tools to manager life cycle of Exordos projects
+The tools to manage life cycle of Exordos projects
 
 # Installation of binary
 
