@@ -117,9 +117,9 @@ def build_cmd(
     developer_key_path: str | None,
     version_suffix: c.VersionSuffixType,
     force: bool,
-    project_dir: str,
     inventory: bool,
     manifest_var: tuple[str, ...],
+    project_dir: str,
 ) -> None:
     if not project_dir:
         raise click.UsageError("No project directories specified")

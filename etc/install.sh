@@ -131,7 +131,8 @@ download_and_extract() {
 GENESIS_CONFIG_FILE=~/.genesis/genesisctl.yaml
 CONFIG_FILE=~/.exordos/exordosctl.yaml
 
-if [ -f "$GENESIS_CONFIG_FILE" && ! -f "$CONFIG_FILE" ]; then
+if [ -f "$GENESIS_CONFIG_FILE" ] && [ ! -f "$CONFIG_FILE" ]; then
+    mkdir -p "$(dirname "$CONFIG_FILE")"
     mv "$GENESIS_CONFIG_FILE" "$CONFIG_FILE"
 fi
 
