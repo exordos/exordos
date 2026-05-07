@@ -86,6 +86,7 @@ def get_exordos_config(
     alternatives = [
         os.path.join(project_dir, exordos_cfg_file),
         os.path.join(project_dir, c.DEF_GEN_WORK_DIR_NAME, exordos_cfg_file),
+        os.path.join(project_dir, "genesis", "genesis.yaml"),
         exordosctl_cfg_file,
     ]
 
