@@ -1,6 +1,6 @@
-# Config for genesis cli
+# Config for exordos cli
 
-Default path for config file: `~/.genesis/genesisctl.yaml`
+Default path for config file: `~/.exordos/exordosctl.yaml`
 
 Example config:
 
@@ -35,7 +35,7 @@ You can change the path to the config file by setting the command line argument 
 Example:
 
 ```bash
-genesis --config ~/.genesis.yaml elements list
+exordos --config ~/.exordos.yaml elements list
 ```
 
 ## Realms
@@ -56,5 +56,5 @@ or by environment variable `GEN_DEV_KEYS`.
 You can interactively init the config file by running the following command:
 
 ```bash
-genesis settings init
+exordos settings init
 ```

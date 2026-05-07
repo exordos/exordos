@@ -7,7 +7,7 @@ Show variable
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos vs variables show [OPTIONS] UUID                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show variable
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos vs variables show [OPTIONS] UUID                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Show variable                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

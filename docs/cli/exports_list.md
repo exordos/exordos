@@ -7,7 +7,7 @@ List exports
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e exports list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos e exports list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List exports
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e exports list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos e exports list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  List exports                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

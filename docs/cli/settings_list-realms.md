@@ -7,7 +7,7 @@ Describe one or many realms
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings list-realms [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos settings list-realms [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -39,7 +39,7 @@ Describe one or many realms
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings list-realms [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos settings list-realms [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  Describe one or many realms                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

@@ -1,13 +1,13 @@
 
 # secret_certificates
 
-Manage certificates in the Genesis installation
+Manage certificates in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
+ Usage: exordos secret certificates [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage certificates in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
+ Usage: exordos secret certificates [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
- Manage certificates in the Genesis installation                                                                                                                                                                                                                                                           
+ Manage certificates in the Exordos installation                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                   Add a new certificate to the Genesis installation                                                                                                                                                                                                                 │
+│ add                                   Add a new certificate to the Exordos installation                                                                                                                                                                                                                 │
 │ delete                                Delete certificate                                                                                                                                                                                                                                                │
 │ list                                  List certificates                                                                                                                                                                                                                                                 │
 │ show                                  Show certificate                                                                                                                                                                                                                                                  │

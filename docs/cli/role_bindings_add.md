@@ -1,13 +1,13 @@
 
 # role_bindings_add
 
-Add a new role_binding to the Genesis installation
+Add a new role_binding to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
+ Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -54,9 +54,9 @@ Add a new role_binding to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
+ Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
- Add a new role_binding to the Genesis installation                                                                                                                                                                                                                                                        
+ Add a new role_binding to the Exordos installation                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid        -u  UUID  UUID of the role_binding                                                                                                                                                                                                                                                     │

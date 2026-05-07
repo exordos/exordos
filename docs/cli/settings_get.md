@@ -7,7 +7,7 @@ Get an individual value from a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings get [OPTIONS] KEY                                                                                                                                                                                                                                                                 
+ Usage: exordos settings get [OPTIONS] KEY                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Get an individual value from a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings get [OPTIONS] KEY                                                                                                                                                                                                                                                                 
+ Usage: exordos settings get [OPTIONS] KEY                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
  Get an individual value from a settings file                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

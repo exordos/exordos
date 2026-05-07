@@ -7,7 +7,7 @@ List variables
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos vs variables list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List variables
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos vs variables list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  List variables                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

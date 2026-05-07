@@ -7,7 +7,7 @@ Show idp
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps show [OPTIONS] UUID                                                                                                                                                                                                                                                               
+ Usage: exordos iam idps show [OPTIONS] UUID                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show idp
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps show [OPTIONS] UUID                                                                                                                                                                                                                                                               
+ Usage: exordos iam idps show [OPTIONS] UUID                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
  Show idp                                                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            

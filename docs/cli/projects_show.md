@@ -7,7 +7,7 @@ Show project
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos iam projects show [OPTIONS] UUID                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show project
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos iam projects show [OPTIONS] UUID                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Show project                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

@@ -1,13 +1,13 @@
 
 # roles_add
 
-Add a new role to the Genesis installation
+Add a new role to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles add [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos iam roles add [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,9 +56,9 @@ Add a new role to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles add [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos iam roles add [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Add a new role to the Genesis installation                                                                                                                                                                                                                                                                
+ Add a new role to the Exordos installation                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --uuid         -u  UUID  UUID of the role                                                                                                                                                                                                                                                               │

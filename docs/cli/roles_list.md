@@ -7,7 +7,7 @@ List roles
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos iam roles list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List roles
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos iam roles list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  List roles                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

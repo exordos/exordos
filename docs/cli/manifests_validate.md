@@ -7,7 +7,7 @@ Validate manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                  
+ Usage: exordos manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Validate manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                  
+ Usage: exordos manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  Validate manifest                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            

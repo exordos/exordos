@@ -7,7 +7,7 @@ List clients
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients list [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos iam clients list [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List clients
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients list [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos iam clients list [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
  List clients                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

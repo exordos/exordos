@@ -1,6 +1,6 @@
 [project]
-name = "genesis_devtools"
-description = "Tools to manager life cycle of Genesis projects."
+name = "exordos"
+description = "Tools to manager life cycle of Exordos projects."
 readme = "README.md"
 authors = [{name = "Genesis Corporation", email = "anton.kremenetsky@gmail.com"}]
 dynamic = ["version"]
@@ -36,7 +36,7 @@ dependencies = [
     "ruamel-yaml==0.17.26",
 ]
 [project.urls]
-homepage = "https://github.com/infraguys/genesis_devtools/"
+homepage = "https://github.com/exordos/exordos/"
 
 [build-system]
 requires = [
@@ -139,7 +139,7 @@ line-ending = "auto"
 where = ["."]
 
 [tool.setuptools.package-data]
-genesis_devtools = [
+exordos = [
     "*.yaml",
     "*.md",
     "templates/**/*",
@@ -149,15 +149,15 @@ genesis_devtools = [
 ]
 
 [project.scripts]
-genesis = "genesis_devtools.cmd.cli:genesis"
+exordos = "exordos.cmd.cli:exordos"
 
-[project.entry-points."genesis_devtools.backup.drivers"]
-LocalQcowBackuper = "genesis_devtools.backup.local:LocalQcowBackuper"
-S3QcowBackuper = "genesis_devtools.backup.s3:S3QcowBackuper"
+[project.entry-points."exordos.backup.drivers"]
+LocalQcowBackuper = "exordos.backup.local:LocalQcowBackuper"
+S3QcowBackuper = "exordos.backup.s3:S3QcowBackuper"
 
-[project.entry-points."genesis_devtools.repo.drivers"]
-fs = "genesis_devtools.repo.fs:FSRepoDriver"
-nginx = "genesis_devtools.repo.nginx:NginxRepoDriver"
+[project.entry-points."exordos.repo.drivers"]
+fs = "exordos.repo.fs:FSRepoDriver"
+nginx = "exordos.repo.nginx:NginxRepoDriver"
 
 [tool.uv]
 package = true
@@ -165,7 +165,7 @@ package = true
 [tool.mypy]
 exclude = [
     '.venv',
-    'genesis_devtools/tests',
+    'exordos/tests',
 ]
 python_version = "3.14"
 disallow_untyped_defs = true
@@ -178,11 +178,11 @@ ignore_missing_imports = true
 [tool.coverage.run]
 branch = true
 source = [
-    "genesis_devtools"
+    "exordos"
 ]
-command_line = "-m pytest -s genesis_devtools/tests/unit"
+command_line = "-m pytest -s exordos/tests/unit"
 omit = [
-    "genesis_devtools/tests/*",
+    "exordos/tests/*",
     ".venv",
     "memory:0x"
 ]

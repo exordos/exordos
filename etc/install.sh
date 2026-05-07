@@ -1,6 +1,6 @@
 #!/bin/sh
-# This script installs Genesis DevTools on Linux and macOS.
-# It detects the current operating system architecture and installs the appropriate version of Genesis DevTools.
+# This script installs exordos on Linux and macOS.
+# It detects the current operating system architecture and installs the appropriate version of exordos.
 
 # Wrap script in main function so that a truncated partial download doesn't end
 # up executing half a script.
@@ -53,34 +53,34 @@ if [ "$OS" = "Darwin" ]; then
         exit 1
     fi
 
-    DOWNLOAD_URL="https://repository.genesis-core.tech/genesis-devtools/latest/genesis-macos"
+    DOWNLOAD_URL="https://repository.genesis-core.tech/exordos/latest/exordos-macos"
 
-    if [ -d "/Applications/genesis.app" ]; then
-        status "Removing existing genesis installation..."
-        rm -rf "/Applications/genesis.app"
+    if [ -d "/Applications/exordos.app" ]; then
+        status "Removing existing exordos installation..."
+        rm -rf "/Applications/exordos.app"
     fi
 
-    status "Downloading genesis for macOS..."
+    status "Downloading exordos for macOS..."
     curl --fail --show-error --location --progress-bar \
-        -o "$TEMP_DIR/genesis-darwin.zip" "$DOWNLOAD_URL"
+        -o "$TEMP_DIR/exordos-darwin.zip" "$DOWNLOAD_URL"
 
-    status "Installing genesis to /Applications..."
-    unzip -q "$TEMP_DIR/genesis-darwin.zip" -d "$TEMP_DIR"
-    mv "$TEMP_DIR/genesis.app" "/Applications/"
+    status "Installing exordos to /Applications..."
+    unzip -q "$TEMP_DIR/exordos-darwin.zip" -d "$TEMP_DIR"
+    mv "$TEMP_DIR/exordos.app" "/Applications/"
 
-    if [ ! -L "/usr/local/bin/genesis" ] || [ "$(readlink "/usr/local/bin/genesis")" != "/Applications/genesis.app/Contents/Resources/genesis" ]; then
-        status "Adding 'genesis' command to PATH (may require password)..."
+    if [ ! -L "/usr/local/bin/exordos" ] || [ "$(readlink "/usr/local/bin/exordos")" != "/Applications/exordos.app/Contents/Resources/exordos" ]; then
+        status "Adding 'exordos' command to PATH (may require password)..."
         mkdir -p "/usr/local/bin" 2>/dev/null || sudo mkdir -p "/usr/local/bin"
-        ln -sf "/Applications/genesis.app/Contents/Resources/genesis" "/usr/local/bin/genesis" 2>/dev/null || \
-            sudo ln -sf "/Applications/genesis.app/Contents/Resources/genesis" "/usr/local/bin/genesis"
+        ln -sf "/Applications/exordos.app/Contents/Resources/exordos" "/usr/local/bin/exordos" 2>/dev/null || \
+            sudo ln -sf "/Applications/exordos.app/Contents/Resources/exordos" "/usr/local/bin/exordos"
     fi
 
-    if [ -z "${genesis_NO_START:-}" ]; then
-        status "Starting genesis..."
-        open -a genesis --args hidden
+    if [ -z "${NO_START:-}" ]; then
+        status "Starting exordos..."
+        open -a exordos --args hidden
     fi
 
-    status "Install complete. You can now run 'genesis'."
+    status "Install complete. You can now run 'exordos'."
     exit 0
 fi
 
@@ -123,26 +123,31 @@ download_and_extract() {
     if curl --fail --silent --head --location "${url_base}/${filename}" >/dev/null 2>&1; then
         status "Downloading ${filename}"
         curl --fail --show-error --location --progress-bar \
-            "${url_base}/${filename}" --output "${dest_dir}/genesis"
+            "${url_base}/${filename}" --output "${dest_dir}/exordos"
         return 0
     fi
 }
 
-CONFIG_FILE=~/.genesis/genesisctl.yaml
+GENESIS_CONFIG_FILE=~/.genesis/genesisctl.yaml
+CONFIG_FILE=~/.exordos/exordosctl.yaml
+
+if [ -f "$GENESIS_CONFIG_FILE" && ! -f "$CONFIG_FILE" ]; then
+    mv "$GENESIS_CONFIG_FILE" "$CONFIG_FILE"
+fi
 
 for BINDIR in /usr/local/bin /usr/bin /bin; do
     echo $PATH | grep -q $BINDIR && break || continue
 done
 
-status "Installing genesis to $BINDIR"
+status "Installing exordos to $BINDIR"
 
-download_and_extract "https://repository.genesis-core.tech/genesis-devtools/latest" "$BINDIR" "genesis-linux"
-$SUDO chmod +x "$BINDIR"/genesis
+download_and_extract "https://repository.genesis-core.tech/exordos/latest" "$BINDIR" "exordos-linux"
+$SUDO chmod +x "$BINDIR"/exordos
 
 install_success() {
-    genesis --silent hello
-    genesis --silent autocomplete_help
-    status 'Install complete. Run "genesis" from the command line.'
+    exordos --silent hello
+    exordos --silent autocomplete_help
+    status 'Install complete. Run "exordos" from the command line.'
 }
 trap install_success EXIT
 

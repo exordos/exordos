@@ -7,7 +7,7 @@ List hypervisors
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors list [OPTIONS]                                                                                                                                                                                                                                                         
+ Usage: exordos compute hypervisors list [OPTIONS]                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List hypervisors
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors list [OPTIONS]                                                                                                                                                                                                                                                         
+ Usage: exordos compute hypervisors list [OPTIONS]                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  List hypervisors                                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            

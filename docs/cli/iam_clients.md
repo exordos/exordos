@@ -1,13 +1,13 @@
 
 # iam_clients
 
-Manage clients in the Genesis installation
+Manage clients in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+ Usage: exordos iam clients [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage clients in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+ Usage: exordos iam clients [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Manage clients in the Genesis installation                                                                                                                                                                                                                                                                
+ Manage clients in the Exordos installation                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                      Add a new client to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                      Add a new client to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                   Delete client                                                                                                                                                                                                                                                  │
 │ list                                     List clients                                                                                                                                                                                                                                                   │
 │ show                                     Show client                                                                                                                                                                                                                                                    │

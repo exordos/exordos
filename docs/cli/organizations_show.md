@@ -7,7 +7,7 @@ Show organization
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations show [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos iam organizations show [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show organization
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations show [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos iam organizations show [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Show organization                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            

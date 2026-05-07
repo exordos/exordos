@@ -1,13 +1,13 @@
 
 # e_exports
 
-Manage exports in the Genesis installation
+Manage exports in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e exports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos e exports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,9 +24,9 @@ Manage exports in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e exports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos e exports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Manage exports in the Genesis installation                                                                                                                                                                                                                                                                
+ Manage exports in the Exordos installation                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

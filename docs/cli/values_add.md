@@ -1,13 +1,13 @@
 
 # values_add
 
-Add a new value to the Genesis installation
+Add a new value to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values add [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos vs values add [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -71,9 +71,9 @@ Add a new value to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values add [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos vs values add [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Add a new value to the Genesis installation                                                                                                                                                                                                                                                               
+ Add a new value to the Exordos installation                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid         -u  UUID  UUID of the value                                                                                                                                                                                                                                                           │

@@ -1,3 +1,0 @@
-if [ -f ~/.genesis/.genesis-complete.bash ]; then
-. ~/.genesis/.genesis-complete.bash
-fi

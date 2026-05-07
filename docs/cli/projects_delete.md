@@ -7,7 +7,7 @@ Delete project
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos iam projects delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete project
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos iam projects delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Delete project                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

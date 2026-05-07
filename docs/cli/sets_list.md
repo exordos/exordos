@@ -7,7 +7,7 @@ List sets
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute sets list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos compute sets list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List sets
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute sets list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos compute sets list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  List sets                                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            

@@ -7,7 +7,7 @@ Show password
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords show [OPTIONS] UUID                                                                                                                                                                                                                                                       
+ Usage: exordos secret passwords show [OPTIONS] UUID                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show password
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords show [OPTIONS] UUID                                                                                                                                                                                                                                                       
+ Usage: exordos secret passwords show [OPTIONS] UUID                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
  Show password                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

@@ -7,7 +7,7 @@ Show profile
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles show [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos vs profiles show [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show profile
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles show [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos vs profiles show [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  Show profile                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

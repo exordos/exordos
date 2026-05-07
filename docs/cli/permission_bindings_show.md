@@ -7,7 +7,7 @@ Show permission_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos iam permission_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show permission_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos iam permission_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  Show permission_binding                                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            

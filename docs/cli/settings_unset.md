@@ -7,7 +7,7 @@ Unset an individual value in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings unset [OPTIONS] KEY                                                                                                                                                                                                                                                               
+ Usage: exordos settings unset [OPTIONS] KEY                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Unset an individual value in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings unset [OPTIONS] KEY                                                                                                                                                                                                                                                               
+ Usage: exordos settings unset [OPTIONS] KEY                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
  Unset an individual value in a settings file                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

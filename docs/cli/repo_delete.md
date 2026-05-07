@@ -7,17 +7,17 @@ Delete the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        
+ Usage: exordos repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `genesis_cfg_file`:
+* `exordos_cfg_file`:
     * Type: text
-    * Default: `genesis.yaml`
+    * Default: `exordos.yaml`
     * Usage: `-c
---genesis-cfg-file`
+--exordos-cfg-file`
 
   Name of the project configuration file
 
@@ -45,12 +45,12 @@ Delete the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        
+ Usage: exordos repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Delete the repository                                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --genesis-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
+│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
 │ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │
 │ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯

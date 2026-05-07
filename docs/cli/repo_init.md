@@ -7,17 +7,17 @@ Initialize the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis repo init [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
+ Usage: exordos repo init [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `genesis_cfg_file`:
+* `exordos_cfg_file`:
     * Type: text
-    * Default: `genesis.yaml`
+    * Default: `exordos.yaml`
     * Usage: `-c
---genesis-cfg-file`
+--exordos-cfg-file`
 
   Name of the project configuration file
 
@@ -53,12 +53,12 @@ Initialize the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis repo init [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
+ Usage: exordos repo init [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
  Initialize the repository                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --genesis-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
+│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
 │ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │
 │ --force             -f        Force init even if the repo already exists                                                                                                                                                                                                                                │
 │ --help                        Show this message and exit.                                                                                                                                                                                                                                               │

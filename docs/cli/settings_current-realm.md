@@ -7,7 +7,7 @@ Display the current-realm
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings current-realm [OPTIONS]                                                                                                                                                                                                                                                           
+ Usage: exordos settings current-realm [OPTIONS]                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,7 +24,7 @@ Display the current-realm
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings current-realm [OPTIONS]                                                                                                                                                                                                                                                           
+ Usage: exordos settings current-realm [OPTIONS]                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Display the current-realm                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            

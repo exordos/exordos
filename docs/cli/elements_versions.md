@@ -7,7 +7,7 @@ Print available elements in repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements versions [OPTIONS] NAME                                                                                                                                                                                                                                                           
+ Usage: exordos elements versions [OPTIONS] NAME                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Print available elements in repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements versions [OPTIONS] NAME                                                                                                                                                                                                                                                           
+ Usage: exordos elements versions [OPTIONS] NAME                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Print available elements in repository                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            

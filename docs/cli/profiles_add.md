@@ -1,13 +1,13 @@
 
 # profiles_add
 
-Add a new profile to the Genesis installation
+Add a new profile to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles add [OPTIONS]                                                                                                                                                                                                                                                                  
+ Usage: exordos vs profiles add [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -64,9 +64,9 @@ Add a new profile to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles add [OPTIONS]                                                                                                                                                                                                                                                                  
+ Usage: exordos vs profiles add [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
- Add a new profile to the Genesis installation                                                                                                                                                                                                                                                             
+ Add a new profile to the Exordos installation                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid          -u  UUID  UUID of the profile                                                                                                                                                                                                                                                        │

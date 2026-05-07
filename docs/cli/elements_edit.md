@@ -7,7 +7,7 @@ Edit manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements edit [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                          
+ Usage: exordos elements edit [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -45,7 +45,7 @@ Edit manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements edit [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                          
+ Usage: exordos elements edit [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
  Edit manifest                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

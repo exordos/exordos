@@ -7,7 +7,7 @@ List permissions
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permissions list [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos iam permissions list [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List permissions
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permissions list [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos iam permissions list [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  List permissions                                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            

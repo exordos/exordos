@@ -7,7 +7,7 @@ List elements
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos elements list [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List elements
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos elements list [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
  List elements                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

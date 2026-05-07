@@ -7,7 +7,7 @@ Update rsa_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret rsa_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -53,7 +53,7 @@ Update rsa_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret rsa_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Update rsa_key                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

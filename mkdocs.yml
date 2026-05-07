@@ -1,7 +1,7 @@
-site_name: genesis_devtools
-site_url: https://github.com/infraguys/genesis_devtools
-repo_name: genesis_devtools
-repo_url: https://github.com/infraguys/genesis_devtools
+site_name: exordos
+site_url: https://github.com/exordos/exordos
+repo_name: exordos
+repo_url: https://github.com/exordos/exordos
 edit_uri: browse/docs/
 
 theme:

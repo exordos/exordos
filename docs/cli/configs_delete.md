@@ -7,7 +7,7 @@ Delete configuration from environment variables
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs delete [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos configs delete [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -40,7 +40,7 @@ Delete configuration from environment variables
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs delete [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos configs delete [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  Delete configuration from environment variables                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

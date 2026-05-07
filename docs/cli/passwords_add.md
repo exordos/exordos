@@ -1,13 +1,13 @@
 
 # passwords_add
 
-Add a new password to the Genesis installation
+Add a new password to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords add [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos secret passwords add [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,9 +56,9 @@ Add a new password to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords add [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos secret passwords add [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
- Add a new password to the Genesis installation                                                                                                                                                                                                                                                            
+ Add a new password to the Exordos installation                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid         -u  UUID  UUID of the password                                                                                                                                                                                                                                                        │

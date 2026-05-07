@@ -7,7 +7,7 @@ Set a context entry in settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings set-context [OPTIONS] REALM                                                                                                                                                                                                                                                       
+ Usage: exordos settings set-context [OPTIONS] REALM                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -76,7 +76,7 @@ Set a context entry in settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings set-context [OPTIONS] REALM                                                                                                                                                                                                                                                       
+ Usage: exordos settings set-context [OPTIONS] REALM                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
  Set a context entry in settings                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

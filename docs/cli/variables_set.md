@@ -7,7 +7,7 @@ Create variable if missing and set its value by creating a new value record
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables set [OPTIONS] VAR_UUID_OR_NAME VALUE                                                                                                                                                                                                                                          
+ Usage: exordos vs variables set [OPTIONS] VAR_UUID_OR_NAME VALUE                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -63,7 +63,7 @@ Create variable if missing and set its value by creating a new value record
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables set [OPTIONS] VAR_UUID_OR_NAME VALUE                                                                                                                                                                                                                                          
+ Usage: exordos vs variables set [OPTIONS] VAR_UUID_OR_NAME VALUE                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
  Create variable if missing and set its value by creating a new value record                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

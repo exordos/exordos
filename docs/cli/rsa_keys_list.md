@@ -7,7 +7,7 @@ List rsa_keys
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys list [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos secret rsa_keys list [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List rsa_keys
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys list [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos secret rsa_keys list [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  List rsa_keys                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

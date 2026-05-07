@@ -1,13 +1,13 @@
 
 # organizations_add
 
-Add a new organization to the Genesis installation
+Add a new organization to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations add [OPTIONS]                                                                                                                                                                                                                                                            
+ Usage: exordos iam organizations add [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -48,9 +48,9 @@ Add a new organization to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations add [OPTIONS]                                                                                                                                                                                                                                                            
+ Usage: exordos iam organizations add [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
- Add a new organization to the Genesis installation                                                                                                                                                                                                                                                        
+ Add a new organization to the Exordos installation                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --uuid         -u  UUID  UUID of the organization                                                                                                                                                                                                                                                       │

@@ -1,13 +1,13 @@
 
 # vs_profiles
 
-Manage profiles in the Genesis installation
+Manage profiles in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+ Usage: exordos vs profiles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,16 +24,16 @@ Manage profiles in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+ Usage: exordos vs profiles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Manage profiles in the Genesis installation                                                                                                                                                                                                                                                               
+ Manage profiles in the Exordos installation                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ activate                                          Activate profile                                                                                                                                                                                                                                      │
-│ add                                               Add a new profile to the Genesis installation                                                                                                                                                                                                         │
+│ add                                               Add a new profile to the Exordos installation                                                                                                                                                                                                         │
 │ delete                                            Delete profile                                                                                                                                                                                                                                        │
 │ list                                              List profiles                                                                                                                                                                                                                                         │
 │ show                                              Show profile                                                                                                                                                                                                                                          │

@@ -1,13 +1,13 @@
 
 # realms_ssh
 
-Connect to genesis realm
+Connect to exordos realm
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis realms ssh [OPTIONS]                                                                                                                                                                                                                                                                       
+ Usage: exordos realms ssh [OPTIONS]                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -40,9 +40,9 @@ Connect to genesis realm
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis realms ssh [OPTIONS]                                                                                                                                                                                                                                                                       
+ Usage: exordos realms ssh [OPTIONS]                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
- Connect to genesis realm                                                                                                                                                                                                                                                                                  
+ Connect to exordos realm                                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --realm     -r  TEXT  Realm to connect to                                                                                                                                                                                                                                                               │

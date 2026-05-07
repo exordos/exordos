@@ -7,7 +7,7 @@ List nodes
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis nodes list [OPTIONS]                                                                                                                                                                                                                                                                       
+ Usage: exordos nodes list [OPTIONS]                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List nodes
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis nodes list [OPTIONS]                                                                                                                                                                                                                                                                       
+ Usage: exordos nodes list [OPTIONS]                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
  List nodes                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

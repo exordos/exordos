@@ -7,7 +7,7 @@ Show permission
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permissions show [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos iam permissions show [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show permission
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permissions show [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos iam permissions show [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Show permission                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

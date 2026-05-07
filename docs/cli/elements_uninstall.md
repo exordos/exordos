@@ -7,7 +7,7 @@ Uninstall manifest by UUID, path or name
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements uninstall [OPTIONS] PATH_UUID_NAME                                                                                                                                                                                                                                                
+ Usage: exordos elements uninstall [OPTIONS] PATH_UUID_NAME                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Uninstall manifest by UUID, path or name
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements uninstall [OPTIONS] PATH_UUID_NAME                                                                                                                                                                                                                                                
+ Usage: exordos elements uninstall [OPTIONS] PATH_UUID_NAME                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  Uninstall manifest by UUID, path or name                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            

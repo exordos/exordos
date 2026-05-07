@@ -1,13 +1,13 @@
 
 # settings_init
 
-Interactively create/update a genesis settings file
+Interactively create/update a exordos settings file
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings init [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos settings init [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,9 +24,9 @@ Interactively create/update a genesis settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings init [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos settings init [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Interactively create/update a genesis settings file                                                                                                                                                                                                                                                       
+ Interactively create/update a exordos settings file                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

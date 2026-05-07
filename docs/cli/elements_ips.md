@@ -7,7 +7,7 @@ Show element ips
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements ips [OPTIONS] NAME                                                                                                                                                                                                                                                                
+ Usage: exordos elements ips [OPTIONS] NAME                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show element ips
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements ips [OPTIONS] NAME                                                                                                                                                                                                                                                                
+ Usage: exordos elements ips [OPTIONS] NAME                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  Show element ips                                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            

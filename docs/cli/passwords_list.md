@@ -7,7 +7,7 @@ List passwords
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords list [OPTIONS]                                                                                                                                                                                                                                                            
+ Usage: exordos secret passwords list [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List passwords
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords list [OPTIONS]                                                                                                                                                                                                                                                            
+ Usage: exordos secret passwords list [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  List passwords                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

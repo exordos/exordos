@@ -7,7 +7,7 @@ List configs
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs list [OPTIONS]                                                                                                                                                                                                                                                                     
+ Usage: exordos configs list [OPTIONS]                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List configs
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs list [OPTIONS]                                                                                                                                                                                                                                                                     
+ Usage: exordos configs list [OPTIONS]                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
  List configs                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

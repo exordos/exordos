@@ -7,7 +7,7 @@ Update password
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords update [OPTIONS] UUID                                                                                                                                                                                                                                                     
+ Usage: exordos secret passwords update [OPTIONS] UUID                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -53,7 +53,7 @@ Update password
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords update [OPTIONS] UUID                                                                                                                                                                                                                                                     
+ Usage: exordos secret passwords update [OPTIONS] UUID                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
  Update password                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

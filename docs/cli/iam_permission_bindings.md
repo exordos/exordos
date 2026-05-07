@@ -1,13 +1,13 @@
 
 # iam_permission_bindings
 
-Manage permission_bindings in the Genesis installation
+Manage permission_bindings in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
+ Usage: exordos iam permission_bindings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage permission_bindings in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
+ Usage: exordos iam permission_bindings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
- Manage permission_bindings in the Genesis installation                                                                                                                                                                                                                                                    
+ Manage permission_bindings in the Exordos installation                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                               Add a new permission_binding to the Genesis installation                                                                                                                                                                                                              │
+│ add                               Add a new permission_binding to the Exordos installation                                                                                                                                                                                                              │
 │ delete                            Delete permission_binding                                                                                                                                                                                                                                             │
 │ list                              List permission_bindings                                                                                                                                                                                                                                              │
 │ show                              Show permission_binding                                                                                                                                                                                                                                               │

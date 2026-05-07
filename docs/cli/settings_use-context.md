@@ -7,7 +7,7 @@ Use the current-context in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings use-context [OPTIONS] NAME                                                                                                                                                                                                                                                        
+ Usage: exordos settings use-context [OPTIONS] NAME                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Use the current-context in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings use-context [OPTIONS] NAME                                                                                                                                                                                                                                                        
+ Usage: exordos settings use-context [OPTIONS] NAME                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Use the current-context in a settings file                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

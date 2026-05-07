@@ -7,7 +7,7 @@ Add configuration from environment variables
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs add-from-env [OPTIONS] NODE                                                                                                                                                                                                                                                        
+ Usage: exordos configs add-from-env [OPTIONS] NODE                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -30,7 +30,7 @@ Add configuration from environment variables
 
 * `env_path`:
     * Type: text
-    * Default: `/var/lib/genesis/app.env`
+    * Default: `/var/lib/exordos/app.env`
     * Usage: `--env-path`
 
   Path to the env file will be saved on the node
@@ -80,7 +80,7 @@ Add configuration from environment variables
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs add-from-env [OPTIONS] NODE                                                                                                                                                                                                                                                        
+ Usage: exordos configs add-from-env [OPTIONS] NODE                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Add configuration from environment variables                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

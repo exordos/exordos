@@ -1,14 +1,14 @@
-![Tests workflow](https://github.com/infraguys/genesis_devtools/actions/workflows/tests.yml/badge.svg)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/genesis-devtools)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/genesis-devtools)
+![Tests workflow](https://github.com/exordos/exordos/actions/workflows/tests.yml/badge.svg)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/exordos)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/exordos)
 
-# Genesis Dev Tools
+# exordos
 
-The tools to manage life cycle of genesis projects
+The tools to manage life cycle of exordos projects
 
 # Requirements
 
-Before you can install and use genesis tools you need to install several requirements:
+Before you can install and use exordos tools you need to install several requirements:
 
 - [packer](https://www.packer.io/)
 - [libvirt](https://libvirt.org/)
@@ -37,18 +37,18 @@ Install packer like described in [this article](https://yandex.cloud/ru/docs/tut
 
 # Install
 
-To install the `genesis-devtools` package, follow these steps:
+To install the `exordos` package, follow these steps:
 
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/infraguys/genesis_devtools.git
+    git clone https://github.com/exordos/exordos.git
     ```
 
 2. Navigate to the project directory:
 
     ```sh
-    cd genesis_devtools
+    cd exordos
     ```
 
 3. Initialize virtual environment:
@@ -62,33 +62,33 @@ To install the `genesis-devtools` package, follow these steps:
 
 ## Build
 
-Firstly you need to build the genesis project. Navigate to your project directory and run the genesis build command, specifying the path to your project root directory as an argument. This will build the project according to the configuration defined in the `genesis.yaml` file.
+Firstly you need to build the exordos project. Navigate to your project directory and run the exordos build command, specifying the path to your project root directory as an argument. This will build the project according to the configuration defined in the `genesis.yaml` file.
 
 Here are some examples of how to use the build command:
 
 ```sh
-genesis build /path/to/my/project
+exordos build /path/to/my/project
 ```
 
-There are some useful options for the genesis build command.
+There are some useful options for the exordos build command.
 
-- Build a Genesis project with a custom developer key path:
+- Build a exordos project with a custom developer key path:
 
 ```sh
-genesis build -i /path/to/my/developer/key /path/to/my/project
+exordos build -i /path/to/my/developer/key /path/to/my/project
 ```
 
-- Build a Genesis project with the --force option to rebuild if the output already exists:
+- Build a exordos project with the --force option to rebuild if the output already exists:
 
 ```sh
-genesis build -f /path/to/my/project
+exordos build -f /path/to/my/project
 ```
 
-Look at the `genesis build --help` command for more options.
+Look at the `exordos build --help` command for more options.
 
 ## Bootstrap
 
-To bootstrap a Genesis installation locally, use the genesis bootstrap command. This command creates and boots a virtual machine with the specified Genesis image.
+To bootstrap a exordos installation locally, use the exordos bootstrap command. This command creates and boots a virtual machine with the specified exordos image.
 
 One of the key options for the bootstrap command is `--launch-mode`, which allows you to specify the launch mode for the application. There are three available modes:
 
@@ -99,20 +99,20 @@ One of the key options for the bootstrap command is `--launch-mode`, which allow
 Here are some examples of how to use the `--launch-mode` option:
 
 ```sh
-genesis bootstrap -i output/genesis-element.raw
+exordos bootstrap -i output/exordos-element.raw
 ```
 
 Launch the installation in `core` mode:
 
 ```sh
-genesis bootstrap -i output/genesis-core.raw -m core
+exordos bootstrap -i output/exordos-core.raw -m core
 ```
 
 # Usage
 
-The package provides a command line interface for building genesis projects, managing genesis installations and covers many other useful aspects. To use the command line interface, run the `genesis` command from the command line. For full documentation about CLI commands, run `genesis --help`.
+The package provides a command line interface for building exordos projects, managing exordos installations and covers many other useful aspects. To use the command line interface, run the `exordos` command from the command line. For full documentation about CLI commands, run `exordos --help`.
 
-For every genesis project the directory `genesis` should exist in the project root. The project configuration file should be named `genesis.yaml` in this directory. For example my project structure looks like this:
+For every exordos project the directory `exordos` should exist in the project root. The project configuration file should be named `exordos.yaml` in this directory. For example my project structure looks like this:
 
 ```sh
 .
@@ -134,9 +134,9 @@ The project should be extended as follows:
 ├── pyproject.toml
 └── README.md
 
-## Genesis configuration file
+## exordos configuration file
 
-The `genesis.yaml` file contains the configuration for the genesis project. It should be placed in the `genesis` directory. It consists of several sections such as build, deploy, etc.
+The `genesis.yaml` file contains the configuration for the exordos project. It should be placed in the `genesis` directory. It consists of several sections such as build, deploy, etc.
 
 Example of the `genesis.yaml` file:
 
@@ -148,17 +148,17 @@ build:
   # for the project
   deps:
       # Target path in the image
-    - dst: /opt/genesis_core
+    - dst: /opt/exordos_core
       # Local path of the build machine
       path:
-        src: ../../genesis_core
+        src: ../../exordos_core
   
   # This section describes elements of the project.
   # Images, artifacts and manifests for every element. 
   elements:
       # List of images in the element
     - images:
-      - name: genesis-core
+      - name: exordos-core
         format: raw
         
         # OS profile for the image
@@ -171,7 +171,7 @@ build:
         override:
           disk_size: "10G"
 
-      manifest: manifests/genesis-core.yaml
+      manifest: manifests/exordos-core.yaml
       
       # List of artifacts in the element
       artifacts:
@@ -181,15 +181,15 @@ build:
 
 ## Build project
 
-The `genesis build` command builds the project. The build process is described in the `build` section of the `genesis.yaml` file. The mandatory argument is path to the project root directory.
+The `exordos build` command builds the project. The build process is described in the `build` section of the `genesis.yaml` file. The mandatory argument is path to the project root directory.
 
-Build a Genesis project.
+Build a exordos project.
 
 ```sh
-genesis build my_project
+exordos build my_project
 ```
 
-This will build the Genesis project in the `my_project` directory using the default configuration file will be located in `my_project/genesis/genesis.yaml`.
+This will build the exordos project in the `my_project` directory using the default configuration file will be located in `my_project/genesis/genesis.yaml`.
 
 After build the project output artifacts will be stored in the `output` directory.
 For detailed information about the `genesis build` command run `genesis build --help`.
@@ -350,7 +350,7 @@ genesis backup --compress --encrypt
 For decryption, use the `genesis backup-decrypt` command.
 
 ```bash
-genesis backup-decrypt backup.tar.gz.encrypted
+exordos backup-decrypt backup.tar.gz.encrypted
 ```
 
 ### Restore backups

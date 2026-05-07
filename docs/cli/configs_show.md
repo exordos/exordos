@@ -7,7 +7,7 @@ Show config
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs show [OPTIONS] UUID                                                                                                                                                                                                                                                                
+ Usage: exordos configs show [OPTIONS] UUID                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show config
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis configs show [OPTIONS] UUID                                                                                                                                                                                                                                                                
+ Usage: exordos configs show [OPTIONS] UUID                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  Show config                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

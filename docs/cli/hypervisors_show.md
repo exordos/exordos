@@ -7,7 +7,7 @@ Show hypervisor
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors show [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos compute hypervisors show [OPTIONS] UUID                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show hypervisor
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors show [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos compute hypervisors show [OPTIONS] UUID                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
  Show hypervisor                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

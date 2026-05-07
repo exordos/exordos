@@ -7,7 +7,7 @@ Show ssh_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos secret ssh_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show ssh_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos secret ssh_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Show ssh_key                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

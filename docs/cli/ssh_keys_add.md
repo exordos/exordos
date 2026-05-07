@@ -1,13 +1,13 @@
 
 # ssh_keys_add
 
-Add a new ssh_key to the Genesis installation, example: `secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`
+Add a new ssh_key to the Exordos installation, example: `secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              
+ Usage: exordos secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -84,9 +84,9 @@ Add a new ssh_key to the Genesis installation, example: `secret ssh_keys add --n
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              
+ Usage: exordos secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
- Add a new ssh_key to the Genesis installation, example: `secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`                                                                                                                             
+ Add a new ssh_key to the Exordos installation, example: `secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid               -u  UUID  UUID of the ssh_key                                                                                                                                                                                                                                                   │

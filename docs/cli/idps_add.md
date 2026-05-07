@@ -1,13 +1,13 @@
 
 # idps_add
 
-Add a new idp to the Genesis installation
+Add a new idp to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps add [OPTIONS]                                                                                                                                                                                                                                                                     
+ Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -83,9 +83,9 @@ Add a new idp to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps add [OPTIONS]                                                                                                                                                                                                                                                                     
+ Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
- Add a new idp to the Genesis installation                                                                                                                                                                                                                                                                 
+ Add a new idp to the Exordos installation                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid            -u  UUID  UUID of the idp                                                                                                                                                                                                                                                          │

@@ -7,7 +7,7 @@ List idps
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List idps
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
  List idps                                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            

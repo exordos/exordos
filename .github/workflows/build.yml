@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install libev (Linux)
+      - name: Install deps (Linux)
         if: runner.os == 'Linux'
         run: sudo apt update && sudo apt install --yes ca-certificates
       - name: Install uv
@@ -34,13 +34,13 @@ jobs:
       - name: Rename executable
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then
-            mv dist/genesis dist/genesis-linux
+            mv dist/exordos dist/exordos-linux
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            mv dist/genesis dist/genesis-macos
+            mv dist/exordos dist/exordos-macos
           fi
         shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: genesis-${{ matrix.os }}
+          name: exordos-${{ matrix.os }}
           path: dist/*

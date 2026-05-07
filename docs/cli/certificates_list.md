@@ -7,7 +7,7 @@ List certificates
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates list [OPTIONS]                                                                                                                                                                                                                                                         
+ Usage: exordos secret certificates list [OPTIONS]                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List certificates
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates list [OPTIONS]                                                                                                                                                                                                                                                         
+ Usage: exordos secret certificates list [OPTIONS]                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  List certificates                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            

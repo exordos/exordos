@@ -7,7 +7,7 @@ Authenticate in IAM and store tokens locally
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis auth login [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                           
+ Usage: exordos auth login [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -86,7 +86,7 @@ Authenticate in IAM and store tokens locally
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis auth login [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                           
+ Usage: exordos auth login [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Authenticate in IAM and store tokens locally                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

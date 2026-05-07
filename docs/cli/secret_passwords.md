@@ -1,13 +1,13 @@
 
 # secret_passwords
 
-Manage passwords in the Genesis installation
+Manage passwords in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                               
+ Usage: exordos secret passwords [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage passwords in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret passwords [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                               
+ Usage: exordos secret passwords [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
- Manage passwords in the Genesis installation                                                                                                                                                                                                                                                              
+ Manage passwords in the Exordos installation                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                     Add a new password to the Genesis installation                                                                                                                                                                                                                  │
+│ add                                     Add a new password to the Exordos installation                                                                                                                                                                                                                  │
 │ delete                                  Delete password                                                                                                                                                                                                                                                 │
 │ list                                    List passwords                                                                                                                                                                                                                                                  │
 │ show                                    Show password                                                                                                                                                                                                                                                   │

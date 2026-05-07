@@ -1,13 +1,13 @@
 
 # iam_roles
 
-Manage roles in the Genesis installation
+Manage roles in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos iam roles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage roles in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos iam roles [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Manage roles in the Genesis installation                                                                                                                                                                                                                                                                  
+ Manage roles in the Exordos installation                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                        Add a new role to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                        Add a new role to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                     Delete role                                                                                                                                                                                                                                                  │
 │ list                                       List roles                                                                                                                                                                                                                                                   │
 │ show                                       Show role                                                                                                                                                                                                                                                    │

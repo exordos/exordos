@@ -1,13 +1,13 @@
 
 # iam_users
 
-Manage users in the Genesis installation
+Manage users in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos iam users [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage users in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos iam users [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Manage users in the Genesis installation                                                                                                                                                                                                                                                                  
+ Manage users in the Exordos installation                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                        Add a new user to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                        Add a new user to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                     Delete user                                                                                                                                                                                                                                                  │
 │ list                                       List users                                                                                                                                                                                                                                                   │
 │ show                                       Show user                                                                                                                                                                                                                                                    │

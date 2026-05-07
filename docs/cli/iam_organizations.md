@@ -1,13 +1,13 @@
 
 # iam_organizations
 
-Manage organizations in the Genesis installation
+Manage organizations in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                              
+ Usage: exordos iam organizations [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage organizations in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                              
+ Usage: exordos iam organizations [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
- Manage organizations in the Genesis installation                                                                                                                                                                                                                                                          
+ Manage organizations in the Exordos installation                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                  Add a new organization to the Genesis installation                                                                                                                                                                                                                 │
+│ add                                  Add a new organization to the Exordos installation                                                                                                                                                                                                                 │
 │ delete                               Delete organization                                                                                                                                                                                                                                                │
 │ list                                 List organizations                                                                                                                                                                                                                                                 │
 │ show                                 Show organization                                                                                                                                                                                                                                                  │

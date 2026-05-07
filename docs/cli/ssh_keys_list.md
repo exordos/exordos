@@ -7,7 +7,7 @@ List ssh_keys
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys list [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos secret ssh_keys list [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List ssh_keys
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys list [OPTIONS]                                                                                                                                                                                                                                                             
+ Usage: exordos secret ssh_keys list [OPTIONS]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  List ssh_keys                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

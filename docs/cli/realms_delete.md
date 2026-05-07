@@ -1,13 +1,13 @@
 
 # realms_delete
 
-Delete the genesis realm
+Delete the exordos realm
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis realms delete [OPTIONS] NAME                                                                                                                                                                                                                                                               
+ Usage: exordos realms delete [OPTIONS] NAME                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,9 +29,9 @@ Delete the genesis realm
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis realms delete [OPTIONS] NAME                                                                                                                                                                                                                                                               
+ Usage: exordos realms delete [OPTIONS] NAME                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
- Delete the genesis realm                                                                                                                                                                                                                                                                                  
+ Delete the exordos realm                                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

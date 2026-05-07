@@ -7,7 +7,7 @@ List organizations
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations list [OPTIONS]                                                                                                                                                                                                                                                           
+ Usage: exordos iam organizations list [OPTIONS]                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List organizations
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam organizations list [OPTIONS]                                                                                                                                                                                                                                                           
+ Usage: exordos iam organizations list [OPTIONS]                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  List organizations                                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            

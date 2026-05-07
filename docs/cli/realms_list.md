@@ -1,13 +1,13 @@
 
 # realms_list
 
-List of running genesis realms
+List of running exordos realms
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis realms list [OPTIONS]                                                                                                                                                                                                                                                                      
+ Usage: exordos realms list [OPTIONS]                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,9 +24,9 @@ List of running genesis realms
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis realms list [OPTIONS]                                                                                                                                                                                                                                                                      
+ Usage: exordos realms list [OPTIONS]                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- List of running genesis realms                                                                                                                                                                                                                                                                            
+ List of running exordos realms                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

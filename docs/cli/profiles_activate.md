@@ -7,7 +7,7 @@ Activate profile
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles activate [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos vs profiles activate [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Activate profile
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles activate [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos vs profiles activate [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Activate profile                                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            

@@ -7,7 +7,7 @@ Delete rsa_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret rsa_keys delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete rsa_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret rsa_keys delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Delete rsa_key                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

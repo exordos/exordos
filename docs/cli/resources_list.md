@@ -7,7 +7,7 @@ List resources
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e resources list [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos e resources list [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List resources
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e resources list [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos e resources list [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
  List resources                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

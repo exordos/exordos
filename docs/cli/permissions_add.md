@@ -1,13 +1,13 @@
 
 # permissions_add
 
-Add a new permission to the Genesis installation
+Add a new permission to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
+ Usage: exordos iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -48,9 +48,9 @@ Add a new permission to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
+ Usage: exordos iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
- Add a new permission to the Genesis installation                                                                                                                                                                                                                                                          
+ Add a new permission to the Exordos installation                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --uuid         -u  UUID  UUID of the permission                                                                                                                                                                                                                                                         │

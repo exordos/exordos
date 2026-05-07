@@ -7,7 +7,7 @@ Show role_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam role_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos iam role_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show role_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam role_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos iam role_bindings show [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Show role_binding                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            

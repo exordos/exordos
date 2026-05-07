@@ -7,7 +7,7 @@ List permission_bindings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings list [OPTIONS]                                                                                                                                                                                                                                                     
+ Usage: exordos iam permission_bindings list [OPTIONS]                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List permission_bindings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings list [OPTIONS]                                                                                                                                                                                                                                                     
+ Usage: exordos iam permission_bindings list [OPTIONS]                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
  List permission_bindings                                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            

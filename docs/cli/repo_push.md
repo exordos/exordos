@@ -7,17 +7,17 @@ Push the element to the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis repo push [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
+ Usage: exordos repo push [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `genesis_cfg_file`:
+* `exordos_cfg_file`:
     * Type: text
-    * Default: `genesis.yaml`
+    * Default: `exordos.yaml`
     * Usage: `-c
---genesis-cfg-file`
+--exordos-cfg-file`
 
   Name of the project configuration file
 
@@ -69,12 +69,12 @@ Push the element to the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis repo push [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
+ Usage: exordos repo push [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
  Push the element to the repository                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --genesis-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
+│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
 │ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │
 │ --element-dir       -e  PATH  Directory where element artifacts are stored                                                                                                                                                                                                                              │
 │ --force             -f        Force push even if the element already exists                                                                                                                                                                                                                             │
