@@ -81,7 +81,7 @@ def get_exordos_config(
     project_dir: str,
     exordos_cfg_file: str = c.DEF_GEN_CFG_FILE_NAME,
     exordosctl_cfg_file: str = c.CONFIG_FILE,
-) -> tp.Dict[str, tp.Any]:
+) -> tp.Tuple[tp.Dict[str, tp.Any], str]:
     """Find the project configuration file."""
     alternatives = [
         os.path.join(project_dir, exordos_cfg_file),
@@ -92,7 +92,7 @@ def get_exordos_config(
 
     for alt in alternatives:
         if os.path.exists(alt):
-            return load_yaml(alt)
+            return load_yaml(alt), alt
 
     raise FileNotFoundError("exordos configuration file not found")
 

@@ -152,7 +152,9 @@ def build_cmd(
 
     # Find path to exordos configuration
     try:
-        gen_config = utils.get_exordos_config(project_dir, exordos_cfg_file)
+        gen_config, gen_config_path = utils.get_exordos_config(
+            project_dir, exordos_cfg_file
+        )
     except FileNotFoundError:
         raise click.ClickException(
             f"Exordos configuration file not found in {project_dir}"
@@ -171,8 +173,7 @@ def build_cmd(
     packer_image_builder = PackerBuilder(logger)
 
     # Path where exordos.yaml configuration file is located
-    work_dir = os.path.abspath(os.path.join(project_dir, c.DEF_GEN_WORK_DIR_NAME))
-
+    work_dir = os.path.dirname(gen_config_path)
     # Prepare a build suffix
     build_suffix = utils.get_version_suffix(version_suffix, project_dir=project_dir)
 
