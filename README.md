@@ -205,7 +205,7 @@ This will build the Exordos project in the `my_project` directory using the defa
 After build the project output artifacts will be stored in the `output` directory.
 For detailed information about the `exordos build` command run `exordos build --help`.
 
-## Manager Exordos installation locally
+## Manage Exordos installation locally
 
 To bootstrap Exordos installation locally, run the `exordos bootstrap` command. The mandatory argument is path to the exordos image. For instance,
 
