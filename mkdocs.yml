@@ -82,9 +82,11 @@ markdown_extensions:
       alternate_style: true
 
 nav:
-  - Software: index.md
-  - Cli: cli
+  - Exordos CLI: index.md
+  - CLI Reference: cli
   - Realms: realms.md
   - Versioning: versioning.md
   - Configuration: config.md
+  - Exordos YAML: exordos-yaml.md
+  - Stand Specification: stand-spec.md
   - Backups: backups.md
