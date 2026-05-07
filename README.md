@@ -118,7 +118,7 @@ exordos bootstrap -i output/exordos-core.raw -m core
 
 # Usage
 
-The package provides a command line interface for building Exordos projects, managing Exordos installations and cover many other useful aspects. To use the command line interface, run the `exordos` command from the command line. For full documentation about CLI commands, run `exordos --help`.
+The package provides a command line interface for building Exordos projects, managing Exordos installations and covers many other useful aspects. To use the command line interface, run the exordos command from the command line. For full documentation about CLI commands, run exordos --help.
 
 For every Exordos project the directory `exordos` should exist in the project root. The project configuration file should be named `exordos.yaml` in this directory. For example my project structure looks like this:
 
