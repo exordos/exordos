@@ -118,9 +118,9 @@ sudo chmod +x /var/lib/genesis/bootstrap/scripts/bootstrap.sh
 
 
 cat <<EOT | sudo tee /etc/motd
-▄▖        ▘  
-▌ █▌▛▌█▌▛▘▌▛▘
-▙▌▙▖▌▌▙▖▄▌▌▄▌
+▄▖       ▌     
+▙▖▚▘▛▌▛▘▛▌▛▌▛▘ 
+▙▖▞▖▙▌▌ ▙▌▙▌▄▌ 
 
 
 Welcome to {{ project_name }} node!

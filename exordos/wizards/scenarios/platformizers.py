@@ -30,8 +30,8 @@ A: type[base.Action] = base.Action
 _PROJECT_WELCOME_FOOTER = """
 \n\n
 After generation, you can use the `genesis` command to 
-[build](https://exordos.github.io/exordos/cli/exordos_build/) 
-and [deploy](https://exordos.github.io/exordos/cli/exordos_deploy/) 
+[build](https://exordos.github.io/exordos_core/app-developer-guide/build/) 
+and [deploy](https://exordos.github.io/exordos_core/app-developer-guide/deploy/) 
 the element.\n\n
 For more information about Genesis Core, please visit 
 [https://exordos.github.io/exordos_core](https://exordos.github.io/exordos_core)
@@ -306,7 +306,7 @@ class ManifestConstructorScenario(base.TemplateScenario):
                     "dependencies, infrastructure configuration, and other "
                     "settings. "
                     "Follow the [developer guide]"
-                    "(https://exordos.github.io/exordos_core/guides/developer/elements/) "
+                    "(https://exordos.github.io/exordos_core/app-developer-guide/) "
                     "for more details."
                 ),
             ),
@@ -410,7 +410,7 @@ class PlatformizerScenario(base.TemplateScenario):
             "Please check files and adjust them to your needs.\n\n"
             "#### Next steps\n\n"
             "To [build]"
-            "(https://exordos.github.io/exordos/cli/exordos_build/) "
+            "(https://exordos.github.io/exordos_core/app-developer-guide/build/) "
             "the element use command\n\n```bash\n genesis build .\n```\n\n"
             "#### Docs\n\n"
             "For more information about Genesis Core, please visit "
