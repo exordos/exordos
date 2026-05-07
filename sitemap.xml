@@ -8,6 +8,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/backups/</loc>
+        <lastmod>2026-05-07</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/backups/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/backups/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/config/</loc>
         <lastmod>2026-05-07</lastmod>
         <changefreq>daily</changefreq>
@@ -1392,6 +1399,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/backups/</loc>
+        <lastmod>2026-05-07</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/backups/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/backups/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/config/</loc>
