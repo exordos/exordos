@@ -19,7 +19,10 @@ jobs:
   update-exordos-cli:
     name: update exordos cli
     needs: upload-install-sh
-    runs-on: self-hosted
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ github-packer-runner-2, github-packer-runner-3, genesis-lab0 ]
     steps:
     - name: update exordos cli
       run: |

@@ -28,7 +28,7 @@ def load_repo_driver(
     exordosctl_cfg_file: str = c.CONFIG_FILE,
 ) -> base_repo.AbstractRepoDriver:
     try:
-        gen_config = utils.get_exordos_config(
+        gen_config, _ = utils.get_exordos_config(
             project_dir, exordos_cfg_file, exordosctl_cfg_file
         )
     except FileNotFoundError:
