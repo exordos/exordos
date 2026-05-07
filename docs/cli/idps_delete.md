@@ -7,7 +7,7 @@ Delete idp
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps delete [OPTIONS] UUID                                                                                                                                                                                                                                                             
+ Usage: exordos iam idps delete [OPTIONS] UUID                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete idp
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps delete [OPTIONS] UUID                                                                                                                                                                                                                                                             
+ Usage: exordos iam idps delete [OPTIONS] UUID                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  Delete idp                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

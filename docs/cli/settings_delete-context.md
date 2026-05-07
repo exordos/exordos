@@ -7,7 +7,7 @@ Delete the specified context from the settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings delete-context [OPTIONS] NAME                                                                                                                                                                                                                                                     
+ Usage: exordos settings delete-context [OPTIONS] NAME                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete the specified context from the settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings delete-context [OPTIONS] NAME                                                                                                                                                                                                                                                     
+ Usage: exordos settings delete-context [OPTIONS] NAME                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
  Delete the specified context from the settings                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

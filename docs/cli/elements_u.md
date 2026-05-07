@@ -7,7 +7,7 @@ Update element from a YAML file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements u [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                          
+ Usage: exordos elements u [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -45,7 +45,7 @@ Update element from a YAML file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements u [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                          
+ Usage: exordos elements u [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
  Update element from a YAML file                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

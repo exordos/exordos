@@ -7,7 +7,7 @@ Show role
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos iam roles show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show role
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos iam roles show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Show role                                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            

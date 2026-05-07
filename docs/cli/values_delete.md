@@ -7,7 +7,7 @@ Delete value
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos vs values delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete value
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos vs values delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  Delete value                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

@@ -7,7 +7,7 @@ Install element from a manifest (YAML file)
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements install [OPTIONS] [PATH_OR_NAME]                                                                                                                                                                                                                                                  
+ Usage: exordos elements install [OPTIONS] [PATH_OR_NAME]                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -45,7 +45,7 @@ Install element from a manifest (YAML file)
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements install [OPTIONS] [PATH_OR_NAME]                                                                                                                                                                                                                                                  
+ Usage: exordos elements install [OPTIONS] [PATH_OR_NAME]                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  Install element from a manifest (YAML file)                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

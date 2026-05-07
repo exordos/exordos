@@ -7,7 +7,7 @@ List profiles
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles list [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos vs profiles list [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,7 +24,7 @@ List profiles
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs profiles list [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos vs profiles list [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
  List profiles                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

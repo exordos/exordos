@@ -1,0 +1,12 @@
+To enable autocomplete for the `exordos` in bash/zsh, follow these steps:
+
+# bash
+
+- Add content from `https://github.com/exordos/exordos/blob/master/exordos/autocomplete/exordos-complete.bash` to your `~/.bashrc` file
+- Restart your shell
+
+# zsh
+
+- Save `https://github.com/exordos/exordos/blob/master/exordos/autocomplete/exordos-complete.zsh` somewhere, for example `~/.exordos-complete.zsh`
+- Source the file `. ~/.exordos-complete.zsh` in your `~/.zshrc`
+- Restart your shell

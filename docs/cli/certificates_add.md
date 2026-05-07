@@ -1,13 +1,13 @@
 
 # certificates_add
 
-Add a new certificate to the Genesis installation
+Add a new certificate to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates add [OPTIONS]                                                                                                                                                                                                                                                          
+ Usage: exordos secret certificates add [OPTIONS]                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,9 +56,9 @@ Add a new certificate to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates add [OPTIONS]                                                                                                                                                                                                                                                          
+ Usage: exordos secret certificates add [OPTIONS]                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
- Add a new certificate to the Genesis installation                                                                                                                                                                                                                                                         
+ Add a new certificate to the Exordos installation                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid         -u  UUID  UUID of the certificate                                                                                                                                                                                                                                                     │

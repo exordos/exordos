@@ -1,13 +1,13 @@
 
 # services_add
 
-Add a new service to the Genesis installation
+Add a new service to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e services add [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos e services add [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,9 +56,9 @@ Add a new service to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e services add [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos e services add [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
- Add a new service to the Genesis installation                                                                                                                                                                                                                                                             
+ Add a new service to the Exordos installation                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid         -u  UUID  UUID of the service                                                                                                                                                                                                                                                         │

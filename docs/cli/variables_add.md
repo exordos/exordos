@@ -1,13 +1,13 @@
 
 # variables_add
 
-Add a new variable to the Genesis installation
+Add a new variable to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables add [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos vs variables add [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,9 +56,9 @@ Add a new variable to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables add [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos vs variables add [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- Add a new variable to the Genesis installation                                                                                                                                                                                                                                                            
+ Add a new variable to the Exordos installation                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid         -u  UUID  UUID of the variable                                                                                                                                                                                                                                                        │

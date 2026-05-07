@@ -7,7 +7,7 @@ Delete hypervisor
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors delete [OPTIONS] UUID                                                                                                                                                                                                                                                  
+ Usage: exordos compute hypervisors delete [OPTIONS] UUID                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete hypervisor
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors delete [OPTIONS] UUID                                                                                                                                                                                                                                                  
+ Usage: exordos compute hypervisors delete [OPTIONS] UUID                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  Delete hypervisor                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            

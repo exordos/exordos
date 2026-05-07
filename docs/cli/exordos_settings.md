@@ -1,0 +1,50 @@
+
+# exordos_settings
+
+Modify exordos settings files
+
+## Usage
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos settings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                           
+```
+
+## Options
+
+* `help`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--help`
+
+  Show this message and exit.
+
+## CLI Help
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos settings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                           
+ Modify exordos settings files                                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ current-realm                                                       Display the current-realm                                                                                                                                                                                                           │
+│ delete-context                                                      Delete the specified context from the settings                                                                                                                                                                                      │
+│ delete-realm                                                        Delete the specified realm from the settings                                                                                                                                                                                        │
+│ get                                                                 Get an individual value from a settings file                                                                                                                                                                                        │
+│ init                                                                Interactively create/update a exordos settings file                                                                                                                                                                                 │
+│ list-realms                                                         Describe one or many realms                                                                                                                                                                                                         │
+│ rename-context                                                      Rename a context from the settings file                                                                                                                                                                                             │
+│ set                                                                 Set an individual value in a settings file                                                                                                                                                                                          │
+│ set-context                                                         Set a context entry in settings                                                                                                                                                                                                     │
+│ set-realm                                                           Set a realm entry in settings                                                                                                                                                                                                       │
+│ unset                                                               Unset an individual value in a settings file                                                                                                                                                                                        │
+│ use-context                                                         Use the current-context in a settings file                                                                                                                                                                                          │
+│ use-realm                                                           Use the current-realm in a settings file                                                                                                                                                                                            │
+│ view                                                                Display merged exordos settings                                                                                                                                                                                                     │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```

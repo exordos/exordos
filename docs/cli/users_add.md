@@ -1,13 +1,13 @@
 
 # users_add
 
-Add a new user to the Genesis installation
+Add a new user to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users add [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos iam users add [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -106,9 +106,9 @@ Add a new user to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users add [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos iam users add [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Add a new user to the Genesis installation                                                                                                                                                                                                                                                                
+ Add a new user to the Exordos installation                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid                       -u  UUID  UUID of the user                                                                                                                                                                                                                                              │

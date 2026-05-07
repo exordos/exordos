@@ -1,13 +1,13 @@
 
 # iam_idps
 
-Manage idps in the Genesis installation
+Manage idps in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                       
+ Usage: exordos iam idps [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage idps in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam idps [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                       
+ Usage: exordos iam idps [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
- Manage idps in the Genesis installation                                                                                                                                                                                                                                                                   
+ Manage idps in the Exordos installation                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                         Add a new idp to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                         Add a new idp to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                      Delete idp                                                                                                                                                                                                                                                  │
 │ list                                        List idps                                                                                                                                                                                                                                                   │
 │ show                                        Show idp                                                                                                                                                                                                                                                    │

@@ -7,7 +7,7 @@ Validate stored token and show user info
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              
+ Usage: exordos auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Validate stored token and show user info
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              
+ Usage: exordos auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Validate stored token and show user info                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            

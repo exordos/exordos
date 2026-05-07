@@ -1,13 +1,13 @@
 
 # iam_projects
 
-Manage projects in the Genesis installation
+Manage projects in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage projects in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
- Manage projects in the Genesis installation                                                                                                                                                                                                                                                               
+ Manage projects in the Exordos installation                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                     Add a new project to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                     Add a new project to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                  Delete project                                                                                                                                                                                                                                                  │
 │ list                                    List projects                                                                                                                                                                                                                                                   │
 │ show                                    Show project                                                                                                                                                                                                                                                    │

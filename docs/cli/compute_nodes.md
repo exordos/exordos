@@ -1,13 +1,13 @@
 
 # compute_nodes
 
-Manage nodes in the Genesis installation
+Manage nodes in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute nodes [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
+ Usage: exordos compute nodes [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage nodes in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute nodes [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
+ Usage: exordos compute nodes [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
- Manage nodes in the Genesis installation                                                                                                                                                                                                                                                                  
+ Manage nodes in the Exordos installation                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                                                       Add a new node to the Genesis installation                                                                                                                                                                                    │
+│ add                                                                       Add a new node to the Exordos installation                                                                                                                                                                                    │
 │ add-or-update                                                             Add a new node or update an existing one                                                                                                                                                                                      │
 │ delete                                                                    Delete node                                                                                                                                                                                                                   │
 │ list                                                                      List nodes                                                                                                                                                                                                                    │

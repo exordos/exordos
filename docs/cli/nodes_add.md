@@ -1,13 +1,13 @@
 
 # nodes_add
 
-Add a new node to the Genesis installation
+Add a new node to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis nodes add [OPTIONS]                                                                                                                                                                                                                                                                        
+ Usage: exordos nodes add [OPTIONS]                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -95,9 +95,9 @@ Add a new node to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis nodes add [OPTIONS]                                                                                                                                                                                                                                                                        
+ Usage: exordos nodes add [OPTIONS]                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
- Add a new node to the Genesis installation                                                                                                                                                                                                                                                                
+ Add a new node to the Exordos installation                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid         -u  UUID     UUID of the node                                                                                                                                                                                                                                                         │

@@ -1,4 +1,4 @@
 driver:
     LocalQcowBackuper:
-        backup_dir: ~/.genesis/backups
+        backup_dir: ~/.exordos/backups
         min_free_disk_space_gb: 10

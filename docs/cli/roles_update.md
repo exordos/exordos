@@ -7,7 +7,7 @@ Update role
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles update [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam roles update [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -53,7 +53,7 @@ Update role
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles update [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam roles update [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  Update role                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

@@ -1,0 +1,3 @@
+if [ -f ~/.exordos/.exordos-complete.bash ]; then
+. ~/.exordos/.exordos-complete.bash
+fi

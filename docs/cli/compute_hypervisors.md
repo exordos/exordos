@@ -1,13 +1,13 @@
 
 # compute_hypervisors
 
-Manage hypervisors in the Genesis installation
+Manage hypervisors in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
+ Usage: exordos compute hypervisors [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,9 +24,9 @@ Manage hypervisors in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
+ Usage: exordos compute hypervisors [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
- Manage hypervisors in the Genesis installation                                                                                                                                                                                                                                                            
+ Manage hypervisors in the Exordos installation                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

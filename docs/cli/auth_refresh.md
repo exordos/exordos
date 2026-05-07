@@ -7,7 +7,7 @@ Refresh stored token using refresh token
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         
+ Usage: exordos auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -43,7 +43,7 @@ Refresh stored token using refresh token
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         
+ Usage: exordos auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Refresh stored token using refresh token                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            

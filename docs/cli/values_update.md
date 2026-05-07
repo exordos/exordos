@@ -7,7 +7,7 @@ Update value
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -69,7 +69,7 @@ Update value
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  Update value                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

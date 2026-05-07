@@ -1,13 +1,13 @@
 
 # permission_bindings_add
 
-Add a new permission_binding to the Genesis installation
+Add a new permission_binding to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings add [OPTIONS]                                                                                                                                                                                                                                                      
+ Usage: exordos iam permission_bindings add [OPTIONS]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -54,9 +54,9 @@ Add a new permission_binding to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam permission_bindings add [OPTIONS]                                                                                                                                                                                                                                                      
+ Usage: exordos iam permission_bindings add [OPTIONS]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Add a new permission_binding to the Genesis installation                                                                                                                                                                                                                                                  
+ Add a new permission_binding to the Exordos installation                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid        -u  UUID  UUID of the permission_binding                                                                                                                                                                                                                                               │

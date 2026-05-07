@@ -6,8 +6,8 @@ on:
       - '*'
 
 env:
-  PROJECT_NAME: genesis-devtools
-  DEVTOOLS_PATH: https://repository.genesis-core.tech/genesis-devtools/
+  PROJECT_NAME: exordos
+  DEVTOOLS_PATH: https://repository.genesis-core.tech/exordos/
   REPO_ENDPOINT_PUT: http://10.20.0.1:8082
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/genesis-devtools
+      url: https://pypi.org/p/exordos
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
@@ -74,10 +74,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install libev (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt update && sudo apt install --yes libev-dev ca-certificates
-      - name: Install libev (macOS)
-        if: runner.os == 'macOS'
-        run: brew install libev
+        run: sudo apt update && sudo apt install --yes ca-certificates
       - name: Install uv
         uses: astral-sh/setup-uv@v7
       - name: Install tox-uv
@@ -87,15 +84,15 @@ jobs:
       - name: Rename executable
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then
-            mv dist/genesis dist/genesis-linux
+            mv dist/exordos dist/exordos-linux
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            mv dist/genesis dist/genesis-macos
+            mv dist/exordos dist/exordos-macos
           fi
         shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: genesis-${{ matrix.os }}
+          name: exordos-${{ matrix.os }}
           path: dist/*
 
   github-release:
@@ -117,12 +114,12 @@ jobs:
     - name: Download Linux binary
       uses: actions/download-artifact@v8
       with:
-        name: genesis-ubuntu-latest
+        name: exordos-ubuntu-latest
         path: dist/
     - name: Download macOS binary
       uses: actions/download-artifact@v8
       with:
-        name: genesis-macos-latest
+        name: exordos-macos-latest
         path: dist/
     - name: Create GitHub Release
       env:
@@ -140,8 +137,8 @@ jobs:
         "$GITHUB_REF_NAME" dist/**
         --repo "$GITHUB_REPOSITORY"
 
-  genesis-release:
-    name: Create genesis Release with artifacts
+  exordos-release:
+    name: Create exordos Release with artifacts
     needs:
     - build_binaries
     runs-on: self-hosted
@@ -149,27 +146,27 @@ jobs:
     - name: Download Linux binary
       uses: actions/download-artifact@v8
       with:
-        name: genesis-ubuntu-latest
+        name: exordos-ubuntu-latest
         path: dist/
     - name: Download macOS binary
       uses: actions/download-artifact@v8
       with:
-        name: genesis-macos-latest
+        name: exordos-macos-latest
         path: dist/
     - name: Push artifacts to repository
       run: |
         set -eux
-        chmod +x ./dist/genesis-linux
-        VERSION=$(./dist/genesis-linux --silent version)
+        chmod +x ./dist/exordos-linux
+        VERSION=$(./dist/exordos-linux --silent version)
         
         # Upload VERSION release
-        curl -X PUT --upload-file ./dist/genesis-macos \
-          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/genesis-macos
-        curl -X PUT --upload-file ./dist/genesis-linux \
-          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/genesis-linux
+        curl -X PUT --upload-file ./dist/exordos-macos \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-macos
+        curl -X PUT --upload-file ./dist/exordos-linux \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-linux
         
         # Upload latest release
-        curl -X PUT --upload-file ./dist/genesis-macos \
-          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/genesis-macos
-        curl -X PUT --upload-file ./dist/genesis-linux \
-          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/genesis-linux
+        curl -X PUT --upload-file ./dist/exordos-macos \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-macos
+        curl -X PUT --upload-file ./dist/exordos-linux \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-linux

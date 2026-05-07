@@ -7,7 +7,7 @@ Set a realm entry in settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings set-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
+ Usage: exordos settings set-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -60,7 +60,7 @@ Set a realm entry in settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings set-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
+ Usage: exordos settings set-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Set a realm entry in settings                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

@@ -7,7 +7,7 @@ Show value
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos vs values show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show value
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos vs values show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Show value                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

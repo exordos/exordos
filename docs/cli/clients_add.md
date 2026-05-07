@@ -1,13 +1,13 @@
 
 # clients_add
 
-Add a new client to the Genesis installation
+Add a new client to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients add [OPTIONS]                                                                                                                                                                                                                                                                  
+ Usage: exordos iam clients add [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -78,9 +78,9 @@ Add a new client to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients add [OPTIONS]                                                                                                                                                                                                                                                                  
+ Usage: exordos iam clients add [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
- Add a new client to the Genesis installation                                                                                                                                                                                                                                                              
+ Add a new client to the Exordos installation                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid                 -u  UUID           UUID of the client                                                                                                                                                                                                                                         │

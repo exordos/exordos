@@ -7,7 +7,7 @@ Initialize hypervisor
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors init [OPTIONS]                                                                                                                                                                                                                                                         
+ Usage: exordos compute hypervisors init [OPTIONS]                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -22,7 +22,7 @@ Initialize hypervisor
 
 * `pool_name`:
     * Type: text
-    * Default: `latest`
+    * Default: `default`
     * Usage: `--pool_name`
 
   storage pool name
@@ -46,7 +46,7 @@ Initialize hypervisor
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute hypervisors init [OPTIONS]                                                                                                                                                                                                                                                         
+ Usage: exordos compute hypervisors init [OPTIONS]                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Initialize hypervisor                                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            

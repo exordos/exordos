@@ -1,13 +1,13 @@
 
 # secret_rsa_keys
 
-Manage rsa_keys in the Genesis installation
+Manage rsa_keys in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                
+ Usage: exordos secret rsa_keys [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage rsa_keys in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                
+ Usage: exordos secret rsa_keys [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
- Manage rsa_keys in the Genesis installation                                                                                                                                                                                                                                                               
+ Manage rsa_keys in the Exordos installation                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                     Add a new rsa_key to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                     Add a new rsa_key to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                  Delete rsa_key                                                                                                                                                                                                                                                  │
 │ list                                    List rsa_keys                                                                                                                                                                                                                                                   │
 │ show                                    Show rsa_key                                                                                                                                                                                                                                                    │

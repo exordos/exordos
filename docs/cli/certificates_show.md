@@ -7,7 +7,7 @@ Show certificate
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates show [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos secret certificates show [OPTIONS] UUID                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show certificate
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates show [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos secret certificates show [OPTIONS] UUID                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
  Show certificate                                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            

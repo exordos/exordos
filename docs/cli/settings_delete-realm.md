@@ -7,7 +7,7 @@ Delete the specified realm from the settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings delete-realm [OPTIONS] REALM                                                                                                                                                                                                                                                      
+ Usage: exordos settings delete-realm [OPTIONS] REALM                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete the specified realm from the settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings delete-realm [OPTIONS] REALM                                                                                                                                                                                                                                                      
+ Usage: exordos settings delete-realm [OPTIONS] REALM                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Delete the specified realm from the settings                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

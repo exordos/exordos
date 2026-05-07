@@ -1,13 +1,13 @@
 
 # settings_view
 
-Display merged genesis settings
+Display merged exordos settings
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings view [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos settings view [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -18,7 +18,7 @@ Display merged genesis settings
     * Default: `false`
     * Usage: `--raw`
 
-  Display the raw merge of the genesis config
+  Display the raw merge of the exordos config
 
 * `help`:
     * Type: boolean
@@ -31,12 +31,12 @@ Display merged genesis settings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings view [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos settings view [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Display merged genesis settings                                                                                                                                                                                                                                                                           
+ Display merged exordos settings                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --raw   Display the raw merge of the genesis config                                                                                                                                                                                                                                                     │
+│ --raw   Display the raw merge of the exordos config                                                                                                                                                                                                                                                     │
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

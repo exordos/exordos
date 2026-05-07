@@ -1,11 +1,11 @@
-# Versioning in Genesis Platform
+# Versioning in Exordos Platform
 
-This document describes the versioning strategy used in the Genesis Platform and
-how it's implemented in the genesis_devtools package.
+This document describes the versioning strategy used in the Exordos Platform and
+how it's implemented in the exordos package.
 
 ## Overview
 
-The versioning system in Genesis Platform follows semantic versioning principles,
+The versioning system in Exordos Platform follows semantic versioning principles,
 with additional enhancements for development and release candidate tracking.
 
 ## Version Format
@@ -36,15 +36,15 @@ Release Candidate Version
 0.4.1-rc+20260220064549.9223faa6
 ```
 
-## Use by genesis_devtools
+## Use by exordos
 
 ```console
-genesis get-version <ELEMENT_DIR>
+exordos get-version <ELEMENT_DIR>
 ```
 
 Example
 
 ```console
-user@user ~ → genesis get-version /home/user/PycharmProjects/genesis/restalchemy
+user@user ~ → exordos get-version /home/user/PycharmProjects/exordos/restalchemy
 15.0.5-dev+20260407054854.672dcc2c
 ```

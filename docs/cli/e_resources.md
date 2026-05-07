@@ -1,13 +1,13 @@
 
 # e_resources
 
-Manage resources in the Genesis installation
+Manage resources in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e resources [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+ Usage: exordos e resources [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,9 +24,9 @@ Manage resources in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e resources [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+ Usage: exordos e resources [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Manage resources in the Genesis installation                                                                                                                                                                                                                                                              
+ Manage resources in the Exordos installation                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

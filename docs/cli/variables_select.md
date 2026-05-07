@@ -7,7 +7,7 @@ Select variable
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables select [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos vs variables select [OPTIONS] UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Select variable
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables select [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos vs variables select [OPTIONS] UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Select variable                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

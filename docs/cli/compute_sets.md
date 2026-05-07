@@ -1,13 +1,13 @@
 
 # compute_sets
 
-Manage sets in the Genesis installation
+Manage sets in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute sets [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos compute sets [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,9 +24,9 @@ Manage sets in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute sets [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos compute sets [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
- Manage sets in the Genesis installation                                                                                                                                                                                                                                                                   
+ Manage sets in the Exordos installation                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

@@ -7,7 +7,7 @@ Delete role
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam roles delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete role
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam roles delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam roles delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  Delete role                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

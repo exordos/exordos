@@ -7,7 +7,7 @@ Use the current-realm in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings use-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
+ Usage: exordos settings use-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Use the current-realm in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings use-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
+ Usage: exordos settings use-realm [OPTIONS] REALM                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Use the current-realm in a settings file                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            

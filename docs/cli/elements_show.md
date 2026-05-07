@@ -7,7 +7,7 @@ Show element general information
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements show [OPTIONS] NAME                                                                                                                                                                                                                                                               
+ Usage: exordos elements show [OPTIONS] NAME                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show element general information
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis elements show [OPTIONS] NAME                                                                                                                                                                                                                                                               
+ Usage: exordos elements show [OPTIONS] NAME                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
  Show element general information                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            

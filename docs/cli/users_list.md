@@ -7,7 +7,7 @@ List users
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List users
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  List users                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

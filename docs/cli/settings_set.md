@@ -7,7 +7,7 @@ Set an individual value in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings set [OPTIONS] KEY VALUE                                                                                                                                                                                                                                                           
+ Usage: exordos settings set [OPTIONS] KEY VALUE                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -34,7 +34,7 @@ Set an individual value in a settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings set [OPTIONS] KEY VALUE                                                                                                                                                                                                                                                           
+ Usage: exordos settings set [OPTIONS] KEY VALUE                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Set an individual value in a settings file                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

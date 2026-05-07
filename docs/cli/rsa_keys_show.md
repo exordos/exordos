@@ -7,7 +7,7 @@ Show rsa_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos secret rsa_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show rsa_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
+ Usage: exordos secret rsa_keys show [OPTIONS] UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Show rsa_key                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

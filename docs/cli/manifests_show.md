@@ -7,7 +7,7 @@ Show manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis manifests show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos manifests show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis manifests show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos manifests show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Show manifest                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

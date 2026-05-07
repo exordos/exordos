@@ -7,7 +7,7 @@ List values
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos vs values list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List values
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos vs values list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  List values                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

@@ -7,7 +7,7 @@ Rename a context from the settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings rename-context [OPTIONS] OLD_CONTEXT NEW_CONTEXT                                                                                                                                                                                                                                  
+ Usage: exordos settings rename-context [OPTIONS] OLD_CONTEXT NEW_CONTEXT                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -42,7 +42,7 @@ Rename a context from the settings file
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis settings rename-context [OPTIONS] OLD_CONTEXT NEW_CONTEXT                                                                                                                                                                                                                                  
+ Usage: exordos settings rename-context [OPTIONS] OLD_CONTEXT NEW_CONTEXT                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  Rename a context from the settings file                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            

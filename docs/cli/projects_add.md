@@ -1,13 +1,13 @@
 
 # projects_add
 
-Add a new project to the Genesis installation
+Add a new project to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects add [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos iam projects add [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,9 +56,9 @@ Add a new project to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects add [OPTIONS]                                                                                                                                                                                                                                                                 
+ Usage: exordos iam projects add [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- Add a new project to the Genesis installation                                                                                                                                                                                                                                                             
+ Add a new project to the Exordos installation                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid          -u  UUID  UUID of the project                                                                                                                                                                                                                                                        │

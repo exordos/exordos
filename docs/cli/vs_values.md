@@ -1,13 +1,13 @@
 
 # vs_values
 
-Manage values in the Genesis installation
+Manage values in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos vs values [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage values in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs values [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos vs values [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Manage values in the Genesis installation                                                                                                                                                                                                                                                                 
+ Manage values in the Exordos installation                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                       Add a new value to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                       Add a new value to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                    Delete value                                                                                                                                                                                                                                                  │
 │ list                                      List values                                                                                                                                                                                                                                                   │
 │ show                                      Show value                                                                                                                                                                                                                                                    │

@@ -1,13 +1,13 @@
 
 # e_services
 
-Manage services in the Genesis installation
+Manage services in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e services [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                     
+ Usage: exordos e services [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage services in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e services [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                     
+ Usage: exordos e services [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
- Manage services in the Genesis installation                                                                                                                                                                                                                                                               
+ Manage services in the Exordos installation                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                     Add a new service to the Genesis installation                                                                                                                                                                                                                   │
+│ add                                     Add a new service to the Exordos installation                                                                                                                                                                                                                   │
 │ delete                                  Delete service                                                                                                                                                                                                                                                  │
 │ list                                    List services                                                                                                                                                                                                                                                   │
 │ show                                    Show service                                                                                                                                                                                                                                                    │

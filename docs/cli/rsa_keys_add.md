@@ -1,13 +1,13 @@
 
 # rsa_keys_add
 
-Add a new rsa_key to the Genesis installation
+Add a new rsa_key to the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys add [OPTIONS]                                                                                                                                                                                                                                                              
+ Usage: exordos secret rsa_keys add [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,9 +56,9 @@ Add a new rsa_key to the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret rsa_keys add [OPTIONS]                                                                                                                                                                                                                                                              
+ Usage: exordos secret rsa_keys add [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
- Add a new rsa_key to the Genesis installation                                                                                                                                                                                                                                                             
+ Add a new rsa_key to the Exordos installation                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid         -u  UUID  UUID of the rsa_key                                                                                                                                                                                                                                                         │

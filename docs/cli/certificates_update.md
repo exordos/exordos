@@ -7,7 +7,7 @@ Update certificate
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
+ Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -53,7 +53,7 @@ Update certificate
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
+ Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  Update certificate                                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            

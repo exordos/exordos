@@ -7,7 +7,7 @@ List role_bindings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam role_bindings list [OPTIONS]                                                                                                                                                                                                                                                           
+ Usage: exordos iam role_bindings list [OPTIONS]                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List role_bindings
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam role_bindings list [OPTIONS]                                                                                                                                                                                                                                                           
+ Usage: exordos iam role_bindings list [OPTIONS]                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  List role_bindings                                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            

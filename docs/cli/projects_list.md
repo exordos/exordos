@@ -7,7 +7,7 @@ List projects
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List projects
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  List projects                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

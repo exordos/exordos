@@ -1,13 +1,13 @@
 
 # vs_variables
 
-Manage variables in the Genesis installation
+Manage variables in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos vs variables [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,15 +24,15 @@ Manage variables in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis vs variables [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos vs variables [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
- Manage variables in the Genesis installation                                                                                                                                                                                                                                                              
+ Manage variables in the Exordos installation                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                       Add a new variable to the Genesis installation                                                                                                                                                                                                                                │
+│ add                       Add a new variable to the Exordos installation                                                                                                                                                                                                                                │
 │ delete                    Delete variable                                                                                                                                                                                                                                                               │
 │ list                      List variables                                                                                                                                                                                                                                                                │
 │ select                    Select variable                                                                                                                                                                                                                                                               │

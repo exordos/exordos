@@ -7,7 +7,7 @@ Show set
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute sets show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos compute sets show [OPTIONS] UUID                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show set
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis compute sets show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos compute sets show [OPTIONS] UUID                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Show set                                                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            

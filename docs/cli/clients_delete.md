@@ -7,7 +7,7 @@ Delete client
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos iam clients delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Delete client
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos iam clients delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
  Delete client                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

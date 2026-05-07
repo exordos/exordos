@@ -1,13 +1,13 @@
 
 # e_imports
 
-Manage imports in the Genesis installation
+Manage imports in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e imports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos e imports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,9 +24,9 @@ Manage imports in the Genesis installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e imports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
+ Usage: exordos e imports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Manage imports in the Genesis installation                                                                                                                                                                                                                                                                
+ Manage imports in the Exordos installation                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

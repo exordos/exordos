@@ -7,7 +7,7 @@ Show import
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e imports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                         
+ Usage: exordos e imports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Show import
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis e imports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                         
+ Usage: exordos e imports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Show import                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

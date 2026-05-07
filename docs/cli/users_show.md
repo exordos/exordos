@@ -7,7 +7,7 @@ Show user
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos iam users show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show user
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam users show [OPTIONS] UUID                                                                                                                                                                                                                                                              
+ Usage: exordos iam users show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Show user                                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            

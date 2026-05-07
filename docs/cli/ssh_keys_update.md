@@ -7,7 +7,7 @@ Update ssh_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret ssh_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -53,7 +53,7 @@ Update ssh_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis secret ssh_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret ssh_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Update ssh_key                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

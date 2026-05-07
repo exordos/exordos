@@ -7,7 +7,7 @@ Show client
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients show [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam clients show [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -29,7 +29,7 @@ Show client
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: genesis iam clients show [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam clients show [OPTIONS] UUID                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  Show client                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
