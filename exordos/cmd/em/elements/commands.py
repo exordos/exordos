@@ -172,6 +172,7 @@ def _apply_with_cleanup(
         manifest_data.pop("created_at", None)
         manifest_data.pop("updated_at", None)
         manifest_data.pop("status", None)
+        manifest_data.pop("uuid", None)
         try:
             manifest_data = base_client.update_entity(
                 client, c.MANIFEST_COLLECTION, manifest_uuid, manifest_data
@@ -300,7 +301,9 @@ def upgrade_manifest(
         # sleep.
         time.sleep(3)
 
-    new_manifest = _apply_with_cleanup(client, manifest, install_only, update_manifest)
+    new_manifest = _apply_with_cleanup(
+        client, manifest, install_only, update_manifest, **kwargs
+    )
     return new_manifest
 
 
