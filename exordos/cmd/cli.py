@@ -51,7 +51,7 @@ from exordos.cmd.settings import config as settings_config
 
 from exordos.cmd.aliases import ClickAliasedGroup
 
-COMMANDS_WITHOUT_CONFIG = [
+COMMANDS_WITHOUT_CONFIG = {
     auth_commands.auth_group.name,
     builder_commands.build_cmd.name,
     initialization_commands.init_cmd.name,
@@ -64,7 +64,7 @@ COMMANDS_WITHOUT_CONFIG = [
     utils_commands.autocomplete.name,
     utils_commands.autocomplete_help.name,
     utils_commands.hello.name,
-]
+}
 
 
 @click.group(
