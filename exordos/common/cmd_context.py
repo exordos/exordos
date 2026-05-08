@@ -22,3 +22,4 @@ class ContextObject(tp.NamedTuple):
     cfg_path: str
     developer_key_path: str
     cfg: dict[str, tp.Any]
+    need_update: bool | None

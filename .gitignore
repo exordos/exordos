@@ -130,3 +130,4 @@ docs/source/*.png
 
 # GC build
  output/
+ _tmp*/
