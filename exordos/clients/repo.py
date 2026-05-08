@@ -124,7 +124,14 @@ def download_manifest(
 
 def get_all_elements(repository_url: str) -> list[str]:
     inventory_url = _join_url(repository_url, "inventory.json")
-    result = _http_get(inventory_url)
+    try:
+        result = _http_get(inventory_url)
+    except urllib.request.HTTPError as exc:
+        if exc.code == 404:
+            raise ManifestNotFound(
+                f"Failed to access repository: {inventory_url}: {exc}"
+            )
+        raise
     inventory = json.loads(result)
     return sorted(inventory["elements"].keys())
 

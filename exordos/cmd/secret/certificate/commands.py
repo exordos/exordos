@@ -22,7 +22,7 @@ import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
 
 from exordos.clients import base_client
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos import constants as c
 from exordos import utils
 
@@ -30,12 +30,17 @@ ENTITY = "certificate"
 ENTITY_COLLECTION = c.CERTIFICATE_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def certificates_group():
     pass
 
 
-@certificates_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -54,7 +59,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@certificates_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -70,7 +75,7 @@ def show_cmd(
     show_data(data)
 
 
-@certificates_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -85,9 +90,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@certificates_group.command(
-    "add", help="Add a new certificate to the Exordos installation"
-)
+@click.command("add", help="Add a new certificate to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -117,7 +120,7 @@ def delete_cmd(
     default="",
     help="Description of the certificate",
 )
-def add_certificate_cmd(
+def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
@@ -138,7 +141,7 @@ def add_certificate_cmd(
     show_data(entity)
 
 
-@certificates_group.command("update", help="Update certificate")
+@click.command("update", help="Update certificate")
 @click.pass_context
 @click.argument(
     "uuid",
@@ -166,7 +169,7 @@ def add_certificate_cmd(
     default=None,
     help="Description of the certificate",
 )
-def update_certificate_cmd(
+def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
     project_id: sys_uuid.UUID | None,
@@ -205,3 +208,10 @@ def _print_entities(certificates: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+certificates_group.add_command(list_cmd, aliases=["l"])
+certificates_group.add_command(show_cmd, aliases=["get", "g"])
+certificates_group.add_command(delete_cmd, aliases=["d"])
+certificates_group.add_command(add_cmd, aliases=["a"])
+certificates_group.add_command(update_cmd, aliases=["u"])

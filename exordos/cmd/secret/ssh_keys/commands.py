@@ -21,7 +21,7 @@ import uuid as sys_uuid
 
 import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.clients import base_client
 
 from exordos import constants as c
@@ -31,12 +31,17 @@ ENTITY = "ssh_key"
 ENTITY_COLLECTION = c.SSH_KEY_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def ssh_keys_group():
     pass
 
 
-@ssh_keys_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -55,7 +60,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@ssh_keys_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -71,7 +76,7 @@ def show_cmd(
     show_data(data)
 
 
-@ssh_keys_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -86,7 +91,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@ssh_keys_group.command(
+@click.command(
     "add",
     help=f"Add a new {ENTITY} to the Exordos installation, example: `secret ssh_keys add "
     f"--node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`",
@@ -196,7 +201,7 @@ def add_cmd(
     show_data(entity)
 
 
-@ssh_keys_group.command("update", help=f"Update {ENTITY}")
+@click.command("update", help=f"Update {ENTITY}")
 @click.pass_context
 @click.argument(
     "uuid",
@@ -264,3 +269,10 @@ def _print_entities(ssh_keys: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+ssh_keys_group.add_command(list_cmd, aliases=["l"])
+ssh_keys_group.add_command(show_cmd, aliases=["get", "g"])
+ssh_keys_group.add_command(delete_cmd, aliases=["d"])
+ssh_keys_group.add_command(add_cmd, aliases=["a"])
+ssh_keys_group.add_command(update_cmd, aliases=["u"])

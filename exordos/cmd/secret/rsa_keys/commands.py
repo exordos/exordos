@@ -22,7 +22,7 @@ import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
 
 from exordos.clients import base_client
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos import utils
 from exordos import constants as c
 
@@ -30,12 +30,17 @@ ENTITY = "rsa_key"
 ENTITY_COLLECTION = c.RSA_KEY_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def rsa_keys_group():
     pass
 
 
-@rsa_keys_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -54,7 +59,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@rsa_keys_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -70,7 +75,7 @@ def show_cmd(
     show_data(data)
 
 
-@rsa_keys_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -85,7 +90,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@rsa_keys_group.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
+@click.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -115,7 +120,7 @@ def delete_cmd(
     default="",
     help=f"Description of the {ENTITY}",
 )
-def add_rsa_key_cmd(
+def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
@@ -137,7 +142,7 @@ def add_rsa_key_cmd(
     show_data(entity)
 
 
-@rsa_keys_group.command("update", help=f"Update {ENTITY}")
+@click.command("update", help=f"Update {ENTITY}")
 @click.pass_context
 @click.argument(
     "uuid",
@@ -201,3 +206,10 @@ def _print_entities(rsa_keys: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+rsa_keys_group.add_command(list_cmd, aliases=["l"])
+rsa_keys_group.add_command(show_cmd, aliases=["get", "g"])
+rsa_keys_group.add_command(delete_cmd, aliases=["d"])
+rsa_keys_group.add_command(add_cmd, aliases=["a"])
+rsa_keys_group.add_command(update_cmd, aliases=["u"])

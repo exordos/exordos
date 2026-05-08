@@ -24,17 +24,23 @@ from exordos.clients import base_client
 
 from exordos import constants as c
 from exordos import utils
+from exordos.cmd.aliases import ClickAliasedGroup
 
 ENTITY = "export"
 ENTITY_COLLECTION = c.EXPORTS_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    "exports",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def exports_group():
     pass
 
 
-@exports_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-e",
     "--element",
@@ -66,7 +72,7 @@ def list_cmd(ctx: click.Context, element: str) -> None:
     _print_entities(resources)
 
 
-@exports_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.option(
     "-e",
     "--element",
@@ -138,3 +144,7 @@ def _print_entities(entities: tp.List[dict]) -> None:
             )
 
         print_table(table)
+
+
+exports_group.add_command(list_cmd, aliases=["l"])
+exports_group.add_command(show_cmd, aliases=["get", "g"])

@@ -26,6 +26,7 @@ from exordos.clients import base_client
 from exordos import logger
 from exordos import utils
 from exordos import constants as c
+from exordos.cmd.aliases import ClickAliasedGroup
 
 ENTITY = "node"
 ENTITY_COLLECTION = c.NODE_COLLECTION
@@ -33,12 +34,17 @@ ENTITY_COLLECTION = c.NODE_COLLECTION
 LIST_FIELDS = ["UUID", "Project", "Name", "Cores", "RAM", "IP", "Status"]
 
 
-@click.group("nodes", help="Manage nodes in the Exordos installation")
-def nodes_group():
+@click.group(
+    "cn",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
+def cn_group():
     pass
 
 
-@nodes_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -57,7 +63,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@nodes_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -73,7 +79,7 @@ def show_cmd(
     show_data(data)
 
 
-@nodes_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -88,7 +94,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@nodes_group.command("add", help="Add a new node to the Exordos installation")
+@click.command("add", help="Add a new node to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -156,7 +162,7 @@ def delete_cmd(
     default=False,
     help="Wait until the node is running",
 )
-def add_node_cmd(
+def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
@@ -196,7 +202,7 @@ def add_node_cmd(
     show_data(entity)
 
 
-@nodes_group.command("add-or-update", help="Add a new node or update an existing one")
+@cn_group.command("add-or-update", help="Add a new node or update an existing one")
 @click.pass_context
 @click.option(
     "-u",
@@ -279,7 +285,7 @@ def add_or_update_node_cmd(
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         return ctx.invoke(
-            add_node_cmd,
+            add_cmd,
             uuid=uuid,
             project_id=project_id,
             cores=cores,
@@ -295,7 +301,7 @@ def add_or_update_node_cmd(
         base_client.get_entity(client, ENTITY_COLLECTION, uuid)
     except bazooka_exc.NotFoundError:
         return ctx.invoke(
-            add_node_cmd,
+            add_cmd,
             uuid=uuid,
             project_id=project_id,
             cores=cores,
@@ -346,3 +352,9 @@ def _print_entities(entities) -> None:
         )
 
     print_table(table)
+
+
+cn_group.add_command(list_cmd, aliases=["l"])
+cn_group.add_command(show_cmd, aliases=["get", "g"])
+cn_group.add_command(delete_cmd, aliases=["d"])
+cn_group.add_command(add_cmd, aliases=["a"])

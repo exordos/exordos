@@ -20,7 +20,7 @@ import uuid as sys_uuid
 
 import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.clients import base_client
 
 from exordos import utils
@@ -30,12 +30,17 @@ ENTITY = "value"
 ENTITY_COLLECTION = c.VALUE_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    "values",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def values_group():
     pass
 
 
-@values_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -54,7 +59,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@values_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -70,7 +75,7 @@ def show_cmd(
     show_data(data)
 
 
-@values_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -85,7 +90,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@values_group.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
+@click.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -128,7 +133,7 @@ def delete_cmd(
     default="",
     help="value",
 )
-def add_value_cmd(
+def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
@@ -161,7 +166,7 @@ def add_value_cmd(
     show_data(entity)
 
 
-@values_group.command("update", help="Update value")
+@click.command("update", help="Update value")
 @click.pass_context
 @click.argument(
     "uuid",
@@ -203,7 +208,7 @@ def add_value_cmd(
     default=None,
     help="uuid of the variable",
 )
-def update_value_cmd(
+def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
     project_id: sys_uuid.UUID | None,
@@ -250,3 +255,10 @@ def _print_entities(values: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+values_group.add_command(list_cmd, aliases=["l"])
+values_group.add_command(show_cmd, aliases=["get", "g"])
+values_group.add_command(delete_cmd, aliases=["d"])
+values_group.add_command(add_cmd, aliases=["a"])
+values_group.add_command(update_cmd, aliases=["u"])

@@ -26,17 +26,23 @@ from exordos.clients import base_client
 from exordos.common.run import runsh, run_command
 from exordos import utils
 from exordos import constants as c
+from exordos.cmd.aliases import ClickAliasedGroup
 
 ENTITY = "hypervisor"
 ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def hypervisors_group():
     pass
 
 
-@hypervisors_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -55,7 +61,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@hypervisors_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -71,7 +77,7 @@ def show_cmd(
     show_data(data)
 
 
-@hypervisors_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -317,3 +323,8 @@ def init_cmd(romfile_version: str, pool_name: str, packer: bool) -> None:
         _install_packer()
 
     log.important("Hypervisor environment initialized successfully")
+
+
+hypervisors_group.add_command(list_cmd, aliases=["l"])
+hypervisors_group.add_command(show_cmd, aliases=["get", "g"])
+hypervisors_group.add_command(delete_cmd, aliases=["d"])

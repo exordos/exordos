@@ -15,13 +15,14 @@ import rich_click as click
 from exordos.cmd.vs.profiles import commands as profiles_commands
 from exordos.cmd.vs.values import commands as values_commands
 from exordos.cmd.vs.vars import commands as vars_commands
+from exordos.cmd.aliases import ClickAliasedGroup
 
 
-@click.group("vs", help="vs group in the Exordos installation")
+@click.group("vs", cls=ClickAliasedGroup, help="vs group in the Exordos installation")
 def vs_group():
     pass
 
 
-vs_group.add_command(profiles_commands.profiles_group)  # noqa
-vs_group.add_command(values_commands.values_group)  # noqa
-vs_group.add_command(vars_commands.variables_group)  # noqa
+vs_group.add_command(profiles_commands.profiles_group)
+vs_group.add_command(values_commands.values_group)
+vs_group.add_command(vars_commands.vv_group, aliases=["v", "variables", "vars"])

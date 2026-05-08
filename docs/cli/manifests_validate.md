@@ -7,7 +7,7 @@ Validate manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                  
+ Usage: exordos em manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -15,7 +15,7 @@ Validate manifest
 
 * `repository`:
     * Type: text
-    * Default: `https://repository.genesis-core.tech/genesis-elements/`
+    * Default: `https://repository.genesis-core.tech/exordos-elements/`
     * Usage: `-r
 --repository`
 
@@ -37,12 +37,6 @@ Validate manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                  
+ Usage: exordos em manifests validate [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
- Validate manifest                                                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --repository  -r  TEXT  Repository endpoint [default: https://repository.genesis-core.tech/genesis-elements/]                                                                                                                                                                                           │
-│ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
