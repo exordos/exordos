@@ -24,7 +24,7 @@ import exordos.constants as c
 from exordos.common.version import get_project_version
 
 
-def check_latest_version(echo_on_latest: bool = False) -> None:
+def check_latest_version(echo_on_latest: bool = False) -> bool:
     """Check for the latest version on GitHub and warn if newer version exists."""
     try:
         response = requests.get(f"{c.GITHUB_RELEASES_URL}/latest", timeout=1)
@@ -42,6 +42,7 @@ def check_latest_version(echo_on_latest: bool = False) -> None:
                 f"Update by:\ncurl -fsSL {c.EXORDOS_REPO_URL}/install.sh | sudo sh",
                 fg="yellow",
             )
+            return False
         else:
             if echo_on_latest:
                 click.secho(
@@ -52,6 +53,7 @@ def check_latest_version(echo_on_latest: bool = False) -> None:
         click.secho(
             f"Failed to check for the latest version on GitHub: {err}", fg="red"
         )
+    return True
 
 
 def should_check_version():
@@ -96,7 +98,16 @@ def version_cmd() -> None:
 
 
 @click.command(name="latest", help="Check for the latest version on GitHub")
-def latest_cmd() -> None:
+@click.pass_context
+def latest_cmd(ctx: click.Context) -> None:
+    if ctx.obj.need_update is False:
+        from exordos import version as exordos_version
+
+        click.secho(
+            f"You are using the latest version: {exordos_version.version_info}",
+            fg="green",
+        )
+        return
     check_latest_version(echo_on_latest=True)
 
 

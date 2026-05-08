@@ -51,6 +51,21 @@ from exordos.cmd.settings import config as settings_config
 
 from exordos.cmd.aliases import ClickAliasedGroup
 
+COMMANDS_WITHOUT_CONFIG = [
+    auth_commands.auth_group.name,
+    builder_commands.build_cmd.name,
+    initialization_commands.init_cmd.name,
+    version_commands.version_cmd.name,
+    version_commands.latest_cmd.name,
+    version_commands.get_project_version_cmd.name,
+    stand_commands.bootstrap_cmd.name,
+    stand_commands.backup_cmd.name,
+    stand_commands.backup_decrypt_cmd.name,
+    utils_commands.autocomplete.name,
+    utils_commands.autocomplete_help.name,
+    utils_commands.hello.name,
+]
+
 
 @click.group(
     cls=ClickAliasedGroup,
@@ -158,7 +173,14 @@ def exordos(
         logging.basicConfig(level=logging.DEBUG)
     # Load configuration from file (if exists)
     cfg_path = config if config else None
-    cfg = settings_config.load_config(ctx, cfg_path, silent)
+    cfg = settings_config.load_config(
+        ctx,
+        cfg_path,
+        silent
+        or any(
+            [ctx.invoked_subcommand.startswith(cmd) for cmd in COMMANDS_WITHOUT_CONFIG]
+        ),
+    )
 
     realm_conf = settings_config.get_realm(cfg, realm)
     context_conf = settings_config.get_context(realm_conf, context)
@@ -186,8 +208,9 @@ def exordos(
     final_developer_key_path = _get_final_value(
         "developer_key_path", developer_key_path, cfg, {}
     )
+    need_update = None
     if final_check_updates and version_commands.should_check_version():
-        version_commands.check_latest_version()
+        need_update = not version_commands.check_latest_version()
         version_commands.save_last_check_time()
 
     final_project_id = _get_final_value("project_id", project_id, cfg, context_conf)
@@ -201,7 +224,9 @@ def exordos(
         refresh_token=final_refresh_token,
         scope=scope,
     )
-    ctx.obj = ContextObject(auth_data, config, final_developer_key_path, cfg)
+    ctx.obj = ContextObject(
+        auth_data, config, final_developer_key_path, cfg, need_update
+    )
 
 
 @exordos.command(help="tool for creating docs files for cli commands", hidden=True)
