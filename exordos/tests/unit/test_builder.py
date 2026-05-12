@@ -18,9 +18,9 @@ import pathlib
 import typing as tp
 from unittest.mock import MagicMock
 
+from exordos.builder import base
 from exordos.builder.builder import SimpleBuilder
 from exordos.logger import DummyLogger
-from exordos.builder import base
 
 
 class TestBuilder:

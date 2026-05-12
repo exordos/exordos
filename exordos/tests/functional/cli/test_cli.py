@@ -17,12 +17,11 @@
 import os
 import tempfile
 
-from click.testing import CliRunner
 from click.globals import get_current_context
+from click.testing import CliRunner
 
 from exordos import utils
 from exordos.cmd import cli
-
 from exordos.cmd.settings import config as settings_config
 
 

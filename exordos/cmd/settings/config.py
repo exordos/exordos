@@ -15,9 +15,10 @@
 #    under the License.
 
 import os
-import yaml
-import rich_click as click
 import tempfile
+
+import rich_click as click
+import yaml
 
 from exordos import constants as c
 

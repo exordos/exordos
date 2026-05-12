@@ -17,9 +17,7 @@ from exordos.cmd.iam.client import commands as client_commands
 from exordos.cmd.iam.idp import commands as idp_commands
 from exordos.cmd.iam.organization import commands as organization_commands
 from exordos.cmd.iam.permission import commands as permission_commands
-from exordos.cmd.iam.permission_binding import (
-    commands as permission_binding_commands,
-)
+from exordos.cmd.iam.permission_binding import commands as permission_binding_commands
 from exordos.cmd.iam.project import commands as project_commands
 from exordos.cmd.iam.role import commands as role_commands
 from exordos.cmd.iam.role_binding import commands as role_binding_commands

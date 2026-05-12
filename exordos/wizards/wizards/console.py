@@ -20,8 +20,8 @@ import typing as tp
 
 import rich_click as click
 
-from exordos.wizards.wizards import base
 from exordos.wizards.scenarios import base as scenarios
+from exordos.wizards.wizards import base
 from exordos.wizards.wizards import terminal as tui
 
 

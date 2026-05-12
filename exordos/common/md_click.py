@@ -15,9 +15,9 @@
 #    under the License.
 
 import os
+import pathlib
 
 from rich_click.rich_context import RichContext
-import pathlib
 
 from exordos import utils
 

@@ -15,19 +15,20 @@
 #    under the License.
 from __future__ import annotations
 
-import json
-import typing as tp
-import tempfile
-import shutil
-import os
 import gzip
-import jinja2
+import json
+import os
+import shutil
+import tempfile
+import typing as tp
 
+import jinja2
 import yaml
 
-from exordos.builder import base
-from exordos.logger import AbstractLogger, DummyLogger
 from exordos import constants as c
+from exordos.builder import base
+from exordos.logger import AbstractLogger
+from exordos.logger import DummyLogger
 
 
 class SimpleBuilder:

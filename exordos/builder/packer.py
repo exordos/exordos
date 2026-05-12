@@ -15,16 +15,16 @@
 #    under the License.
 from __future__ import annotations
 
+import importlib.resources as resources
 import os
+import shutil
 import subprocess
 import typing as tp
-import shutil
 
-import importlib.resources as resources
-
-from exordos.builder import base
-from exordos.logger import AbstractLogger, DummyLogger
 from exordos import constants as c
+from exordos.builder import base
+from exordos.logger import AbstractLogger
+from exordos.logger import DummyLogger
 
 file_provisioner_tmpl = """
   provisioner "file" {{

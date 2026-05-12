@@ -15,13 +15,13 @@
 #    under the License.
 
 import os
-import requests
 import time
 
+import requests
 import rich_click as click
 
-import exordos.constants as c
 from exordos.common.version import get_project_version
+import exordos.constants as c
 
 
 def check_latest_version(echo_on_latest: bool = False) -> bool:
@@ -31,10 +31,9 @@ def check_latest_version(echo_on_latest: bool = False) -> bool:
         response.raise_for_status()
         latest_tag = response.json()["tag_name"]
 
-        from exordos import version as exordos_version
-
-        # Сравниваем версии
         from packaging import version
+
+        from exordos import version as exordos_version
 
         if version.parse(latest_tag) > version.parse(exordos_version.version_info):
             click.secho(

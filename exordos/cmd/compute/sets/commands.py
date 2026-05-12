@@ -16,12 +16,14 @@
 from __future__ import annotations
 
 import rich_click as click
-from exordos.common.table import get_table, print_table, show_data
 
-from exordos.clients import base_client
-from exordos import utils
-from exordos.cmd.aliases import ClickAliasedGroup
 from exordos import constants as c
+from exordos import utils
+from exordos.clients import base_client
+from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.common.table import show_data
 
 ENTITY = "set"
 ENTITY_COLLECTION = c.SET_COLLECTION

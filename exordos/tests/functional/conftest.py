@@ -15,6 +15,7 @@
 #    under the License
 
 import os
+
 from click.testing import CliRunner
 import pytest
 import yaml

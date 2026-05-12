@@ -18,13 +18,12 @@ import os
 import typing as tp
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 import certifi
 import rich_click as click
 
-from bazooka import exceptions as bazooka_exc
-from exordos.clients import base as http_client
-
 from exordos import utils
+from exordos.clients import base as http_client
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
 

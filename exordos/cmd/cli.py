@@ -14,43 +14,36 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from requests.exceptions import RequestException
 import typing as tp
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
+from requests.exceptions import RequestException
 import rich_click as click
 
-from bazooka import exceptions as bazooka_exc
-
-import exordos.constants as c
-from exordos.common.cmd_context import ContextObject
-
-from exordos.cmd.iam.auth import commands as auth_commands
-
-from exordos.cmd.iam import iam_group
-from exordos.cmd.secret import secret_group
-from exordos.cmd.vs import vs_group
-from exordos.cmd.vs.vars import commands as vars_commands
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.compute import compute_group
-from exordos.cmd.compute.nodes import commands as nodes_commands
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
-from exordos.cmd.realms.commands import realms_group
-from exordos.cmd.version import commands as version_commands
-from exordos.cmd.stand import commands as stand_commands
-from exordos.cmd.stand import utils_commands
-
+from exordos.cmd.compute.nodes import commands as nodes_commands
+from exordos.cmd.configs import commands as configs_commands
 from exordos.cmd.em import em_group
 from exordos.cmd.em.builder import commands as builder_commands
 from exordos.cmd.em.elements import commands as elements_commands
-
+from exordos.cmd.iam import iam_group
+from exordos.cmd.iam.auth import commands as auth_commands
 from exordos.cmd.initialization import commands as initialization_commands
-from exordos.cmd.configs import commands as configs_commands
+from exordos.cmd.realms.commands import realms_group
 from exordos.cmd.repo import commands as repo_commands
-
+from exordos.cmd.secret import secret_group
 from exordos.cmd.settings import commands as settings_commands
 from exordos.cmd.settings import config as settings_config
-
-from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.stand import commands as stand_commands
+from exordos.cmd.stand import utils_commands
+from exordos.cmd.version import commands as version_commands
+from exordos.cmd.vs import vs_group
+from exordos.cmd.vs.vars import commands as vars_commands
+from exordos.common.cmd_context import ContextObject
+import exordos.constants as c
 
 COMMANDS_WITHOUT_CONFIG = {
     auth_commands.auth_group.name,

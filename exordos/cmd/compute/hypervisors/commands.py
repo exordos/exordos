@@ -19,14 +19,17 @@ import os
 import typing as tp
 
 import rich_click as click
-from exordos.common.table import get_table, print_table, show_data
 
-from exordos.logger import ClickLogger
-from exordos.clients import base_client
-from exordos.common.run import runsh, run_command
-from exordos import utils
 from exordos import constants as c
+from exordos import utils
+from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.common.run import run_command
+from exordos.common.run import runsh
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.common.table import show_data
+from exordos.logger import ClickLogger
 
 ENTITY = "hypervisor"
 ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION

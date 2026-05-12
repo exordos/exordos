@@ -15,26 +15,26 @@
 #    under the License.
 from __future__ import annotations
 
-import json
+from importlib.metadata import entry_points
 import io
-import os
-import time
-import shutil
 import itertools
+import json
+import os
+import shutil
+import socket
 import subprocess
-import uuid
+import time
 import typing as tp
 import urllib.parse
-import socket
-from importlib.metadata import entry_points
+import uuid
 
-import git
-import ruamel.yaml
-import rich_click as click
-from cryptography.hazmat.primitives import ciphers
-from cryptography.hazmat.primitives.ciphers import modes as cipher_models
-from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat import backends as crypto_back
+from cryptography.hazmat.primitives import ciphers
+from cryptography.hazmat.primitives.ciphers import algorithms
+from cryptography.hazmat.primitives.ciphers import modes as cipher_models
+import git
+import rich_click as click
+import ruamel.yaml
 
 import exordos.constants as c
 
@@ -522,8 +522,8 @@ PROJECT_PATH = get_project_path()
 
 def validate_config(data: dict, schema: tp.Optional[dict]) -> None:
     try:
-        import openapi_schema_validator
         from jsonschema.exceptions import ValidationError
+        import openapi_schema_validator
 
         if data and schema:
             try:

@@ -16,16 +16,16 @@
 
 import abc
 import base64
+import http as httplib
 import inspect
 import typing as tp
-import uuid as sys_uuid
-import http as httplib
 from urllib.parse import urljoin
+import uuid as sys_uuid
 
-import orjson
 import bazooka
-from requests import models as req_models
 from bazooka import exceptions as bazooka_exc
+import orjson
+from requests import models as req_models
 
 from exordos.common import crypto
 

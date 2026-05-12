@@ -17,10 +17,10 @@
 from __future__ import annotations
 
 import json
-import typing as tp
 import re
-import urllib.request
+import typing as tp
 import urllib.parse
+import urllib.request
 
 import yaml
 

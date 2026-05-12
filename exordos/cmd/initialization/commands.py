@@ -22,8 +22,8 @@ import typing as tp
 
 import rich_click as click
 
-from exordos.wizards.scenarios import platformizers
 from exordos.wizards.engines.templaters import templaters
+from exordos.wizards.scenarios import platformizers
 from exordos.wizards.wizards import console
 
 

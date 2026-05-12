@@ -15,13 +15,15 @@
 #    under the License.
 from __future__ import annotations
 
-import os
-import yaml
-import rich_click as click
 import json
+import os
+
+import rich_click as click
+import yaml
 
 from exordos import constants as c
-from exordos.cmd.settings.config import get_current_realm, save_config
+from exordos.cmd.settings.config import get_current_realm
+from exordos.cmd.settings.config import save_config
 
 
 @click.group("settings", help="Modify exordos settings files")

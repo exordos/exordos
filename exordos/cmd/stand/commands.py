@@ -14,33 +14,34 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fnmatch
 import hashlib
+import ipaddress
 import json
 import os
+import pathlib
 import subprocess
 import time
 import typing as tp
-import ipaddress
-import pathlib
 import urllib.parse
-import yaml
-import fnmatch
 
 import requests
 import rich.progress
 import rich.status
 import rich_click as click
+import yaml
 
-from exordos.builder import base as base_builder
-import exordos.constants as c
-from exordos.logger import ClickLogger
 from exordos import utils
-from exordos.cmd.stand.constants import BackupPeriod, Profile
-from exordos.stand import models as stand_models
-from exordos.infra.driver import libvirt as libvirt_infra
-from exordos.infra.libvirt import libvirt
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
+from exordos.builder import base as base_builder
+from exordos.cmd.stand.constants import BackupPeriod
+from exordos.cmd.stand.constants import Profile
+import exordos.constants as c
+from exordos.infra.driver import libvirt as libvirt_infra
+from exordos.infra.libvirt import libvirt
+from exordos.logger import ClickLogger
+from exordos.stand import models as stand_models
 
 BOOTSTRAP_TAG = "bootstrap"
 LaunchModeType = tp.Literal["core", "element", "custom"]

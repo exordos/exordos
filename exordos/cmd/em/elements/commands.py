@@ -16,21 +16,23 @@
 from __future__ import annotations
 
 import os
-from rich.prompt import Prompt, Confirm
 import subprocess
 import tempfile
 import time
 import typing as tp
 
+from bazooka import exceptions as bazooka_exc
+from rich.prompt import Confirm
+from rich.prompt import Prompt
 import rich_click as click
 
-from bazooka import exceptions as bazooka_exc
-
-from exordos.cmd.aliases import ClickAliasedGroup
-from exordos.common.table import get_table, print_table, show_data
 from exordos import utils
 from exordos.clients import base_client
 from exordos.clients import repo as repo_lib
+from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.common.table import show_data
 import exordos.constants as c
 from exordos.logger import ClickLogger
 

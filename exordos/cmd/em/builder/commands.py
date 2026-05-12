@@ -16,17 +16,15 @@
 from __future__ import annotations
 
 import os
+import shutil
 import tempfile
 import typing as tp
-import shutil
 
 import rich_click as click
 
-
+from exordos import utils
 from exordos.builder import builder as simple_builder
 from exordos.builder.packer import PackerBuilder
-from exordos import utils
-
 import exordos.constants as c
 from exordos.logger import ClickLogger
 

@@ -14,14 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import requests
 import secrets
 import uuid as sys_uuid
 
-import rich_click as click
-
 from bazooka import client as bazooka_client
 from bazooka import exceptions as bazooka_exc
+import requests
+import rich_click as click
 
 
 def register_realm(

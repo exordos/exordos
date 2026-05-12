@@ -15,13 +15,13 @@
 #    under the License.
 from __future__ import annotations
 
-import os
 import dataclasses
+import os
 
+from exordos import constants as c
 from exordos import utils
 from exordos.wizards.scenarios import base
 from exordos.wizards.scenarios import cicd
-from exordos import constants as c
 
 # Type aliases for better readability
 A: type[base.Action] = base.Action
