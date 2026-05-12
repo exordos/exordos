@@ -7,7 +7,7 @@ Show export
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                         
+ Usage: exordos em exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Show export
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                         
+ Usage: exordos em exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
  Show export                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

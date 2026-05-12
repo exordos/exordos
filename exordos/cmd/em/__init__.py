@@ -21,16 +21,14 @@ from exordos.cmd.em.resources import commands as resources_commands
 from exordos.cmd.em.services import commands as services_commands
 
 
-@click.group(
-    "e", cls=ClickAliasedGroup, help="Element group in the Exordos installation"
-)
-def elements_group():
+@click.group("em", cls=ClickAliasedGroup, help="em group in the Exordos installation")
+def em_group():
     pass
 
 
-elements_group.add_command(elements_commands.elements_group, aliases=["e"])
-elements_group.add_command(exports_commands.exports_group)
-elements_group.add_command(imports_commands.imports_group, aliases=["i"])
-elements_group.add_command(manifests_commands.manifests_group, aliases=["m"])
-elements_group.add_command(resources_commands.resources_group, aliases=["r"])
-elements_group.add_command(services_commands.services_group, aliases=["s"])
+em_group.add_command(elements_commands.ee_group, aliases=["e", "elements"])
+em_group.add_command(exports_commands.exports_group)
+em_group.add_command(imports_commands.imports_group, aliases=["i"])
+em_group.add_command(manifests_commands.manifests_group, aliases=["m"])
+em_group.add_command(resources_commands.resources_group, aliases=["r"])
+em_group.add_command(services_commands.services_group, aliases=["s"])

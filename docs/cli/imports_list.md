@@ -7,7 +7,7 @@ List imports
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e imports list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos em imports list [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List imports
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e imports list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos em imports list [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  List imports                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

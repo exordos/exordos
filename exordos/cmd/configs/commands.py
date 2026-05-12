@@ -26,17 +26,23 @@ from exordos.common.table import get_table, print_table, show_data
 
 from exordos.clients import base_client
 from exordos import constants as c
+from exordos.cmd.aliases import ClickAliasedGroup
 
 ENTITY = "config"
 ENTITY_COLLECTION = c.CONFIG_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def configs_group():
     pass
 
 
-@configs_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-n",
     "--node",
@@ -45,7 +51,7 @@ def configs_group():
     help="Filter configs by node",
 )
 @click.pass_context
-def list_config_cmd(
+def list_cmd(
     ctx: click.Context,
     node: sys_uuid.UUID | None,
 ) -> None:
@@ -59,7 +65,7 @@ def list_config_cmd(
     _print_entities(entities)
 
 
-@configs_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -186,7 +192,7 @@ def add_config_from_env_cmd(
             raise ValueError(f"Unknown kind {key}")
 
     # Validate configurations
-    # Foramt:
+    # Format:
     # {
     #     "name": {"path": "/path/to/config", "text": "content is here ..."},
     # }
@@ -210,7 +216,7 @@ def add_config_from_env_cmd(
         click.echo(f"Saved config to {cfg['path']}")
 
 
-@configs_group.command("delete", help="Delete configuration from environment variables")
+@click.command("delete", help="Delete configuration from environment variables")
 @click.option(
     "-u",
     "--uuid",
@@ -226,7 +232,7 @@ def add_config_from_env_cmd(
     help="Delete all configs for the node",
 )
 @click.pass_context
-def delete_config_cmd(
+def delete_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     node: sys_uuid.UUID | None,
@@ -267,3 +273,8 @@ def _print_entities(entities: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+configs_group.add_command(list_cmd, aliases=["l"])
+configs_group.add_command(show_cmd, aliases=["get", "g"])
+configs_group.add_command(delete_cmd, aliases=["d"])

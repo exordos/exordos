@@ -26,6 +26,7 @@ import rich_click as click
 
 from bazooka import exceptions as bazooka_exc
 
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.common.table import get_table, print_table, show_data
 from exordos import utils
 from exordos.clients import base_client
@@ -41,12 +42,17 @@ ENTITY = "element"
 ENTITY_COLLECTION = c.ELEMENT_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
-def elements_group():
+@click.group(
+    "ee",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
+def ee_group():
     pass
 
 
-@elements_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -65,10 +71,10 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@elements_group.command("show", help="Show element general information")
+@click.command("show", help="Show element general information")
 @click.argument("name")
 @click.pass_context
-def show_element_cmd(ctx: click.Context, name: str) -> None:
+def show_cmd(ctx: click.Context, name: str) -> None:
     """Show element general information"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = base_client.get_entity(client, ENTITY_COLLECTION, name)
@@ -126,7 +132,7 @@ def show_element_cmd(ctx: click.Context, name: str) -> None:
     print_table(table)
 
 
-@elements_group.command("ips", help="Show element ips")
+@ee_group.command("ips", help="Show element ips")
 @click.argument("name")
 @click.pass_context
 def show_element_ips(ctx: click.Context, name: str) -> None:
@@ -307,7 +313,7 @@ def upgrade_manifest(
     return new_manifest
 
 
-@elements_group.command("install", help="Install element from a manifest (YAML file)")
+@click.command("install", help="Install element from a manifest (YAML file)")
 @click.option(
     "-r",
     "--repository",
@@ -324,7 +330,7 @@ def upgrade_manifest(
 )
 @click.argument("path_or_name", required=False)
 @click.pass_context
-def install_manifest_cmd(
+def install_cmd(
     ctx: click.Context, repository: str, version: str | None, path_or_name: str | None
 ) -> None:
     """Install manifest from a YAML file"""
@@ -347,36 +353,7 @@ def install_manifest_cmd(
     )
 
 
-@elements_group.command("i", help="Install element from a manifest (YAML file)")
-@click.option(
-    "-r",
-    "--repository",
-    default=f"{c.ELEMENT_REPO_URL}/",
-    show_default=True,
-    help="Repository endpoint",
-)
-@click.option(
-    "-v",
-    "--version",
-    type=str,
-    required=False,
-    help="version of the element",
-)
-@click.argument("path_or_name", required=False)
-@click.pass_context
-def i(
-    ctx: click.Context, repository: str, version: str | None, path_or_name: str | None
-) -> None:  # pragma: no cover
-    ctx.invoke(
-        install_manifest_cmd,
-        repository=repository,
-        path_or_name=path_or_name,
-        version=version,
-    )
-    return None
-
-
-@elements_group.command("update", help="Update element from a YAML file")
+@click.command("update", help="Update element from a YAML file")
 @click.option(
     "-r",
     "--repository",
@@ -393,7 +370,7 @@ def i(
 )
 @click.argument("path_or_name")
 @click.pass_context
-def update_manifest_cmd(
+def update_cmd(
     ctx: click.Context, repository: str, version: str | None, path_or_name: str
 ) -> None:
     """Update manifest from a YAML file"""
@@ -408,39 +385,10 @@ def update_manifest_cmd(
     )
 
 
-@elements_group.command(help="Update element from a YAML file")
-@click.option(
-    "-r",
-    "--repository",
-    default=f"{c.ELEMENT_REPO_URL}/",
-    show_default=True,
-    help="Repository endpoint",
-)
-@click.option(
-    "-v",
-    "--version",
-    type=str,
-    required=False,
-    help="version of the element",
-)
-@click.argument("path_or_name")
-@click.pass_context
-def u(
-    ctx: click.Context, repository: str, version: str | None, path_or_name: str | None
-) -> None:  # pragma: no cover
-    ctx.invoke(
-        update_manifest_cmd,
-        repository=repository,
-        version=version,
-        path_or_name=path_or_name,
-    )
-    return None
-
-
-@elements_group.command("uninstall", help="Uninstall manifest by UUID, path or name")
+@click.command("uninstall", help="Uninstall manifest by UUID, path or name")
 @click.argument("path_uuid_name", type=str)
 @click.pass_context
-def uninstall_manifest_cmd(ctx: click.Context, path_uuid_name: str) -> None:
+def uninstall_cmd(ctx: click.Context, path_uuid_name: str) -> None:
     """Uninstall manifest by UUID, path or name"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     log = ClickLogger()
@@ -493,18 +441,7 @@ def uninstall_manifest_cmd(ctx: click.Context, path_uuid_name: str) -> None:
     log.warn(f"Element {path_uuid_name} not found")
 
 
-@elements_group.command("un", help="Uninstall manifest by UUID, path or name")
-@click.argument("path_uuid_name", type=str)
-@click.pass_context
-def un(ctx: click.Context, path_or_name: str | None) -> None:
-    ctx.invoke(
-        uninstall_manifest_cmd,
-        path_or_name=path_or_name,
-    )
-    return None
-
-
-@elements_group.command("available", help="Print available elements in repository")
+@ee_group.command("available", help="Print available elements in repository")
 def available_elements() -> None:
     """Update manifest from a YAML file"""
     elements = repo_lib.get_all_elements(c.ELEMENT_REPO_URL)
@@ -512,7 +449,7 @@ def available_elements() -> None:
         click.echo(e)
 
 
-@elements_group.command("versions", help="Print available elements in repository")
+@ee_group.command("versions", help="Print available elements in repository")
 @click.argument("name")
 def versions(name) -> None:
     """Update manifest from a YAML file"""
@@ -540,7 +477,7 @@ def edit_data(data: str, editor: str = "nano") -> tp.Tuple[str, dict]:
     return new_data, json_data
 
 
-@elements_group.command(help="Edit manifest", context_settings={"show_default": True})
+@ee_group.command(help="Edit manifest", context_settings={"show_default": True})
 @click.argument("uuid_name")
 @click.option(
     "-e",
@@ -583,7 +520,7 @@ def edit(ctx: click.Context, uuid_name: str, editor: str, repository: str) -> No
     )
 
 
-@elements_group.command("clear", help="Uninstall all elements, except base")
+@ee_group.command("clear", help="Uninstall all elements, except base")
 @click.option(
     "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
 )
@@ -613,3 +550,10 @@ def _print_entities(entities: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+ee_group.add_command(list_cmd, aliases=["l"])
+ee_group.add_command(show_cmd, aliases=["get", "g"])
+ee_group.add_command(uninstall_cmd, aliases=["d", "delete"])
+ee_group.add_command(install_cmd, aliases=["i", "add"])
+ee_group.add_command(update_cmd, aliases=["u"])

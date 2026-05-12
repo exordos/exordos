@@ -7,7 +7,7 @@ Add a new service to the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e services add [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos em services add [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -56,7 +56,7 @@ Add a new service to the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e services add [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos em services add [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  Add a new service to the Exordos installation                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

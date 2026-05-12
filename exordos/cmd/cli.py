@@ -30,16 +30,17 @@ from exordos.cmd.iam.auth import commands as auth_commands
 from exordos.cmd.iam import iam_group
 from exordos.cmd.secret import secret_group
 from exordos.cmd.vs import vs_group
+from exordos.cmd.vs.vars import commands as vars_commands
 from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.nodes import commands as nodes_commands
+from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
 from exordos.cmd.realms.commands import realms_group
 from exordos.cmd.version import commands as version_commands
 from exordos.cmd.stand import commands as stand_commands
 from exordos.cmd.stand import utils_commands
 
-from exordos.cmd.em import elements_group
+from exordos.cmd.em import em_group
 from exordos.cmd.em.builder import commands as builder_commands
-from exordos.cmd.em.manifests import commands as manifests_commands
 from exordos.cmd.em.elements import commands as elements_commands
 
 from exordos.cmd.initialization import commands as initialization_commands
@@ -64,6 +65,8 @@ COMMANDS_WITHOUT_CONFIG = {
     utils_commands.autocomplete.name,
     utils_commands.autocomplete_help.name,
     utils_commands.hello.name,
+    hypervisors_commands.init_cmd.name,
+    settings_commands.settings_group.name,
 }
 
 
@@ -241,15 +244,16 @@ exordos.add_command(auth_commands.auth_group)  # noqa
 
 exordos.add_command(iam_group)  # noqa
 exordos.add_command(secret_group, aliases=["s"])  # noqa
-exordos.add_command(compute_group, aliases=["c"])  # noqa
-exordos.add_command(nodes_commands.nodes_group, aliases=["n"])  # noqa
-
-exordos.add_command(vs_group)  # noqa
 exordos.add_command(realms_group)  # noqa
 
-exordos.add_command(elements_group)  # noqa
-exordos.add_command(manifests_commands.manifests_group, aliases=["m"])  # noqa
-exordos.add_command(elements_commands.elements_group)  # noqa
+exordos.add_command(vs_group)  # noqa
+exordos.add_command(vars_commands.vv_group)  # noqa
+
+exordos.add_command(compute_group, aliases=["c"])  # noqa
+exordos.add_command(nodes_commands.cn_group)  # noqa
+
+exordos.add_command(em_group, aliases=["e"])  # noqa
+exordos.add_command(elements_commands.ee_group)  # noqa
 exordos.add_command(builder_commands.build_cmd)  # noqa
 
 exordos.add_command(configs_commands.configs_group)  # noqa

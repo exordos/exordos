@@ -59,7 +59,7 @@ Dynamic options (derived from scenario actions):
   --manifest-description: Manifest description. **Manifest** is a YAML file that
     specifies the project's dependencies, infrastructure configuration, and other
     settings. Follow the [developer
-    guide](https://exordos.github.io/exordos_core/guides/developer/elements/) for more
+    guide](https://exordos.github.io/exordos_core/app-developer-guide/) for more
     details.
   --pgsql-database-name: PostgreSQL database name
   --pgsql-usage-mode: Use the communal PG cluster or create your own

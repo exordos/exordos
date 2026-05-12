@@ -26,5 +26,5 @@ def compute_group():
 
 
 compute_group.add_command(hypervisors_commands.hypervisors_group, aliases=["h"])  # noqa
-compute_group.add_command(nodes_commands.nodes_group, aliases=["n"])  # noqa
+compute_group.add_command(nodes_commands.cn_group, aliases=["n", "nodes"])  # noqa
 compute_group.add_command(sets_commands.sets_group, aliases=["s"])  # noqa

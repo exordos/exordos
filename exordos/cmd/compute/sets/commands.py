@@ -20,7 +20,7 @@ from exordos.common.table import get_table, print_table, show_data
 
 from exordos.clients import base_client
 from exordos import utils
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos import constants as c
 
 ENTITY = "set"
@@ -30,12 +30,17 @@ ENTITY_COLLECTION = c.SET_COLLECTION
 LIST_FIELDS = ["UUID", "Project", "Name", "Cores", "RAM", "NodeType", "Status"]
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def sets_group():
     pass
 
 
-@sets_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -54,7 +59,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@sets_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -70,7 +75,7 @@ def show_cmd(
     show_data(data)
 
 
-@sets_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -100,3 +105,8 @@ def _print_entities(sets: list) -> None:
         )
 
     print_table(table)
+
+
+sets_group.add_command(list_cmd, aliases=["l"])
+sets_group.add_command(show_cmd, aliases=["get", "g"])
+sets_group.add_command(delete_cmd, aliases=["d"])

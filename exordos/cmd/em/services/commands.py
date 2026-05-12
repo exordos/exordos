@@ -20,7 +20,7 @@ import uuid as sys_uuid
 
 import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.clients import base_client
 
 from exordos import utils
@@ -30,12 +30,17 @@ ENTITY = "service"
 ENTITY_COLLECTION = c.SERVICE_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    "services",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def services_group():
     pass
 
 
-@services_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -54,7 +59,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@services_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -70,7 +75,7 @@ def show_cmd(
     show_data(data)
 
 
-@services_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -85,7 +90,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@services_group.command("add", help="Add a new service to the Exordos installation")
+@click.command("add", help="Add a new service to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -115,7 +120,7 @@ def delete_cmd(
     default="",
     help="Description of the service",
 )
-def add_service_cmd(
+def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
@@ -135,7 +140,7 @@ def add_service_cmd(
     show_data(entity)
 
 
-@services_group.command("update", help="Update service")
+@click.command("update", help="Update service")
 @click.pass_context
 @click.argument(
     "uuid",
@@ -163,7 +168,7 @@ def add_service_cmd(
     default=None,
     help="Description of the service",
 )
-def update_service_cmd(
+def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
     project_id: sys_uuid.UUID | None,
@@ -198,3 +203,10 @@ def _print_entities(services: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+services_group.add_command(list_cmd, aliases=["l"])
+services_group.add_command(show_cmd, aliases=["get", "g"])
+services_group.add_command(delete_cmd, aliases=["d"])
+services_group.add_command(add_cmd, aliases=["a"])
+services_group.add_command(update_cmd, aliases=["u"])

@@ -19,7 +19,7 @@ import typing as tp
 
 import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.clients import base_client
 
 from exordos import constants as c
@@ -29,12 +29,17 @@ ENTITY = "resource"
 ENTITY_COLLECTION = c.RESOURCE_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    "resources",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def resources_group():
     pass
 
 
-@resources_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-e",
     "--element",
@@ -42,7 +47,7 @@ def resources_group():
     help="Name or uuid of the element",
 )
 @click.pass_context
-def list_resource_cmd(ctx: click.Context, element: str) -> None:
+def list_cmd(ctx: click.Context, element: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if element is None:
         resources = base_client.list_entities(client, c.RESOURCE_COLLECTION)
@@ -66,7 +71,7 @@ def list_resource_cmd(ctx: click.Context, element: str) -> None:
     _print_resources(resources)
 
 
-@resources_group.command("show", help="Show resource")
+@click.command("show", help="Show resource")
 @click.option(
     "-e",
     "--element",
@@ -79,7 +84,7 @@ def list_resource_cmd(ctx: click.Context, element: str) -> None:
     required=True,
 )
 @click.pass_context
-def show_resource_cmd(
+def show_cmd(
     ctx: click.Context,
     element: str | None,
     resource_name_uuid: str | None,
@@ -148,3 +153,7 @@ def _print_resources(resources: tp.List[dict]) -> None:
             )
 
         print_table(table)
+
+
+resources_group.add_command(list_cmd, aliases=["l"])
+resources_group.add_command(show_cmd, aliases=["get", "g"])

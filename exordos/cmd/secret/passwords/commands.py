@@ -22,7 +22,7 @@ import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
 
 from exordos.clients import base_client
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos import constants as c
 from exordos import utils
 
@@ -30,12 +30,17 @@ ENTITY = "password"
 ENTITY_COLLECTION = c.PASSWORD_COLLECTION
 
 
-@click.group("passwords", help="Manage passwords in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def passwords_group():
     pass
 
 
-@passwords_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -54,7 +59,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@passwords_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -70,7 +75,7 @@ def show_cmd(
     show_data(data)
 
 
-@passwords_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -85,7 +90,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@passwords_group.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
+@click.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -137,7 +142,7 @@ def add_cmd(
     show_data(entity)
 
 
-@passwords_group.command("update", help=f"Update {ENTITY}")
+@click.command("update", help=f"Update {ENTITY}")
 @click.pass_context
 @click.argument(
     "uuid",
@@ -165,7 +170,7 @@ def add_cmd(
     default=None,
     help=f"Description of the {ENTITY}",
 )
-def update_password_cmd(
+def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
     project_id: sys_uuid.UUID | None,
@@ -203,3 +208,10 @@ def _print_entities(passwords: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+passwords_group.add_command(list_cmd, aliases=["l"])
+passwords_group.add_command(show_cmd, aliases=["get", "g"])
+passwords_group.add_command(delete_cmd, aliases=["d"])
+passwords_group.add_command(add_cmd, aliases=["a"])
+passwords_group.add_command(update_cmd, aliases=["u"])

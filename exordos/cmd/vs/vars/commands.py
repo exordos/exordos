@@ -23,7 +23,7 @@ from exordos.common.table import get_table, print_table, show_data
 from bazooka import exceptions as bazooka_exc
 
 from exordos.clients import base_client
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos import constants as c
 from exordos import utils
 
@@ -31,12 +31,17 @@ ENTITY = "variable"
 ENTITY_COLLECTION = c.VARIABLE_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
-def variables_group():
+@click.group(
+    "vv",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
+def vv_group():
     pass
 
 
-@variables_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -55,7 +60,7 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@variables_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -71,7 +76,7 @@ def show_cmd(
     show_data(data)
 
 
-@variables_group.command(
+@vv_group.command(
     "set",
     help="Create variable if missing and set its value by creating a new value record",
 )
@@ -190,7 +195,7 @@ def set_variable_cmd(
     show_data(data)
 
 
-@variables_group.command("delete", help=f"Delete {ENTITY}")
+@click.command("delete", help=f"Delete {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
@@ -205,7 +210,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-@variables_group.command("select", help="Select variable")
+@vv_group.command("select", help="Select variable")
 @click.argument(
     "uuid",
     type=str,
@@ -236,7 +241,7 @@ def select_variable_cmd(
     )
 
 
-@variables_group.command("add", help="Add a new variable to the Exordos installation")
+@click.command("add", help="Add a new variable to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -266,7 +271,7 @@ def select_variable_cmd(
     default="",
     help="Description of the variable",
 )
-def add_variable_cmd(
+def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
@@ -310,3 +315,9 @@ def _print_entities(variables: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+vv_group.add_command(list_cmd, aliases=["l"])
+vv_group.add_command(show_cmd, aliases=["get", "g"])
+vv_group.add_command(delete_cmd, aliases=["d"])
+vv_group.add_command(add_cmd, aliases=["a"])

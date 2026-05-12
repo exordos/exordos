@@ -7,7 +7,7 @@ Show resource
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e resources show [OPTIONS] RESOURCE_NAME_UUID                                                                                                                                                                                                                                              
+ Usage: exordos em resources show [OPTIONS] RESOURCE_NAME_UUID                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Show resource
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos e resources show [OPTIONS] RESOURCE_NAME_UUID                                                                                                                                                                                                                                              
+ Usage: exordos em resources show [OPTIONS] RESOURCE_NAME_UUID                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  Show resource                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

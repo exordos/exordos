@@ -22,7 +22,7 @@ import yaml
 
 import rich_click as click
 from exordos.common.table import get_table, print_table, show_data
-
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.clients import base_client
 
 from exordos.clients import repo as repo_lib
@@ -33,12 +33,17 @@ ENTITY = "manifest"
 ENTITY_COLLECTION = c.MANIFEST_COLLECTION
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
+@click.group(
+    f"{ENTITY}s",
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=f"Manage {ENTITY}s in the Exordos installation",
+)
 def manifests_group():
     pass
 
 
-@manifests_group.command("list", help=f"List {ENTITY}s")
+@click.command("list", help=f"List {ENTITY}s")
 @click.option(
     "-f",
     "--filters",
@@ -57,14 +62,14 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     _print_entities(entities)
 
 
-@manifests_group.command("show", help=f"Show {ENTITY}")
+@click.command("show", help=f"Show {ENTITY}")
 @click.argument(
     "uuid",
     type=str,
     required=True,
 )
 @click.pass_context
-def show_manifest_cmd(ctx: click.Context, uuid: str) -> None:
+def show_cmd(ctx: click.Context, uuid: str) -> None:
     """Show manifest general information"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
@@ -115,9 +120,7 @@ def show_manifest_cmd(ctx: click.Context, uuid: str) -> None:
 )
 @click.argument("path_or_name")
 @click.pass_context
-def validate_manifest_cmd(
-    ctx: click.Context, repository: str, path_or_name: str
-) -> None:
+def validate_cmd(ctx: click.Context, repository: str, path_or_name: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if os.path.isfile(path_or_name):
@@ -152,3 +155,7 @@ def _print_entities(entities: tp.List[dict]) -> None:
         )
 
     print_table(table)
+
+
+manifests_group.add_command(list_cmd, aliases=["l"])
+manifests_group.add_command(show_cmd, aliases=["get", "g"])

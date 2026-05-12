@@ -7,7 +7,7 @@ List manifests
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos manifests list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos em manifests list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -32,7 +32,7 @@ List manifests
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos manifests list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos em manifests list [OPTIONS]                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  List manifests                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
