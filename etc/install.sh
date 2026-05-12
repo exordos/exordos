@@ -146,9 +146,7 @@ download_and_extract "https://repository.genesis-core.tech/exordos/latest" "$BIN
 $SUDO chmod +x "$BINDIR"/exordos
 
 install_success() {
-    exordos --silent hello
-    exordos --silent autocomplete_help
-    status 'Install complete. Run "exordos" from the command line.'
+    exordos introduction
 }
 trap install_success EXIT
 

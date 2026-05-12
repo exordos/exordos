@@ -22,12 +22,12 @@ from requests.exceptions import RequestException
 import rich_click as click
 
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.builds import commands as builds_commands
 from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
 from exordos.cmd.compute.nodes import commands as nodes_commands
 from exordos.cmd.configs import commands as configs_commands
 from exordos.cmd.em import em_group
-from exordos.cmd.em.builder import commands as builder_commands
 from exordos.cmd.em.elements import commands as elements_commands
 from exordos.cmd.iam import iam_group
 from exordos.cmd.iam.auth import commands as auth_commands
@@ -47,7 +47,7 @@ import exordos.constants as c
 
 COMMANDS_WITHOUT_CONFIG = {
     auth_commands.auth_group.name,
-    builder_commands.build_cmd.name,
+    builds_commands.build_cmd.name,
     initialization_commands.init_cmd.name,
     version_commands.version_cmd.name,
     version_commands.latest_cmd.name,
@@ -58,6 +58,7 @@ COMMANDS_WITHOUT_CONFIG = {
     utils_commands.autocomplete.name,
     utils_commands.autocomplete_help.name,
     utils_commands.hello.name,
+    utils_commands.introduction.name,
     hypervisors_commands.init_cmd.name,
     settings_commands.settings_group.name,
 }
@@ -247,7 +248,7 @@ exordos.add_command(nodes_commands.cn_group)  # noqa
 
 exordos.add_command(em_group, aliases=["e"])  # noqa
 exordos.add_command(elements_commands.ee_group)  # noqa
-exordos.add_command(builder_commands.build_cmd)  # noqa
+exordos.add_command(builds_commands.build_cmd)  # noqa
 
 exordos.add_command(configs_commands.configs_group)  # noqa
 exordos.add_command(settings_commands.settings_group)  # noqa
@@ -269,6 +270,7 @@ exordos.add_command(utils_commands.hello)  # noqa
 exordos.add_command(utils_commands.autocomplete_help)  # noqa
 exordos.add_command(utils_commands.autocomplete)  # noqa
 exordos.add_command(utils_commands.sync)  # noqa
+exordos.add_command(utils_commands.introduction)  # noqa
 
 
 if __name__ == "__main__":
