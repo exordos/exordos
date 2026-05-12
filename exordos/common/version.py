@@ -15,11 +15,14 @@
 #    under the License.
 
 import os
+import re
 import time
 
 import git
 
 import exordos.constants as c
+
+VERSION_REGEXP = r"(?:\d+\.\d+\.\d+(?:-(?:rc|dev)\+\d{14}\.[a-f0-9]{8})?|latest)"
 
 
 def get_project_version(
@@ -84,3 +87,7 @@ def get_project_version(
         prefix = "dev"
 
     return f"{major}.{minor}.{patch}-{prefix}+{date_repr}.{hexsha[:8]}"
+
+
+def is_version(version: str) -> bool:
+    return re.match(VERSION_REGEXP, version.strip()) is not None
