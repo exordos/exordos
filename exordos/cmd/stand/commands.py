@@ -37,6 +37,7 @@ from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
+from exordos.common import version
 import exordos.constants as c
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
@@ -54,13 +55,6 @@ def _is_url(value: str) -> bool:
     """Return True if *value* looks like an HTTP(S) URL."""
     parsed = urllib.parse.urlparse(value)
     return parsed.scheme in ("http", "https")
-
-
-def _is_version(value: str) -> bool:
-    """Return True if *value* looks like a plain version string (e.g. '0.0.6')."""
-    import re
-
-    return bool(re.fullmatch(r"[0-9]+\.[0-9]+(\.[0-9]+)*", value.strip()))
 
 
 def _inventory_cache_dir(base_url: str) -> pathlib.Path:
@@ -704,7 +698,7 @@ def bootstrap_cmd(
     if not inventory:
         raise click.UsageError("No inventory specified")
 
-    if _is_version(inventory):
+    if version.is_version(inventory):
         inventory = f"{c.ELEMENT_REPO_URL}/core/{inventory.strip()}/"
 
     if _is_url(inventory):
