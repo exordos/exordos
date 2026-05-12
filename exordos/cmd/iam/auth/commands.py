@@ -18,9 +18,10 @@ from __future__ import annotations
 import os
 
 import rich_click as click
-from exordos.common.table import get_table, print_table
 
 from exordos.clients import iam as iam_client
+from exordos.common.table import get_table
+from exordos.common.table import print_table
 
 
 @click.group("auth", help="Authenticate and manage IAM token")

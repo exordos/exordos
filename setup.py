@@ -15,12 +15,11 @@
 #    under the License.
 from __future__ import annotations
 
-import git
 import os
-
 import time
-from setuptools import setup
 
+import git
+from setuptools import setup
 from setuptools_scm import ScmVersion
 
 RC_BRANCHES = ("master", "main")

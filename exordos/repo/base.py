@@ -18,9 +18,9 @@ from __future__ import annotations
 import abc
 import typing as tp
 
+from exordos import constants as c
 from exordos import exceptions
 from exordos.builder import base as builder_base
-from exordos import constants as c
 
 
 class RepoAlreadyExistsError(exceptions.DevToolsException):

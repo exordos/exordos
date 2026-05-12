@@ -17,8 +17,8 @@
 from __future__ import annotations
 
 from exordos import utils
-from exordos.repo import base as base_repo
 import exordos.constants as c
+from exordos.repo import base as base_repo
 
 
 def load_repo_driver(

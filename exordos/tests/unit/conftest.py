@@ -19,14 +19,12 @@ from unittest.mock import MagicMock
 import pytest
 import yaml
 
+from exordos.builder.base import AbstractDependency
+from exordos.builder.base import AbstractImageBuilder
+from exordos.builder.base import Element
 from exordos.builder.builder import SimpleBuilder
-from exordos.builder.base import (
-    AbstractDependency,
-    AbstractImageBuilder,
-    Element,
-)
-from exordos.logger import DummyLogger
 from exordos.builder.dependency import LocalPathDependency
+from exordos.logger import DummyLogger
 
 
 @pytest.fixture

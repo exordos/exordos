@@ -15,19 +15,20 @@
 #    under the License.
 from __future__ import annotations
 
+import multiprocessing as mp
 import os
 import re
-import time
 import shutil
+import time
 import typing as tp
-import multiprocessing as mp
 
 import rich_click as click
-from exordos.common.table import get_table, print_table
 
-from exordos import utils
-from exordos.infra.libvirt import libvirt
 from exordos import constants as c
+from exordos import utils
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.infra.libvirt import libvirt
 
 
 class EncryptionCreds(tp.NamedTuple):

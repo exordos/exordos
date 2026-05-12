@@ -18,14 +18,15 @@ from __future__ import annotations
 import typing as tp
 import uuid as sys_uuid
 
-import rich_click as click
 from rich.prompt import Prompt
-from exordos.common.table import get_table, print_table, show_data
+import rich_click as click
 
-from exordos.clients import base_client
-from exordos import utils
 from exordos import constants as c
-
+from exordos import utils
+from exordos.clients import base_client
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.common.table import show_data
 
 ENTITY = "user"
 ENTITY_COLLECTION = c.USER_COLLECTION

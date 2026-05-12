@@ -14,8 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from rich.table import Table
 from rich import print as rprint
+from rich.table import Table
 
 SHOW_FIELDS = [
     "Field",

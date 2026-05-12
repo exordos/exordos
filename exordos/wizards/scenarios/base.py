@@ -18,9 +18,8 @@ from __future__ import annotations
 import dataclasses
 import typing as tp
 
-from exordos.wizards import exceptions
 from exordos.wizards import constants as c
-
+from exordos.wizards import exceptions
 
 SimpleType = tp.Union[int, str, bool, float]
 ActionValueType = tp.Union[SimpleType, "Scenario"]

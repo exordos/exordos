@@ -22,8 +22,8 @@ import typing as tp
 
 import requests
 
-from exordos import exceptions
 from exordos import constants
+from exordos import exceptions
 
 
 class IAMClientError(exceptions.DevToolsException):

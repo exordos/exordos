@@ -15,12 +15,12 @@
 #    under the License.
 from __future__ import annotations
 
-import re
-import ipaddress
-import typing as tp
 import dataclasses
-import uuid
+import ipaddress
 import random
+import re
+import typing as tp
+import uuid
 
 
 @dataclasses.dataclass

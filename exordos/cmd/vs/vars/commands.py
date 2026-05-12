@@ -18,14 +18,16 @@ from __future__ import annotations
 import typing as tp
 import uuid as sys_uuid
 
-import rich_click as click
-from exordos.common.table import get_table, print_table, show_data
 from bazooka import exceptions as bazooka_exc
+import rich_click as click
 
-from exordos.clients import base_client
-from exordos.cmd.aliases import ClickAliasedGroup
 from exordos import constants as c
 from exordos import utils
+from exordos.clients import base_client
+from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.common.table import show_data
 
 ENTITY = "variable"
 ENTITY_COLLECTION = c.VARIABLE_COLLECTION

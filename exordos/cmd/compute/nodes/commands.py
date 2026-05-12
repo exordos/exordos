@@ -20,13 +20,15 @@ import uuid as sys_uuid
 
 from bazooka import exceptions as bazooka_exc
 import rich_click as click
-from exordos.common.table import get_table, print_table, show_data
 
-from exordos.clients import base_client
+from exordos import constants as c
 from exordos import logger
 from exordos import utils
-from exordos import constants as c
+from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.common.table import show_data
 
 ENTITY = "node"
 ENTITY_COLLECTION = c.NODE_COLLECTION

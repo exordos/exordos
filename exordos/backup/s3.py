@@ -21,10 +21,10 @@ import typing as tp
 
 import boto3
 
-from exordos.backup import base
-from exordos.backup import qcow
 from exordos import logger as logger_base
 from exordos import utils
+from exordos.backup import base
+from exordos.backup import qcow
 
 
 class S3QcowBackuper(qcow.AbstractQcowBackuper):

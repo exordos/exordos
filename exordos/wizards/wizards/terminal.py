@@ -18,12 +18,12 @@ from __future__ import annotations
 import readline
 import sys
 
-import rich.align
-import simple_term_menu
 from rich import console as rich_console
 from rich import markdown as rich_markdown
 from rich import panel as rich_panel
 from rich import text as rich_text
+import rich.align
+import simple_term_menu
 
 DEFAULT_PROMPT_COLOR = "grey50"
 DEFAULT_TEXT_COLOR = "grey80"

@@ -15,15 +15,16 @@
 #    under the License.
 from __future__ import annotations
 
-import os
 import json
-from packaging import version
+import os
 import shutil
 
-from exordos.repo import base
-from exordos.builder import base as builder_base
-from exordos import logger as logger_base
+from packaging import version
+
 from exordos import constants as c
+from exordos import logger as logger_base
+from exordos.builder import base as builder_base
+from exordos.repo import base
 
 
 class FSRepoDriver(base.AbstractRepoDriver):

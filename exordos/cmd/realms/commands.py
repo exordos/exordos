@@ -18,9 +18,9 @@ from __future__ import annotations
 import os
 
 import rich_click as click
-from exordos.common.table import get_table, print_table
 
-
+from exordos.common.table import get_table
+from exordos.common.table import print_table
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger

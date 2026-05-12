@@ -18,16 +18,18 @@ from __future__ import annotations
 import json
 import os
 import typing as tp
-import yaml
 
 import rich_click as click
-from exordos.common.table import get_table, print_table, show_data
-from exordos.cmd.aliases import ClickAliasedGroup
-from exordos.clients import base_client
+import yaml
 
-from exordos.clients import repo as repo_lib
-import exordos.constants as c
 from exordos import utils
+from exordos.clients import base_client
+from exordos.clients import repo as repo_lib
+from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.common.table import get_table
+from exordos.common.table import print_table
+from exordos.common.table import show_data
+import exordos.constants as c
 
 ENTITY = "manifest"
 ENTITY_COLLECTION = c.MANIFEST_COLLECTION

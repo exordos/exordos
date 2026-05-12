@@ -16,16 +16,17 @@
 
 from __future__ import annotations
 
-import os
 import json
-from packaging import version
+import os
 import pathlib
+
+from packaging import version
 import requests
 
-from exordos.repo import base
-from exordos.builder import base as builder_base
-from exordos import logger as logger_base
 from exordos import constants as c
+from exordos import logger as logger_base
+from exordos.builder import base as builder_base
+from exordos.repo import base
 
 
 class NginxRepoDriver(base.AbstractRepoDriver):

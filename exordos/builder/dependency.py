@@ -15,13 +15,13 @@
 #    under the License.
 from __future__ import annotations
 
+import fnmatch
 import os
 import shutil
 import typing as tp
 
-import git
 import bazooka
-import fnmatch
+import git
 
 from exordos.builder import base
 

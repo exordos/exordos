@@ -15,16 +15,18 @@
 #    under the License.
 from __future__ import annotations
 
-import pathlib
 import json
+import pathlib
 import typing as tp
+
 import rich_click as click
 
+from exordos import constants as c
 from exordos.builder import base as base_builder
-from exordos.common.table import get_table, print_table
+from exordos.common.table import get_table
+from exordos.common.table import print_table
 from exordos.repo import base as base_repo
 from exordos.repo import utils as repo_utils
-from exordos import constants as c
 
 if tp.TYPE_CHECKING:
     from exordos.common.cmd_context import ContextObject

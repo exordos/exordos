@@ -15,14 +15,14 @@
 #    under the License.
 
 import os
-import requests
 import subprocess
 import typing as tp
 
+import requests
 import rich_click as click
 
-import exordos.constants as c
 from exordos import utils
+import exordos.constants as c
 
 if tp.TYPE_CHECKING:
     from exordos.common.cmd_context import ContextObject
@@ -51,8 +51,9 @@ if tp.TYPE_CHECKING:
 )
 @click.pass_context
 def openapi_spec(ctx: click.Context, url: str, endpoint: str, path: str) -> None:
-    from exordos.clients.base_client import get_user_api_client
     import ruamel.yaml
+
+    from exordos.clients.base_client import get_user_api_client
 
     if url:
         response = requests.get(url, timeout=10).json()

@@ -15,20 +15,20 @@
 #    under the License.
 from __future__ import annotations
 
+import ipaddress
+import itertools
 import json
 import os
 import re
-import tempfile
-import itertools
 import subprocess
-import ipaddress
+import tempfile
 import typing as tp
 import uuid as sys_uuid
 from xml.etree import ElementTree as ET
 
-from exordos.stand import models
 from exordos import constants as c
 from exordos.infra.libvirt import constants as vc
+from exordos.stand import models
 
 CONFIG_DRIVES_DIR = "/var/lib/exordos/config-drives"
 
