@@ -90,10 +90,10 @@ from exordos.logger import ClickLogger
     help="Rebuild if the output already exists",
 )
 @click.option(
-    "--inventory",
+    "--only-images",
     show_default=True,
     is_flag=True,
-    help="Build using the inventory format",
+    help="Build only images, skip manifests and other artifacts",
 )
 @click.option(
     "--manifest-var",
@@ -104,7 +104,7 @@ from exordos.logger import ClickLogger
         "key1=value1 --manifest-var key2=value2"
     ),
 )
-@click.argument("project_dir", type=click.Path())
+@click.argument("project_dir", type=click.Path(), default=".")
 @click.pass_context
 def build_cmd(
     ctx: click.Context,
@@ -115,14 +115,12 @@ def build_cmd(
     developer_key_path: str | None,
     version_suffix: c.VersionSuffixType,
     force: bool,
-    inventory: bool,
+    only_images: bool,
     manifest_var: tuple[str, ...],
     project_dir: str,
 ) -> None:
-    if not project_dir:
-        raise click.UsageError("No project directories specified")
-
     manifest_vars = utils.convert_input_multiply(manifest_var)
+    inventory = not only_images
 
     # Leave 'none' for backward compatibility
     if version_suffix == "none" and inventory:

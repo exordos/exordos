@@ -14,7 +14,7 @@ mdlint:
 	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" --fix
 
 build_empty:
-	./dist/exordos build -i $(SSH_KEY) -f ../exordos_empty -o ../exordos_empty/output --inventory --manifest-var repository=$(REPOSITORY)
+	./dist/exordos build -i $(SSH_KEY) -f ../exordos_empty -o ../exordos_empty/output --manifest-var repository=$(REPOSITORY)
 
 push_empty:
 	./dist/exordos repo push -t my_push_name -f --latest ../exordos_empty -e ../exordos_empty/output

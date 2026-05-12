@@ -20,6 +20,8 @@ import typing as tp
 
 import requests
 import rich_click as click
+from rich.console import Console
+from rich.markdown import Markdown
 
 from exordos import utils
 import exordos.constants as c
@@ -204,3 +206,57 @@ def sync(obj: "ContextObject", target_dir: str | None, project_dir: str | None) 
     ]
     subprocess.run(cmd, check=True)
     return None
+
+
+INTRODUCTION_TEXT = """
+# Welcome to Exordos CLI!
+
+Exordos CLI is now installed and ready to use. Next steps:
+
+## Development
+
+Initialize a new element in the current directory:
+
+```bash
+exordos init
+```
+
+Learn more: [https://exordos.github.io/exordos_core/app-developer-guide/init/](https://exordos.github.io/exordos_core/app-developer-guide/init/)
+
+Build your project as an Exordos element:
+
+```bash
+exordos build
+```
+
+Learn more: [https://exordos.github.io/exordos_core/app-developer-guide/build/](https://exordos.github.io/exordos_core/app-developer-guide/build/)
+
+## Local Deployment
+
+To set up a local Exordos platform instance:
+
+Install [dependencies](https://exordos.github.io/exordos_core/usage/local_deployment/#dependencies) and bootstrap the Exordos platform locally:
+
+```bash
+exordos bootstrap -i latest -m core --ssh-public-key /path/to/your/public/key
+```
+
+Learn more: [https://exordos.github.io/exordos_core/usage/local_deployment/](https://exordos.github.io/exordos_core/usage/local_deployment/)
+
+## References
+
+- **Documentation**: [https://exordos.github.io/exordos_core/](https://exordos.github.io/exordos_core/)
+- **Quick Start Guide**: [https://exordos.github.io/exordos_core/app-developer-guide/](https://exordos.github.io/exordos_core/app-developer-guide/)
+- **Local Deployment**: [https://exordos.github.io/exordos_core/usage/local_deployment/](https://exordos.github.io/exordos_core/usage/local_deployment/)
+
+Use `exordos autocomplete` to enable autocomplete for your shell.
+
+Use `exordos --help` to see all available commands.
+"""
+
+
+@click.command("introduction", help="Display introduction guide")
+def introduction() -> None:
+    console = Console()
+    md = Markdown(INTRODUCTION_TEXT)
+    console.print(md)
