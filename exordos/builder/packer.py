@@ -105,12 +105,12 @@ def _get_profile_files(base: str) -> list[tp.Any]:
     """Get base files for the image."""
     profile_files = []
     try:
-        # Для Python 3.9+
+        # Python 3.9+
         files = resources.files(f"{c.PKG_NAME}.packer.{base}")
         for bfile in files.iterdir():
             profile_files.append(bfile)
     except AttributeError:
-        # Для Python 3.8 и ниже
+        # Python 3.8-
         with resources.path(f"{c.PKG_NAME}.packer.{base}", "") as path:
             for item in path.iterdir():
                 if item.is_file():

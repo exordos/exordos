@@ -21,3 +21,6 @@ push_empty:
 
 bootstrap:
 	./dist/exordos bootstrap -i ../exordos_core/output/inventory.json -f -m core --admin-password admin --cidr 10.20.0.0/22 --settings
+
+find_ascii:
+	grep -rnP "#.*[^\x00-\x7f]" ./exordos
