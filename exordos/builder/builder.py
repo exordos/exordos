@@ -19,6 +19,7 @@ import gzip
 import json
 import os
 import shutil
+import subprocess
 import tempfile
 import typing as tp
 
@@ -81,6 +82,50 @@ class SimpleBuilder:
 
         return dst_path
 
+    def _convert_image(
+        self,
+        raw_src: str,
+        img_name: str,
+        fmt: str,
+        images_output_dir: str,
+    ) -> str:
+        """Convert a RAW image to the requested format and return the final path."""
+        if fmt == "raw":
+            tgt = os.path.join(images_output_dir, f"{img_name}.raw")
+            shutil.move(raw_src, tgt)
+            return os.path.abspath(tgt)
+        elif fmt == "qcow2":
+            self._logger.info(f"Converting {img_name} to qcow2")
+            tgt = os.path.join(images_output_dir, f"{img_name}.qcow2")
+            subprocess.run(
+                [
+                    "qemu-img",
+                    "convert",
+                    "-f",
+                    "raw",
+                    "-O",
+                    "qcow2",
+                    "-c",
+                    "-o",
+                    "preallocation=off,compression_type=zstd",
+                    raw_src,
+                    tgt,
+                ],
+                check=True,
+            )
+            return os.path.abspath(tgt)
+        elif fmt == "gz":
+            self._logger.info(f"Compressing {img_name} to {img_name}.raw.gz")
+            tgt = os.path.join(images_output_dir, f"{img_name}.raw.gz")
+            with (
+                open(raw_src, "rb") as f_in,
+                gzip.open(tgt, "wb", compresslevel=5) as f_out,
+            ):
+                shutil.copyfileobj(f_in, f_out)
+            return os.path.abspath(tgt)
+        else:
+            raise ValueError(f"Unsupported image format: {fmt}")
+
     def _build_image(
         self,
         img: base.Image,
@@ -88,7 +133,7 @@ class SimpleBuilder:
         output_dir: str,
         developer_keys: str,
         inventory_mode: bool = False,
-    ) -> str:
+    ) -> tp.List[str]:
 
         # Determine images output directory
         if inventory_mode:
@@ -121,26 +166,23 @@ class SimpleBuilder:
         if not os.path.exists(images_output_dir):
             os.makedirs(images_output_dir)
 
-        # Determine source path to move. If gzip was requested,
-        # compress RAW -> GZ first.
-        if img.format == "gz":
-            self._logger.info(f"Compressing {img.name} to {img.name}.raw.gz")
-            # Source RAW image produced by Packer
-            raw_src = os.path.join(output_dir, f"{img.name}.raw")
-            gz_tgt = os.path.join(images_output_dir, f"{img.name}.raw.gz")
-            # Compress using standard library (gzip uses zlib) with level 5
-            with (
-                open(raw_src, "rb") as f_in,
-                gzip.open(gz_tgt, "wb", compresslevel=5) as f_out,
-            ):
-                shutil.copyfileobj(f_in, f_out)
-            return os.path.abspath(gz_tgt)
+        # A builder always produces a RAW image. Convert to each requested format.
+        raw_src = os.path.join(output_dir, f"{img.name}.raw")
+
+        # Move "raw" in the end as it will be moved
+        if "raw" in img.formats:
+            img_formats = [f for f in img.formats if f != "raw"] + ["raw"]
         else:
-            src_path = os.path.join(output_dir, f"{img.name}.{img.format}")
-            shutil.move(src_path, images_output_dir)
-            return os.path.abspath(
-                os.path.join(images_output_dir, f"{img.name}.{img.format}")
-            )
+            img_formats = img.formats
+
+        result_paths = []
+        for fmt in img_formats:
+            path = self._convert_image(raw_src, img.name, fmt, images_output_dir)
+            result_paths.append(path)
+
+        # TODO(akremenetsky): Should we clear raw format?
+
+        return result_paths
 
     def fetch_dependency(self, deps_dir: str) -> None:
         """Fetch common dependencies for elements."""
@@ -185,14 +227,14 @@ class SimpleBuilder:
             tmp_img_output = f"_tmp_{img.name}-output"
 
             try:
-                _path = self._build_image(
+                _paths = self._build_image(
                     img,
                     build_dir,
                     tmp_img_output,
                     developer_keys,
                     inventory_mode,
                 )
-                image_paths.append(_path)
+                image_paths.extend(_paths)
             finally:
                 if os.path.exists(tmp_img_output):
                     shutil.rmtree(tmp_img_output)

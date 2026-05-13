@@ -197,3 +197,103 @@ class TestBuilder:
 
         assert (out_dir / "manifests" / "app1.yaml").exists()
         assert (out_dir / "manifests" / "app2.yaml").exists()
+
+    def test_image_from_config_single_format(self) -> None:
+        """Image.from_config parses a single format string into a one-element list."""
+        img = base.Image.from_config(
+            {"script": "/tmp/install.sh", "format": "qcow2", "name": "my-img"},
+            work_dir="/tmp",
+        )
+        assert img.formats == ["qcow2"]
+        assert img.format == "qcow2"
+
+    def test_image_from_config_multi_format(self) -> None:
+        """Image.from_config parses a comma-separated format string correctly."""
+        img = base.Image.from_config(
+            {"script": "/tmp/install.sh", "format": "raw, qcow2", "name": "my-img"},
+            work_dir="/tmp",
+        )
+        assert img.formats == ["raw", "qcow2"]
+        assert img.format == "raw"
+
+    def test_image_from_config_gz_qcow2(self) -> None:
+        """Image.from_config parses gz,qcow2 multi-format correctly."""
+        img = base.Image.from_config(
+            {"script": "/tmp/install.sh", "format": "gz,qcow2", "name": "my-img"},
+            work_dir="/tmp",
+        )
+        assert img.formats == ["gz", "qcow2"]
+
+    def test_convert_image_raw(self, tmp_path) -> None:
+        """_convert_image copies a raw image to the output dir."""
+        images_dir = tmp_path / "images"
+        images_dir.mkdir()
+        raw_src = tmp_path / "my-img.raw"
+        raw_src.write_bytes(b"rawdata")
+
+        builder = SimpleBuilder(
+            work_dir=str(tmp_path),
+            deps=[],
+            elements=[],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=str(tmp_path / "out"),
+        )
+        result = builder._convert_image(str(raw_src), "my-img", "raw", str(images_dir))
+        assert pathlib.Path(result).name == "my-img.raw"
+        assert pathlib.Path(result).exists()
+
+    def test_build_element_multi_format_inventory(self, tmp_path) -> None:
+        """build_element lists all requested format variants in inventory images."""
+        work_dir = tmp_path / "work"
+        out_dir = tmp_path / "out"
+        work_dir.mkdir()
+        out_dir.mkdir()
+
+        manifest_rel = "app.yaml"
+        (work_dir / manifest_rel).write_text("name: myapp\nversion: 0\n")
+
+        raw_file = tmp_path / "packer_out" / "myapp.raw"
+        raw_file.parent.mkdir(parents=True)
+        raw_file.write_bytes(b"fake-raw-image-data")
+
+        img = base.Image(
+            script=str(work_dir / "install.sh"),
+            formats=["raw", "gz"],
+            name="myapp",
+        )
+
+        mock_builder = MagicMock(spec=base.AbstractImageBuilder)
+
+        def fake_run(image_dir, image, deps, developer_keys, output_dir):
+            out = pathlib.Path(output_dir)
+            out.mkdir(parents=True, exist_ok=True)
+            (out / f"{image.name}.raw").write_bytes(b"fake-raw-image-data")
+
+        mock_builder.run.side_effect = fake_run
+
+        builder = SimpleBuilder(
+            work_dir=str(work_dir),
+            deps=[],
+            elements=[base.Element(manifest=manifest_rel, images=[img])],
+            image_builder=mock_builder,
+            logger=DummyLogger(),
+            elements_output_dir=str(out_dir),
+        )
+
+        builder.build(
+            build_dir=None,
+            developer_keys=None,
+            build_suffix="1.0.0",
+            inventory_mode=True,
+            manifest_vars=None,
+        )
+
+        inventory_json = out_dir / "inventory.json"
+        assert inventory_json.exists()
+        data = json.loads(inventory_json.read_text())
+        assert isinstance(data, list)
+        images = data[0]["images"]
+        image_names = [pathlib.Path(p).name for p in images]
+        assert any(n.endswith(".raw") for n in image_names)
+        assert any(n.endswith(".raw.gz") for n in image_names)
