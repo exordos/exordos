@@ -28,8 +28,9 @@ jobs:
       run: |
         set -eux
 
-        curl --fail --show-error --location --progress-bar https://repository.genesis-core.tech/exordos/latest/exordos-linux --output /usr/local/bin/exordos
-        chmod +x /usr/local/bin/exordos
+        sudo curl --fail --show-error --location --progress-bar https://repository.genesis-core.tech/exordos/latest/exordos-linux --output /usr/local/bin/exordos
+        sudo chmod +x /usr/local/bin/exordos
         
+        which exordos
         exordos version
  
