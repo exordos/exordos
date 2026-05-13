@@ -478,6 +478,7 @@ def destroy_domain(name: str) -> None:
         subprocess.run(
             ["sudo", "virsh", "undefine", "--nvram", "--remove-all-storage", name],
             stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             check=True,
         )
     except subprocess.CalledProcessError:
