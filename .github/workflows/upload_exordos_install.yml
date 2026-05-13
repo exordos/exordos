@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        runner: [ github-packer-runner-2, github-packer-runner-3, genesis-lab0 ]
+        runner: [ github-packer-runner-1, github-packer-runner-2, github-packer-runner-3, genesis-lab0 ]
     steps:
     - name: update exordos cli
       run: |
@@ -32,7 +32,6 @@ jobs:
         curl --fail --show-error --location --progress-bar https://repository.genesis-core.tech/exordos/latest/exordos-linux --output "$HOME/bin/exordos"
         chmod +x "$HOME/bin/exordos"
         
-        source ~/.profile
         which exordos
         exordos version
  

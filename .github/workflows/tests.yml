@@ -7,6 +7,7 @@ on:
       - 'mkdocs.yml'
       - '.markdownlint.yaml'
   pull_request:
+    types: [opened]
     paths-ignore:
       - 'docs/**'
       - 'mkdocs.yml'
@@ -70,3 +71,12 @@ jobs:
       - name: Coverage
         run: |
           tox -e begin,${{ matrix.python-version }},${{ matrix.python-version }}-functional,end
+  Ascii:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: check ascii
+        run: |
+          ! grep -rnPq "#.*[^\\x00-\\x7f]" ./exordos
