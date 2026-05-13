@@ -34,10 +34,50 @@ class Image:
 
     script: str
     profile: c.ImageProfileType = "ubuntu_24"
-    format: c.ImageFormatType = DEF_IMG_FORMAT
+    formats: list[str] = dataclasses.field(default_factory=lambda: ["raw"])
     name: str | None = None
     envs: list[str] | None = None
     override: dict[str, tp.Any] | None = None
+
+    @property
+    def format(self) -> str:
+        """Return the primary (first) image format."""
+        return self.formats[0]
+
+    @classmethod
+    def _resolve_formats(cls, raw_format_str: str) -> list[str]:
+        """Resolve image formats from a comma-separated string."""
+        raw_format_str = raw_format_str.strip()
+        if raw_format_str.startswith(cls.ENV_IMG_PREFIX):
+            # Extract key and default image format if they present
+            if "=" in raw_format_str:
+                env_key, img_formats = raw_format_str.split("=", 1)
+            else:
+                env_key, img_formats = raw_format_str, None
+
+            try:
+                img_formats = os.environ[env_key]
+            except KeyError:
+                if not img_formats:
+                    raise ValueError(
+                        f"Image format {raw_format_str} is not found in the environment "
+                        f"and no default value is provided"
+                    )
+
+            # Save extracted formats back to the string
+            raw_format_str = img_formats
+
+        formats = list(dict.fromkeys(f.strip() for f in raw_format_str.split(",")))
+
+        # Validate formats
+        for f in formats:
+            if f not in c.ImageFormatType.__args__:
+                raise ValueError(
+                    f"Invalid image format: {f}, "
+                    f"expected one of {c.ImageFormatType.__args__}"
+                )
+
+        return formats
 
     @classmethod
     def from_config(cls, image_config: dict[str, tp.Any], work_dir: str) -> "Image":
@@ -47,33 +87,12 @@ class Image:
         if not os.path.isabs(script):
             script = os.path.join(work_dir, script)
 
-        # Determine the image format
-        img_format = image_config.pop("format")
-        if img_format.startswith(cls.ENV_IMG_PREFIX):
-            format_def = None
+        # Determine the image format(s). The value may be a comma-separated
+        # string of formats, e.g. "raw, qcow2" or "gz, qcow2".
+        raw_format_value = str(image_config.pop("format", cls.DEF_IMG_FORMAT))
+        formats = cls._resolve_formats(raw_format_value)
 
-            # Handle case if there is a default value
-            if "=" in img_format:
-                img_format, format_def = [i.strip() for i in img_format.split("=", 1)]
-
-            try:
-                img_format = os.environ[img_format]
-            except KeyError:
-                if not format_def:
-                    raise ValueError(
-                        f"Image format {img_format} is not found in the environment "
-                        f"and no default value is provided"
-                    )
-                img_format = format_def
-
-        # Validate the image format
-        if img_format not in c.ImageFormatType.__args__:
-            raise ValueError(
-                f"Invalid image format: {img_format}, "
-                f"expected one of {c.ImageFormatType.__args__}"
-            )
-
-        return cls(script=script, format=img_format, **image_config)
+        return cls(script=script, formats=formats, **image_config)
 
 
 @dataclasses.dataclass

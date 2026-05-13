@@ -103,6 +103,7 @@ def _download_inventory_files(
     base_url: str,
     raw: dict,
     cache_dir: pathlib.Path,
+    images_suffix_filter: tp.Optional[str] = None,
 ) -> None:
     """Download all artefact files referenced in *raw* inventory to *cache_dir*.
 
@@ -112,6 +113,11 @@ def _download_inventory_files(
     Already-cached files are skipped.  On completion, *raw* is mutated in-place
     so that every category list contains absolute local paths, and the final
     ``inventory.json`` is written to *cache_dir*.
+
+    Args:
+        images_suffix_filter: When set, only image files whose name ends with
+            this suffix (e.g. ``'.qcow2'``) are downloaded and kept in the
+            cached inventory.  All other categories are unaffected.
     """
     inventories = raw if isinstance(raw, list) else [raw]
 
@@ -121,7 +127,14 @@ def _download_inventory_files(
     all_files: list[tuple[str, pathlib.Path, str]] = []
     for inv in inventories:
         for category in base_builder.ElementInventory.categories():
-            for rel_path in inv.get(category, []):
+            rel_paths = inv.get(category, [])
+            if images_suffix_filter and category == "images":
+                rel_paths = [
+                    p
+                    for p in rel_paths
+                    if pathlib.Path(p).name.endswith(images_suffix_filter)
+                ]
+            for rel_path in rel_paths:
                 file_name = pathlib.Path(rel_path).name
                 remote_url = f"{base_url}/{category}/{file_name}"
                 local_file = cache_dir / category / file_name
@@ -162,9 +175,16 @@ def _download_inventory_files(
 
     for inv in inventories:
         for category in base_builder.ElementInventory.categories():
+            rel_paths = inv.get(category, [])
+            if images_suffix_filter and category == "images":
+                rel_paths = [
+                    p
+                    for p in rel_paths
+                    if pathlib.Path(p).name.endswith(images_suffix_filter)
+                ]
             inv[category] = [
                 str(cache_dir / category / pathlib.Path(rel_path).name)
-                for rel_path in inv.get(category, [])
+                for rel_path in rel_paths
             ]
 
     inventory_local = cache_dir / "inventory.json"
@@ -194,7 +214,9 @@ def _resolve_inventory_from_url(url: str) -> pathlib.Path:
     cache_dir.mkdir(parents=True, exist_ok=True)
     with requests.Session() as session:
         raw = _download_inventory_json(session, base_url)
-        _download_inventory_files(session, base_url, raw, cache_dir)
+        _download_inventory_files(
+            session, base_url, raw, cache_dir, images_suffix_filter=".qcow2"
+        )
 
     return cache_dir
 
