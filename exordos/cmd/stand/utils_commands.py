@@ -19,9 +19,9 @@ import subprocess
 import typing as tp
 
 import requests
-import rich_click as click
 from rich.console import Console
 from rich.markdown import Markdown
+import rich_click as click
 
 from exordos import utils
 import exordos.constants as c

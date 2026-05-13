@@ -199,6 +199,65 @@ def _resolve_inventory_from_url(url: str) -> pathlib.Path:
     return cache_dir
 
 
+def _ecosystem_realm_url_from_core_url(core_base_url: str) -> str | None:
+    """Derive the ecosystem_realm repository URL from a core element URL.
+
+    Replaces the element-name path segment (e.g. ``core``) with
+    ``ecosystem_realm`` while preserving the version segment and scheme.
+
+    Returns ``None`` when the URL structure is not recognisable.
+    """
+    parsed = urllib.parse.urlparse(core_base_url)
+    parts = [p for p in parsed.path.split("/") if p]
+    if len(parts) < 2:
+        return None
+    version_segment = parts[-1]
+    base_parts = parts[:-2]
+    new_path = "/".join(base_parts + ["ecosystem_realm", version_segment])
+    return urllib.parse.urlunparse(parsed._replace(path=f"/{new_path}"))
+
+
+def _fetch_ecosystem_realm_into_inventory(
+    core_url: str,
+    cache_dir: pathlib.Path,
+) -> None:
+    """Download ecosystem_realm artefacts and merge them into *cache_dir*/inventory.json.
+
+    The ecosystem_realm URL is derived from *core_url* by substituting the
+    element-name segment with ``ecosystem_realm``.  Files are placed into the
+    same *cache_dir* so that :py:meth:`ElementInventory.load` can find them
+    via the merged ``inventory.json``.
+
+    If the ecosystem_realm entry already exists in the cached inventory or the
+    remote URL cannot be determined, the function returns without doing anything.
+    """
+    if core_url.endswith("/inventory.json"):
+        core_url = core_url[: -len("/inventory.json")]
+
+    eco_url = _ecosystem_realm_url_from_core_url(core_url)
+    if eco_url is None:
+        click.secho(
+            "Warning: could not derive ecosystem_realm URL from core URL, skipping",
+            fg="yellow",
+        )
+        return
+
+    inventory_local = cache_dir / "inventory.json"
+    existing_raw = json.loads(inventory_local.read_text())
+    existing_list = existing_raw if isinstance(existing_raw, list) else [existing_raw]
+
+    if any((inv.get("name") == "ecosystem_realm") for inv in existing_list):
+        return
+
+    with requests.Session() as session:
+        eco_raw = _download_inventory_json(session, eco_url)
+        _download_inventory_files(session, eco_url, eco_raw, cache_dir)
+
+    eco_entry = eco_raw if not isinstance(eco_raw, list) else eco_raw[0]
+    existing_list.append(eco_entry)
+    inventory_local.write_text(json.dumps(existing_list, indent=2))
+
+
 def _get_core_image_uri_from_manifest(manifest_path: str) -> str:
     """Get image URI from manifest file."""
     if not os.path.exists(manifest_path):
@@ -703,6 +762,7 @@ def bootstrap_cmd(
 
     if _is_url(inventory):
         inventory_path = _resolve_inventory_from_url(inventory)
+        _fetch_ecosystem_realm_into_inventory(inventory.rstrip("/"), inventory_path)
         inventory = str(inventory_path)
     elif not os.path.exists(inventory):
         raise click.UsageError(f"Inventory path not found: {inventory}")
