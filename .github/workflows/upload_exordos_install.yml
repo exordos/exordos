@@ -28,10 +28,8 @@ jobs:
       run: |
         set -eux
 
-        mkdir -p "$HOME/bin"
-        curl --fail --show-error --location --progress-bar https://repository.genesis-core.tech/exordos/latest/exordos-linux --output "$HOME/bin/exordos"
-        chmod +x "$HOME/bin/exordos"
+        curl --fail --show-error --location --progress-bar https://repository.genesis-core.tech/exordos/latest/exordos-linux --output /usr/local/bin/exordos
+        chmod +x /usr/local/bin/exordos
         
-        which exordos
         exordos version
  
