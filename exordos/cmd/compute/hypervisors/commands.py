@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 import typing as tp
+import uuid as sys_uuid
 
 import rich_click as click
 
@@ -108,6 +109,117 @@ def delete_cmd(
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
+
+
+@click.command("add", help="Add a new hypervisor")
+@click.pass_context
+@click.option(
+    "-u",
+    "--uuid",
+    type=click.UUID,
+    default=None,
+    help="UUID of the hypervisor",
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default="hypervisor",
+    help="Name of the hypervisor",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default="",
+    help="Description of the hypervisor",
+)
+@click.option(
+    "--avail_cores",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--avail_ram",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--all_cores",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--all_ram",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--cores_ratio",
+    type=float,
+    required=False,
+)
+@click.option(
+    "--ram_ratio",
+    type=float,
+    required=False,
+)
+@click.option(
+    "-m",
+    "--machine_type",
+    required=False,
+    type=click.Choice(["VM", "HW"], case_sensitive=False),
+)
+@click.option(
+    "-d",
+    "--driver_spec",
+    multiple=True,
+    help=(
+        "Additional filters to pass to the api. "
+        "The format is 'key=value'. For example: -d "
+        "a=b -d c=d --driver_spec e=f"
+    ),
+)
+def add_cmd(
+    ctx: click.Context,
+    uuid: sys_uuid.UUID | None,
+    name: str,
+    description: str,
+    avail_cores: int | None,
+    avail_ram: int | None,
+    all_cores: int | None,
+    all_ram: int | None,
+    cores_ratio: float | None,
+    ram_ratio: float | None,
+    machine_type: str | None,
+    driver_spec: tuple[str, ...],
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    if uuid is None:
+        uuid = sys_uuid.uuid4()
+    driver_spec = utils.convert_input_multiply(driver_spec)
+    data: dict = {
+        "uuid": str(uuid),
+        "name": name,
+        "description": description,
+        "driver_spec": driver_spec,
+    }
+    if avail_cores is not None:
+        data["avail_cores"] = avail_cores
+    if avail_ram is not None:
+        data["avail_ram"] = avail_ram
+    if all_cores is not None:
+        data["all_cores"] = all_cores
+    if all_ram is not None:
+        data["all_ram"] = all_ram
+    if cores_ratio is not None:
+        data["cores_ratio"] = cores_ratio
+    if ram_ratio is not None:
+        data["ram_ratio"] = ram_ratio
+    if machine_type is not None:
+        data["machine_type"] = machine_type
+    entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
+    show_data(entity)
 
 
 def _print_entities(hypervisors: tp.List[dict], output: str) -> None:
@@ -346,3 +458,4 @@ def init_cmd(romfile_version: str, pool_name: str, packer: bool) -> None:
 hypervisors_group.add_command(list_cmd, aliases=["l"])
 hypervisors_group.add_command(show_cmd, aliases=["get", "g"])
 hypervisors_group.add_command(delete_cmd, aliases=["d"])
+hypervisors_group.add_command(add_cmd, aliases=["a"])
