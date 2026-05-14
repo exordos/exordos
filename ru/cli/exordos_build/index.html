@@ -1186,6 +1186,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../exordos_introduction/" class="md-nav__link">
+        exordos_introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../exordos_latest/" class="md-nav__link">
         exordos_latest
       </a>
@@ -3175,7 +3189,7 @@
 <p>Additional variables can be passed using the --manifest-var options.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos build [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                                </span>
+<span class="go"> Usage: exordos build [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                              </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
@@ -3248,14 +3262,14 @@
 </ul>
 <p>Rebuild if the output already exists</p>
 <ul>
-<li><code>inventory</code>:<ul>
+<li><code>only_images</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
-<li>Usage: <code>--inventory</code></li>
+<li>Usage: <code>--only-images</code></li>
 </ul>
 </li>
 </ul>
-<p>Build using the inventory format</p>
+<p>Build only images, skip manifests and other artifacts</p>
 <ul>
 <li><code>manifest_var</code>:<ul>
 <li>Type: text</li>
@@ -3267,10 +3281,10 @@
 <p>Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2</p>
 <ul>
 <li>
-<p><code>project_dir</code> (REQUIRED):</p>
+<p><code>project_dir</code>:</p>
 <ul>
 <li>Type: path</li>
-<li>Default: <code>sentinel.unset</code></li>
+<li>Default: <code>.</code></li>
 <li>Usage: <code>project_dir</code></li>
 </ul>
 </li>
@@ -3286,7 +3300,7 @@
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos build [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                                </span>
+<span class="go"> Usage: exordos build [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                              </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Build a Exordos element. The command build all images, manifests and other artifacts required for the element. The manifest in the project may be a raw YAML file or a template using Jinja2 templates. For Jinja2 templates, the following variables are available by default:                           </span>
 <span class="go"> - {{ version }}: version of the element                                                                                                                                                                                                                                                                   </span>
@@ -3304,7 +3318,7 @@
 <span class="go">│ --developer-key-path  -i  TEXT                   Path to developer public key                                                                                                                                                                                                                           │</span>
 <span class="go">│ --version-suffix      -s  [latest|none|element]  Version suffix will be used for the build [default: none]                                                                                                                                                                                              │</span>
 <span class="go">│ --force               -f                         Rebuild if the output already exists                                                                                                                                                                                                                   │</span>
-<span class="go">│ --inventory                                      Build using the inventory format                                                                                                                                                                                                                       │</span>
+<span class="go">│ --only-images                                    Build only images, skip manifests and other artifacts                                                                                                                                                                                                  │</span>
 <span class="go">│ --manifest-var            TEXT                   Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                   │</span>
 <span class="go">│ --help                                           Show this message and exit.                                                                                                                                                                                                                            │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>

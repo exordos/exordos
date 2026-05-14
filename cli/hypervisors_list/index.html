@@ -1131,6 +1131,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../exordos_introduction/" class="md-nav__link">
+        exordos_introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../exordos_latest/" class="md-nav__link">
         exordos_latest
       </a>
@@ -3175,6 +3189,16 @@
 </ul>
 <p>Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW</p>
 <ul>
+<li><code>output</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>table</code></li>
+<li>Usage: <code>--output
+-o</code></li>
+</ul>
+</li>
+</ul>
+<p>the output format, defaults to table</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -3190,8 +3214,9 @@
 <span class="go"> List hypervisors                                                                                                                                                                                                                                                                                          </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --filters  -f  TEXT  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                                                 │</span>
-<span class="go">│ --help               Show this message and exit.                                                                                                                                                                                                                                                        │</span>
+<span class="go">│ --filters  -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                               │</span>
+<span class="go">│ --output   -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                             │</span>
+<span class="go">│ --help                                 Show this message and exit.                                                                                                                                                                                                                                      │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
