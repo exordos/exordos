@@ -62,6 +62,7 @@ def print_table(
             click.secho(msg, fg=fg)
         else:
             click.echo(msg)
+        rprint(table)
     elif output == "json":
         data = table_to_list_of_dicts(table)
         rprint_json(data=data)
