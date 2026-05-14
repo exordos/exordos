@@ -48,8 +48,15 @@ def imports_group():
     default=None,
     help="Name or uuid of the element",
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
-def list_cmd(ctx: click.Context, element: str) -> None:
+def list_cmd(ctx: click.Context, element: str, output: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if element is None:
         resources = base_client.list_entities(client, ENTITY_COLLECTION)
@@ -70,7 +77,7 @@ def list_cmd(ctx: click.Context, element: str) -> None:
                 client, f"{c.ELEMENT_COLLECTION}{element}/imports/"
             )
 
-    _print_entities(resources)
+    _print_entities(resources, output)
 
 
 @click.command("show", help=f"Show {ENTITY}")
@@ -85,11 +92,19 @@ def list_cmd(ctx: click.Context, element: str) -> None:
     type=str,
     required=True,
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
 def show_cmd(
     ctx: click.Context,
     element: str | None,
     name_uuid: str | None,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
@@ -129,10 +144,10 @@ def show_cmd(
             client, f"{c.ELEMENT_COLLECTION}{element}/imports/", name_uuid
         )
 
-    show_data(entity)
+    show_data(entity, output)
 
 
-def _print_entities(entities: tp.List[dict]) -> None:
+def _print_entities(entities: tp.List[dict], output: str) -> None:
     if entities:
         table = get_table("UUID", "Name", "Kind", "Link", "Element")
         for entity in entities:
@@ -144,7 +159,7 @@ def _print_entities(entities: tp.List[dict]) -> None:
                 entity["element"],
             )
 
-        print_table(table)
+        print_table(table, output)
 
 
 imports_group.add_command(list_cmd, aliases=["l"])

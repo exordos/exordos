@@ -52,10 +52,18 @@ def configs_group():
     default=None,
     help="Filter configs by node",
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
 def list_cmd(
     ctx: click.Context,
     node: sys_uuid.UUID | None,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     entities = base_client.list_entities(client, ENTITY_COLLECTION)
@@ -64,7 +72,7 @@ def list_cmd(
             config for config in entities if config["target"]["node"] == str(node)
         ]
 
-    _print_entities(entities)
+    _print_entities(entities, output)
 
 
 @click.command("show", help=f"Show {ENTITY}")
@@ -73,14 +81,22 @@ def list_cmd(
     type=str,
     required=True,
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
 def show_cmd(
     ctx: click.Context,
     uuid: str,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data)
+    show_data(data, output)
 
 
 @configs_group.command(
@@ -253,7 +269,7 @@ def delete_cmd(
                 base_client.delete_entity(client, ENTITY_COLLECTION, config["uuid"])
 
 
-def _print_entities(entities: tp.List[dict]) -> None:
+def _print_entities(entities: tp.List[dict], output: str) -> None:
     table = get_table()
     table.add_column("UUID")
     table.add_column("Name")
@@ -274,7 +290,7 @@ def _print_entities(entities: tp.List[dict]) -> None:
             entity["status"],
         )
 
-    print_table(table)
+    print_table(table, output)
 
 
 configs_group.add_command(list_cmd, aliases=["l"])

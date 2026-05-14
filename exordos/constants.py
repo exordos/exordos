@@ -90,3 +90,6 @@ BOOTSTRAP_USER = "ubuntu"
 UPDATE_CHECK_INTERVAL = 60 * 60  # 1 hour in seconds
 
 BASE_ELEMENTS = ["core", "ecosystem_realm"]
+
+DEFAULT_TABLE_FORMAT = "table"
+TABLE_FORMATS = ["json", "html", DEFAULT_TABLE_FORMAT, "yaml"]

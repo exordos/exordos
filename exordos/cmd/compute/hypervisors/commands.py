@@ -56,12 +56,19 @@ def hypervisors_group():
         "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
     ),
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
+def list_cmd(ctx: click.Context, filters: tuple[str, ...], output: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     filters = utils.convert_input_multiply(filters)
     entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities)
+    _print_entities(entities, output)
 
 
 @click.command("show", help=f"Show {ENTITY}")
@@ -70,14 +77,22 @@ def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
     type=str,
     required=True,
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
 def show_cmd(
     ctx: click.Context,
     uuid: str,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data)
+    show_data(data, output)
 
 
 @click.command("delete", help=f"Delete {ENTITY}")
@@ -95,7 +110,7 @@ def delete_cmd(
     base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
 
 
-def _print_entities(hypervisors: tp.List[dict]) -> None:
+def _print_entities(hypervisors: tp.List[dict], output: str) -> None:
     table = get_table()
     table.add_column("UUID")
     table.add_column("Name")
@@ -118,7 +133,7 @@ def _print_entities(hypervisors: tp.List[dict]) -> None:
             hypervisor["status"],
         )
 
-    print_table(table)
+    print_table(table, output)
 
 
 def _install_packages() -> None:

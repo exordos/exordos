@@ -26,6 +26,14 @@ Show resource
     * Default: `sentinel.unset`
     * Usage: `resource_name_uuid`
 
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  the output format, defaults to table
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -42,7 +50,8 @@ Show resource
  Show resource                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --element  -e  TEXT  Name or uuid of the element                                                                                                                                                                                                                                                        │
-│ --help               Show this message and exit.                                                                                                                                                                                                                                                        │
+│ --element  -e  TEXT                    Name or uuid of the element                                                                                                                                                                                                                                      │
+│ --output   -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                             │
+│ --help                                 Show this message and exit.                                                                                                                                                                                                                                      │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -1,38 +1,17 @@
 
-# exports_show
+# exordos_introduction
 
-Show export
+Display introduction guide
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                        
+ Usage: exordos introduction [OPTIONS]                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
-
-* `element`:
-    * Type: text
-    * Default: `none`
-    * Usage: `-e
---element`
-
-  Name or uuid of the element
-
-* `name_uuid` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `name_uuid`
-
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
--o`
-
-  the output format, defaults to table
 
 * `help`:
     * Type: boolean
@@ -45,13 +24,11 @@ Show export
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                        
+ Usage: exordos introduction [OPTIONS]                                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
- Show export                                                                                                                                                                                                                                                                                               
+ Display introduction guide                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --element  -e  TEXT                    Name or uuid of the element                                                                                                                                                                                                                                      │
-│ --output   -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                             │
-│ --help                                 Show this message and exit.                                                                                                                                                                                                                                      │
+│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
