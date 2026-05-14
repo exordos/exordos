@@ -65,12 +65,19 @@ def ee_group():
         "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
     ),
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
+def list_cmd(ctx: click.Context, filters: tuple[str, ...], output: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     filters = utils.convert_input_multiply(filters)
     entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities)
+    _print_entities(entities, output)
 
 
 @click.command("show", help="Show element general information")
@@ -98,8 +105,7 @@ def show_cmd(ctx: click.Context, name: str) -> None:
             resource["created_at"],
             resource["updated_at"],
         )
-    click.echo("Resources:")
-    print_table(table)
+    print_table(table, msg="Resources:")
 
     imports = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/imports/"
@@ -114,8 +120,7 @@ def show_cmd(ctx: click.Context, name: str) -> None:
             resource["created_at"],
             resource["updated_at"],
         )
-    click.echo("Imports:")
-    print_table(table)
+    print_table(table, msg="Imports:")
 
     exports = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/exports/"
@@ -130,8 +135,7 @@ def show_cmd(ctx: click.Context, name: str) -> None:
             resource["created_at"],
             resource["updated_at"],
         )
-    click.echo("Exports:")
-    print_table(table)
+    print_table(table, msg="Exports:")
 
 
 @ee_group.command("ips", help="Show element ips")
@@ -539,7 +543,7 @@ def clear(ctx: click.Context, y: bool) -> None:  # pragma: no cover
     return None
 
 
-def _print_entities(entities: tp.List[dict]) -> None:
+def _print_entities(entities: tp.List[dict], output: str) -> None:
     table = get_table("UUID", "Name", "Description", "Version", "Status")
 
     for entity in entities:
@@ -551,7 +555,7 @@ def _print_entities(entities: tp.List[dict]) -> None:
             entity["status"],
         )
 
-    print_table(table)
+    print_table(table, output)
 
 
 ee_group.add_command(list_cmd, aliases=["l"])

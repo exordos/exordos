@@ -17,7 +17,7 @@ Additional variables can be passed using the --manifest-var options.
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos build [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                                
+ Usage: exordos build [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -77,12 +77,12 @@ Additional variables can be passed using the --manifest-var options.
 
   Rebuild if the output already exists
 
-- `inventory`:
+- `only_images`:
     - Type: boolean
     - Default: `false`
-    - Usage: `--inventory`
+    - Usage: `--only-images`
 
-  Build using the inventory format
+  Build only images, skip manifests and other artifacts
 
 - `manifest_var`:
     - Type: text
@@ -91,9 +91,9 @@ Additional variables can be passed using the --manifest-var options.
 
   Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2
 
-- `project_dir` (REQUIRED):
+- `project_dir`:
     - Type: path
-    - Default: `sentinel.unset`
+    - Default: `.`
     - Usage: `project_dir`
 
 - `help`:
@@ -107,7 +107,7 @@ Additional variables can be passed using the --manifest-var options.
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos build [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                                
+ Usage: exordos build [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Build a Exordos element. The command build all images, manifests and other artifacts required for the element. The manifest in the project may be a raw YAML file or a template using Jinja2 templates. For Jinja2 templates, the following variables are available by default:                           
  - {{ version }}: version of the element                                                                                                                                                                                                                                                                   
@@ -125,7 +125,7 @@ Additional variables can be passed using the --manifest-var options.
 │ --developer-key-path  -i  TEXT                   Path to developer public key                                                                                                                                                                                                                           │
 │ --version-suffix      -s  [latest|none|element]  Version suffix will be used for the build [default: none]                                                                                                                                                                                              │
 │ --force               -f                         Rebuild if the output already exists                                                                                                                                                                                                                   │
-│ --inventory                                      Build using the inventory format                                                                                                                                                                                                                       │
+│ --only-images                                    Build only images, skip manifests and other artifacts                                                                                                                                                                                                  │
 │ --manifest-var            TEXT                   Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                   │
 │ --help                                           Show this message and exit.                                                                                                                                                                                                                            │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯

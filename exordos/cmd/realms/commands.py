@@ -96,7 +96,7 @@ def list_cmd() -> None:
     print_table(table)
 
 
-@realms_group.command("delete", help="Delete the exordos realm")
+@realms_group.command("delete", help="Delete the exordos local realm")
 @click.argument("name", type=str)
 def delete_cmd(name: str) -> None:
     infra = libvirt_infra.LibvirtInfraDriver()
@@ -106,6 +106,6 @@ def delete_cmd(name: str) -> None:
         if stand.name == name:
             break
     else:
-        raise click.UsageError(f"Realm {name} not found")
+        raise click.UsageError(f"Local realm {name} not found")
 
     infra.delete_stand(stand)

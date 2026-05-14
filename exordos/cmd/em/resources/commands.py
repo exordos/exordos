@@ -48,8 +48,15 @@ def resources_group():
     default=None,
     help="Name or uuid of the element",
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
-def list_cmd(ctx: click.Context, element: str) -> None:
+def list_cmd(ctx: click.Context, element: str, output: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if element is None:
         resources = base_client.list_entities(client, c.RESOURCE_COLLECTION)
@@ -70,7 +77,7 @@ def list_cmd(ctx: click.Context, element: str) -> None:
                 client, f"{c.ELEMENT_COLLECTION}{element}/resources/"
             )
 
-    _print_resources(resources)
+    _print_entities(resources, output)
 
 
 @click.command("show", help="Show resource")
@@ -85,11 +92,19 @@ def list_cmd(ctx: click.Context, element: str) -> None:
     type=str,
     required=True,
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
 def show_cmd(
     ctx: click.Context,
     element: str | None,
     resource_name_uuid: str | None,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
@@ -135,10 +150,10 @@ def show_cmd(
             client, f"{c.ELEMENT_COLLECTION}{element}/resources/", resource_name_uuid
         )
 
-    show_data(resource)
+    show_data(resource, output)
 
 
-def _print_resources(resources: tp.List[dict]) -> None:
+def _print_entities(resources: tp.List[dict], output: str) -> None:
     if resources:
         table = get_table(
             "UUID", "Name", "Kind", "Full hash", "Status", "Created at", "Updated at"
@@ -154,7 +169,7 @@ def _print_resources(resources: tp.List[dict]) -> None:
                 resource["updated_at"],
             )
 
-        print_table(table)
+        print_table(table, output)
 
 
 resources_group.add_command(list_cmd, aliases=["l"])

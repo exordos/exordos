@@ -21,6 +21,14 @@ List configs
 
   Filter configs by node
 
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  the output format, defaults to table
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -37,7 +45,8 @@ List configs
  List configs                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --node  -n  UUID  Filter configs by node                                                                                                                                                                                                                                                                │
-│ --help            Show this message and exit.                                                                                                                                                                                                                                                           │
+│ --node    -n  UUID                    Filter configs by node                                                                                                                                                                                                                                            │
+│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
+│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

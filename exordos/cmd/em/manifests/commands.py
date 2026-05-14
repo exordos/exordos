@@ -56,12 +56,19 @@ def manifests_group():
         "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
     ),
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
+def list_cmd(ctx: click.Context, filters: tuple[str, ...], output: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     filters = utils.convert_input_multiply(filters)
     entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities)
+    _print_entities(entities, output)
 
 
 @click.command("show", help=f"Show {ENTITY}")
@@ -108,8 +115,7 @@ def show_cmd(ctx: click.Context, uuid: str) -> None:
             resource["updated_at"],
         )
 
-    click.echo("Resources:")
-    print_table(table)
+    print_table(table, msg="Resources:")
 
 
 @manifests_group.command("validate", help=f"Validate {ENTITY}")
@@ -139,7 +145,7 @@ def validate_cmd(ctx: click.Context, repository: str, path_or_name: str) -> None
     )
 
 
-def _print_entities(entities: tp.List[dict]) -> None:
+def _print_entities(entities: tp.List[dict], output: str) -> None:
     table = get_table()
     table.add_column("UUID")
     table.add_column("Name")
@@ -156,7 +162,7 @@ def _print_entities(entities: tp.List[dict]) -> None:
             entity["status"],
         )
 
-    print_table(table)
+    print_table(table, output)
 
 
 manifests_group.add_command(list_cmd, aliases=["l"])

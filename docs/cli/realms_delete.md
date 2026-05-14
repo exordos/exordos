@@ -1,7 +1,7 @@
 
 # realms_delete
 
-Delete the exordos realm
+Delete the exordos local realm
 
 ## Usage
 
@@ -31,7 +31,7 @@ Delete the exordos realm
                                                                                                                                                                                                                                                                                                            
  Usage: exordos realms delete [OPTIONS] NAME                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
- Delete the exordos realm                                                                                                                                                                                                                                                                                  
+ Delete the exordos local realm                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
