@@ -1327,6 +1327,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../hypervisors_add/" class="md-nav__link">
+        hypervisors_add
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hypervisors_delete/" class="md-nav__link">
         hypervisors_delete
       </a>
@@ -1371,6 +1385,20 @@
     <li class="md-nav__item">
       <a href="../hypervisors_show/" class="md-nav__link">
         hypervisors_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hypervisors_update/" class="md-nav__link">
+        hypervisors_update
       </a>
     </li>
   
@@ -3189,6 +3217,35 @@
 </ul>
 <p>Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW</p>
 <ul>
+<li><code>output</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>table</code></li>
+<li>Usage: <code>--output
+-o</code></li>
+</ul>
+</li>
+</ul>
+<p>the output format, defaults to table</p>
+<ul>
+<li><code>watch</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>-w
+--watch</code></li>
+</ul>
+</li>
+</ul>
+<p>Watch the list of passwords</p>
+<ul>
+<li><code>interval</code>:<ul>
+<li>Type: float range</li>
+<li>Default: <code>0.5</code></li>
+<li>Usage: <code>--interval</code></li>
+</ul>
+</li>
+</ul>
+<p>Refresh interval in seconds.</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -3204,8 +3261,11 @@
 <span class="go"> List passwords                                                                                                                                                                                                                                                                                            </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --filters  -f  TEXT  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                                                 │</span>
-<span class="go">│ --help               Show this message and exit.                                                                                                                                                                                                                                                        │</span>
+<span class="go">│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │</span>
+<span class="go">│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │</span>
+<span class="go">│ --watch     -w                          Watch the list of passwords                                                                                                                                                                                                                                     │</span>
+<span class="go">│ --interval      FLOAT RANGE [x&gt;=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │</span>
+<span class="go">│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
