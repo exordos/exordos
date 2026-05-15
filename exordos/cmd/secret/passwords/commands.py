@@ -15,81 +15,27 @@
 #    under the License.
 from __future__ import annotations
 
-import typing as tp
 import uuid as sys_uuid
 
 import rich_click as click
 
 from exordos import constants as c
-from exordos import utils
 from exordos.clients import base_client
-from exordos.cmd.aliases import ClickAliasedGroup
-from exordos.common.table import get_table
-from exordos.common.table import print_table
+from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
 
 ENTITY = "password"
 ENTITY_COLLECTION = c.PASSWORD_COLLECTION
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Project": "project_id",
+    "Name": "name",
+    "Method": "method",
+    "Status": "status",
+}
 
 
-@click.group(
-    f"{ENTITY}s",
-    cls=ClickAliasedGroup,
-    invoke_without_command=True,
-    help=f"Manage {ENTITY}s in the Exordos installation",
-)
-def passwords_group():
-    pass
-
-
-@click.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-f",
-    "--filters",
-    multiple=True,
-    help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: --f "
-        "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
-    ),
-)
-@click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    filters = utils.convert_input_multiply(filters)
-    entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities)
-
-
-@click.command("show", help=f"Show {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def show_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data)
-
-
-@click.command("delete", help=f"Delete {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def delete_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
+passwords_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @click.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
@@ -192,28 +138,5 @@ def update_cmd(
     show_data(entity)
 
 
-def _print_entities(passwords: tp.List[dict]) -> None:
-    table = get_table()
-    table.add_column("UUID")
-    table.add_column("Project")
-    table.add_column("Name")
-    table.add_column("Method")
-    table.add_column("Status")
-
-    for password in passwords:
-        table.add_row(
-            password["uuid"],
-            password["project_id"],
-            password["name"],
-            password["method"],
-            password["status"],
-        )
-
-    print_table(table)
-
-
-passwords_group.add_command(list_cmd, aliases=["l"])
-passwords_group.add_command(show_cmd, aliases=["get", "g"])
-passwords_group.add_command(delete_cmd, aliases=["d"])
 passwords_group.add_command(add_cmd, aliases=["a"])
 passwords_group.add_command(update_cmd, aliases=["u"])

@@ -15,96 +15,25 @@
 #    under the License.
 from __future__ import annotations
 
-import typing as tp
 import uuid as sys_uuid
 
 import rich_click as click
 
 from exordos import constants as c
-from exordos import utils
 from exordos.clients import base_client
-from exordos.cmd.aliases import ClickAliasedGroup
-from exordos.common.table import get_table
-from exordos.common.table import print_table
+from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
 
 ENTITY = "service"
 ENTITY_COLLECTION = c.SERVICE_COLLECTION
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Project": "project",
+    "Name": "name",
+    "Status": "status",
+}
 
-
-@click.group(
-    "services",
-    cls=ClickAliasedGroup,
-    invoke_without_command=True,
-    help=f"Manage {ENTITY}s in the Exordos installation",
-)
-def services_group():
-    pass
-
-
-@click.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-f",
-    "--filters",
-    multiple=True,
-    help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: --f "
-        "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
-    ),
-)
-@click.option(
-    "--output",
-    "-o",
-    default=c.DEFAULT_TABLE_FORMAT,
-    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
-    help="the output format, defaults to table",
-)
-@click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...], output: str) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    filters = utils.convert_input_multiply(filters)
-    entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities, output)
-
-
-@click.command("show", help=f"Show {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.option(
-    "--output",
-    "-o",
-    default=c.DEFAULT_TABLE_FORMAT,
-    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
-    help="the output format, defaults to table",
-)
-@click.pass_context
-def show_cmd(
-    ctx: click.Context,
-    uuid: str,
-    output: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data, output)
-
-
-@click.command("delete", help=f"Delete {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def delete_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
+services_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @click.command("add", help="Add a new service to the Exordos installation")
@@ -204,26 +133,5 @@ def update_cmd(
     show_data(entity)
 
 
-def _print_entities(services: tp.List[dict], output: str) -> None:
-    table = get_table()
-    table.add_column("UUID")
-    table.add_column("Project")
-    table.add_column("Name")
-    table.add_column("Status")
-
-    for service in services:
-        table.add_row(
-            service["uuid"],
-            service["project_id"],
-            service["name"],
-            service["status"],
-        )
-
-    print_table(table, output)
-
-
-services_group.add_command(list_cmd, aliases=["l"])
-services_group.add_command(show_cmd, aliases=["get", "g"])
-services_group.add_command(delete_cmd, aliases=["d"])
 services_group.add_command(add_cmd, aliases=["a"])
 services_group.add_command(update_cmd, aliases=["u"])

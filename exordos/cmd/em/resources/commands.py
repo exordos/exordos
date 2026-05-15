@@ -15,162 +15,26 @@
 #    under the License.
 from __future__ import annotations
 
-import typing as tp
-
-import rich_click as click
-
 from exordos import constants as c
-from exordos import utils
-from exordos.clients import base_client
-from exordos.cmd.aliases import ClickAliasedGroup
-from exordos.common.table import get_table
-from exordos.common.table import print_table
-from exordos.common.table import show_data
+from exordos.cmd.base import create_entity_group
 
 ENTITY = "resource"
 ENTITY_COLLECTION = c.RESOURCE_COLLECTION
 
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Name": "name",
+    "Kind": "kind",
+    "Full hash": "full_hash",
+    "Status": "status",
+    "Created at": "created_at",
+    "Updated at": "updated_at",
+}
 
-@click.group(
-    "resources",
-    cls=ClickAliasedGroup,
-    invoke_without_command=True,
-    help=f"Manage {ENTITY}s in the Exordos installation",
+
+resources_group = create_entity_group(
+    ENTITY,
+    ENTITY_COLLECTION,
+    FIELDS_MAP,
+    add_delete_command=False,
 )
-def resources_group():
-    pass
-
-
-@click.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-e",
-    "--element",
-    default=None,
-    help="Name or uuid of the element",
-)
-@click.option(
-    "--output",
-    "-o",
-    default=c.DEFAULT_TABLE_FORMAT,
-    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
-    help="the output format, defaults to table",
-)
-@click.pass_context
-def list_cmd(ctx: click.Context, element: str, output: str) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    if element is None:
-        resources = base_client.list_entities(client, c.RESOURCE_COLLECTION)
-    else:
-        if not utils.is_valid_uuid(element):
-            elements = base_client.list_entities(
-                client, c.ELEMENT_COLLECTION, name=element
-            )
-            if elements:
-                uuid = elements[0]["uuid"]
-                resources = base_client.list_entities(
-                    client, f"{c.ELEMENT_COLLECTION}{uuid}/resources/"
-                )
-            else:
-                raise click.ClickException(f"Element with name {element} not found")
-        else:
-            resources = base_client.list_entities(
-                client, f"{c.ELEMENT_COLLECTION}{element}/resources/"
-            )
-
-    _print_entities(resources, output)
-
-
-@click.command("show", help="Show resource")
-@click.option(
-    "-e",
-    "--element",
-    default=None,
-    help="Name or uuid of the element",
-)
-@click.argument(
-    "resource_name_uuid",
-    type=str,
-    required=True,
-)
-@click.option(
-    "--output",
-    "-o",
-    default=c.DEFAULT_TABLE_FORMAT,
-    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
-    help="the output format, defaults to table",
-)
-@click.pass_context
-def show_cmd(
-    ctx: click.Context,
-    element: str | None,
-    resource_name_uuid: str | None,
-    output: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-
-    if element is None:
-        if not utils.is_valid_uuid(resource_name_uuid):
-            resources = base_client.list_entities(
-                client, c.RESOURCE_COLLECTION, name=resource_name_uuid
-            )
-            if resources:
-                resource_name_uuid = resources[0]["uuid"]
-            else:
-                raise click.ClickException(
-                    f"resource with name {resource_name_uuid} not found"
-                )
-        resource = base_client.get_entity(
-            client, c.RESOURCE_COLLECTION, resource_name_uuid
-        )
-
-    else:
-        if not utils.is_valid_uuid(element):
-            elements = base_client.list_entities(
-                client, ENTITY_COLLECTION, name=element
-            )
-            if elements:
-                element = elements[0]["uuid"]
-            else:
-                raise click.ClickException(f"Element with name {element} not found")
-
-        if not utils.is_valid_uuid(resource_name_uuid):
-            resources = base_client.list_entities(
-                client,
-                f"{c.ELEMENT_COLLECTION}{element}/resources/",
-                name=resource_name_uuid,
-            )
-            if resources:
-                resource_name_uuid = resources[0]["uuid"]
-            else:
-                raise click.ClickException(
-                    f"resource with name {resource_name_uuid} not found"
-                )
-
-        resource = base_client.get_entity(
-            client, f"{c.ELEMENT_COLLECTION}{element}/resources/", resource_name_uuid
-        )
-
-    show_data(resource, output)
-
-
-def _print_entities(resources: tp.List[dict], output: str) -> None:
-    if resources:
-        table = get_table(
-            "UUID", "Name", "Kind", "Full hash", "Status", "Created at", "Updated at"
-        )
-        for resource in resources:
-            table.add_row(
-                resource["uuid"],
-                resource["name"],
-                resource["kind"],
-                resource["full_hash"],
-                resource["status"],
-                resource["created_at"],
-                resource["updated_at"],
-            )
-
-        print_table(table, output)
-
-
-resources_group.add_command(list_cmd, aliases=["l"])
-resources_group.add_command(show_cmd, aliases=["get", "g"])

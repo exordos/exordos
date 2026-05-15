@@ -18,6 +18,7 @@ import os
 import typing as tp
 import uuid as sys_uuid
 
+from bazooka import Client
 from bazooka import exceptions as bazooka_exc
 import certifi
 import rich_click as click
@@ -26,9 +27,12 @@ from exordos import utils
 from exordos.clients import base as http_client
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
+CONNECT_TIMEOUT = 5
+READ_TIMEOUT = 5
 
 
 def get_user_api_client(auth_data: dict) -> http_client.CollectionBaseClient:
+    bazooka_client = Client(default_timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
     auth = http_client.CoreIamAuthenticator(
         base_url=auth_data["endpoint"],
         username=auth_data.get("username"),
@@ -36,10 +40,12 @@ def get_user_api_client(auth_data: dict) -> http_client.CollectionBaseClient:
         access_token=auth_data.get("access_token"),
         refresh_token=auth_data.get("refresh_token"),
         scope=auth_data.get("scope"),
+        http_client=bazooka_client,
     )
     client = http_client.CollectionBaseClient(
         base_url=auth_data["endpoint"],
         auth=auth,
+        http_client=bazooka_client,
     )
     return client
 

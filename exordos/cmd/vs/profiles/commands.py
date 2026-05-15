@@ -15,7 +15,6 @@
 #    under the License.
 from __future__ import annotations
 
-import typing as tp
 import uuid as sys_uuid
 
 import rich_click as click
@@ -23,72 +22,22 @@ import rich_click as click
 from exordos import constants as c
 from exordos import utils
 from exordos.clients import base_client
-from exordos.cmd.aliases import ClickAliasedGroup
-from exordos.common.table import get_table
-from exordos.common.table import print_table
+from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
 
 ENTITY = "profile"
 ENTITY_COLLECTION = c.PROFILE_COLLECTION
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Project": "project_id",
+    "Name": "name",
+    "ProfileType": "profile_type",
+    "Active": "active",
+    "Status": "status",
+}
 
 
-@click.group(
-    "profiles",
-    cls=ClickAliasedGroup,
-    invoke_without_command=True,
-    help=f"Manage {ENTITY}s in the Exordos installation",
-)
-def profiles_group():
-    pass
-
-
-@click.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-f",
-    "--filters",
-    multiple=True,
-    help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: --f "
-        "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
-    ),
-)
-@click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    filters = utils.convert_input_multiply(filters)
-    entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities)
-
-
-@click.command("show", help=f"Show {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def show_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data)
-
-
-@click.command("delete", help="Delete profile")
-@click.argument(
-    "uuid",
-    type=str,
-)
-@click.pass_context
-def delete_cmd(
-    ctx: click.Context,
-    uuid: sys_uuid.UUID | None,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
+profiles_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @profiles_group.command("activate", help="Activate profile")
@@ -170,29 +119,4 @@ def add_cmd(
     show_data(data)
 
 
-def _print_entities(profiles: tp.List[dict]) -> None:
-    table = get_table()
-    table.add_column("UUID")
-    table.add_column("Project")
-    table.add_column("Name")
-    table.add_column("ProfileType")
-    table.add_column("Active")
-    table.add_column("Status")
-
-    for profile in profiles:
-        table.add_row(
-            profile["uuid"],
-            profile["project_id"],
-            profile["name"],
-            profile["profile_type"],
-            str(profile["active"]),
-            profile["status"],
-        )
-
-    print_table(table)
-
-
-profiles_group.add_command(list_cmd, aliases=["l"])
-profiles_group.add_command(show_cmd, aliases=["get", "g"])
-profiles_group.add_command(delete_cmd, aliases=["d"])
 profiles_group.add_command(add_cmd, aliases=["a"])
