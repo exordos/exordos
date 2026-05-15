@@ -42,7 +42,7 @@ ENV_GEN_DEV_KEYS = "GEN_DEV_KEYS"
 
 # Types
 ImageProfileType = tp.Literal["ubuntu_24", "exordos_base"]
-ImageFormatType = tp.Literal["raw", "qcow2", "gz"]
+ImageFormatType = tp.Literal["raw", "qcow2", "gz", "zst"]
 NetType = tp.Literal["network", "bridge"]
 VersionSuffixType = tp.Literal["latest", "none", "element"]
 DomainState = tp.Literal["all", "inactive", "state-paused"]

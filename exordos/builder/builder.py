@@ -123,6 +123,26 @@ class SimpleBuilder:
             ):
                 shutil.copyfileobj(f_in, f_out)
             return os.path.abspath(tgt)
+        elif fmt == "zst":
+            # Using subprocess with zstd utility instead of Python's compression.zstd
+            # because: 1) it works on Python <3.14, 2) allows multi-threading via -T0
+            self._logger.info(f"Compressing {img_name} to {img_name}.raw.zst")
+            tgt = os.path.join(images_output_dir, f"{img_name}.raw.zst")
+            subprocess.run(
+                [
+                    "zstd",
+                    "-10",  # The trade-off between speed and size
+                    "-T0",
+                    "-f",
+                    "-o",
+                    tgt,
+                    raw_src,
+                ],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return os.path.abspath(tgt)
         else:
             raise ValueError(f"Unsupported image format: {fmt}")
 
