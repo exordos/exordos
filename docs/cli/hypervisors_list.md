@@ -29,6 +29,21 @@ List hypervisors
 
   the output format, defaults to table
 
+* `watch`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-w
+--watch`
+
+  Watch the list of hypervisors
+
+* `interval`:
+    * Type: float range
+    * Default: `0.5`
+    * Usage: `--interval`
+
+  Refresh interval in seconds.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -45,8 +60,10 @@ List hypervisors
  List hypervisors                                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters  -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                               │
-│ --output   -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                             │
-│ --help                                 Show this message and exit.                                                                                                                                                                                                                                      │
+│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
+│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
+│ --watch     -w                          Watch the list of hypervisors                                                                                                                                                                                                                                   │
+│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
+│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

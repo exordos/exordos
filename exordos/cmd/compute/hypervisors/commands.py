@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import os
-import typing as tp
 import uuid as sys_uuid
 
 import rich_click as click
@@ -24,91 +23,27 @@ import rich_click as click
 from exordos import constants as c
 from exordos import utils
 from exordos.clients import base_client
-from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.base import create_entity_group
 from exordos.common.run import run_command
 from exordos.common.run import runsh
-from exordos.common.table import get_table
-from exordos.common.table import print_table
 from exordos.common.table import show_data
 from exordos.logger import ClickLogger
 
 ENTITY = "hypervisor"
 ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Name": "name",
+    "Machine type": "machine_type",
+    "All cores": "all_cores",
+    "Avail cores": "avail_cores",
+    "All ram": "all_ram",
+    "Avail ram": "avail_ram",
+    "Status": "status",
+}
 
 
-@click.group(
-    f"{ENTITY}s",
-    cls=ClickAliasedGroup,
-    invoke_without_command=True,
-    help=f"Manage {ENTITY}s in the Exordos installation",
-)
-def hypervisors_group():
-    pass
-
-
-@click.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-f",
-    "--filters",
-    multiple=True,
-    help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: --f "
-        "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
-    ),
-)
-@click.option(
-    "--output",
-    "-o",
-    default=c.DEFAULT_TABLE_FORMAT,
-    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
-    help="the output format, defaults to table",
-)
-@click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...], output: str) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    filters = utils.convert_input_multiply(filters)
-    entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities, output)
-
-
-@click.command("show", help=f"Show {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.option(
-    "--output",
-    "-o",
-    default=c.DEFAULT_TABLE_FORMAT,
-    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
-    help="the output format, defaults to table",
-)
-@click.pass_context
-def show_cmd(
-    ctx: click.Context,
-    uuid: str,
-    output: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data, output)
-
-
-@click.command("delete", help=f"Delete {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def delete_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
+hypervisors_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @click.command("add", help="Add a new hypervisor")
@@ -145,16 +80,6 @@ def delete_cmd(
     required=False,
 )
 @click.option(
-    "--all_cores",
-    type=int,
-    required=False,
-)
-@click.option(
-    "--all_ram",
-    type=int,
-    required=False,
-)
-@click.option(
     "--cores_ratio",
     type=float,
     required=False,
@@ -187,8 +112,6 @@ def add_cmd(
     description: str,
     avail_cores: int | None,
     avail_ram: int | None,
-    all_cores: int | None,
-    all_ram: int | None,
     cores_ratio: float | None,
     ram_ratio: float | None,
     machine_type: str | None,
@@ -208,10 +131,6 @@ def add_cmd(
         data["avail_cores"] = avail_cores
     if avail_ram is not None:
         data["avail_ram"] = avail_ram
-    if all_cores is not None:
-        data["all_cores"] = all_cores
-    if all_ram is not None:
-        data["all_ram"] = all_ram
     if cores_ratio is not None:
         data["cores_ratio"] = cores_ratio
     if ram_ratio is not None:
@@ -222,30 +141,98 @@ def add_cmd(
     show_data(entity)
 
 
-def _print_entities(hypervisors: tp.List[dict], output: str) -> None:
-    table = get_table()
-    table.add_column("UUID")
-    table.add_column("Name")
-    table.add_column("MachineType")
-    table.add_column("All Cores")
-    table.add_column("Avail Cores")
-    table.add_column("All Ram")
-    table.add_column("Avail Ram")
-    table.add_column("Status")
+@click.command("update", help=f"Update {ENTITY}")
+@click.pass_context
+@click.argument(
+    "uuid",
+    type=str,
+    required=True,
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default=None,
+    help=f"Name of the {ENTITY}",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default=None,
+    help=f"Description of the {ENTITY}",
+)
+@click.option(
+    "--avail_cores",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--avail_ram",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--cores_ratio",
+    type=float,
+    required=False,
+)
+@click.option(
+    "--ram_ratio",
+    type=float,
+    required=False,
+)
+@click.option(
+    "-m",
+    "--machine_type",
+    required=False,
+    type=click.Choice(["VM", "HW"], case_sensitive=False),
+)
+@click.option(
+    "-d",
+    "--driver_spec",
+    multiple=True,
+    help=(
+        "Additional filters to pass to the api. "
+        "The format is 'key=value'. For example: -d "
+        "a=b -d c=d --driver_spec e=f"
+    ),
+)
+def update_cmd(
+    ctx: click.Context,
+    uuid: sys_uuid.UUID,
+    name: str | None,
+    description: str,
+    avail_cores: int | None,
+    avail_ram: int | None,
+    cores_ratio: float | None,
+    ram_ratio: float | None,
+    machine_type: str | None,
+    driver_spec: tuple[str, ...],
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {}
+    if name is not None:
+        data["name"] = name
+    if description is not None:
+        data["description"] = description
+    if avail_cores is not None:
+        data["avail_cores"] = avail_cores
+    if avail_ram is not None:
+        data["avail_ram"] = avail_ram
+    if cores_ratio is not None:
+        data["cores_ratio"] = cores_ratio
+    if ram_ratio is not None:
+        data["ram_ratio"] = ram_ratio
+    if machine_type is not None:
+        data["machine_type"] = machine_type
 
-    for hypervisor in hypervisors:
-        table.add_row(
-            hypervisor["uuid"],
-            hypervisor["name"],
-            hypervisor["machine_type"],
-            str(hypervisor["all_cores"]),
-            str(hypervisor["avail_cores"]),
-            str(hypervisor["all_ram"]),
-            str(hypervisor["avail_ram"]),
-            hypervisor["status"],
-        )
+    driver_spec = utils.convert_input_multiply(driver_spec)
+    if driver_spec:
+        data["driver_spec"] = driver_spec
 
-    print_table(table, output)
+    entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
+    show_data(entity)
 
 
 def _install_packages() -> None:
@@ -455,7 +442,5 @@ def init_cmd(romfile_version: str, pool_name: str, packer: bool) -> None:
     log.important("Hypervisor environment initialized successfully")
 
 
-hypervisors_group.add_command(list_cmd, aliases=["l"])
-hypervisors_group.add_command(show_cmd, aliases=["get", "g"])
-hypervisors_group.add_command(delete_cmd, aliases=["d"])
 hypervisors_group.add_command(add_cmd, aliases=["a"])
+hypervisors_group.add_command(update_cmd, aliases=["u"])

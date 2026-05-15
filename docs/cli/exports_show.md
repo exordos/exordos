@@ -7,24 +7,16 @@ Show export
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                        
+ Usage: exordos em exports show [OPTIONS] UUID                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `element`:
-    * Type: text
-    * Default: `none`
-    * Usage: `-e
---element`
-
-  Name or uuid of the element
-
-* `name_uuid` (REQUIRED):
+* `uuid` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `name_uuid`
+    * Usage: `uuid`
 
 * `output`:
     * Type: choice
@@ -45,13 +37,12 @@ Show export
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em exports show [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                        
+ Usage: exordos em exports show [OPTIONS] UUID                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  Show export                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --element  -e  TEXT                    Name or uuid of the element                                                                                                                                                                                                                                      │
-│ --output   -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                             │
-│ --help                                 Show this message and exit.                                                                                                                                                                                                                                      │
+│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
+│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

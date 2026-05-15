@@ -13,13 +13,13 @@ List configs
 
 ## Options
 
-* `node`:
-    * Type: uuid
-    * Default: `none`
-    * Usage: `-n
---node`
+* `filters`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-f
+--filters`
 
-  Filter configs by node
+  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
 
 * `output`:
     * Type: choice
@@ -28,6 +28,21 @@ List configs
 -o`
 
   the output format, defaults to table
+
+* `watch`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-w
+--watch`
+
+  Watch the list of configs
+
+* `interval`:
+    * Type: float range
+    * Default: `0.5`
+    * Usage: `--interval`
+
+  Refresh interval in seconds.
 
 * `help`:
     * Type: boolean
@@ -45,8 +60,10 @@ List configs
  List configs                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --node    -n  UUID                    Filter configs by node                                                                                                                                                                                                                                            │
-│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
-│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
+│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
+│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
+│ --watch     -w                          Watch the list of configs                                                                                                                                                                                                                                       │
+│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
+│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
