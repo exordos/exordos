@@ -31,11 +31,11 @@ ENTITY = "node"
 ENTITY_COLLECTION = c.NODE_COLLECTION
 FIELDS_MAP = {
     "UUID": "uuid",
-    "Project": "project",
+    "Project": "project_id",
     "Name": "name",
     "Cores": "cores",
     "RAM": "ram",
-    "IP": "ip",
+    "IP": lambda x: x.get("default_network", {}).get("ipv4", "unknown"),
     "Status": "status",
 }
 

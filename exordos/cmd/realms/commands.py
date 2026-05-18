@@ -15,23 +15,26 @@
 #    under the License.
 from __future__ import annotations
 
+import dataclasses
 import os
 
 import rich_click as click
 
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
+from exordos.utils import get_ip_from_url
 
 
-@click.group("realms", help="Manage exordos realms")
+@click.group("realms", cls=ClickAliasedGroup, help="Manage realms")
 def realms_group():
     pass
 
 
-@realms_group.command("ssh", help="Connect to exordos realm")
+@realms_group.command("ssh", help="Connect to local realm")
 @click.option(
     "-r",
     "--realm",
@@ -75,28 +78,53 @@ def ssh_cmd(realm: str | None, username: str) -> None:
     os.system(f"ssh {username}@{ip_address}")
 
 
-@realms_group.command("list", help="List of running exordos realms")
-def list_cmd() -> None:
-    table = get_table()
-    table.add_column("name")
-    table.add_column("nodes")
-    table.add_column("IP")
+@dataclasses.dataclass
+class Realm:
+    name: str
+    ip: str
+    local: bool
+
+
+@click.command("list", help="List of realms")
+@click.pass_context
+def list_cmd(ctx: click.Context) -> None:
+    config = ctx.obj.cfg
+    config_realms = config.get("realms", {})
+
+    realms: dict[str, Realm] = {}
 
     infra = libvirt_infra.LibvirtInfraDriver()
 
+    # Get the list of local realms by libvirt
     for stand in infra.list_stands():
         if stand.network.dhcp:
             ip = libvirt.get_domain_ip(stand.bootstraps[0].name)
         else:
             ip = stand.network.cidr[2]
+        realms[str(ip)] = Realm(stand.name, str(ip), True)
 
-        nodes = len(stand.bootstraps) + len(stand.baremetals)
-        table.add_row(stand.name, str(nodes), str(ip))
+    # Get the list of remote realms by config
+    for config_realm_name, config_realm in config_realms.items():
+        try:
+            ip = get_ip_from_url(config_realm.get("endpoint", ""))
+            if realm := realms.get(ip):
+                realm.name = config_realm_name
+                continue
+        except ValueError:
+            continue
+        realms[ip] = Realm(config_realm_name, ip, False)
+
+    table = get_table(*["Name", "IP", "Local/Remote"])
+    for realm in realms.values():
+        table.add_row(realm.name, realm.ip, "local" if realm.local else "remote")
 
     print_table(table)
 
 
-@realms_group.command("delete", help="Delete the exordos local realm")
+realms_group.add_command(list_cmd, aliases=["l"])
+
+
+@realms_group.command("delete", help="Delete local realm")
 @click.argument("name", type=str)
 def delete_cmd(name: str) -> None:
     infra = libvirt_infra.LibvirtInfraDriver()

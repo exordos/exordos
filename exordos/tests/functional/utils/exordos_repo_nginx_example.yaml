@@ -1,0 +1,5 @@
+push:
+  exordos_repo:
+    driver: nginx
+    url: https://repo.exordos.com/
+    auth: [user, admin]
