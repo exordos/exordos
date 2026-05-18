@@ -61,6 +61,7 @@ COMMANDS_WITHOUT_CONFIG = {
     utils_commands.introduction.name,
     hypervisors_commands.init_cmd.name,
     settings_commands.settings_group.name,
+    repo_commands.push_cmd.name,
 }
 
 
@@ -271,6 +272,7 @@ exordos.add_command(utils_commands.autocomplete_help)  # noqa
 exordos.add_command(utils_commands.autocomplete)  # noqa
 exordos.add_command(utils_commands.sync)  # noqa
 exordos.add_command(utils_commands.introduction)  # noqa
+exordos.add_command(utils_commands.ready_api)  # noqa
 
 
 if __name__ == "__main__":

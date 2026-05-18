@@ -24,6 +24,7 @@ from rich.markdown import Markdown
 import rich_click as click
 
 from exordos import utils
+from exordos.clients import base_client
 import exordos.constants as c
 
 if tp.TYPE_CHECKING:
@@ -260,3 +261,17 @@ def introduction() -> None:
     console = Console()
     md = Markdown(INTRODUCTION_TEXT)
     console.print(md)
+
+
+@click.command("ready_api", help="Check if Exordos api is ready to use")
+@click.pass_context
+def ready_api(ctx: click.Context) -> None:
+    from yretry import defaults
+
+    defaults.HTTP_RETRY_ATTEMPTS = 1
+    client = base_client.get_user_api_client(ctx.obj.auth_data, timeout=(1, 1))
+    try:
+        client.filter("")
+        click.echo("Exordos Api ready to use")
+    except Exception:
+        raise click.ClickException("Exordos Api not ready to use")

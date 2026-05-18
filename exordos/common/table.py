@@ -55,7 +55,12 @@ def fill_table(entities: tp.List[dict], fields_map: dict):
     table = get_table(*fields_map.keys())
 
     for entity in entities:
-        table.add_row(*[str(entity[field.lower()]) for field in fields_map.values()])
+        table.add_row(
+            *[
+                str(entity[field.lower()]) if not callable(field) else field(entity)
+                for field in fields_map.values()
+            ]
+        )
 
     return table
 

@@ -31,11 +31,13 @@ CONNECT_TIMEOUT = 5
 READ_TIMEOUT = 5
 
 
-def get_user_api_client(auth_data: dict) -> http_client.CollectionBaseClient:
-    bazooka_client = Client(default_timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+def get_user_api_client(
+    auth_data: dict, timeout: tp.Tuple[int, int] | None = None
+) -> http_client.CollectionBaseClient:
+    bazooka_client = Client(default_timeout=timeout or (CONNECT_TIMEOUT, READ_TIMEOUT))
     auth = http_client.CoreIamAuthenticator(
         base_url=auth_data["endpoint"],
-        username=auth_data.get("username"),
+        username=auth_data.get("username", auth_data.get("user")),
         password=auth_data.get("password"),
         access_token=auth_data.get("access_token"),
         refresh_token=auth_data.get("refresh_token"),

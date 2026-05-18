@@ -40,7 +40,7 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         self,
         url: str,
         name: str = "nginx_repo",
-        auth: tuple[str, str] | None = None,
+        auth: tuple[str, str] | list[str, str] | None = None,
         logger: logger_base.AbstractLogger = logger_base.ClickLogger(),
     ):
         """Initialize the Nginx repo driver.
@@ -52,6 +52,8 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         """
         self._base_url = url.rstrip("/")
         self._name = name
+        if auth and isinstance(auth, list) and len(auth) >= 2:
+            auth = (auth[0], auth[1])
         self._auth = auth
         self._logger = logger
         self._session = requests.Session()
