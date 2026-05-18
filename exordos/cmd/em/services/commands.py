@@ -28,7 +28,7 @@ ENTITY = "service"
 ENTITY_COLLECTION = c.SERVICE_COLLECTION
 FIELDS_MAP = {
     "UUID": "uuid",
-    "Project": "project",
+    "Project": "project_id",
     "Name": "name",
     "Status": "status",
 }

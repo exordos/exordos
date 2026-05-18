@@ -25,6 +25,7 @@ from exordos import constants as c
 from exordos import logger
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.compute import common as compute_common
 from exordos.common.table import show_data
 
 ENTITY = "node"
@@ -36,6 +37,8 @@ FIELDS_MAP = {
     "Cores": "cores",
     "RAM": "ram",
     "IP": lambda x: x.get("default_network", {}).get("ipv4", "unknown"),
+    "Disks": compute_common.extract_disks_from_entity,
+    "Image": compute_common.extract_image_from_entity,
     "Status": "status",
 }
 
@@ -146,7 +149,131 @@ def add_cmd(
     while entity["status"] != "ACTIVE":
         log.info(f"Waiting for node to be ready. Status: {entity['status']}")
         time.sleep(2)
-        entity = client.get(c.NODE_COLLECTION, uuid=uuid)
+        entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
+    show_data(entity)
+
+
+@click.command("update", help="Update an existing node")
+@click.pass_context
+@click.option(
+    "-u",
+    "--uuid_or_name",
+    type=str,
+    required=True,
+    help="UUID or name of the node to update",
+)
+@click.option(
+    "-c",
+    "--cores",
+    type=int,
+    default=None,
+    help="Number of cores to allocate for the node",
+)
+@click.option(
+    "-r",
+    "--ram",
+    type=int,
+    default=None,
+    help="Amount of RAM in Mb to allocate for the node",
+)
+@click.option(
+    "-d",
+    "--root-disk",
+    type=int,
+    default=None,
+    help="Number of GiB of root disk to allocate for the node",
+)
+@click.option(
+    "-i",
+    "--image",
+    type=str,
+    default=None,
+    help="Name of the image to deploy",
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default=None,
+    help="Name of the node",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default=None,
+    help="Description of the node",
+)
+@click.option(
+    "--wait",
+    type=bool,
+    is_flag=True,
+    help="Wait until the node is running",
+)
+def update_cmd(
+    ctx: click.Context,
+    uuid_or_name: str,
+    cores: int | None,
+    ram: int | None,
+    root_disk: int | None,
+    image: str | None,
+    name: str | None,
+    description: str | None,
+    wait: bool,
+) -> None:
+    update_data = {}
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
+    try:
+        entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid_or_name)
+    except bazooka_exc.NotFoundError:
+        raise click.ClickException(f"Node with UUID or name {uuid_or_name} not found")
+
+    if cores is not None:
+        update_data["cores"] = cores
+    if ram is not None:
+        update_data["ram"] = ram
+    if name is not None:
+        update_data["name"] = name
+    if description is not None:
+        update_data["description"] = description
+
+    if root_disk is not None or image is not None:
+        update_data["disk_spec"] = entity["disk_spec"]
+
+        if update_data["disk_spec"]["kind"] == "root_disk":
+            update_data["disk_spec"]["size"] = (
+                root_disk or update_data["disk_spec"]["size"]
+            )
+            update_data["disk_spec"]["image"] = (
+                image or update_data["disk_spec"]["image"]
+            )
+        elif update_data["disk_spec"]["kind"] == "disks":
+            update_data["disk_spec"]["disks"][0]["size"] = (
+                root_disk or update_data["disk_spec"]["disks"][0]["size"]
+            )
+            update_data["disk_spec"]["disks"][0]["image"] = (
+                image or update_data["disk_spec"]["disks"][0]["image"]
+            )
+        else:
+            raise click.ClickException(
+                f"Unsupported disk spec kind: {update_data['disk_spec']['kind']}"
+            )
+
+    if not update_data:
+        raise click.ClickException("No updates provided")
+
+    entity = base_client.update_entity(
+        client, ENTITY_COLLECTION, uuid_or_name, update_data
+    )
+    if not wait:
+        show_data(entity)
+        return
+    log = logger.ClickLogger()
+    while entity["status"] != "ACTIVE":
+        log.info(f"Waiting for node to be ready. Status: {entity['status']}")
+        time.sleep(2)
+        entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid_or_name)
     show_data(entity)
 
 
@@ -286,3 +413,4 @@ def add_or_update_node_cmd(
 
 
 cn_group.add_command(add_cmd, aliases=["a"])
+cn_group.add_command(update_cmd, aliases=["u"])
