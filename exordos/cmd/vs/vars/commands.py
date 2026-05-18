@@ -33,7 +33,7 @@ FIELDS_MAP = {
     "UUID": "uuid",
     "Project": "project_id",
     "Name": "name",
-    "Value": "value",
+    "Value": lambda x: str(x.get("value", "")),
     "Status": "status",
 }
 
