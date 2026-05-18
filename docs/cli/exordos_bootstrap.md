@@ -19,7 +19,7 @@ Bootstrap exordos locally
     * Usage: `-i
 --inventory`
 
-  Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to <https://repository.genesis-core.tech/exordos-elements/core/><version>/. Examples: 0.0.6  /path/to/core/0.0.6  <https://repository.example.com/exordos-elements/core/0.0.6/>  <https://repository.example.com/exordos-elements/core/0.0.6/inventory.json>
+  Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to <https://repo.exordos.com/exordos-elements/core/><version>/. Examples: 0.0.6  /path/to/core/0.0.6  <https://repository.example.com/exordos-elements/core/0.0.6/>  <https://repository.example.com/exordos-elements/core/0.0.6/inventory.json>
 
 * `profile`:
     * Type: choice
@@ -103,7 +103,7 @@ Bootstrap exordos locally
 
 * `repository`:
     * Type: text
-    * Default: `https://repository.genesis-core.tech/`
+    * Default: `https://repo.exordos.com/`
     * Usage: `-r
 --repository`
 
@@ -218,7 +218,7 @@ Bootstrap exordos locally
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --inventory                 -i  TEXT                                 Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under               │
 │                                                                      ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to                           │
-│                                                                      https://repository.genesis-core.tech/exordos-elements/core/<version>/. Examples: 0.0.6  /path/to/core/0.0.6  https://repository.example.com/exordos-elements/core/0.0.6/                                                           │
+│                                                                      https://repo.exordos.com/exordos-elements/core/<version>/. Examples: 0.0.6  /path/to/core/0.0.6  https://repository.example.com/exordos-elements/core/0.0.6/                                                           │
 │                                                                      https://repository.example.com/exordos-elements/core/0.0.6/inventory.json                                                                                                                                                          │
 │ --profile                       [develop|small|medium|large|legacy]  Profile for the installation. [default: small]                                                                                                                                                                                     │
 │ --name                          TEXT                                 Name of the installation                                                                                                                                                                                                           │
@@ -231,7 +231,7 @@ Bootstrap exordos locally
 │ --boot-bridge                   TEXT                                 Name of the linux bridge for the bootstrap network, it will be created if not set.                                                                                                                                                 │
 │ --force                     -f                                       Rebuild if the output already exists                                                                                                                                                                                               │
 │ --no-wait                                                            Cancel waiting for the installation to start                                                                                                                                                                                       │
-│ --repository                -r  TEXT                                 Default element repository [default: https://repository.genesis-core.tech/]                                                                                                                                                        │
+│ --repository                -r  TEXT                                 Default element repository [default: https://repo.exordos.com/]                                                                                                                                                        │
 │ --admin-password                TEXT                                 A password for the admin user in. If not provided, the password will be generated.                                                                                                                                                 │
 │ --save-admin-password-file      TEXT                                 If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.                                                                                                                         │
 │ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. If not set, the first address of the network(--cidr option) will be used.                                               │

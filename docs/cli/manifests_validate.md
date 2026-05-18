@@ -15,7 +15,7 @@ Validate manifest
 
 * `repository`:
     * Type: text
-    * Default: `https://repository.genesis-core.tech/exordos-elements/`
+    * Default: `https://repo.exordos.com/exordos-elements/`
     * Usage: `-r
 --repository`
 

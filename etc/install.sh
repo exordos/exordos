@@ -53,7 +53,7 @@ if [ "$OS" = "Darwin" ]; then
         exit 1
     fi
 
-    DOWNLOAD_URL="https://repository.genesis-core.tech/exordos/latest/exordos-macos"
+    DOWNLOAD_URL="https://repo.exordos.com/exordos/latest/exordos-macos"
 
     if [ -d "/Applications/exordos.app" ]; then
         status "Removing existing exordos installation..."
@@ -142,7 +142,7 @@ done
 
 status "Installing exordos to $BINDIR"
 
-download_and_extract "https://repository.genesis-core.tech/exordos/latest" "$BINDIR" "exordos-linux"
+download_and_extract "https://repo.exordos.com/exordos/latest" "$BINDIR" "exordos-linux"
 $SUDO chmod +x "$BINDIR"/exordos
 
 install_success() {

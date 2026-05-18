@@ -19,7 +19,7 @@ import typing as tp
 
 PKG_NAME = "exordos"
 GITHUB_RELEASES_URL = f"https://api.github.com/repos/infraguys/{PKG_NAME}/releases"
-EXORDOS_REPO_URL = "https://repository.genesis-core.tech"
+EXORDOS_REPO_URL = "https://repo.exordos.com"
 ELEMENT_REPO_PATH = "exordos-elements"
 ELEMENT_REPO_URL = f"{EXORDOS_REPO_URL}/{ELEMENT_REPO_PATH}"
 LIBVIRT_DEF_POOL_PATH = "/var/lib/libvirt/images"

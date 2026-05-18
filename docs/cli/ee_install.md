@@ -15,7 +15,7 @@ Install element from a manifest (YAML file)
 
 * `repository`:
     * Type: text
-    * Default: `https://repository.genesis-core.tech/exordos-elements/`
+    * Default: `https://repo.exordos.com/exordos-elements/`
     * Usage: `-r
 --repository`
 
@@ -50,7 +50,7 @@ Install element from a manifest (YAML file)
  Install element from a manifest (YAML file)                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --repository  -r  TEXT  Repository endpoint [default: https://repository.genesis-core.tech/exordos-elements/]                                                                                                                                                                                           │
+│ --repository  -r  TEXT  Repository endpoint [default: https://repo.exordos.com/exordos-elements/]                                                                                                                                                                                           │
 │ --version     -v  TEXT  version of the element                                                                                                                                                                                                                                                          │
 │ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
