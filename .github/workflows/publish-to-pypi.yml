@@ -7,7 +7,7 @@ on:
 
 env:
   PROJECT_NAME: exordos
-  DEVTOOLS_PATH: https://repository.genesis-core.tech/exordos/
+  DEVTOOLS_PATH: https://repo.exordos.com/exordos/
   REPO_ENDPOINT_PUT: http://10.20.0.1:8082
 
 jobs:

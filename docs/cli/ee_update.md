@@ -15,7 +15,7 @@ Update element from a YAML file
 
 * `repository`:
     * Type: text
-    * Default: `https://repository.genesis-core.tech/exordos-elements/`
+    * Default: `https://repo.exordos.com/exordos-elements/`
     * Usage: `-r
 --repository`
 
@@ -50,7 +50,7 @@ Update element from a YAML file
  Update element from a YAML file                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --repository  -r  TEXT  Repository endpoint [default: https://repository.genesis-core.tech/exordos-elements/]                                                                                                                                                                                           │
+│ --repository  -r  TEXT  Repository endpoint [default: https://repo.exordos.com/exordos-elements/]                                                                                                                                                                                           │
 │ --version     -v  TEXT  version of the element                                                                                                                                                                                                                                                          │
 │ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯

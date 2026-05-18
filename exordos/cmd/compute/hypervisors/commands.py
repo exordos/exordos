@@ -295,7 +295,7 @@ def _download_rom_file(version: str) -> None:
     rom_path = f"/usr/share/qemu/{rom_filename}"
     if not os.path.exists(rom_path):
         runsh(
-            f"wget -O {rom_path} --timeout=30 https://repository.genesis-core.tech/seed_os/{version}/{rom_filename}"
+            f"wget -O {rom_path} --timeout=30 https://repo.exordos.com/seed_os/{version}/{rom_filename}"
         ).raise_on_result()
 
     else:

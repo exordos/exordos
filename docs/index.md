@@ -19,7 +19,7 @@ With a single binary you can:
 Install the CLI with a single command:
 
 ```bash
-curl -fsSL https://repository.genesis-core.tech/install.sh | sudo sh
+curl -fsSL https://repo.exordos.com/install.sh | sudo sh
 ```
 
 ### Via uv

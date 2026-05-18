@@ -1,5 +1,5 @@
 SHELL := bash
-REPOSITORY := https://repository.genesis-core.tech
+REPOSITORY := https://repo.exordos.com
 ifeq ($(SSH_KEY),)
 	SSH_KEY = ~/.ssh/id_rsa.pub
 endif
