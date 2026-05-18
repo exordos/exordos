@@ -131,7 +131,7 @@ class SimpleBuilder:
             subprocess.run(
                 [
                     "zstd",
-                    "-10",  # The trade-off between speed and size
+                    "-9",  # The trade-off between speed and size
                     "-T0",
                     "-f",
                     "-o",
