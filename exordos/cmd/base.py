@@ -153,6 +153,7 @@ def create_entity_group(
         ) -> None:
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             base_client.delete_entity(client, entity_collection, uuid)
+            click.echo(f"{entity_name} {uuid} deleted")
 
         entity_group.add_command(delete_cmd, aliases=["d"])
 

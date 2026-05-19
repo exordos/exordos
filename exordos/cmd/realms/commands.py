@@ -18,6 +18,7 @@ from __future__ import annotations
 import dataclasses
 import os
 
+import requests
 import rich_click as click
 
 from exordos.cmd.aliases import ClickAliasedGroup
@@ -82,7 +83,16 @@ def ssh_cmd(realm: str | None, username: str) -> None:
 class Realm:
     name: str
     ip: str
-    local: bool
+    provider: str
+    status: str
+
+
+def check_api(url: str) -> bool:
+    try:
+        requests.get(url, timeout=1)
+        return True
+    except requests.exceptions.RequestException:
+        return False
 
 
 @click.command("list", help="List of realms")
@@ -101,39 +111,66 @@ def list_cmd(ctx: click.Context) -> None:
             ip = libvirt.get_domain_ip(stand.bootstraps[0].name)
         else:
             ip = stand.network.cidr[2]
-        realms[str(ip)] = Realm(stand.name, str(ip), True)
+        realms[str(ip)] = Realm(stand.name, str(ip), "local", "Active")
 
     # Get the list of remote realms by config
     for config_realm_name, config_realm in config_realms.items():
+        endpoint = config_realm.get("endpoint", "")
+        if not endpoint:
+            continue
         try:
-            ip = get_ip_from_url(config_realm.get("endpoint", ""))
+            ip = get_ip_from_url(endpoint)
             if realm := realms.get(ip):
                 realm.name = config_realm_name
                 continue
         except ValueError:
             continue
-        realms[ip] = Realm(config_realm_name, ip, False)
+        if check_api(endpoint):
+            status = "Connected"
+        else:
+            status = "Disconnected"
 
-    table = get_table(*["Name", "IP", "Local/Remote"])
+        realms[ip] = Realm(config_realm_name, ip, "remote", status)
+
+    table = get_table(*["Name", "IP", "Provider", "Status"])
     for realm in realms.values():
-        table.add_row(realm.name, realm.ip, "local" if realm.local else "remote")
+        table.add_row(realm.name, realm.ip, realm.provider, realm.status)
 
     print_table(table)
 
 
-realms_group.add_command(list_cmd, aliases=["l"])
-
-
-@realms_group.command("delete", help="Delete local realm")
+@click.command("delete", help="Delete local realm")
 @click.argument("name", type=str)
-def delete_cmd(name: str) -> None:
+@click.pass_context
+def delete_cmd(ctx: click.Context, name: str) -> None:
     infra = libvirt_infra.LibvirtInfraDriver()
+    local_stands = infra.list_stands()
 
-    # Check if the target stand already exists
-    for stand in infra.list_stands():
+    for stand in local_stands:
         if stand.name == name:
-            break
-    else:
-        raise click.UsageError(f"Local realm {name} not found")
+            click.echo(f"Deleting local realm {stand.name}...")
+            infra.delete_stand(stand)
+            return None
 
-    infra.delete_stand(stand)
+    config = ctx.obj.cfg
+    config_realm = config.get("realms", {}).get(name)
+    if config_realm:
+        try:
+            config_ip = get_ip_from_url(config_realm.get("endpoint", ""))
+            for stand in local_stands:
+                if stand.network.dhcp:
+                    ip = libvirt.get_domain_ip(stand.bootstraps[0].name)
+                else:
+                    ip = stand.network.cidr[2]
+                if str(ip) == config_ip:
+                    click.echo(f"Deleting local realm {stand.name}...")
+                    infra.delete_stand(stand)
+                    return None
+        except ValueError as err:
+            click.echo(f"Error while converting IP address: {err}")
+
+    raise click.ClickException(f"Local realm {name} not found")
+
+
+realms_group.add_command(list_cmd, aliases=["l"])
+realms_group.add_command(delete_cmd, aliases=["d"])

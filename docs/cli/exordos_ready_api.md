@@ -1,45 +1,17 @@
 
-# exordos_sync
+# exordos_ready_api
 
-copy exordos core from local git repo to bootstrap
+Check if Exordos api is ready to use
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos sync [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                               
+ Usage: exordos ready_api [OPTIONS]                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
-
-* `target_dir`:
-    * Type: path
-    * Default: `sentinel.unset`
-    * Usage: `-t
---target-dir`
-
-  Directory to copy exordos core to
-
-* `name`:
-    * Type: text
-    * Default: `core`
-    * Usage: `-n
---name`
-
-  Element name
-
-* `user`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--user`
-
-  ssh user name
-
-* `project_dir`:
-    * Type: path
-    * Default: `sentinel.unset`
-    * Usage: `project_dir`
 
 * `help`:
     * Type: boolean
@@ -52,14 +24,11 @@ copy exordos core from local git repo to bootstrap
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos sync [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                               
+ Usage: exordos ready_api [OPTIONS]                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
- copy exordos core from local git repo to bootstrap                                                                                                                                                                                                                                                        
+ Check if Exordos api is ready to use                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --target-dir  -t  PATH  Directory to copy exordos core to                                                                                                                                                                                                                                               │
-│ --name        -n  TEXT  Element name                                                                                                                                                                                                                                                                    │
-│ --user            TEXT  ssh user name                                                                                                                                                                                                                                                                   │
-│ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │
+│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

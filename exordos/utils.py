@@ -542,7 +542,7 @@ def load_spec() -> dict:
     return load_yaml(spec_path)
 
 
-def convert_input_multiply(params: tuple[str, ...]) -> dict[str, str]:
+def convert_input_multiply(params: tuple[str, ...]) -> dict[str, ...]:
     result = {}
     for param in params:
         if "=" not in param:
@@ -550,7 +550,7 @@ def convert_input_multiply(params: tuple[str, ...]) -> dict[str, str]:
                 f"Invalid variable format: '{param}'. Expected 'key=value'."
             )
         key, value = param.split("=", 1)
-        result[key] = value
+        result[key] = convert_to_nearest_type(value)
     return result
 
 

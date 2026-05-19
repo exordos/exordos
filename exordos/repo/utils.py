@@ -26,7 +26,14 @@ def load_repo_driver(
     target: str | None,
     project_dir: str,
     exordosctl_cfg_file: str = c.CONFIG_FILE,
+    driver_kind: str | None = None,
+    driver_params: tuple[str, ...] | None = None,
 ) -> base_repo.AbstractRepoDriver:
+    if driver_kind:
+        params = utils.convert_input_multiply(driver_params or ())
+        driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
+        return driver_class(name=target, **params)
+
     try:
         gen_config, _ = utils.get_exordos_config(
             project_dir, exordos_cfg_file, exordosctl_cfg_file

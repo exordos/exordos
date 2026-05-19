@@ -98,12 +98,12 @@ COMMANDS_WITHOUT_CONFIG = {
 )
 @click.option(
     "-a",
-    "--access_token",
+    "--access-token",
     default=None,
     help="access token for the client user",
 )
 @click.option(
-    "--refresh_token",
+    "--refresh-token",
     default=None,
     help="refresh token for the client user",
 )
