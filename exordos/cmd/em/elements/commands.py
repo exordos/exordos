@@ -258,7 +258,9 @@ def upgrade_manifest(
     while required_elements:
         requirement = required_elements.pop()
         if requirement not in installed_elements:
-            click.echo(f"The following dependency element will be installed: {requirement}")
+            click.echo(
+                f"The following dependency element will be installed: {requirement}"
+            )
         req_manifest = repo_lib.download_manifest(repository, requirement)
 
         # Determine requirements for the element
@@ -523,7 +525,9 @@ def clear(ctx: click.Context, y: bool) -> None:  # pragma: no cover
             continue
         if y or Confirm.ask(f"Do you want to uninstall {entity['name']}?"):
             uninstalled_name = f"{entity['name']} ({entity['version']})"
-            click.echo(f"Uninstalling element {click.style(uninstalled_name, fg='green')}")
+            click.echo(
+                f"Uninstalling element {click.style(uninstalled_name, fg='green')}"
+            )
             base_client.delete_entity(client, ENTITY_COLLECTION, entity["uuid"])
     return None
 

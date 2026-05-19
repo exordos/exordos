@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 import re
 import typing as tp
 import urllib.parse
@@ -104,9 +105,27 @@ def download_manifest(
     else:
         latest_dir = manifest_version
 
+    # get inventory.json
+    inventory_url = _join_url(element_url, latest_dir, "inventory.json")
+    try:
+        inventory = json.loads(_http_get(inventory_url))
+    except Exception as exc:
+        raise ManifestNotFound(
+            f"Failed to download or parse inventory at {inventory_url}: {exc}"
+        )
+    # get manifest_name from inventory
+    target_manifest_path = None
+    for manifest_path in inventory["manifests"]:
+        stem = Path(manifest_path).stem
+        if stem == manifest_name:
+            target_manifest_path = manifest_path
+    if target_manifest_path is None:
+        raise ManifestNotFound(
+            f"Manifest '{manifest_name}' not found in inventory at {inventory_url}"
+        )
     # 4) Build manifest URL and download YAML
     manifest_url = _join_url(
-        element_url, latest_dir, "manifests/", f"{manifest_name}.yaml"
+        element_url, latest_dir, "manifests/", target_manifest_path
     )
     try:
         data = _http_get(manifest_url)
