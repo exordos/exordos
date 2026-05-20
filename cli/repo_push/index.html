@@ -557,6 +557,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../cn_update/" class="md-nav__link">
+        cn_update
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../compute_cn/" class="md-nav__link">
         compute_cn
       </a>
@@ -1175,6 +1189,20 @@
     <li class="md-nav__item">
       <a href="../exordos_push/" class="md-nav__link">
         exordos_push
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exordos_ready_api/" class="md-nav__link">
+        exordos_ready_api
       </a>
     </li>
   
@@ -2530,6 +2558,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../sets_add/" class="md-nav__link">
+        sets_add
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../sets_delete/" class="md-nav__link">
         sets_delete
       </a>
@@ -2560,6 +2602,20 @@
     <li class="md-nav__item">
       <a href="../sets_show/" class="md-nav__link">
         sets_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sets_update/" class="md-nav__link">
+        sets_update
       </a>
     </li>
   
@@ -3217,6 +3273,25 @@
 </ul>
 <p>Name of the project configuration file</p>
 <ul>
+<li><code>driver</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-d
+--driver</code></li>
+</ul>
+</li>
+</ul>
+<p>Driver to use, nginx for example</p>
+<ul>
+<li><code>driver_params</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--driver-params</code></li>
+</ul>
+</li>
+</ul>
+<p>Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=<a href="http://repo.local.genesis-core.tech:8080/">http://repo.local.genesis-core.tech:8080/</a> --driver-params auth=["user","password"]</p>
+<ul>
 <li><code>target</code>:<ul>
 <li>Type: text</li>
 <li>Default: <code>none</code></li>
@@ -3283,6 +3358,8 @@
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
 <span class="go">│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │</span>
+<span class="go">│ --driver            -d  TEXT  Driver to use, nginx for example                                                                                                                                                                                                                                          │</span>
+<span class="go">│ --driver-params         TEXT  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.genesis-core.tech:8080/ --driver-params auth=["user","password"]                                                                                   │</span>
 <span class="go">│ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │</span>
 <span class="go">│ --element-dir       -e  PATH  Directory where element artifacts are stored                                                                                                                                                                                                                              │</span>
 <span class="go">│ --force             -f        Force push even if the element already exists                                                                                                                                                                                                                             │</span>
