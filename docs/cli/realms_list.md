@@ -1,7 +1,7 @@
 
 # realms_list
 
-List of running exordos realms
+List of realms
 
 ## Usage
 
@@ -26,7 +26,7 @@ List of running exordos realms
                                                                                                                                                                                                                                                                                                            
  Usage: exordos realms list [OPTIONS]                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- List of running exordos realms                                                                                                                                                                                                                                                                            
+ List of realms                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

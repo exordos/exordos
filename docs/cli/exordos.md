@@ -48,14 +48,14 @@ Provides all the necessary tools for work with Exordos Platform
     * Type: text
     * Default: `none`
     * Usage: `-a
---access_token`
+--access-token`
 
   access token for the client user
 
 * `refresh_token`:
     * Type: text
     * Default: `none`
-    * Usage: `--refresh_token`
+    * Usage: `--refresh-token`
 
   refresh token for the client user
 

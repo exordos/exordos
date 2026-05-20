@@ -19,6 +19,7 @@ import json
 import pathlib
 import typing as tp
 
+import rich.status as rich_status
 import rich_click as click
 
 from exordos import constants as c
@@ -183,6 +184,21 @@ def repo_list_cmd(
     help="Name of the project configuration file",
 )
 @click.option(
+    "-d",
+    "--driver",
+    default=None,
+    help="Driver to use, nginx for example",
+)
+@click.option(
+    "--driver-params",
+    multiple=True,
+    help=(
+        "Additional params to pass to the driver. "
+        "The format is 'key=value'. For example: --driver-params "
+        'url=http://repo.local.genesis-core.tech:8080/ --driver-params auth=["user","password"]'
+    ),
+)
+@click.option(
     "-t",
     "--target",
     default=None,
@@ -214,14 +230,16 @@ def repo_list_cmd(
 def push_cmd(
     obj: "ContextObject",
     exordos_cfg_file: str,
+    driver: str | None,
+    driver_params: tuple[str, ...],
     target: str | None,
     element_dir: str,
     force: bool,
     latest: bool,
     project_dir: str,
 ) -> None:
-    driver = repo_utils.load_repo_driver(
-        exordos_cfg_file, target, project_dir, obj.cfg_path
+    repo_driver = repo_utils.load_repo_driver(
+        exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
     )
 
     # Push elements
@@ -237,12 +255,16 @@ def push_cmd(
     for inventory in inventories:
         element = base_builder.ElementInventory.from_dict(inventory)
         try:
-            driver.push(element, latest=latest)
+            with rich_status.Status("Push the element to the repo...", spinner="dots"):
+                repo_driver.push(element, latest=latest)
         except base_repo.ElementAlreadyExistsError:
             if force:
-                driver.remove(element)
-                driver.push(element, latest=latest)
-                continue
+                repo_driver.remove(element)
+                with rich_status.Status(
+                    "Push the element to the repo...", spinner="dots"
+                ):
+                    repo_driver.push(element, latest=latest)
+                    continue
 
             click.secho(
                 f"Element {element.name} version {element.version} already exists.",

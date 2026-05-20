@@ -16,14 +16,14 @@ Initialize hypervisor
 * `romfile_version`:
     * Type: text
     * Default: `latest`
-    * Usage: `--romfile_version`
+    * Usage: `--romfile-version`
 
   version of the rom file
 
 * `pool_name`:
     * Type: text
     * Default: `default`
-    * Usage: `--pool_name`
+    * Usage: `--pool-name`
 
   storage pool name
 
@@ -34,6 +34,13 @@ Initialize hypervisor
 --packer`
 
   Install packer
+
+* `user`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--user`
+
+  username
 
 * `help`:
     * Type: boolean

@@ -252,18 +252,21 @@ def _install_packages() -> None:
     run_command(cmd)
 
 
-def _add_user_to_groups() -> None:
+def _add_user_to_groups(user: str | None) -> None:
     """Add current user to libvirt and kvm groups."""
-    username = os.environ.get("USER")
-    if not username:
-        raise click.ClickException("Cannot determine current username")
-    else:
-        click.echo(f"Current username: {username}")
+    users = []
+    if user:
+        users.append(user)
+    current_username = os.environ.get("USER")
+    if current_username and current_username not in users:
+        users.append(current_username)
 
-    cmd = ["usermod", "-a", "-G", "libvirt", username]
-    run_command(cmd)
-    cmd = ["usermod", "-a", "-G", "kvm", username]
-    run_command(cmd)
+    for username in users:
+        click.echo(f"Adding user {username} to libvirt and kvm groups")
+        cmd = ["usermod", "-a", "-G", "libvirt", username]
+        run_command(cmd)
+        cmd = ["usermod", "-a", "-G", "kvm", username]
+        run_command(cmd)
 
 
 def _create_storage_pool(pool_name: str) -> None:
@@ -384,13 +387,13 @@ def _install_packer() -> None:
 
 @hypervisors_group.command("init", help="Initialize hypervisor")
 @click.option(
-    "--romfile_version",
+    "--romfile-version",
     type=str,
     default="latest",
     help="version of the rom file",
 )
 @click.option(
-    "--pool_name",
+    "--pool-name",
     type=str,
     default="default",
     help="storage pool name",
@@ -403,7 +406,15 @@ def _install_packer() -> None:
     default=False,
     help="Install packer",
 )
-def init_cmd(romfile_version: str, pool_name: str, packer: bool) -> None:
+@click.option(
+    "--user",
+    type=str,
+    required=False,
+    help="username",
+)
+def init_cmd(
+    romfile_version: str, pool_name: str, packer: bool, user: str | None
+) -> None:
     """Initialize hypervisor with all required components."""
 
     if not _check_debian_like():
@@ -424,7 +435,7 @@ def init_cmd(romfile_version: str, pool_name: str, packer: bool) -> None:
     _install_packages()
 
     log.info("Adding user to required groups...")
-    _add_user_to_groups()
+    _add_user_to_groups(user)
 
     log.info("Setting up storage pool...")
     _create_storage_pool(pool_name)
