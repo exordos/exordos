@@ -20,16 +20,20 @@ import subprocess
 import tempfile
 import time
 import typing as tp
+import uuid as sys_uuid
 
 from bazooka import exceptions as bazooka_exc
 from rich.prompt import Confirm
 from rich.prompt import Prompt
+from rich.text import Text
 import rich_click as click
 
 from exordos import utils
 from exordos.clients import base_client
 from exordos.clients import repo as repo_lib
 from exordos.cmd.base import create_entity_group
+from exordos.common import compute
+from exordos.common import ssh
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
@@ -529,6 +533,115 @@ def clear(ctx: click.Context, y: bool) -> None:  # pragma: no cover
                 f"Uninstalling element {click.style(uninstalled_name, fg='green')}"
             )
             base_client.delete_entity(client, ENTITY_COLLECTION, entity["uuid"])
+    return None
+
+
+@ee_group.command(
+    name="ssh",
+    help="copy exordos element from local git repo to element nodes, "
+    "example cmd: exordos e e ssh empty",
+)
+@click.option(
+    "--user",
+    type=str,
+    required=False,
+    help="ssh user name",
+)
+@click.option(
+    "-i",
+    "--public-key",
+    type=click.Path(exists=True),
+    required=False,
+    help="key or path to it, for example: /home/user/.ssh/id_rsa.pub",
+)
+@click.option(
+    "-p",
+    "--private-key",
+    type=click.Path(exists=True),
+    required=False,
+    help="key or path to it, for example: /home/user/.ssh/id_rsa.pub",
+)
+@click.option(
+    "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+)
+@click.argument("name")
+@click.pass_context
+def ssh_cmd(
+    ctx: click.Context,
+    user: str | None,
+    public_key: str | None,
+    private_key: str | None,
+    y: bool,
+    name: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
+    element_data = base_client.get_entity(client, c.ELEMENT_COLLECTION, name)
+    targets = compute.get_compute_targets_from_element(client, element_data)
+    if len(targets) == 1:
+        target = targets[0]
+    else:
+        target = {}
+        target_uuid = Prompt.ask(
+            Text("Select target uuid for ssh"),
+            choices=[t["uuid"] for t in targets],
+        )
+        for target in targets:
+            if target["uuid"] == target_uuid:
+                break
+
+    if public_key:
+        with open(public_key, "r") as f:
+            target_public_key = f.read()
+        key_pair_name = public_key.split("/")[-1].split(".")[0]
+        if not private_key:
+            private_key_path = public_key.replace(".pub", "")
+            if os.path.exists(private_key_path):
+                private_key = private_key_path
+    else:
+        key_pair_name = ssh.generate_random_ssh_key_name()
+        with ssh.generate_keys(key_pair_name, permanent=True) as (priv_path, pub_path):
+            private_key = priv_path
+            public_key = pub_path
+            with open(pub_path, "r") as f:
+                target_public_key = f.read()
+
+    ssh_keys = []
+    ssh_key_base_data = {
+        "user": str(user or c.BOOTSTRAP_USER),
+        "target_public_key": target_public_key,
+    }
+    target_data = ssh_key_base_data.copy()
+    target_data["name"] = f"{key_pair_name}_for_{target['name']}"
+    target_data["uuid"] = str(sys_uuid.uuid4())
+    target_data["target"] = target["target"]
+    target_data["project_id"] = target["project_id"]
+    ssh_key = base_client.add_entity(client, c.SSH_KEY_COLLECTION, target_data)
+    ssh_keys.append(ssh_key)
+
+    ssh.wait_for_ssh_keys(client, ssh_keys)
+
+    for ip in target["ips"]:
+        if y or Confirm.ask(Text(f"Do you want ssh to {ip}?")):
+            if private_key:
+                click.secho(
+                    f"Your private key is {click.style(private_key, fg='green')}"
+                )
+                click.secho(f"Your public key is {click.style(public_key, fg='green')}")
+            cmd = [
+                "ssh",
+                "-t",
+                f"{user or c.BOOTSTRAP_USER}@{ip}",
+                "-o StrictHostKeyChecking=no",
+                "-o UserKnownHostsFile=/dev/null",
+            ]
+            if private_key:
+                cmd.append("-i")
+                cmd.append(private_key)
+            try:
+                subprocess.Popen(cmd)
+            except subprocess.CalledProcessError as e:
+                raise click.ClickException(e.stderr)
     return None
 
 

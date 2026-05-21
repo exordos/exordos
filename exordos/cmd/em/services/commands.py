@@ -15,13 +15,17 @@
 #    under the License.
 from __future__ import annotations
 
+import subprocess
 import uuid as sys_uuid
 
+from rich.prompt import Confirm
 import rich_click as click
 
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.common import compute
+from exordos.common import ssh
 from exordos.common.table import show_data
 
 ENTITY = "service"
@@ -135,3 +139,77 @@ def update_cmd(
 
 services_group.add_command(add_cmd, aliases=["a"])
 services_group.add_command(update_cmd, aliases=["u"])
+
+
+@services_group.command(
+    hidden=True,
+    help="copy exordos element from local git repo to element nodes, "
+    "example cmd: exordos e s restart example-service",
+)
+@click.option(
+    "--user",
+    type=str,
+    required=False,
+    help="ssh user name",
+)
+@click.argument("name")
+@click.option(
+    "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+)
+@click.pass_context
+def restart(ctx: click.Context, user: str, name: str, y: bool) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
+    service_data = base_client.get_entity(client, c.SERVICE_COLLECTION, name)
+    service_name = service_data["name"]
+    targets = compute.get_compute_targets_from_service(client, service_data)
+
+    key_pair_name = ssh.generate_random_ssh_key_name()
+    with ssh.generate_keys(key_pair_name) as (priv_path, pub_path):
+        with open(pub_path, "r") as f:
+            target_public_key = f.read()
+        ssh_keys = []
+        try:
+            ssh_key_base_data = {
+                "user": str(user or c.BOOTSTRAP_USER),
+                "target_public_key": target_public_key,
+            }
+            for target in targets:
+                target_data = ssh_key_base_data.copy()
+                target_data["name"] = f"{key_pair_name}_for_{target['name']}"
+                target_data["uuid"] = str(sys_uuid.uuid4())
+                target_data["target"] = target["target"]
+                target_data["project_id"] = target["project_id"]
+                ssh_key = base_client.add_entity(
+                    client, c.SSH_KEY_COLLECTION, target_data
+                )
+                ssh_keys.append(ssh_key)
+
+            ssh.wait_for_ssh_keys(client, ssh_keys)
+
+            for target in targets:
+                for ip in target["ips"]:
+                    click.echo(f"Restarting service on {ip}")
+
+                    if y or Confirm.ask(f"Do you want to deploy code to {ip}?"):
+                        cmd = [
+                            "ssh",
+                            f"{user or c.BOOTSTRAP_USER}@{ip}",
+                            "-i",
+                            priv_path,
+                            "echo",
+                            f"restarting service {service_name}",
+                        ]
+                        try:
+                            pr = subprocess.run(
+                                cmd, check=True, capture_output=True, text=True
+                            )
+                            click.echo(
+                                f"Service {service_name} restarted on {ip}: {pr.stdout}"
+                            )
+                        except subprocess.CalledProcessError as e:
+                            raise click.ClickException(e.stderr)
+        finally:
+            for ssh_key in ssh_keys:
+                base_client.delete_entity(client, c.SSH_KEY_COLLECTION, ssh_key["uuid"])
+    return None

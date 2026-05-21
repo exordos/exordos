@@ -1,7 +1,7 @@
 
 # exordos_sync
 
-copy exordos core from local git repo to bootstrap
+copy exordos element from local git repo to element nodes, example cmd: exordos sync --name empty /home/user/PycharmProjects/exordos/exordos_empty
 
 ## Usage
 
@@ -36,6 +36,14 @@ copy exordos core from local git repo to bootstrap
 
   ssh user name
 
+* `y`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--y
+-y`
+
+  Automatically answer yes for all questions
+
 * `project_dir`:
     * Type: path
     * Default: `sentinel.unset`
@@ -54,12 +62,13 @@ copy exordos core from local git repo to bootstrap
                                                                                                                                                                                                                                                                                                            
  Usage: exordos sync [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
- copy exordos core from local git repo to bootstrap                                                                                                                                                                                                                                                        
+ copy exordos element from local git repo to element nodes, example cmd: exordos sync --name empty /home/user/PycharmProjects/exordos/exordos_empty                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --target-dir  -t  PATH  Directory to copy exordos core to                                                                                                                                                                                                                                               │
 │ --name        -n  TEXT  Element name                                                                                                                                                                                                                                                                    │
 │ --user            TEXT  ssh user name                                                                                                                                                                                                                                                                   │
+│ --y           -y        Automatically answer yes for all questions                                                                                                                                                                                                                                      │
 │ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
