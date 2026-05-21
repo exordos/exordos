@@ -36,12 +36,12 @@ variable img_format {
 
 variable base_image_url {
   type    = string
-  default = "http://repository.genesis-core.tech:8081/genesis-base/latest/genesis-base.qcow2"
+  default = "https://repo.exordos.com/genesis-base/latest/genesis-base.qcow2"
 }
 
 variable base_image_checksum {
   type    = string
-  default = "file:http://repository.genesis-core.tech:8081/SHA256SUMS"
+  default = "file:https://repo.exordos.com/SHA256SUMS"
 }
 
 data "sshkey" "install" {
