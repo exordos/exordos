@@ -55,7 +55,7 @@ build:
         src: /tmp/exordos_core_test_dir
     - dst: /opt/undionly.kpxe
       http:
-        src: http://repository.genesis-core.tech:8081/ipxe/latest/undionly.kpxe
+        src: https://repo.exordos.com/ipxe/latest/undionly.kpxe
   elements:
     - images:
       - name: exordos-core

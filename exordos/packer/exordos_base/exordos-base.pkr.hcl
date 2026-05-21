@@ -39,8 +39,8 @@ data "sshkey" "install" {
 }
 
 source "qemu" "exordos-base" {
-  iso_url                   = "http://repository.genesis-core.tech:8081/exordos-base/latest/exordos-base.qcow2"
-  iso_checksum              = "file:http://repository.genesis-core.tech:8081/exordos-base/latest/SHA256SUMS"
+  iso_url                   = "https://repo.exordos.com/exordos-base/latest/exordos-base.qcow2"
+  iso_checksum              = "file:https://repo.exordos.com/exordos-base/latest/SHA256SUMS"
   accelerator               = "kvm"
   cpu_model                 = "host"
   boot_wait                 = "5s"

@@ -39,8 +39,8 @@ data "sshkey" "install" {
 }
 
 source "qemu" "genesis-base" {
-  iso_url                   = "http://repository.genesis-core.tech:8081/genesis-base/latest/genesis-base.qcow2"
-  iso_checksum              = "file:http://repository.genesis-core.tech:8081/genesis-base/latest/SHA256SUMS"
+  iso_url                   = "https://repo.exordos.com/genesis-base/latest/genesis-base.qcow2"
+  iso_checksum              = "file:https://repo.exordos.com/genesis-base/latest/SHA256SUMS"
   accelerator               = "kvm"
   cpu_model                 = "host"
   boot_wait                 = "5s"

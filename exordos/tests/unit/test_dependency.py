@@ -84,7 +84,7 @@ class TestDependency:
         assert dep.img_dest == "/opt/undionly.kpxe"
         assert (
             dep._endpoint
-            == "http://repository.genesis-core.tech:8081/ipxe/latest/undionly.kpxe"
+            == "https://repo.exordos.com/ipxe/latest/undionly.kpxe"
         )
         assert dep.local_path is None
 
