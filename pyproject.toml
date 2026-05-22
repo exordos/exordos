@@ -168,6 +168,7 @@ S3QcowBackuper = "exordos.backup.s3:S3QcowBackuper"
 [project.entry-points."exordos.repo.drivers"]
 fs = "exordos.repo.fs:FSRepoDriver"
 nginx = "exordos.repo.nginx:NginxRepoDriver"
+proxy = "exordos.repo.simple_server:SimplePythonServerRepoDriver"
 
 [tool.uv]
 package = true

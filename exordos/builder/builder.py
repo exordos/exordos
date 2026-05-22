@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import gzip
-import json
 import os
 import pathlib
 import shutil
@@ -31,12 +30,23 @@ from exordos import constants as c
 from exordos.builder import base
 from exordos.logger import AbstractLogger
 from exordos.logger import DummyLogger
+from exordos.repo import base as base_repo
+from exordos.repo import elements_inventory
 from exordos.repo import fs as repo_fs
+
+JINJA2_EXTENSIONS = (".jinja2", ".j2")
+CONVERT_IMAGE_FORMATS_MAP = {
+    "raw": "raw",
+    "qcow2": "qcow2",
+    "gz": "raw.gz",
+    "zst": "raw.zst",
+}
 
 
 class SimpleBuilder:
     """Simple element builder."""
 
+    BUILD_KEY = "build"
     DEPS_KEY = "deps"
     ELEMENTS_KEY = "elements"
 
@@ -49,6 +59,7 @@ class SimpleBuilder:
         logger: tp.Optional[AbstractLogger] = None,
         elements_output_dir: pathlib.Path = pathlib.Path(c.DEF_GEN_OUTPUT_DIR_NAME),
         version: str = "0.0.0",
+        only_manifests: bool = False,
     ) -> None:
         super().__init__()
         self._deps = deps
@@ -58,20 +69,44 @@ class SimpleBuilder:
         self._logger = logger or DummyLogger()
         self._elements_output_dir = elements_output_dir
         self._version = version
+        self._only_manifests = only_manifests
 
         if not os.path.exists(self._elements_output_dir):
             os.makedirs(self._elements_output_dir)
 
-    def _build_config_artifact(
-        self,
+    @staticmethod
+    def _get_config_artifact_path(
         config_artifact: base.Config | base.Artifact,
         output_dir: pathlib.Path,
     ) -> pathlib.Path:
-        output_dir.mkdir(parents=True, exist_ok=True)
         dst_path = output_dir / pathlib.Path(config_artifact.path).name
+        return pathlib.Path(dst_path.name)
+
+    @staticmethod
+    def _build_config_artifact(
+        config_artifact: base.Config | base.Artifact,
+        output_dir: pathlib.Path,
+    ) -> pathlib.Path:
+        dst_path = output_dir / pathlib.Path(config_artifact.path).name
+
+        output_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy(config_artifact.abs_path, dst_path)
 
         return pathlib.Path(dst_path.name)
+
+    @staticmethod
+    def _get_converted_image_path(
+        raw_src: pathlib.Path,
+        img_name: str,
+        fmt: str,
+    ) -> str:
+        if fmt == "raw":
+            return f"{img_name}.{CONVERT_IMAGE_FORMATS_MAP[fmt]}"
+        elif fmt in CONVERT_IMAGE_FORMATS_MAP:
+            tgt = raw_src.parent / f"{img_name}.{CONVERT_IMAGE_FORMATS_MAP[fmt]}"
+            return tgt.name
+        else:
+            raise ValueError(f"Unsupported image format: {fmt}")
 
     def _convert_image(
         self,
@@ -135,6 +170,20 @@ class SimpleBuilder:
         else:
             raise ValueError(f"Unsupported image format: {fmt}")
 
+    def _get_image_path(
+        self,
+        img: base.Image,
+        output_dir: pathlib.Path,
+    ) -> list[pathlib.Path]:
+        raw_src = output_dir / f"{img.name}.raw"
+
+        result_paths = []
+        for fmt in img.formats:
+            path = self._get_converted_image_path(raw_src, img.name, fmt)
+            result_paths.append(pathlib.Path(path))
+
+        return result_paths
+
     def _build_image(
         self,
         img: base.Image,
@@ -158,10 +207,22 @@ class SimpleBuilder:
             path = self._convert_image(raw_src, img.name, fmt)
             result_paths.append(pathlib.Path(path))
 
-        if "raw" not in img.formats:
+        if "raw" not in img.formats and os.path.exists(raw_src):
             os.unlink(raw_src)
 
         return result_paths
+
+    def _get_images_paths(
+        self,
+        element: base.Element,
+        output_dir: pathlib.Path,
+    ) -> list[pathlib.Path]:
+        image_paths = []
+        for img in element.images:
+            _paths = self._get_image_path(img, output_dir)
+            image_paths.extend(_paths)
+
+        return image_paths
 
     def _build_images(
         self,
@@ -187,8 +248,7 @@ class SimpleBuilder:
         orig_manifest_path = self._exordos_dir / element.manifest
 
         # Render templated manifests
-        jinja2_extensions = (".jinja2", ".j2")
-        if str(element.manifest).endswith(jinja2_extensions):
+        if str(element.manifest).endswith(JINJA2_EXTENSIONS):
             # Render Jinja2 manifest
             with open(orig_manifest_path) as f:
                 template = jinja2.Template(f.read())
@@ -228,13 +288,13 @@ class SimpleBuilder:
     ) -> base.ElementInventory | None:
         """Build an element."""
         self._logger.info(f"Building element: {element}")
-        configs, artifacts = [], []
+        configs, artifacts, images = [], [], []
 
         # If manifest is not provided, build only images and return.
         # We used the `--only-images` flag earlier to skip manifest processing.
         if not element.manifest:
             self._build_images(element, repo_dir, developer_keys)
-            return
+            return None
 
         # Prepare manifest variables
         manifest_vars = (manifest_vars or {}).copy()
@@ -264,17 +324,26 @@ class SimpleBuilder:
         for artifact in element.artifacts:
             artifact_dir = element_dir / "artifacts"
             artifact_dir.mkdir(parents=True, exist_ok=True)
-            _path = self._build_config_artifact(artifact, artifact_dir)
+            if self._only_manifests:
+                _path = self._get_config_artifact_path(artifact, artifact_dir)
+            else:
+                _path = self._build_config_artifact(artifact, artifact_dir)
             artifacts.append(_path)
         for config in element.configs:
             config_dir = element_dir / "configs"
             config_dir.mkdir(parents=True, exist_ok=True)
-            _path = self._build_config_artifact(config, config_dir)
+            if self._only_manifests:
+                _path = self._get_config_artifact_path(config, config_dir)
+            else:
+                _path = self._build_config_artifact(config, config_dir)
             configs.append(_path)
 
         # Build images
         images_dir = element_dir / "images"
-        images = self._build_images(element, images_dir, developer_keys)
+        if self._only_manifests:
+            images = self._get_images_paths(element, images_dir)
+        else:
+            images = self._build_images(element, images_dir, developer_keys)
 
         inventory = base.ElementInventory(
             name=name,
@@ -299,7 +368,10 @@ class SimpleBuilder:
         # Initialize repository if any element has a manifest
         if any(e.manifest for e in self._elements):
             repo = repo_fs.FSRepoDriver(self._elements_output_dir)
-            repo.init_repo()
+            try:
+                repo.init_repo()
+            except base_repo.RepoAlreadyExistsError:
+                pass
             repo_dir = pathlib.Path(repo.elements_path)
 
         inventories = []
@@ -313,18 +385,7 @@ class SimpleBuilder:
             if inventory:
                 inventories.append(inventory)
 
-        # Save inventories
-        # TODO(akremenetsky): It's internal logic of repository and it should be
-        # moved into repository models one day.
-        if inventories:
-            data = {"elements": {}}
-            for inventory in inventories:
-                data["elements"][inventory.name] = {
-                    inventory.version: inventory.to_dict()
-                }
-
-            with open(repo_dir / "inventory.json", "w") as f:
-                json.dump(data, f, indent=2, sort_keys=True)
+        elements_inventory.build(repo_dir, "")
 
     @classmethod
     def from_config(
@@ -335,6 +396,7 @@ class SimpleBuilder:
         elements_output_dir: pathlib.Path,
         version: str = "0.0.0",
         logger: AbstractLogger | None = None,
+        only_manifests: bool = False,
     ) -> "SimpleBuilder":
         """Create a builder from configuration."""
         # Prepare dependencies entries but do not fetch them
@@ -349,7 +411,8 @@ class SimpleBuilder:
         # Prepare elements
         element_configs = build_config.get(cls.ELEMENTS_KEY, [])
         elements = [
-            base.Element.from_config(elem, exordos_dir) for elem in element_configs
+            base.Element.from_config(elem, exordos_dir, version)
+            for elem in element_configs
         ]
 
         if not elements:
@@ -363,4 +426,5 @@ class SimpleBuilder:
             logger,
             elements_output_dir,
             version,
+            only_manifests,
         )

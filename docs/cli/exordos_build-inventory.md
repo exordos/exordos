@@ -1,48 +1,30 @@
 
-# users_list
+# exordos_build-inventory
 
-List users
+Build elements inventory
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos build-inventory [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `filters`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-f
---filters`
+* `elements_dir`:
+    * Type: path
+    * Default: `.`
+    * Usage: `-e
+--elements-dir`
 
-  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+  Directory where elements are stored
 
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
--o`
-
-  the output format, defaults to table
-
-* `watch`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `-w
---watch`
-
-  Watch the list of users
-
-* `interval`:
-    * Type: float range
-    * Default: `0.5`
-    * Usage: `--interval`
-
-  Refresh interval in seconds.
+* `project_dir`:
+    * Type: path
+    * Default: `.`
+    * Usage: `project_dir`
 
 * `help`:
     * Type: boolean
@@ -55,15 +37,12 @@ List users
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos build-inventory [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- List users                                                                                                                                                                                                                                                                                                
+ Build elements inventory                                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of users                                                                                                                                                                                                                                         │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│ --elements-dir  -e  PATH  Directory where elements are stored                                                                                                                                                                                                                                           │
+│ --help                    Show this message and exit.                                                                                                                                                                                                                                                   │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

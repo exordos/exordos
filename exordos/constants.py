@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ipaddress
 import os
 import typing as tp
 
@@ -93,3 +94,7 @@ BASE_ELEMENTS = ["core", "ecosystem_realm"]
 
 DEFAULT_TABLE_FORMAT = "table"
 TABLE_FORMATS = ["json", "html", DEFAULT_TABLE_FORMAT, "yaml"]
+
+GC_CIDR = ipaddress.IPv4Network("10.20.0.0/22")
+GC_BOOT_CIDR = ipaddress.IPv4Network("10.30.0.0/24")
+GC_ADDRESS = ipaddress.IPv4Address("10.20.0.1")

@@ -23,19 +23,19 @@ from exordos import exceptions
 from exordos.builder import base as builder_base
 
 
-class RepoAlreadyExistsError(exceptions.DevToolsException):
+class RepoAlreadyExistsError(exceptions.ExordosException):
     """Repo already exists."""
 
 
-class RepoNotFoundError(exceptions.DevToolsException):
+class RepoNotFoundError(exceptions.ExordosException):
     """Repo not found."""
 
 
-class ElementAlreadyExistsError(exceptions.DevToolsException):
+class ElementAlreadyExistsError(exceptions.ExordosException):
     """Element already exists in the repo."""
 
 
-class UnableLoadDriverError(exceptions.DevToolsException):
+class UnableLoadDriverError(exceptions.ExordosException):
     """Unable to load driver."""
 
 
@@ -56,6 +56,9 @@ class AbstractRepoDriver(abc.ABC):
     def name(self) -> str:
         """Return the name of the repo."""
         ...
+
+    @property
+    def elements_path(self) -> str: ...
 
     @abc.abstractmethod
     def init_repo(self) -> None:

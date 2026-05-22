@@ -564,3 +564,29 @@ def get_ip_from_url(url: str) -> str:
         return ip_info[0][4][0]
     except socket.gaierror as e:
         raise RuntimeError(f"Failed to resolve hostname {hostname}: {e}")
+
+
+def find_free_port(start_port: int, end_port: int) -> int:
+    """
+    Find a free port in the specified range.
+
+    Args:
+        start_port: Starting port number (inclusive)
+        end_port: Ending port number (inclusive)
+
+    Returns:
+        Free port number
+
+    Raises:
+        RuntimeError: If no free port found in the range
+    """
+    for port in range(start_port, end_port + 1):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("localhost", port))
+                s.listen(1)
+                return port
+            except OSError:
+                continue
+
+    raise RuntimeError(f"No free port found in range [{start_port}, {end_port}]")

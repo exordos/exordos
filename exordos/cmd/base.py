@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import time
 
+import questionary
 from rich.live import Live
 import rich_click as click
 
@@ -37,6 +38,7 @@ def create_entity_group(
     add_list_command: bool = True,
     add_show_command: bool = True,
     add_delete_command: bool = True,
+    add_clear_command: bool = False,
 ) -> ClickAliasedGroup:
     """Create a universal click group for entity management."""
 
@@ -157,4 +159,25 @@ def create_entity_group(
 
         entity_group.add_command(delete_cmd, aliases=["d"])
 
+    if add_clear_command:
+
+        @click.command("clear", help=f"Delete all {entity_name}s")
+        @click.option(
+            "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+        )
+        @click.pass_context
+        def clear_cmd(ctx: click.Context, y: bool) -> None:
+            client = base_client.get_user_api_client(ctx.obj.auth_data)
+            entities = base_client.list_entities(client, entity_collection)
+            for entity in entities:
+                if (
+                    y
+                    or questionary.confirm(
+                        f"Delete {entity_name} {entity['uuid']}?"
+                    ).ask()
+                ):
+                    base_client.delete_entity(client, entity_collection, entity["uuid"])
+                    click.echo(f"{entity_name} {entity['uuid']} deleted")
+
+        entity_group.add_command(clear_cmd, aliases=["c"])
     return entity_group

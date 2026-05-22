@@ -60,12 +60,27 @@ Additional variables can be passed using the --manifest-var options.
 
   Rebuild if the output already exists
 
+- `only_manifests`:
+    - Type: boolean
+    - Default: `false`
+    - Usage: `--only-manifests`
+
+  Build only manifests
+
 - `manifest_var`:
     - Type: text
     - Default: `sentinel.unset`
     - Usage: `--manifest-var`
 
   Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2
+
+- `manifest`:
+    - Type: text
+    - Default: `sentinel.unset`
+    - Usage: `-m
+--manifest`
+
+  part of manifest filename from exordos.yaml to build, for example: 'empty.yaml', 'empty'
 
 - `project_dir`:
     - Type: path
@@ -98,7 +113,9 @@ Additional variables can be passed using the --manifest-var options.
 │ --output-dir        -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                           │
 │ --ssh-public-key    -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                           │
 │ --force             -f        Rebuild if the output already exists                                                                                                                                                                                                                                      │
+│ --only-manifests              Build only manifests                                                                                                                                                                                                                                                      │
 │ --manifest-var          TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                      │
+│ --manifest          -m  TEXT  part of manifest filename from exordos.yaml to build, for example: 'empty.yaml', 'empty'                                                                                                                                                                                  │
 │ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

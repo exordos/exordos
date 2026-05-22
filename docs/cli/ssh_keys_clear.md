@@ -1,48 +1,25 @@
 
-# users_list
+# ssh_keys_clear
 
-List users
+Delete all ssh_keys
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos secret ssh_keys clear [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `filters`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-f
---filters`
-
-  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
-
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
--o`
-
-  the output format, defaults to table
-
-* `watch`:
+* `y`:
     * Type: boolean
     * Default: `false`
-    * Usage: `-w
---watch`
+    * Usage: `--y
+-y`
 
-  Watch the list of users
-
-* `interval`:
-    * Type: float range
-    * Default: `0.5`
-    * Usage: `--interval`
-
-  Refresh interval in seconds.
+  Automatically answer yes for all questions
 
 * `help`:
     * Type: boolean
@@ -55,15 +32,12 @@ List users
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos secret ssh_keys clear [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
- List users                                                                                                                                                                                                                                                                                                
+ Delete all ssh_keys                                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of users                                                                                                                                                                                                                                         │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│ --y     -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │
+│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

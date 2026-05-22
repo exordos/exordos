@@ -45,6 +45,7 @@ from exordos.cmd.vs import vs_group
 from exordos.cmd.vs.vars import commands as vars_commands
 from exordos.common.cmd_context import ContextObject
 import exordos.constants as c
+from exordos.exceptions import ExordosException
 
 COMMANDS_WITHOUT_CONFIG = {
     builds_commands.build_cmd.name,
@@ -250,50 +251,235 @@ def exordos(
 
 @exordos.command(help="tool for creating docs files for cli commands", hidden=True)
 def dumphelp() -> None:
-    from exordos.common.md_click import dump_helper  # type: ignore
+    from exordos.common.md_click import dump_helper
 
     dump_helper(exordos)
     return None
 
 
-exordos.add_command(auth_commands.auth_group)  # noqa
+@click.command(
+    "deploy",
+    help="Deploy the element to realm through the proxy repository",
+)
+@click.option(
+    "-c",
+    "--exordos-cfg-file",
+    default=c.DEF_GEN_CFG_FILE_NAME,
+    help="Name of the project configuration file",
+)
+@click.option(
+    "-o",
+    "--output-dir",
+    default=c.DEF_GEN_OUTPUT_DIR_NAME,
+    help="Directory where element artifacts are stored",
+)
+@click.option(
+    "--only-manifests",
+    default=True,
+    is_flag=True,
+    help="Rebuild if the output already exists",
+)
+@click.option(
+    "-w",
+    "--watch",
+    default=True,
+    is_flag=True,
+    help="Watch deploy process",
+)
+@click.option(
+    "--interval",
+    type=click.FloatRange(min=0.1),
+    default=1.0,
+    help="Refresh interval in seconds.",
+)
+@click.argument("project_dir", type=click.Path(), default=".")
+@click.pass_context
+def deploy_cmd(
+    ctx: click.Context,
+    exordos_cfg_file: str | None,
+    output_dir: str | None,
+    project_dir: str,
+    only_manifests: bool,
+    watch: bool,
+    interval: float,
+) -> None:
+    """
+    - initialize the proxy repo
+    - build the element with repository from the first step
+    - push the element to the proxy repository
+    - install the element from the proxy repository
+    - delete the proxy repository
+    """
 
-exordos.add_command(iam_group)  # noqa
-exordos.add_command(secret_group, aliases=["s"])  # noqa
-exordos.add_command(realms_group)  # noqa
+    import os
+    import tempfile
 
-exordos.add_command(vs_group)  # noqa
-exordos.add_command(vars_commands.vv_group)  # noqa
+    from exordos import utils as exordos_utils
+    from exordos.common.table import dump_yaml_ruamel_to_str
+    from exordos.common.table import fill_table
 
-exordos.add_command(compute_group, aliases=["c"])  # noqa
-exordos.add_command(nodes_commands.cn_group)  # noqa
+    free_port = exordos_utils.find_free_port(8080, 8200)
+    address = "10.20.0.1"
+    repo_elements_path = f"http://{address}:{free_port}/{c.ELEMENT_REPO_PATH}"
+    if not os.path.isabs(output_dir):
+        output_dir = os.path.join(project_dir, output_dir)
 
-exordos.add_command(em_group, aliases=["e"])  # noqa
-exordos.add_command(elements_commands.ee_group)  # noqa
-exordos.add_command(builds_commands.build_cmd)  # noqa
+    # build
+    ctx.invoke(
+        builds_commands.build_cmd,
+        exordos_cfg_file=exordos_cfg_file,
+        output_dir=output_dir,
+        force=True,
+        only_manifests=only_manifests,
+        manifest_var=(f"repository={repo_elements_path}",),
+        project_dir=project_dir,
+    )
 
-exordos.add_command(configs_commands.configs_group)  # noqa
-exordos.add_command(settings_commands.settings_group)  # noqa
-exordos.add_command(repo_commands.repository_group)  # noqa
-exordos.add_command(repo_commands.push_cmd)  # noqa
+    repo_cfg_file = None
+    try:
+        data = dump_yaml_ruamel_to_str(
+            {
+                "push": {
+                    "proxy_repo": {
+                        "driver": "proxy",
+                        "address": address,
+                        "port": free_port,
+                        "path": output_dir,
+                    }
+                }
+            }
+        )
+        with tempfile.NamedTemporaryFile(suffix=".yaml", mode="a+", delete=False) as tf:
+            tf.write(data)
+            tf.flush()
+            repo_cfg_file = tf.name
 
-exordos.add_command(initialization_commands.init_cmd)  # noqa
+        repo = ctx.invoke(
+            repo_commands.repo_init_cmd,
+            exordos_cfg_file=repo_cfg_file,
+            force=False,
+            project_dir=project_dir,
+        )
 
-exordos.add_command(version_commands.version_cmd)  # noqa
-exordos.add_command(version_commands.latest_cmd)  # noqa
-exordos.add_command(version_commands.get_project_version_cmd)  # noqa
+        import json
+        import pathlib
 
-exordos.add_command(stand_commands.bootstrap_cmd)  # noqa
-exordos.add_command(stand_commands.backup_cmd)  # noqa
-exordos.add_command(stand_commands.backup_decrypt_cmd)  # noqa
+        from exordos.builder import base as base_builder
 
-exordos.add_command(utils_commands.openapi_spec)  # noqa
-exordos.add_command(utils_commands.hello)  # noqa
-exordos.add_command(utils_commands.autocomplete_help)  # noqa
-exordos.add_command(utils_commands.autocomplete)  # noqa
-exordos.add_command(utils_commands.sync)  # noqa
-exordos.add_command(utils_commands.introduction)  # noqa
-exordos.add_command(utils_commands.ready_api)  # noqa
+        path = pathlib.Path(f"{output_dir}/{c.ELEMENT_REPO_PATH}")
+        inventories = []
+        for file in path.rglob("**/inventory.json"):
+            if file.parent != path:
+                with open(file, "r") as f:
+                    inventories.append(json.load(f))
+
+        # choose element and target realm
+        if len(inventories) > 1:
+            import questionary
+
+            target_inventories = questionary.checkbox(
+                "Choose elements",
+                choices=[
+                    questionary.Choice(
+                        f"{inventory['name']} ({inventory['version']})", inventory
+                    )
+                    for inventory in inventories
+                ],
+            ).ask()
+            if not target_inventories:
+                click.echo("No elements chosen")
+                return
+        else:
+            target_inventories = inventories
+
+        for inventory in target_inventories:
+            element = base_builder.ElementInventory.from_dict(inventory)
+            ctx.invoke(
+                elements_commands.install_cmd,
+                repository=repo.elements_path,
+                path_or_name=element.name,
+                version=element.version,
+            )
+        if watch:
+            import time
+
+            from rich.live import Live
+
+            from exordos.clients import base_client
+
+            client = base_client.get_user_api_client(ctx.obj.auth_data)
+            element_names = [inventory["name"] for inventory in target_inventories]
+            click.echo(f"Watching elements: {element_names}")
+            with Live(refresh_per_second=4) as live:
+                start_time = time.time()
+                while True:
+                    if (time.time() - start_time) > 60 * 10:
+                        click.echo("Timeout")
+                        break
+
+                    entities = base_client.list_entities(client, c.ELEMENT_COLLECTION)
+                    entities = [
+                        entity for entity in entities if entity["name"] in element_names
+                    ]
+                    if all([entity["status"] == "ACTIVE" for entity in entities]):
+                        break
+
+                    live.update(
+                        fill_table(entities, elements_commands.FIELDS_MAP), refresh=True
+                    )
+                    time.sleep(interval)
+
+            ctx.invoke(
+                repo_commands.repo_delete_cmd,
+                exordos_cfg_file=repo_cfg_file,
+                project_dir=project_dir,
+            )
+
+    finally:
+        if repo_cfg_file and os.path.exists(repo_cfg_file):
+            os.remove(repo_cfg_file)
+
+
+exordos.add_command(auth_commands.auth_group)
+
+exordos.add_command(iam_group)
+exordos.add_command(secret_group, aliases=["s"])
+exordos.add_command(realms_group)
+
+exordos.add_command(vs_group)
+exordos.add_command(vars_commands.vv_group)
+
+exordos.add_command(compute_group, aliases=["c"])
+exordos.add_command(nodes_commands.cn_group)
+
+exordos.add_command(em_group, aliases=["e"])
+exordos.add_command(elements_commands.ee_group)
+exordos.add_command(builds_commands.build_cmd)
+exordos.add_command(deploy_cmd)
+
+exordos.add_command(configs_commands.configs_group)
+exordos.add_command(settings_commands.settings_group)
+exordos.add_command(repo_commands.repository_group)
+exordos.add_command(repo_commands.push_cmd)
+exordos.add_command(repo_commands.build_elements_inventory_cmd)
+
+exordos.add_command(initialization_commands.init_cmd)
+
+exordos.add_command(version_commands.version_cmd)
+exordos.add_command(version_commands.latest_cmd)
+exordos.add_command(version_commands.get_project_version_cmd)
+
+exordos.add_command(stand_commands.bootstrap_cmd)
+exordos.add_command(stand_commands.backup_cmd)
+exordos.add_command(stand_commands.backup_decrypt_cmd)
+
+exordos.add_command(utils_commands.openapi_spec)
+exordos.add_command(utils_commands.hello)
+exordos.add_command(utils_commands.autocomplete_help)
+exordos.add_command(utils_commands.autocomplete)
+exordos.add_command(utils_commands.sync)
+exordos.add_command(utils_commands.introduction)
+exordos.add_command(utils_commands.ready_api)
 
 
 if __name__ == "__main__":
@@ -307,5 +493,5 @@ if __name__ == "__main__":
                 f"Error: [{e.response.status_code}] {e.response.text}", fg="red"
             )
         click.secho(f"Error: {e}", fg="red")
-    except (ValueError, FileNotFoundError) as e:
+    except (ValueError, FileNotFoundError, ExordosException) as e:
         click.secho(f"Error: {e}", fg="red")

@@ -81,6 +81,13 @@ from exordos.logger import ClickLogger
     help="Rebuild if the output already exists",
 )
 @click.option(
+    "--only-manifests",
+    default=False,
+    show_default=True,
+    is_flag=True,
+    help="Build only manifests",
+)
+@click.option(
     "--manifest-var",
     multiple=True,
     help=(
@@ -88,6 +95,13 @@ from exordos.logger import ClickLogger
         "The format is 'key=value'. For example: --manifest-var "
         "key1=value1 --manifest-var key2=value2"
     ),
+)
+@click.option(
+    "-m",
+    "--manifest",
+    type=str,
+    required=False,
+    help="part of manifest filename from exordos.yaml to build, for example: 'empty.yaml', 'empty'",
 )
 @click.argument("project_dir", type=click.Path(), default=".")
 @click.pass_context
@@ -98,20 +112,33 @@ def build_cmd(
     output_dir: pathlib.Path,
     ssh_public_key: tuple[pathlib.Path, ...],
     force: bool,
+    only_manifests: bool,
     manifest_var: tuple[str, ...],
+    manifest: str | None,
     project_dir: str,
 ) -> None:
     manifest_vars = utils.convert_input_multiply(manifest_var)
 
-    if os.path.exists(output_dir) and not force:
-        click.secho(
-            f"The '{output_dir}' directory already exists. Use '--force' "
-            "flag to remove current artifacts and new build.",
-            fg="yellow",
-        )
-        return
-    elif os.path.exists(output_dir) and force:
-        shutil.rmtree(output_dir)
+    if not os.path.isabs(output_dir):
+        output_dir = os.path.join(project_dir, output_dir)
+    if os.path.exists(output_dir):
+        if not force:
+            click.secho(
+                f"The '{output_dir}' directory already exists. Use '--force' "
+                "flag to remove current artifacts and new build.",
+                fg="yellow",
+            )
+            return
+        elif force and not only_manifests:
+            shutil.rmtree(output_dir)
+    else:
+        if only_manifests:
+            click.secho(
+                f"The '{output_dir}' directory does not exist. Use '--only-manifests' "
+                "flag to build manifests only.",
+                fg="yellow",
+            )
+            return
 
     # Load SSH keys
     developer_keys = ""
@@ -135,10 +162,26 @@ def build_cmd(
     spec = utils.load_spec()
     utils.validate_config(gen_config, spec)
     # Take all build sections from the configuration
-    builds = {k: v for k, v in gen_config.items() if k.startswith("build")}
+    builds = {
+        k: v
+        for k, v in gen_config.items()
+        if k.startswith(simple_builder.SimpleBuilder.BUILD_KEY)
+    }
     if not builds:
         click.secho("No builds found in the configuration", fg="yellow")
         return
+    if manifest:
+        for element in builds[simple_builder.SimpleBuilder.BUILD_KEY].get(
+            simple_builder.SimpleBuilder.ELEMENTS_KEY, {}
+        ):
+            if manifest in element.get("manifest"):
+                builds[simple_builder.SimpleBuilder.BUILD_KEY][
+                    simple_builder.SimpleBuilder.ELEMENTS_KEY
+                ] = [element]
+                click.secho(
+                    f"Build only manifest {element.get('manifest')}", fg="green"
+                )
+                break
 
     version = utils.get_project_version(project_dir)
 
@@ -150,7 +193,13 @@ def build_cmd(
 
     for _, build_cfg in builds.items():
         builder = simple_builder.SimpleBuilder.from_config(
-            exordos_dir, build_cfg, packer_image_builder, output_dir, version, logger
+            exordos_dir,
+            build_cfg,
+            packer_image_builder,
+            output_dir,
+            version,
+            logger,
+            only_manifests,
         )
         with tempfile.TemporaryDirectory() as temp_dir:
             builder.fetch_dependency(deps_dir or temp_dir)

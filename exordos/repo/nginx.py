@@ -20,7 +20,6 @@ import json
 import os
 import pathlib
 
-from packaging import version
 import requests
 
 from exordos import constants as c
@@ -224,7 +223,7 @@ class NginxRepoDriver(base.AbstractRepoDriver):
 
         self._logger.info(f"Pushed {element.name} version {element.version}")
 
-        if latest and not version.parse(element.version).is_prerelease:
+        if latest:
             element_url_latest = f"{self.elements_path}/{element.name}/latest"
 
             for category in element.categories():

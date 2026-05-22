@@ -133,6 +133,7 @@ class Artifact:
 class Element:
     """Element representation."""
 
+    version: str | None = None
     manifest: pathlib.Path | None = None
     images: list[Image] = dataclasses.field(default_factory=list)
     artifacts: list[Artifact] = dataclasses.field(default_factory=list)
@@ -155,7 +156,10 @@ class Element:
 
     @classmethod
     def from_config(
-        cls, element_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
+        cls,
+        element_config: tp.Dict[str, tp.Any],
+        work_dir: pathlib.Path,
+        version: str,
     ) -> "Element":
         """Create an element from configuration."""
         image_configs = element_config.pop("images", [])
@@ -179,6 +183,7 @@ class Element:
             configs=configs,
             artifacts=artifacts,
             manifest=manifest,
+            version=element_config.pop("version", version),
             **element_config,
         )
 

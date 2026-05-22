@@ -25,9 +25,7 @@ import urllib.request
 
 import yaml
 
-
-class ManifestNotFound(Exception):
-    """Raised when the requested manifest cannot be located or downloaded."""
+from exordos.exceptions import ManifestNotFound
 
 
 def _join_url(*parts: str) -> str:

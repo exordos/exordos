@@ -77,9 +77,7 @@ def show_cmd(ctx: click.Context, name: str) -> None:
     resources = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/resources/"
     )
-    table = get_table(
-        "UUID", "Name", "Kind", "Full hash", "Status", "Created at", "Updated at"
-    )
+    table = get_table("UUID", "Name", "Kind", "Full hash", "Status")
     for resource in resources:
         table.add_row(
             resource["uuid"],
@@ -87,38 +85,32 @@ def show_cmd(ctx: click.Context, name: str) -> None:
             resource["kind"],
             resource["full_hash"],
             resource["status"],
-            resource["created_at"],
-            resource["updated_at"],
         )
     print_table(table, msg="Resources:")
 
     imports = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/imports/"
     )
-    table = get_table("UUID", "Name", "Kind", "Link", "Created at", "Updated at")
+    table = get_table("UUID", "Name", "Kind", "Link")
     for resource in imports:
         table.add_row(
             resource["uuid"],
             resource["name"],
             resource["kind"],
             resource["link"],
-            resource["created_at"],
-            resource["updated_at"],
         )
     print_table(table, msg="Imports:")
 
     exports = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/exports/"
     )
-    table = get_table("UUID", "Name", "Kind", "Link", "Created at", "Updated at")
+    table = get_table("UUID", "Name", "Kind", "Link")
     for resource in exports:
         table.add_row(
             resource["uuid"],
             resource["name"],
             resource["kind"],
             resource["link"],
-            resource["created_at"],
-            resource["updated_at"],
         )
     print_table(table, msg="Exports:")
 
@@ -458,23 +450,6 @@ def versions(name) -> None:
         click.echo(version)
 
 
-def edit_data(data: str, editor: str = "nano") -> tp.Tuple[str, dict]:
-    tf_path = None
-    try:
-        with tempfile.NamedTemporaryFile(suffix=".yaml", mode="a+", delete=False) as tf:
-            tf.write(data)
-            tf.flush()
-            tf_path = tf.name
-            subprocess.call([editor, tf_path])
-            tf.seek(0)
-            new_data = tf.read()
-    finally:
-        if tf_path and os.path.exists(tf_path):
-            os.remove(tf_path)
-    json_data = utils.load_yaml(new_data)
-    return new_data, json_data
-
-
 @ee_group.command(help="Edit manifest", context_settings={"show_default": True})
 @click.argument("uuid_name")
 @click.option(
@@ -548,6 +523,15 @@ def edit(ctx: click.Context, uuid_name: str, editor: str, repository: str) -> No
     required=False,
     help="Name of resource to define",
 )
+@click.option(
+    "--resource-var",
+    multiple=True,
+    help=(
+        "Variables to pass to the resource template. "
+        "The format is 'key=value'. For example: --resource-var "
+        "cpu=1 --resource-var ram=1024"
+    ),
+)
 @click.pass_context
 def define(
     ctx: click.Context,
@@ -556,6 +540,7 @@ def define(
     repository: str,
     resource_type: str,
     resource_name: str,
+    resource_var: tuple[str, ...],
 ) -> None:
     # Get Openapi schema
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -579,7 +564,16 @@ def define(
     ]
     resource = schema["components"]["schemas"][resource_ref]
     resource_def = resource["properties"]
-    resource_json = {k: v.get("example", "") for k, v in resource_def.items()}
+    resource_json = {
+        k: v.get("example", "")
+        for k, v in resource_def.items()
+        if not v.get("readOnly", False)
+    }
+
+    resource_var = utils.convert_input_multiply(resource_var)
+    for k, v in resource_var.items():
+        resource_json[k] = v
+
     manifest = base_client.get_entity(client, c.MANIFEST_COLLECTION, uuid_name)
     if resource_type not in manifest["resources"]:
         manifest["resources"][resource_type] = {}

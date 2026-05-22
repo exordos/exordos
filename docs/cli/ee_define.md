@@ -48,6 +48,13 @@ Add resource to manifest
 
   Name of resource to define
 
+* `resource_var`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--resource-var`
+
+  Variables to pass to the resource template. The format is 'key=value'. For example: --resource-var cpu=1 --resource-var ram=1024
+
 * `help`:
     * Type: boolean
     * Default: `false`

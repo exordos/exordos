@@ -46,7 +46,7 @@ Push the element to the repository
 
 * `element_dir`:
     * Type: path
-    * Default: `<function <lambda> at 0x76ca53876770>`
+    * Default: `output`
     * Usage: `-e
 --element-dir`
 

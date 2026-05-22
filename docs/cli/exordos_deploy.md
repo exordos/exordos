@@ -1,48 +1,60 @@
 
-# users_list
+# exordos_deploy
 
-List users
+Deploy the element to realm through the proxy repository
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos deploy [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `filters`:
+* `exordos_cfg_file`:
     * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-f
---filters`
+    * Default: `exordos.yaml`
+    * Usage: `-c
+--exordos-cfg-file`
 
-  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+  Name of the project configuration file
 
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
--o`
+* `output_dir`:
+    * Type: text
+    * Default: `output`
+    * Usage: `-o
+--output-dir`
 
-  the output format, defaults to table
+  Directory where element artifacts are stored
+
+* `only_manifests`:
+    * Type: boolean
+    * Default: `true`
+    * Usage: `--only-manifests`
+
+  Rebuild if the output already exists
 
 * `watch`:
     * Type: boolean
-    * Default: `false`
+    * Default: `true`
     * Usage: `-w
 --watch`
 
-  Watch the list of users
+  Watch deploy process
 
 * `interval`:
     * Type: float range
-    * Default: `0.5`
+    * Default: `1.0`
     * Usage: `--interval`
 
   Refresh interval in seconds.
+
+* `project_dir`:
+    * Type: path
+    * Default: `.`
+    * Usage: `project_dir`
 
 * `help`:
     * Type: boolean
@@ -55,15 +67,16 @@ List users
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users list [OPTIONS]                                                                                                                                                                                                                                                                   
+ Usage: exordos deploy [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
- List users                                                                                                                                                                                                                                                                                                
+ Deploy the element to realm through the proxy repository                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of users                                                                                                                                                                                                                                         │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│ --exordos-cfg-file  -c  TEXT                  Name of the project configuration file                                                                                                                                                                                                                    │
+│ --output-dir        -o  TEXT                  Directory where element artifacts are stored                                                                                                                                                                                                              │
+│ --only-manifests                              Rebuild if the output already exists                                                                                                                                                                                                                      │
+│ --watch             -w                        Watch deploy process                                                                                                                                                                                                                                      │
+│ --interval              FLOAT RANGE [x>=0.1]  Refresh interval in seconds.                                                                                                                                                                                                                              │
+│ --help                                        Show this message and exit.                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

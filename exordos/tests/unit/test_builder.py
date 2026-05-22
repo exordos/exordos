@@ -84,7 +84,11 @@ class TestBuilder:
             version="1.2.3",
         )
 
-        element = base.Element(manifest=pathlib.Path(manifest_rel), images=[])
+        element = base.Element(
+            manifest=pathlib.Path(manifest_rel),
+            images=[],
+            version="1.2.3",
+        )
 
         # Act
         inventory = builder.build_element(

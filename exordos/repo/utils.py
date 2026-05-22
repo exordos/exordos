@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+import pathlib
+
 from exordos import utils
 import exordos.constants as c
 from exordos.repo import base as base_repo
@@ -24,7 +26,7 @@ from exordos.repo import base as base_repo
 def load_repo_driver(
     exordos_cfg_file: str,
     target: str | None,
-    project_dir: str,
+    project_dir: str | pathlib.Path,
     exordosctl_cfg_file: str = c.CONFIG_FILE,
     driver_kind: str | None = None,
     driver_params: tuple[str, ...] | None = None,

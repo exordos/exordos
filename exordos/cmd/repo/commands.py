@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import typing as tp
 
@@ -27,6 +28,7 @@ from exordos.builder import base as base_builder
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.repo import base as base_repo
+from exordos.repo import elements_inventory
 from exordos.repo import fs as repo_fs
 from exordos.repo import utils as repo_utils
 
@@ -67,7 +69,7 @@ def repo_init_cmd(
     target: str | None,
     force: bool,
     project_dir: str,
-) -> None:
+) -> base_repo.AbstractRepoDriver:
 
     driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path
@@ -76,15 +78,14 @@ def repo_init_cmd(
     try:
         driver.init_repo()
     except base_repo.RepoAlreadyExistsError:
+        click.secho(
+            "Repository already exists.",
+            fg="yellow",
+        )
         if force:
             driver.delete_repo()
             driver.init_repo()
-            return
-
-        click.secho(
-            "Repository already exists.",
-            fg="red",
-        )
+    return driver
 
 
 @repository_group.command("delete", help="Delete the repository")
@@ -149,7 +150,7 @@ def repo_list_cmd(
     try:
         elements = driver.list()
     except base_repo.RepoNotFoundError:
-        click.secho("Repository not found", fg="red")
+        click.secho("Repositories not found", fg="red")
         return
 
     click.secho(f"Repository: {driver.name}", fg="green")
@@ -166,7 +167,7 @@ def repo_list_cmd(
         return
 
     table.add_column("name")
-    table.add_column("last version")
+    table.add_column("latest version")
     table.add_column("versions")
 
     for element in elements:
@@ -244,6 +245,8 @@ def push_cmd(
     )
 
     # Every build creates a local repo with built elements into it.
+    if not os.path.isabs(element_dir):
+        element_dir = os.path.join(project_dir, element_dir)
     build_repo = repo_fs.FSRepoDriver(element_dir)
     build_repo_dir = pathlib.Path(build_repo.elements_path)
 
@@ -277,3 +280,19 @@ def push_cmd(
                 f"{e_inventory.version} already exists.",
                 fg="red",
             )
+
+
+@repository_group.command("build-inventory", help="Build elements inventory")
+@click.option(
+    "-e",
+    "--elements-dir",
+    type=click.Path(),
+    default=".",
+    help="Directory where elements are stored",
+)
+@click.argument("project_dir", type=click.Path(), default=".")
+def build_elements_inventory_cmd(
+    elements_dir: str,
+    project_dir: str,
+) -> None:
+    elements_inventory.build(project_dir, elements_dir)

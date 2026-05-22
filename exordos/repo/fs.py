@@ -20,8 +20,6 @@ import os
 import pathlib
 import shutil
 
-from packaging import version
-
 from exordos import constants as c
 from exordos import logger as logger_base
 from exordos.builder import base as builder_base
@@ -31,7 +29,7 @@ from exordos.repo import base
 class FSRepoDriver(base.AbstractRepoDriver):
     def __init__(
         self,
-        path: str,
+        path: str | pathlib.Path,
         name: str = "fs_repo",
         logger: logger_base.AbstractLogger = logger_base.ClickLogger(),
     ):
@@ -95,7 +93,7 @@ class FSRepoDriver(base.AbstractRepoDriver):
         meta_path = os.path.join(self._repo_path, "exordos-repo-meta.json")
 
         if os.path.exists(elements_path):
-            os.rmdir(elements_path)
+            shutil.rmtree(elements_path)
 
         if os.path.exists(meta_path):
             os.remove(meta_path)
@@ -126,7 +124,7 @@ class FSRepoDriver(base.AbstractRepoDriver):
         with open(self.elements_inventory_path(element), "w") as f:
             json.dump(spec, f, indent=2)
 
-        if latest and not version.parse(element.version).is_prerelease:
+        if latest:
             # Push latest
             latest_element_path = os.path.join(
                 self.elements_path, element.name, "latest"

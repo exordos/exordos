@@ -24,6 +24,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.common import compute
 from exordos.common.table import show_data
 
 ENTITY = "ssh_key"
@@ -37,13 +38,16 @@ FIELDS_MAP = {
     "Status": "status",
 }
 
-ssh_keys_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+ssh_keys_group = create_entity_group(
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_clear_command=True
+)
 
 
 @click.command(
     "add",
-    help=f"Add a new {ENTITY} to the Exordos installation, example: `secret ssh_keys add "
-    f"--node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`",
+    help=f"Add a new {ENTITY} to the Exordos installation, examples: `exordos secret ssh_keys add "
+    f"--node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or "
+    f"`exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`",
 )
 @click.pass_context
 @click.option(
@@ -64,7 +68,7 @@ ssh_keys_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     "-n",
     "--name",
     type=str,
-    default=f"test_{ENTITY}",
+    required=False,
     help=f"Name of the {ENTITY}",
 )
 @click.option(
@@ -75,21 +79,33 @@ ssh_keys_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     help=f"Description of the {ENTITY}",
 )
 @click.option(
+    "--realm",
+    default=False,
+    is_flag=True,
+    help="add ssh keys to all realm nodes and sets",
+)
+@click.option(
+    "--element",
+    type=str,
+    required=False,
+    help="element uuid or name",
+)
+@click.option(
     "--node",
-    type=click.UUID,
+    type=str,
     required=False,
     help="node uuid",
 )
 @click.option(
     "--node_set",
-    type=click.UUID,
+    type=str,
     required=False,
     help="node_set uuid",
 )
 @click.option(
     "--user",
     type=str,
-    required=True,
+    default=c.BOOTSTRAP_USER,
     help=f"user name of the {ENTITY}",
 )
 @click.option(
@@ -102,38 +118,25 @@ def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID | None,
-    name: str,
+    name: str | None,
     description: str,
-    node: sys_uuid.UUID | None,
-    node_set: sys_uuid.UUID | None,
+    realm: bool,
+    element: str | None,
+    node: str | None,
+    node_set: str | None,
     user: str,
     target_public_key: str | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    if uuid is None:
-        uuid = sys_uuid.uuid4()
 
     data: dict[str, tp.Any] = {
-        "uuid": str(uuid),
-        "name": name,
         "description": description,
-        "user": str(user),
+        "user": user,
     }
-
-    if node is None and node_set is None:
-        raise click.ClickException("Either node or node_set must be specified")
-    if node is not None:
-        target_entity = base_client.get_entity(client, c.NODE_COLLECTION, node)
-        data["target"] = {
-            "kind": "node",
-            "node": str(node),
-        }
-    else:
-        target_entity = base_client.get_entity(client, c.SET_COLLECTION, node_set)
-        data["target"] = {
-            "kind": "node_set",
-            "node_set": str(node_set),
-        }
+    if uuid is not None:
+        data["uuid"] = str(sys_uuid.uuid4())
+    if name is not None:
+        data["name"] = name
 
     if target_public_key is not None:
         path = os.path.expanduser(target_public_key)
@@ -142,12 +145,54 @@ def add_cmd(
                 target_public_key = f.read()
         data["target_public_key"] = target_public_key.strip()
 
+    if not any([node, node_set, element, realm]):
+        raise click.ClickException(
+            "Either node or node_set or element or realm must be specified"
+        )
+    if realm:
+        targets = compute.get_compute_targets_all(client)
+    elif element is not None:
+        element_data = base_client.get_entity(client, c.ELEMENT_COLLECTION, element)
+        targets = compute.get_compute_targets_from_element(client, element_data)
+    elif node is not None:
+        target_entity = base_client.get_entity(client, c.NODE_COLLECTION, node)
+        targets = [
+            {
+                "target": {
+                    "kind": "node",
+                    "node": target_entity["uuid"],
+                },
+                "name": target_entity["name"],
+                "project_id": target_entity["project_id"],
+            }
+        ]
+    else:
+        target_entity = base_client.get_entity(client, c.SET_COLLECTION, node_set)
+        targets = [
+            {
+                "target": {
+                    "kind": "node_set",
+                    "node": target_entity["uuid"],
+                },
+                "name": target_entity["name"],
+                "project_id": target_entity["project_id"],
+            }
+        ]
+
     if project_id is None:
-        project_id = target_entity["project_id"]
+        project_id = targets[0]["project_id"]
     data["project_id"] = str(project_id)
 
-    entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity)
+    for target in targets:
+        data_copy = data.copy()
+        if not data_copy.get("uuid"):
+            data_copy["uuid"] = str(sys_uuid.uuid4())
+        if not data_copy.get("name"):
+            data_copy["name"] = f"ssh_key_to_{target['name']}"
+        data_copy["target"] = target["target"]
+        entity = base_client.add_entity(client, ENTITY_COLLECTION, data_copy)
+        click.echo(f"{ENTITY} {entity['uuid']} to target {target['name']} created")
+        show_data(entity)
 
 
 @click.command("update", help=f"Update {ENTITY}")
