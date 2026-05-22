@@ -16,19 +16,20 @@
 
 import os
 import subprocess
-import typing as tp
+import uuid as sys_uuid
 
 import requests
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.prompt import Confirm
+from rich.text import Text
 import rich_click as click
 
 from exordos import utils
 from exordos.clients import base_client
+from exordos.common import compute
+from exordos.common import ssh
 import exordos.constants as c
-
-if tp.TYPE_CHECKING:
-    from exordos.common.cmd_context import ContextObject
 
 
 @click.command(name="openapi", help="tool for creating openapi spec files", hidden=True)
@@ -178,7 +179,10 @@ def autocomplete(shell: str | None) -> None:
     click.echo("autocomplete updated. Restart your shell")
 
 
-@click.command(help="copy exordos core from local git repo to bootstrap")
+@click.command(
+    help="copy exordos element from local git repo to element nodes, "
+    "example cmd: exordos sync --name empty /home/user/PycharmProjects/exordos/exordos_empty"
+)
 @click.option(
     "-t",
     "--target-dir",
@@ -186,26 +190,93 @@ def autocomplete(shell: str | None) -> None:
     type=click.Path(),
     help="Directory to copy exordos core to",
 )
-@click.argument("project_dir", type=click.Path(), required=False)
-@click.pass_obj
-def sync(obj: "ContextObject", target_dir: str | None, project_dir: str | None) -> None:
-    repo = utils.get_repo(project_dir or ".")
-    project_name = os.path.basename(repo.working_dir)
-    if project_name != "exordos_core":
-        raise ValueError("project name must be exordos_core")
-    bootstrap_ip = utils.get_ip_from_url(obj.auth_data["endpoint"])
-    target = target_dir or "/opt"
-    dest = f"{c.BOOTSTRAP_USER}@{bootstrap_ip}:{target}"
-    cmd = [
-        "rsync",
-        "-avzr",
-        "--exclude=.*",
-        "--exclude=__pycache__",
-        "--exclude=output",
-        repo.working_dir,
-        dest,
-    ]
-    subprocess.run(cmd, check=True)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default="core",
+    help="Element name",
+)
+@click.option(
+    "--user",
+    type=str,
+    required=False,
+    help="ssh user name",
+)
+@click.option(
+    "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+)
+@click.argument("project_dir", type=click.Path(), default=".")
+@click.pass_context
+def sync(
+    ctx: click.Context,
+    target_dir: str | None,
+    name: str | None,
+    user: str | None,
+    y: bool,
+    project_dir: str | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    repo = utils.get_repo(project_dir)
+
+    if not target_dir and not name:
+        raise click.UsageError("Please specify target directory or element name")
+    target_dir = target_dir or f"/opt/{name}/"
+
+    element_data = base_client.get_entity(client, c.ELEMENT_COLLECTION, name)
+    targets = compute.get_compute_targets_from_element(client, element_data)
+
+    key_pair_name = ssh.generate_random_ssh_key_name()
+    with ssh.generate_keys(key_pair_name) as (priv_path, pub_path):
+        with open(pub_path, "r") as f:
+            target_public_key = f.read()
+        ssh_keys = []
+        try:
+            ssh_key_base_data = {
+                "user": str(user or c.BOOTSTRAP_USER),
+                "target_public_key": target_public_key,
+            }
+            for target in targets:
+                target_data = ssh_key_base_data.copy()
+                target_data["name"] = f"{key_pair_name}_for_{target['name']}"
+                target_data["uuid"] = str(sys_uuid.uuid4())
+                target_data["target"] = target["target"]
+                target_data["project_id"] = target["project_id"]
+                ssh_key = base_client.add_entity(
+                    client, c.SSH_KEY_COLLECTION, target_data
+                )
+                ssh_keys.append(ssh_key)
+
+            ssh.wait_for_ssh_keys(client, ssh_keys)
+
+            for target in targets:
+                for ip in target["ips"]:
+                    if y or Confirm.ask(Text(f"Do you want to deploy code to {ip}?")):
+                        dest = f"{user or c.BOOTSTRAP_USER}@{ip}:{target_dir}"
+                        cmd = [
+                            "rsync",
+                            "-e",
+                            f"ssh -i {priv_path} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null",
+                            "-avzr",
+                            "--exclude=.*",
+                            "--exclude=__pycache__",
+                            "--exclude=output",
+                            f"{repo.working_dir}/",
+                            dest,
+                        ]
+                        try:
+                            subprocess.run(
+                                cmd, check=True, capture_output=True, text=True
+                            )
+                            click.echo(
+                                f"Deployed code from {repo.working_dir} to {ip}:{target_dir}"
+                            )
+                        except subprocess.CalledProcessError as e:
+                            raise click.ClickException(e.stderr)
+                        # TODO(slashburygin): restart services after deploying code
+        finally:
+            for ssh_key in ssh_keys:
+                base_client.delete_entity(client, c.SSH_KEY_COLLECTION, ssh_key["uuid"])
     return None
 
 

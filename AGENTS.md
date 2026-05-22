@@ -166,11 +166,8 @@ Closes #123
 
 ### Pull Request Requirements
 
+- **Title**: Use imperative, present tense: "Add feature", not "Added feature"
 - **Description**: Clear summary of changes
-- **Linked issues**: Use `Closes #XXX` or `Related to #XXX`
-- **Tests**: Include unit and/or functional tests
-- **Reviewers**: Add project maintainer as reviewer
-- **Branch**: All changes in separate feature branch
 
 ## Additional Guidelines
 
