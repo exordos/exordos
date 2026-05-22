@@ -767,6 +767,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../ee_ssh/" class="md-nav__link">
+        ee_ssh
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ee_uninstall/" class="md-nav__link">
         ee_uninstall
       </a>
@@ -2530,6 +2544,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_restart/" class="md-nav__link">
+        services_restart
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_show/" class="md-nav__link">
         services_show
       </a>
@@ -3255,7 +3283,7 @@
 
 
 <h1 id="exordos_sync">exordos_sync<a class="headerlink" href="#exordos_sync" title="Permanent link">#</a></h1>
-<p>copy exordos core from local git repo to bootstrap</p>
+<p>copy exordos element from local git repo to element nodes, example cmd: exordos sync --name empty /home/user/PycharmProjects/exordos/exordos_empty</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Usage: exordos sync [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                               </span>
@@ -3292,6 +3320,16 @@
 </ul>
 <p>ssh user name</p>
 <ul>
+<li><code>y</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>--y
+-y</code></li>
+</ul>
+</li>
+</ul>
+<p>Automatically answer yes for all questions</p>
+<ul>
 <li>
 <p><code>project_dir</code>:</p>
 <ul>
@@ -3314,12 +3352,13 @@
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Usage: exordos sync [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                               </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> copy exordos core from local git repo to bootstrap                                                                                                                                                                                                                                                        </span>
+<span class="go"> copy exordos element from local git repo to element nodes, example cmd: exordos sync --name empty /home/user/PycharmProjects/exordos/exordos_empty                                                                                                                                                        </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
 <span class="go">│ --target-dir  -t  PATH  Directory to copy exordos core to                                                                                                                                                                                                                                               │</span>
 <span class="go">│ --name        -n  TEXT  Element name                                                                                                                                                                                                                                                                    │</span>
 <span class="go">│ --user            TEXT  ssh user name                                                                                                                                                                                                                                                                   │</span>
+<span class="go">│ --y           -y        Automatically answer yes for all questions                                                                                                                                                                                                                                      │</span>
 <span class="go">│ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
