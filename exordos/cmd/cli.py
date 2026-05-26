@@ -30,8 +30,8 @@ from exordos.cmd.configs import commands as configs_commands
 from exordos.cmd.em import em_group
 from exordos.cmd.em.elements import commands as elements_commands
 from exordos.cmd.iam import iam_group
-from exordos.cmd.iam.auth import commands as auth_commands
 from exordos.cmd.initialization import commands as initialization_commands
+from exordos.cmd.auth import commands as auth_commands
 from exordos.cmd.realms.commands import realms_group
 from exordos.cmd.repo import commands as repo_commands
 from exordos.cmd.secret import secret_group
@@ -46,7 +46,6 @@ from exordos.common.cmd_context import ContextObject
 import exordos.constants as c
 
 COMMANDS_WITHOUT_CONFIG = {
-    auth_commands.auth_group.name,
     builds_commands.build_cmd.name,
     initialization_commands.init_cmd.name,
     version_commands.version_cmd.name,

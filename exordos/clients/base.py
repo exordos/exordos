@@ -373,6 +373,12 @@ class CollectionBaseClient:
         url = self.resource_url(collection, uuid)
         self._request(httplib.HTTPMethod.DELETE, url)
 
+    def me(self) -> dict[str, tp.Any]:
+        base = self._base_url.rstrip("/")
+        url = f"{base}/v1/iam/clients/default/actions/me"
+        resp = self._request(httplib.HTTPMethod.GET, url)
+        return resp.json()
+
     def do_action(
         self,
         collection: str,
