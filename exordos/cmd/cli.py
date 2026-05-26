@@ -65,6 +65,12 @@ COMMANDS_WITHOUT_CONFIG = {
 }
 
 
+def _get_otp_prompt(otp_code: str | None) -> str:
+    if otp_code:
+        return otp_code
+    return click.prompt("OTP code", hide_input=False)
+
+
 @click.group(
     cls=ClickAliasedGroup,
     invoke_without_command=True,
@@ -146,6 +152,11 @@ COMMANDS_WITHOUT_CONFIG = {
     is_flag=True,
     help="Do not print messages, warnings or errors",
 )
+@click.option(
+    "--otp-code",
+    default=None,
+    help="OTP code for two-factor authentication",
+)
 @click.pass_context
 def exordos(
     ctx: click.Context,
@@ -161,6 +172,7 @@ def exordos(
     verbose: bool | None,
     developer_key_path: str | None,
     silent: bool | None,
+    otp_code: str | None,
 ) -> None:
     if not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
@@ -223,6 +235,7 @@ def exordos(
         access_token=final_access_token,
         refresh_token=final_refresh_token,
         scope=scope,
+        otp_prompt=lambda: _get_otp_prompt(otp_code),
     )
     ctx.obj = ContextObject(
         auth_data, config, final_developer_key_path, cfg, need_update

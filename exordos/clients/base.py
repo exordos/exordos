@@ -121,6 +121,7 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         scope: str | None = None,
         ttl: int = 86400,  # 1 day
         http_client: bazooka.Client | None = None,
+        otp_prompt: tp.Callable[[], str] | None = None,
     ):
         if not (access_token or refresh_token or (username and password)):
             raise ValueError(
@@ -143,19 +144,44 @@ class CoreIamAuthenticator(AbstractAuthenticator):
 
         self._access_token = access_token
         self._refresh_token = refresh_token
+        self._otp_prompt = otp_prompt
 
-    def authenticate(self) -> None:
-        response = self._http_client.post(
-            self._url,
-            headers=self._headers,
-            data={
+    def _do_authenticate(self, otp: str | None = None) -> dict[str, tp.Any]:
+        headers = self._headers.copy()
+        if otp:
+            headers["X-OTP"] = otp
+
+        data = (
+            {
                 "grant_type": GRANT_TYPE_REFRESH_TOKEN,
                 "refresh_token": self._refresh_token,
             }
             if self._refresh_token
-            else self._data,
+            else self._data
         )
-        data = response.json()
+
+        response = self._http_client.post(
+            self._url,
+            headers=headers,
+            data=data,
+        )
+        return response.json()
+
+    def authenticate(self) -> None:
+        try:
+            data = self._do_authenticate()
+        except bazooka_exc.UnauthorizedError as e:
+            error_data = e.cause.response.json()
+            if (
+                error_data.get("error") == "invalid_client"
+                and "otp" in error_data.get("error_description", "").lower()
+                and self._otp_prompt
+            ):
+                otp = self._otp_prompt()
+                data = self._do_authenticate(otp=otp)
+            else:
+                raise
+
         self._access_token = data["access_token"]
         self._refresh_token = data["refresh_token"]
 

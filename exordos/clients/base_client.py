@@ -43,6 +43,7 @@ def get_user_api_client(
         refresh_token=auth_data.get("refresh_token"),
         scope=auth_data.get("scope"),
         http_client=bazooka_client,
+        otp_prompt=auth_data.get("otp_prompt"),
     )
     client = http_client.CollectionBaseClient(
         base_url=auth_data["endpoint"],
