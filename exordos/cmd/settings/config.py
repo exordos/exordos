@@ -55,6 +55,7 @@ def load_config(
                 )
                 if endpoint_provided and (
                     (user_provided and password_provided)
+                    or user_provided
                     or (access_token_provided and refresh_token_provided)
                 ):
                     silent = True
