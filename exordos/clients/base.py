@@ -106,7 +106,7 @@ class AbstractAuthenticator(abc.ABC):
 
 
 class CoreIamAuthenticator(AbstractAuthenticator):
-    DEFAULT_CLIENT_UUID = sys_uuid.UUID("00000000-0000-0000-0000-000000000000")
+    DEFAULT_CLIENT_SLUG = "default"
 
     def __init__(
         self,
@@ -117,7 +117,7 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         refresh_token: str | None = None,
         client_id: str = "GenesisCoreClientId",
         client_secret: str = "GenesisCoreSecret",
-        client_uuid: sys_uuid.UUID = DEFAULT_CLIENT_UUID,
+        client_uuid: str = DEFAULT_CLIENT_SLUG,
         scope: str | None = None,
         ttl: int = 86400,  # 1 day
         http_client: bazooka.Client | None = None,
@@ -129,7 +129,6 @@ class CoreIamAuthenticator(AbstractAuthenticator):
 
         self._http_client = http_client or bazooka.Client()
 
-        client_uuid = str(client_uuid)
         self._url = f"{base_url}/v1/iam/clients/{client_uuid}/actions/get_token/invoke"
 
         self._headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -138,8 +137,6 @@ class CoreIamAuthenticator(AbstractAuthenticator):
             "grant_type": GRANT_TYPE_PASSWORD,
             "username": username,
             "password": password,
-            "client_id": client_id,
-            "client_secret": client_secret,
             "scope": scope or self.empty_scope(),
             "ttl": str(ttl),
         }
