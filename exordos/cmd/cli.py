@@ -211,11 +211,16 @@ def exordos(
     final_access_token = _get_final_value(
         "access_token", access_token, cfg, context_conf
     )
-    if final_user and not final_password and not final_access_token:
-        final_password = click.prompt("Password", hide_input=True)
     final_refresh_token = _get_final_value(
         "refresh_token", refresh_token, cfg, context_conf
     )
+    if (
+        final_user
+        and not final_password
+        and not final_access_token
+        and not final_refresh_token
+    ):
+        final_password = click.prompt("Password", hide_input=True)
     final_developer_key_path = _get_final_value(
         "developer_key_path", developer_key_path, cfg, {}
     )
