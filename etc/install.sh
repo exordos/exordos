@@ -53,32 +53,16 @@ if [ "$OS" = "Darwin" ]; then
         exit 1
     fi
 
+    BINDIR="/usr/local/bin"
     DOWNLOAD_URL="https://repo.exordos.com/exordos/latest/exordos-macos-arm"
 
-    if [ -d "/Applications/exordos.app" ]; then
-        status "Removing existing exordos installation..."
-        rm -rf "/Applications/exordos.app"
-    fi
-
-    status "Downloading exordos for macOS..."
+    status "Installing exordos to $BINDIR..."
+    mkdir -p "$BINDIR" 2>/dev/null || sudo mkdir -p "$BINDIR"
     curl --fail --show-error --location --progress-bar \
-        -o "$TEMP_DIR/exordos-darwin.zip" "$DOWNLOAD_URL"
-
-    status "Installing exordos to /Applications..."
-    unzip -q "$TEMP_DIR/exordos-darwin.zip" -d "$TEMP_DIR"
-    mv "$TEMP_DIR/exordos.app" "/Applications/"
-
-    if [ ! -L "/usr/local/bin/exordos" ] || [ "$(readlink "/usr/local/bin/exordos")" != "/Applications/exordos.app/Contents/Resources/exordos" ]; then
-        status "Adding 'exordos' command to PATH (may require password)..."
-        mkdir -p "/usr/local/bin" 2>/dev/null || sudo mkdir -p "/usr/local/bin"
-        ln -sf "/Applications/exordos.app/Contents/Resources/exordos" "/usr/local/bin/exordos" 2>/dev/null || \
-            sudo ln -sf "/Applications/exordos.app/Contents/Resources/exordos" "/usr/local/bin/exordos"
-    fi
-
-    if [ -z "${NO_START:-}" ]; then
-        status "Starting exordos..."
-        open -a exordos --args hidden
-    fi
+        "$DOWNLOAD_URL" --output "$TEMP_DIR/exordos"
+    chmod +x "$TEMP_DIR/exordos"
+    mv "$TEMP_DIR/exordos" "$BINDIR/exordos" 2>/dev/null || \
+        sudo mv "$TEMP_DIR/exordos" "$BINDIR/exordos"
 
     status "Install complete. You can now run 'exordos'."
     exit 0
