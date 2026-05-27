@@ -35,7 +35,7 @@ OS="$(uname -s)"
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64) ARCH="amd64" ;;
-    # aarch64|arm64) ARCH="arm64" ;;
+    aarch64|arm64) ARCH="arm64" ;;
     *) error "Unsupported architecture: $ARCH" ;;
 esac
 
@@ -53,7 +53,7 @@ if [ "$OS" = "Darwin" ]; then
         exit 1
     fi
 
-    DOWNLOAD_URL="https://repo.exordos.com/exordos/latest/exordos-macos"
+    DOWNLOAD_URL="https://repo.exordos.com/exordos/latest/exordos-macos-arm"
 
     if [ -d "/Applications/exordos.app" ]; then
         status "Removing existing exordos installation..."
