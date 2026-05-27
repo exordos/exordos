@@ -7,11 +7,16 @@ jobs:
   build_binaries:
     strategy:
       matrix:
-        os: [
-          ubuntu-latest,
-          macos-latest
-        ]
-        python-version: ["3.14"]
+        include:
+          - os: ubuntu-latest
+            artifact-suffix: linux
+            python-version: "3.14"
+          - os: macos-latest
+            artifact-suffix: macos-arm
+            python-version: "3.14"
+          - os: windows-latest
+            artifact-suffix: windows
+            python-version: "3.14"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -33,14 +38,14 @@ jobs:
         run: tox -e bin
       - name: Rename executable
         run: |
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-            mv dist/exordos dist/exordos-linux
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            mv dist/exordos dist/exordos-macos
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            mv dist/exordos.exe dist/exordos-${{ matrix.artifact-suffix }}.exe
+          else
+            mv dist/exordos dist/exordos-${{ matrix.artifact-suffix }}
           fi
         shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: exordos-${{ matrix.os }}
+          name: exordos-${{ matrix.artifact-suffix }}
           path: dist/*

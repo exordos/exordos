@@ -60,8 +60,16 @@ jobs:
   build_binaries:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: ["3.14"]
+        include:
+          - os: ubuntu-latest
+            artifact-suffix: linux
+            python-version: "3.14"
+          - os: macos-latest
+            artifact-suffix: macos-arm
+            python-version: "3.14"
+          - os: windows-latest
+            artifact-suffix: windows
+            python-version: "3.14"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -72,7 +80,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install libev (Linux)
+      - name: Install deps (Linux)
         if: runner.os == 'Linux'
         run: sudo apt update && sudo apt install --yes ca-certificates
       - name: Install uv
@@ -83,16 +91,16 @@ jobs:
         run: tox -e bin
       - name: Rename executable
         run: |
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-            mv dist/exordos dist/exordos-linux
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            mv dist/exordos dist/exordos-macos
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            mv dist/exordos.exe dist/exordos-${{ matrix.artifact-suffix }}.exe
+          else
+            mv dist/exordos dist/exordos-${{ matrix.artifact-suffix }}
           fi
         shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: exordos-${{ matrix.os }}
+          name: exordos-${{ matrix.artifact-suffix }}
           path: dist/*
 
   github-release:
@@ -114,12 +122,17 @@ jobs:
     - name: Download Linux binary
       uses: actions/download-artifact@v8
       with:
-        name: exordos-ubuntu-latest
+        name: exordos-linux
         path: dist/
-    - name: Download macOS binary
+    - name: Download macOS arm binary
       uses: actions/download-artifact@v8
       with:
-        name: exordos-macos-latest
+        name: exordos-macos-arm
+        path: dist/
+    - name: Download Windows binary
+      uses: actions/download-artifact@v8
+      with:
+        name: exordos-windows
         path: dist/
     - name: Create GitHub Release
       env:
@@ -146,27 +159,36 @@ jobs:
     - name: Download Linux binary
       uses: actions/download-artifact@v8
       with:
-        name: exordos-ubuntu-latest
+        name: exordos-linux
         path: dist/
-    - name: Download macOS binary
+    - name: Download macOS arm binary
       uses: actions/download-artifact@v8
       with:
-        name: exordos-macos-latest
+        name: exordos-macos-arm
+        path: dist/
+    - name: Download Windows binary
+      uses: actions/download-artifact@v8
+      with:
+        name: exordos-windows
         path: dist/
     - name: Push artifacts to repository
       run: |
         set -eux
         chmod +x ./dist/exordos-linux
         VERSION=$(./dist/exordos-linux --silent version)
-        
+
         # Upload VERSION release
-        curl -X PUT --upload-file ./dist/exordos-macos \
-          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-macos
         curl -X PUT --upload-file ./dist/exordos-linux \
           $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-linux
-        
+        curl -X PUT --upload-file ./dist/exordos-macos-arm \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-macos-arm
+        curl -X PUT --upload-file ./dist/exordos-windows.exe \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-windows.exe
+
         # Upload latest release
-        curl -X PUT --upload-file ./dist/exordos-macos \
-          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-macos
         curl -X PUT --upload-file ./dist/exordos-linux \
           $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-linux
+        curl -X PUT --upload-file ./dist/exordos-macos-arm \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-macos-arm
+        curl -X PUT --upload-file ./dist/exordos-windows.exe \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-windows.exe
