@@ -33,6 +33,7 @@ dependencies = [
     "certifi>=2026.2.25",  # modified version of ca-bundle.crt
 #    "openapi-schema-validator>=0.8.1",  # BSD-3  #
     "orjson>=3.10.0,<4.0.0",  # MIT
+    "qrcode>=8.0,<9.0.0",  # BSD
     "ruamel-yaml==0.17.26",
 ]
 [project.urls]

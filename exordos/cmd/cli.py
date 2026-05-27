@@ -21,7 +21,9 @@ from bazooka import exceptions as bazooka_exc
 from requests.exceptions import RequestException
 import rich_click as click
 
+from exordos.clients.base import PasswordPrompt
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.auth import commands as auth_commands
 from exordos.cmd.builds import commands as builds_commands
 from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
@@ -30,7 +32,6 @@ from exordos.cmd.configs import commands as configs_commands
 from exordos.cmd.em import em_group
 from exordos.cmd.em.elements import commands as elements_commands
 from exordos.cmd.iam import iam_group
-from exordos.cmd.iam.auth import commands as auth_commands
 from exordos.cmd.initialization import commands as initialization_commands
 from exordos.cmd.realms.commands import realms_group
 from exordos.cmd.repo import commands as repo_commands
@@ -46,7 +47,6 @@ from exordos.common.cmd_context import ContextObject
 import exordos.constants as c
 
 COMMANDS_WITHOUT_CONFIG = {
-    auth_commands.auth_group.name,
     builds_commands.build_cmd.name,
     initialization_commands.init_cmd.name,
     version_commands.version_cmd.name,
@@ -63,6 +63,12 @@ COMMANDS_WITHOUT_CONFIG = {
     settings_commands.settings_group.name,
     repo_commands.push_cmd.name,
 }
+
+
+def _get_otp_prompt(otp_code: str | None) -> str:
+    if otp_code:
+        return otp_code
+    return click.prompt("OTP code", hide_input=False)
 
 
 @click.group(
@@ -146,6 +152,11 @@ COMMANDS_WITHOUT_CONFIG = {
     is_flag=True,
     help="Do not print messages, warnings or errors",
 )
+@click.option(
+    "--otp-code",
+    default=None,
+    help="OTP code for two-factor authentication",
+)
 @click.pass_context
 def exordos(
     ctx: click.Context,
@@ -161,6 +172,7 @@ def exordos(
     verbose: bool | None,
     developer_key_path: str | None,
     silent: bool | None,
+    otp_code: str | None,
 ) -> None:
     if not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
@@ -213,6 +225,13 @@ def exordos(
 
     final_project_id = _get_final_value("project_id", project_id, cfg, context_conf)
     scope = f"project:{final_project_id}" if final_project_id else None
+    needs_password_prompt = (
+        final_user
+        and not final_password
+        and not final_access_token
+        and not final_refresh_token
+    )
+    password_prompt = PasswordPrompt() if needs_password_prompt else None
 
     auth_data = dict(
         endpoint=final_endpoint,
@@ -221,6 +240,8 @@ def exordos(
         access_token=final_access_token,
         refresh_token=final_refresh_token,
         scope=scope,
+        password_prompt=password_prompt,
+        otp_prompt=lambda: _get_otp_prompt(otp_code),
     )
     ctx.obj = ContextObject(
         auth_data, config, final_developer_key_path, cfg, need_update

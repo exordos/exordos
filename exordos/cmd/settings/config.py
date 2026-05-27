@@ -41,10 +41,6 @@ def load_config(
                     ctx.get_parameter_source("user")
                     == click.core.ParameterSource.COMMANDLINE
                 )
-                password_provided = (
-                    ctx.get_parameter_source("password")
-                    == click.core.ParameterSource.COMMANDLINE
-                )
                 access_token_provided = (
                     ctx.get_parameter_source("access_token")
                     == click.core.ParameterSource.COMMANDLINE
@@ -54,8 +50,7 @@ def load_config(
                     == click.core.ParameterSource.COMMANDLINE
                 )
                 if endpoint_provided and (
-                    (user_provided and password_provided)
-                    or (access_token_provided and refresh_token_provided)
+                    user_provided or (access_token_provided and refresh_token_provided)
                 ):
                     silent = True
             if not silent:
