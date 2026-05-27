@@ -21,7 +21,9 @@ from bazooka import exceptions as bazooka_exc
 from requests.exceptions import RequestException
 import rich_click as click
 
+from exordos.clients.base import PasswordPrompt
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.auth import commands as auth_commands
 from exordos.cmd.builds import commands as builds_commands
 from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
@@ -31,7 +33,6 @@ from exordos.cmd.em import em_group
 from exordos.cmd.em.elements import commands as elements_commands
 from exordos.cmd.iam import iam_group
 from exordos.cmd.initialization import commands as initialization_commands
-from exordos.cmd.auth import commands as auth_commands
 from exordos.cmd.realms.commands import realms_group
 from exordos.cmd.repo import commands as repo_commands
 from exordos.cmd.secret import secret_group
@@ -214,13 +215,6 @@ def exordos(
     final_refresh_token = _get_final_value(
         "refresh_token", refresh_token, cfg, context_conf
     )
-    if (
-        final_user
-        and not final_password
-        and not final_access_token
-        and not final_refresh_token
-    ):
-        final_password = click.prompt("Password", hide_input=True)
     final_developer_key_path = _get_final_value(
         "developer_key_path", developer_key_path, cfg, {}
     )
@@ -231,6 +225,13 @@ def exordos(
 
     final_project_id = _get_final_value("project_id", project_id, cfg, context_conf)
     scope = f"project:{final_project_id}" if final_project_id else None
+    needs_password_prompt = (
+        final_user
+        and not final_password
+        and not final_access_token
+        and not final_refresh_token
+    )
+    password_prompt = PasswordPrompt() if needs_password_prompt else None
 
     auth_data = dict(
         endpoint=final_endpoint,
@@ -239,6 +240,7 @@ def exordos(
         access_token=final_access_token,
         refresh_token=final_refresh_token,
         scope=scope,
+        password_prompt=password_prompt,
         otp_prompt=lambda: _get_otp_prompt(otp_code),
     )
     ctx.obj = ContextObject(

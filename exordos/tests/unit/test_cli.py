@@ -33,3 +33,17 @@ def test_refresh_token_auth_does_not_prompt_for_password(monkeypatch) -> None:
     assert result.exit_code == 0
     prompt.assert_not_called()
     assert "enable-otp" in result.output
+
+
+def test_settings_command_does_not_prompt_for_password(monkeypatch) -> None:
+    prompt = MagicMock()
+    monkeypatch.setattr(cli.click, "prompt", prompt)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli.exordos,
+        ["--config", "missing.yaml", "--user", "alice", "settings", "view", "--raw"],
+    )
+
+    assert result.exit_code == 0
+    prompt.assert_not_called()

@@ -18,6 +18,9 @@ import os
 import shutil
 import tempfile
 import typing as tp
+from unittest.mock import patch
+
+import git
 
 from exordos.builder import dependency as deps
 
@@ -82,10 +85,7 @@ class TestDependency:
         )
 
         assert dep.img_dest == "/opt/undionly.kpxe"
-        assert (
-            dep._endpoint
-            == "https://repo.exordos.com/ipxe/latest/undionly.kpxe"
-        )
+        assert dep._endpoint == "https://repo.exordos.com/ipxe/latest/undionly.kpxe"
         assert dep.local_path is None
 
     def test_http_fetch(self, build_config: tp.Dict[str, tp.Any]) -> None:
@@ -114,18 +114,28 @@ class TestDependency:
         assert dep.local_path is None
 
     def test_git_fetch(self, build_git_config: tp.Dict[str, tp.Any]) -> None:
-        dep = deps.GitDependency.from_config(
-            build_git_config["deps"][0],
-            "/tmp",
-        )
+        def mock_clone_func(
+            repo_url: str, repo_dir: str, branch: str | None = None
+        ) -> None:
+            os.makedirs(repo_dir, exist_ok=True)
 
-        os.makedirs("/tmp/___deps_dir", exist_ok=True)
-        dep.fetch("/tmp/___deps_dir")
+        with patch.object(
+            git.Repo, "clone_from", side_effect=mock_clone_func
+        ) as mock_clone:
+            dep = deps.GitDependency.from_config(
+                build_git_config["deps"][0],
+                "/tmp",
+            )
 
-        try:
+            os.makedirs("/tmp/___deps_dir", exist_ok=True)
+            dep.fetch("/tmp/___deps_dir")
+
+            mock_clone.assert_called_once_with(
+                "https://github.com/exordos/exordos_empty.git",
+                "/tmp/___deps_dir/exordos_empty",
+                branch="master",
+            )
             assert os.path.exists("/tmp/___deps_dir/exordos_empty")
-        finally:
-            shutil.rmtree("/tmp/___deps_dir")
 
     def test_env_path_from_config(self, build_env_config: tp.Dict[str, tp.Any]) -> None:
         work_dir = "/tmp/work_dir"

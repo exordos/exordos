@@ -19,9 +19,7 @@ import rich_click as click
 
 
 def print_qr(uri: str) -> None:
-    qr = qrcode.QRCode(
-        error_correction=qrcode.constants.ERROR_CORRECT_L, border=1
-    )
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L, border=1)
     qr.add_data(uri)
     qr.make(fit=True)
     white = "\033[0;37;47m  "
@@ -29,5 +27,7 @@ def print_qr(uri: str) -> None:
     reset = "\033[0m"
     click.echo(white * (qr.modules_count + 2) + reset)
     for row in qr.modules:
-        click.echo(white + "".join(black if cell else white for cell in row) + white + reset)
+        click.echo(
+            white + "".join(black if cell else white for cell in row) + white + reset
+        )
     click.echo(white * (qr.modules_count + 2) + reset)
