@@ -326,7 +326,12 @@ def create_domain(
         tgt_image_path = os.path.join(pool_path, image_name)
         delete_volume(pool, image_name)
         create_volume(
-            pool, image_name, disks[0].size, source_path=image, fmt=img_format
+            pool,
+            image_name,
+            disks[0].size,
+            source_path=image,
+            fmt=img_format,
+            target_image_path=tgt_image_path,
         )
         disks_xml = disk_template.format(
             device="vda",
@@ -657,6 +662,7 @@ def create_volume(
     size_gb: int,
     fmt: str = "qcow2",
     source_path: str | None = None,
+    target_image_path: str | None = None,
 ) -> None:
     args = [
         "sudo",
@@ -693,8 +699,17 @@ def create_volume(
                 stdout=subprocess.DEVNULL,
             )
         else:
+            if target_image_path is None:
+                ValueError("Need to specify `target_image_path`!")
+
             subprocess.check_call(
                 ["sudo", "virsh", "vol-upload", "--pool", pool, name, source_path],
+                stdout=subprocess.DEVNULL,
+            )
+
+            # Actualize uploaded volume with desired size instead of size of the image.
+            subprocess.check_call(
+                ["sudo", "qemu-img", "resize", target_image_path, f"{size_gb}G"],
                 stdout=subprocess.DEVNULL,
             )
 
