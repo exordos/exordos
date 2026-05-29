@@ -20,6 +20,7 @@ import ipaddress
 import json
 import os
 import pathlib
+import secrets
 import subprocess
 import time
 import typing as tp
@@ -390,6 +391,14 @@ def _register_core(
     return realm_uuid, realm_secret, tokens_dict
 
 
+def _iam_default_client_settings() -> dict:
+    return {
+        "default_client_uuid": "00000000-0000-0000-0000-000000000000",
+        "default_client_id": "Exordos",
+        "default_client_secret": secrets.token_urlsafe(32),
+    }
+
+
 def _bootstrap_core(
     image_path: str | None,
     image_uri: str | None,
@@ -398,6 +407,7 @@ def _bootstrap_core(
     stand_spec: tp.Dict[str, tp.Any] | None,
     stand_main_network: stand_models.Network,
     stand_boot_network: stand_models.Network,
+    disks: list[str] | None,
     force: bool,
     core_ip: ipaddress.IPv4Address,
     repository: str,
@@ -430,6 +440,7 @@ def _bootstrap_core(
             image_uri=image_uri,
             cores=profile.cores,
             memory=profile.ram,
+            disks=disks,
             core_ip=core_ip,
             network=stand_main_network,
             boot_network=stand_boot_network,
@@ -472,6 +483,10 @@ def _bootstrap_core(
         infra.delete_stand(stand)
         logger.info(f"Destroyed old Exordos installation: {dev_stand.name}")
 
+    # Prepare IAM settings
+    iam = _iam_default_client_settings()
+    iam["admin_password"] = admin_password
+
     try:
         infra.create_stand(
             dev_stand,
@@ -487,6 +502,7 @@ def _bootstrap_core(
             realm_secret=realm_secret,
             realm_tokens=realm_tokens,
             developer_keys=ssh_public_key,
+            iam=iam,
         )
         logger.info(f"Launched Exordos installation in `{profile.value}` profile")
 
@@ -561,6 +577,20 @@ def _bootstrap_core(
     show_default=True,
     help="Profile for the installation.",
     type=click.Choice([p.value for p in Profile]),
+)
+@click.option(
+    "--root-disk-size",
+    default=10,
+    show_default=True,
+    type=int,
+    help="Root disk size in GB",
+)
+@click.option(
+    "--data-disk-size",
+    default=10,
+    show_default=True,
+    type=int,
+    help="Data disk size in GB",
 )
 @click.option(
     "--name",
@@ -751,6 +781,8 @@ def bootstrap_cmd(
     ctx: click.Context,
     inventory: str,
     profile: str,
+    root_disk_size: int,
+    data_disk_size: int,
     name: str,
     launch_mode: LaunchModeType,
     stand_spec: str | None,
@@ -932,6 +964,7 @@ def bootstrap_cmd(
             stand_spec=stand_spec,
             stand_main_network=stand_main_network,
             stand_boot_network=stand_boot_network,
+            disks=[root_disk_size, data_disk_size],
             force=force,
             core_ip=core_ip,
             repository=repository,

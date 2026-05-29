@@ -198,6 +198,7 @@ class Stand:
         boot_network: Network,
         cores: int = 1,
         memory: int = 1024,
+        disks: list[str] | None = None,
         name: str = "dev-stand",
         bootstrap_name: str = "bootstrap",
         hypervisors: tp.Collection[Hypervisor] = (),
@@ -206,6 +207,19 @@ class Stand:
             Port(mac=Port.gen_mac(), ip=core_ip),
             Port(mac=Port.gen_mac()),
         ]
+        if disks is None:
+            disks = [
+                Disk(size=10, label="root-volume"),
+                Disk(size=10, label="data"),
+            ]
+        else:
+            if len(disks) != 2:
+                raise ValueError("Core node requires exactly 2 disks!")
+            disks = [
+                Disk(size=int(disks[0]), label="root-volume"),
+                Disk(size=int(disks[1]), label="data"),
+            ]
+
         return cls(
             name=name,
             network=network,
@@ -217,6 +231,7 @@ class Stand:
                     image_uri=image_uri,
                     cores=cores,
                     memory=memory,
+                    disks=disks,
                     ports=ports,
                 )
             ],
