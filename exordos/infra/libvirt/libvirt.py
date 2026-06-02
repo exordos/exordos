@@ -700,7 +700,7 @@ def create_volume(
             )
         else:
             if target_image_path is None:
-                ValueError("Need to specify `target_image_path`!")
+                raise ValueError("Need to specify `target_image_path`!")
 
             subprocess.check_call(
                 ["sudo", "virsh", "vol-upload", "--pool", pool, name, source_path],

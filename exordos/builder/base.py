@@ -22,6 +22,8 @@ import os
 import pathlib
 import typing as tp
 
+import yaml
+
 from exordos import constants as c
 
 
@@ -80,7 +82,9 @@ class Image:
         return formats
 
     @classmethod
-    def from_config(cls, image_config: dict[str, tp.Any], work_dir: str) -> "Image":
+    def from_config(
+        cls, image_config: dict[str, tp.Any], work_dir: pathlib.Path
+    ) -> "Image":
         """Create an image from configuration."""
         image_config = image_config.copy()
         script = image_config.pop("script")
@@ -103,7 +107,7 @@ class Config:
     path: str
 
     @classmethod
-    def from_config(cls, config: dict[str, tp.Any], work_dir: str) -> "Config":
+    def from_config(cls, config: dict[str, tp.Any], work_dir: pathlib.Path) -> "Config":
         """Create a config from configuration."""
         abs_path = os.path.join(work_dir, config["path"])
         return cls(abs_path=abs_path, path=config["path"])
@@ -117,19 +121,22 @@ class Artifact:
     path: str
 
     @classmethod
-    def from_config(cls, config: dict[str, tp.Any], work_dir: str) -> "Artifact":
+    def from_config(
+        cls, config: dict[str, tp.Any], work_dir: pathlib.Path
+    ) -> "Artifact":
         """Create an artifact from configuration."""
         abs_path = os.path.join(work_dir, config["path"])
         return cls(abs_path=abs_path, path=config["path"])
 
 
-class Element(tp.NamedTuple):
+@dataclasses.dataclass
+class Element:
     """Element representation."""
 
-    manifest: tp.Optional[str] = None
-    images: tp.Optional[tp.List[Image]] = None
-    artifacts: tp.Optional[tp.List[Artifact]] = None
-    configs: tp.Optional[tp.List[Config]] = None
+    manifest: pathlib.Path | None = None
+    images: list[Image] = dataclasses.field(default_factory=list)
+    artifacts: list[Artifact] = dataclasses.field(default_factory=list)
+    configs: list[Config] = dataclasses.field(default_factory=list)
 
     def __str__(self):
         if self.manifest:
@@ -141,9 +148,14 @@ class Element(tp.NamedTuple):
 
         return f"<Element {str(self)}>"
 
+    def name(self, exordos_dir: pathlib.Path) -> str | None:
+        with open(exordos_dir / self.manifest, "r") as f:
+            manifest = yaml.safe_load(f)
+        return manifest.get("name")
+
     @classmethod
     def from_config(
-        cls, element_config: tp.Dict[str, tp.Any], work_dir: str
+        cls, element_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
     ) -> "Element":
         """Create an element from configuration."""
         image_configs = element_config.pop("images", [])
@@ -156,8 +168,18 @@ class Element(tp.NamedTuple):
         artifacts = [
             Artifact.from_config(artifact, work_dir) for artifact in artifacts_configs
         ]
+
+        # Convert manifest to Path if present
+        manifest = element_config.pop("manifest", None)
+        if manifest is not None:
+            manifest = pathlib.Path(manifest)
+
         return cls(
-            images=images, configs=configs, artifacts=artifacts, **element_config
+            images=images,
+            configs=configs,
+            artifacts=artifacts,
+            manifest=manifest,
+            **element_config,
         )
 
 
@@ -186,6 +208,23 @@ class ElementInventory(tp.NamedTuple):
         for category in self.categories():
             data[category] = [str(p) for p in getattr(self, category)]
         return data
+
+    def replace_with_abspath(self, inventory_dir: pathlib.Path) -> "ElementInventory":
+        """Create a copy of inventory but with abs path."""
+        kwargs = {
+            "name": self.name,
+            "version": self.version,
+        }
+        for category in self.categories():
+            abs_paths = []
+            for p in getattr(self, category):
+                if p.is_absolute():
+                    abs_paths.append(p)
+                else:
+                    # Resolve to absolute path relative to inventory_dir
+                    abs_paths.append((inventory_dir / category / p).resolve())
+            kwargs[category] = abs_paths
+        return ElementInventory(**kwargs)
 
     def save(self, path: pathlib.Path) -> None:
         """Save the element inventory to a path."""
@@ -239,7 +278,7 @@ class AbstractDependency(abc.ABC):
     This class defines the interface for a dependency item.
     """
 
-    dependencies_store: tp.List["AbstractDependency"] = []
+    dependencies_store: list["AbstractDependency"] = []
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__()
@@ -260,13 +299,13 @@ class AbstractDependency(abc.ABC):
 
     @abc.abstractclassmethod
     def from_config(
-        cls, dep_config: tp.Dict[str, tp.Any], work_dir: str
+        cls, dep_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
     ) -> "AbstractDependency":
         """Create a dependency item from configuration."""
 
     @classmethod
     def find_dependency(
-        cls, dep_config: tp.Dict[str, tp.Any], work_dir: str
+        cls, dep_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
     ) -> tp.Optional["AbstractDependency"]:
         """Probe all dependencies to find the right one."""
         for dep in cls.dependencies_store:
@@ -289,7 +328,7 @@ class AbstractImageBuilder(abc.ABC):
         self,
         image_dir: str,
         image: Image,
-        deps: tp.List[AbstractDependency],
+        deps: list[AbstractDependency],
         developer_keys: tp.Optional[str] = None,
         output_dir: str = c.DEF_GEN_OUTPUT_DIR_NAME,
     ) -> None:
@@ -316,7 +355,7 @@ class AbstractImageBuilder(abc.ABC):
         self,
         image_dir: str,
         image: Image,
-        deps: tp.List[AbstractDependency],
+        deps: list[AbstractDependency],
         developer_keys: tp.Optional[str] = None,
         output_dir: str = c.DEF_GEN_OUTPUT_DIR_NAME,
     ) -> None:
@@ -336,7 +375,7 @@ class DummyImageBuilder(AbstractImageBuilder):
         self,
         image_dir: str,
         image: Image,
-        deps: tp.List[AbstractDependency],
+        deps: list[AbstractDependency],
         developer_keys: tp.Optional[str] = None,
         output_dir: str = c.DEF_GEN_OUTPUT_DIR_NAME,
     ) -> None:

@@ -18,42 +18,46 @@ from __future__ import annotations
 import gzip
 import json
 import os
+import pathlib
 import shutil
 import subprocess
 import tempfile
 import typing as tp
 
 import jinja2
-import yaml
+import rich_click as click
 
 from exordos import constants as c
 from exordos.builder import base
 from exordos.logger import AbstractLogger
 from exordos.logger import DummyLogger
+from exordos.repo import fs as repo_fs
 
 
 class SimpleBuilder:
     """Simple element builder."""
 
-    DEP_KEY = "deps"
-    ELEMENT_KEY = "elements"
+    DEPS_KEY = "deps"
+    ELEMENTS_KEY = "elements"
 
     def __init__(
         self,
-        work_dir: str,
-        deps: tp.List[base.AbstractDependency],
-        elements: tp.List[base.Element],
+        exordos_dir: pathlib.Path,
+        deps: list[base.AbstractDependency],
+        elements: list[base.Element],
         image_builder: base.AbstractImageBuilder,
         logger: tp.Optional[AbstractLogger] = None,
-        elements_output_dir: str = c.DEF_GEN_OUTPUT_DIR_NAME,
+        elements_output_dir: pathlib.Path = pathlib.Path(c.DEF_GEN_OUTPUT_DIR_NAME),
+        version: str = "0.0.0",
     ) -> None:
         super().__init__()
         self._deps = deps
         self._elements = elements
         self._image_builder = image_builder
-        self._work_dir = work_dir
+        self._exordos_dir = exordos_dir
         self._logger = logger or DummyLogger()
         self._elements_output_dir = elements_output_dir
+        self._version = version
 
         if not os.path.exists(self._elements_output_dir):
             os.makedirs(self._elements_output_dir)
@@ -61,42 +65,27 @@ class SimpleBuilder:
     def _build_config_artifact(
         self,
         config_artifact: base.Config | base.Artifact,
-        output_dir: str,
-        inventory_mode: bool = False,
-    ) -> str:
+        output_dir: pathlib.Path,
+    ) -> pathlib.Path:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        dst_path = output_dir / pathlib.Path(config_artifact.path).name
+        shutil.copy(config_artifact.abs_path, dst_path)
 
-        # Determine config/artifact output directory
-        if inventory_mode:
-            _output_dir = os.path.join(self._elements_output_dir, output_dir)
-        else:
-            _output_dir = self._elements_output_dir
-
-        # Move config/artifact to the final location
-        if not os.path.exists(_output_dir):
-            os.makedirs(_output_dir)
-        dst_path = os.path.abspath(
-            os.path.join(_output_dir, os.path.basename(config_artifact.path))
-        )
-        src_path = config_artifact.abs_path
-        shutil.copy(src_path, _output_dir)
-
-        return dst_path
+        return pathlib.Path(dst_path.name)
 
     def _convert_image(
         self,
-        raw_src: str,
+        raw_src: pathlib.Path,
         img_name: str,
         fmt: str,
-        images_output_dir: str,
     ) -> str:
         """Convert a RAW image to the requested format and return the final path."""
         if fmt == "raw":
-            tgt = os.path.join(images_output_dir, f"{img_name}.raw")
-            shutil.move(raw_src, tgt)
-            return os.path.abspath(tgt)
+            # Do nothing
+            return f"{img_name}.raw"
         elif fmt == "qcow2":
             self._logger.info(f"Converting {img_name} to qcow2")
-            tgt = os.path.join(images_output_dir, f"{img_name}.qcow2")
+            tgt = raw_src.parent / f"{img_name}.qcow2"
             subprocess.run(
                 [
                     "qemu-img",
@@ -113,21 +102,21 @@ class SimpleBuilder:
                 ],
                 check=True,
             )
-            return os.path.abspath(tgt)
+            return tgt.name
         elif fmt == "gz":
             self._logger.info(f"Compressing {img_name} to {img_name}.raw.gz")
-            tgt = os.path.join(images_output_dir, f"{img_name}.raw.gz")
+            tgt = raw_src.parent / f"{img_name}.raw.gz"
             with (
                 open(raw_src, "rb") as f_in,
                 gzip.open(tgt, "wb", compresslevel=5) as f_out,
             ):
                 shutil.copyfileobj(f_in, f_out)
-            return os.path.abspath(tgt)
+            return tgt.name
         elif fmt == "zst":
             # Using subprocess with zstd utility instead of Python's compression.zstd
             # because: 1) it works on Python <3.14, 2) allows multi-threading via -T0
             self._logger.info(f"Compressing {img_name} to {img_name}.raw.zst")
-            tgt = os.path.join(images_output_dir, f"{img_name}.raw.zst")
+            tgt = raw_src.parent / f"{img_name}.raw.zst"
             subprocess.run(
                 [
                     "zstd",
@@ -142,67 +131,86 @@ class SimpleBuilder:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            return os.path.abspath(tgt)
+            return tgt.name
         else:
             raise ValueError(f"Unsupported image format: {fmt}")
 
     def _build_image(
         self,
         img: base.Image,
-        build_dir: str | None,
-        output_dir: str,
-        developer_keys: str,
-        inventory_mode: bool = False,
-    ) -> tp.List[str]:
-
-        # Determine images output directory
-        if inventory_mode:
-            images_output_dir = os.path.join(self._elements_output_dir, "images")
-        else:
-            images_output_dir = self._elements_output_dir
-
-        # The build_dir is used only for debugging purposes to observe
-        # the content of the image. In production, the image is built
-        # in a temporary directory.
-        if build_dir is not None:
+        output_dir: pathlib.Path,
+        developer_keys: str | None = None,
+    ) -> list[pathlib.Path]:
+        with tempfile.TemporaryDirectory() as temp_dir:
             self._image_builder.run(
-                build_dir,
+                temp_dir,
                 img,
                 self._deps,
                 developer_keys,
-                output_dir,
+                str(output_dir),
             )
-        else:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                self._image_builder.run(
-                    temp_dir,
-                    img,
-                    self._deps,
-                    developer_keys,
-                    output_dir,
-                )
-
-        # Move the image to the final location
-        if not os.path.exists(images_output_dir):
-            os.makedirs(images_output_dir)
 
         # A builder always produces a RAW image. Convert to each requested format.
-        raw_src = os.path.join(output_dir, f"{img.name}.raw")
-
-        # Move "raw" in the end as it will be moved
-        if "raw" in img.formats:
-            img_formats = [f for f in img.formats if f != "raw"] + ["raw"]
-        else:
-            img_formats = img.formats
+        raw_src = output_dir / f"{img.name}.raw"
 
         result_paths = []
-        for fmt in img_formats:
-            path = self._convert_image(raw_src, img.name, fmt, images_output_dir)
-            result_paths.append(path)
+        for fmt in img.formats:
+            path = self._convert_image(raw_src, img.name, fmt)
+            result_paths.append(pathlib.Path(path))
 
-        # TODO(akremenetsky): Should we clear raw format?
+        if "raw" not in img.formats:
+            os.unlink(raw_src)
 
         return result_paths
+
+    def _build_images(
+        self,
+        element: base.Element,
+        output_dir: pathlib.Path,
+        developer_keys: str | None = None,
+    ) -> list[pathlib.Path]:
+        """Build images for the element."""
+        image_paths = []
+        for img in element.images:
+            _paths = self._build_image(img, output_dir, developer_keys)
+            image_paths.extend(_paths)
+
+        return image_paths
+
+    def _build_manifest(
+        self,
+        element: base.Element,
+        manifests_dir: pathlib.Path,
+        manifest_vars: dict[str, tp.Any] | None = None,
+    ) -> list[pathlib.Path]:
+        """Build manifests for the element."""
+        orig_manifest_path = self._exordos_dir / element.manifest
+
+        # Render templated manifests
+        jinja2_extensions = (".jinja2", ".j2")
+        if str(element.manifest).endswith(jinja2_extensions):
+            # Render Jinja2 manifest
+            with open(orig_manifest_path) as f:
+                template = jinja2.Template(f.read())
+            rendered_manifest = template.render(
+                manifests=[element.manifest.name],
+                **manifest_vars,
+            )
+
+            # Remove extension from the manifest name
+            manifest_name = ".".join(element.manifest.name.split(".")[:-1])
+            manifest_path = manifests_dir / manifest_name
+
+            # Save rendered manifest
+            manifest_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(manifest_path, "w") as f:
+                f.write(rendered_manifest)
+        else:
+            manifest_path = manifests_dir / element.manifest.name
+            manifest_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(orig_manifest_path, manifest_path)
+
+        return [pathlib.Path(manifest_path.name)]
 
     def fetch_dependency(self, deps_dir: str) -> None:
         """Fetch common dependencies for elements."""
@@ -214,187 +222,145 @@ class SimpleBuilder:
     def build_element(
         self,
         element: base.Element,
-        build_dir: str | None = None,
+        repo_dir: pathlib.Path,
         developer_keys: str | None = None,
-        build_suffix: str = "",
-        inventory_mode: bool = False,
         manifest_vars: dict[str, tp.Any] | None = None,
     ) -> base.ElementInventory | None:
         """Build an element."""
         self._logger.info(f"Building element: {element}")
-        image_paths, configs, artifacts = [], [], []
+        configs, artifacts = [], []
 
-        if element.artifacts:
-            for artifact in element.artifacts:
-                _path = self._build_config_artifact(
-                    artifact,
-                    "artifacts",
-                    inventory_mode,
-                )
-                artifacts.append(_path)
-        if element.configs:
-            for config in element.configs:
-                _path = self._build_config_artifact(
-                    config,
-                    "configs",
-                    inventory_mode,
-                )
-                configs.append(_path)
-        # Build images
-        for img in element.images:
-            if build_suffix and not inventory_mode:
-                img.name = f"{img.name}.{build_suffix}"
-            tmp_img_output = f"_tmp_{img.name}-output"
+        # If manifest is not provided, build only images and return.
+        # We used the `--only-images` flag earlier to skip manifest processing.
+        if not element.manifest:
+            self._build_images(element, repo_dir, developer_keys)
+            return
 
-            try:
-                _paths = self._build_image(
-                    img,
-                    build_dir,
-                    tmp_img_output,
-                    developer_keys,
-                    inventory_mode,
-                )
-                image_paths.extend(_paths)
-            finally:
-                if os.path.exists(tmp_img_output):
-                    shutil.rmtree(tmp_img_output)
+        # Prepare manifest variables
+        manifest_vars = (manifest_vars or {}).copy()
+        manifest_vars["version"] = self._version
 
-        # Save files in the inventory format
-        if inventory_mode:
-            if not element.manifest:
-                raise ValueError("Element must have a manifest")
+        # Determine element name
+        name: str = manifest_vars.get("name") or element.name(self._exordos_dir)
+        if not name:
+            raise click.UsageError("Element name is not provided")
 
-            with open(os.path.join(self._work_dir, element.manifest), "r") as f:
-                manifest = yaml.safe_load(f)
-
-            version = build_suffix
-
-            if manifest_vars:
-                manifest_vars = manifest_vars.copy()
-            else:
-                manifest_vars = {}
-            manifest_vars["version"] = version
-
-            name = (manifest_vars.get("name") or manifest["name"]).strip()
-
-            if name.startswith("{"):
-                raise ValueError(
-                    "Specify manifest name using --manifest-var name=value"
-                )
-            manifest_vars["name"] = name
-
-            # TODO(akremenetsky): This part should be refactored when we
-            # support building of multiple elements.
-            inventory_path = self._elements_output_dir
-
-            manifests_path = os.path.join(inventory_path, "manifests")
-            orig_manifest_path = os.path.join(self._work_dir, element.manifest)
-
-            # Render templated manifests
-            jinja2_extensions = (".jinja2", ".j2")
-            if element.manifest.endswith(jinja2_extensions):
-                # Render Jinja2 manifest
-                with open(orig_manifest_path) as f:
-                    template = jinja2.Template(f.read())
-                rendered_manifest = template.render(
-                    images=[os.path.basename(p) for p in image_paths],
-                    manifests=[os.path.basename(element.manifest)],
-                    **manifest_vars,
-                )
-
-                # Remove extension from the manifest name
-                manifest_name = ".".join(
-                    os.path.basename(element.manifest).split(".")[:-1]
-                )
-                manifest_path = os.path.join(manifests_path, manifest_name)
-
-                # Save rendered manifest
-                os.makedirs(manifests_path, exist_ok=True)
-                with open(manifest_path, "w") as f:
-                    f.write(rendered_manifest)
-            else:
-                manifest_name = os.path.basename(element.manifest)
-                manifest_path = os.path.join(manifests_path, manifest_name)
-                os.makedirs(manifests_path, exist_ok=True)
-                shutil.copyfile(orig_manifest_path, manifest_path)
-
-            manifests = [os.path.abspath(manifest_path)]
-
-            inventory = base.ElementInventory(
-                name=name,
-                version=version,
-                images=image_paths,
-                manifests=manifests,
-                configs=configs,
-                artifacts=artifacts,
+        if name.startswith("{"):
+            raise click.UsageError(
+                "Specify manifest name using --manifest-var name=value"
             )
-            return inventory
+        name = name.strip()
+        manifest_vars["name"] = name
+        manifest_vars["version"] = self._version
+
+        element_dir = repo_dir / name / self._version
+        element_dir.mkdir(parents=True, exist_ok=True)
+
+        # Render manifest
+        manifests_dir = element_dir / "manifests"
+        manifests = self._build_manifest(element, manifests_dir, manifest_vars)
+
+        # Build artifacts and configs
+        for artifact in element.artifacts:
+            artifact_dir = element_dir / "artifacts"
+            artifact_dir.mkdir(parents=True, exist_ok=True)
+            _path = self._build_config_artifact(artifact, artifact_dir)
+            artifacts.append(_path)
+        for config in element.configs:
+            config_dir = element_dir / "configs"
+            config_dir.mkdir(parents=True, exist_ok=True)
+            _path = self._build_config_artifact(config, config_dir)
+            configs.append(_path)
+
+        # Build images
+        images_dir = element_dir / "images"
+        images = self._build_images(element, images_dir, developer_keys)
+
+        inventory = base.ElementInventory(
+            name=name,
+            version=self._version,
+            images=images,
+            manifests=manifests,
+            configs=configs,
+            artifacts=artifacts,
+        )
+        inventory.save(element_dir)
+        return inventory
 
     def build(
         self,
-        build_dir: str | None = None,
         developer_keys: str | None = None,
-        build_suffix: str = "",
-        inventory_mode: bool = False,
         manifest_vars: dict[str, tp.Any] | None = None,
     ) -> None:
         """Build all elements."""
         self._logger.important("Building elements")
+        repo_dir = self._elements_output_dir
+
+        # Initialize repository if any element has a manifest
+        if any(e.manifest for e in self._elements):
+            repo = repo_fs.FSRepoDriver(self._elements_output_dir)
+            repo.init_repo()
+            repo_dir = pathlib.Path(repo.elements_path)
 
         inventories = []
         for e in self._elements:
             inventory = self.build_element(
                 e,
-                build_dir,
+                repo_dir,
                 developer_keys,
-                build_suffix,
-                inventory_mode,
                 manifest_vars,
             )
             if inventory:
                 inventories.append(inventory)
 
         # Save inventories
+        # TODO(akremenetsky): It's internal logic of repository and it should be
+        # moved into repository models one day.
         if inventories:
-            data = [inventory.to_dict() for inventory in inventories]
-            with open(
-                os.path.join(self._elements_output_dir, "inventory.json"), "w"
-            ) as f:
+            data = {"elements": {}}
+            for inventory in inventories:
+                data["elements"][inventory.name] = {
+                    inventory.version: inventory.to_dict()
+                }
+
+            with open(repo_dir / "inventory.json", "w") as f:
                 json.dump(data, f, indent=2, sort_keys=True)
 
     @classmethod
     def from_config(
         cls,
-        work_dir: str,
-        build_config: tp.Dict[str, tp.Any],
+        exordos_dir: pathlib.Path,
+        build_config: dict[str, tp.Any],
         image_builder: base.AbstractImageBuilder,
-        logger: tp.Optional[AbstractLogger] = None,
-        elements_output_dir: str = c.DEF_GEN_OUTPUT_DIR_NAME,
+        elements_output_dir: pathlib.Path,
+        version: str = "0.0.0",
+        logger: AbstractLogger | None = None,
     ) -> "SimpleBuilder":
         """Create a builder from configuration."""
         # Prepare dependencies entries but do not fetch them
         deps = []
-        dep_configs = build_config.get(cls.DEP_KEY, [])
+        dep_configs = build_config.get(cls.DEPS_KEY, [])
         for dep in dep_configs:
-            dep_item = base.AbstractDependency.find_dependency(dep, work_dir)
+            dep_item = base.AbstractDependency.find_dependency(dep, exordos_dir)
             if dep_item is None:
                 raise ValueError(f"Unable to handle dependency: {dep}. Unknown type.")
             deps.append(dep_item)
 
         # Prepare elements
-        element_configs = build_config.get(cls.ELEMENT_KEY, [])
+        element_configs = build_config.get(cls.ELEMENTS_KEY, [])
         elements = [
-            base.Element.from_config(elem, work_dir) for elem in element_configs
+            base.Element.from_config(elem, exordos_dir) for elem in element_configs
         ]
 
         if not elements:
             raise ValueError("No elements found in configuration")
 
         return cls(
-            work_dir,
+            exordos_dir,
             deps,
             elements,
             image_builder,
             logger,
             elements_output_dir,
+            version,
         )

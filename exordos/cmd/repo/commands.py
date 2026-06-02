@@ -27,6 +27,7 @@ from exordos.builder import base as base_builder
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.repo import base as base_repo
+from exordos.repo import fs as repo_fs
 from exordos.repo import utils as repo_utils
 
 if tp.TYPE_CHECKING:
@@ -207,9 +208,9 @@ def repo_list_cmd(
 @click.option(
     "-e",
     "--element-dir",
-    default=c.DEF_GEN_OUTPUT_DIR_NAME,
+    default=lambda: pathlib.Path(c.DEF_GEN_OUTPUT_DIR_NAME),
     help="Directory where element artifacts are stored",
-    type=click.Path(),
+    type=click.Path(path_type=pathlib.Path),
 )
 @click.option(
     "-f",
@@ -233,40 +234,46 @@ def push_cmd(
     driver: str | None,
     driver_params: tuple[str, ...],
     target: str | None,
-    element_dir: str,
+    element_dir: pathlib.Path,
     force: bool,
     latest: bool,
-    project_dir: str,
+    project_dir: pathlib.Path,
 ) -> None:
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
     )
 
-    # Push elements
-    path = pathlib.Path(element_dir) / base_builder.ElementInventory.file_name
-    with open(path, "r") as f:
-        inventories = json.load(f)
+    # Every build creates a local repo with built elements into it.
+    build_repo = repo_fs.FSRepoDriver(element_dir)
+    build_repo_dir = pathlib.Path(build_repo.elements_path)
 
-    # Backward compatibility: support both single
-    # inventory and list of inventories
-    if not isinstance(inventories, list):
-        inventories = [inventories]
+    with open(build_repo_dir / "inventory.json") as f:
+        repo_inventory = json.load(f)
+        repo_elements = repo_inventory["elements"]
 
-    for inventory in inventories:
-        element = base_builder.ElementInventory.from_dict(inventory)
+    for e_name in repo_elements:
+        # FIXME(akremenetsky): In the build repo only single version is available
+        e_version = tuple(repo_elements[e_name].keys())[0]
+        e_dir = build_repo_dir / e_name / e_version
+        e_inventory = base_builder.ElementInventory.from_dict(
+            repo_elements[e_name][e_version]
+        )
+        e_inventory = e_inventory.replace_with_abspath(e_dir)
+
         try:
             with rich_status.Status("Push the element to the repo...", spinner="dots"):
-                repo_driver.push(element, latest=latest)
+                repo_driver.push(e_inventory, latest=latest)
         except base_repo.ElementAlreadyExistsError:
             if force:
-                repo_driver.remove(element)
+                repo_driver.remove(e_inventory)
                 with rich_status.Status(
                     "Push the element to the repo...", spinner="dots"
                 ):
-                    repo_driver.push(element, latest=latest)
+                    repo_driver.push(e_inventory, latest=latest)
                     continue
 
             click.secho(
-                f"Element {element.name} version {element.version} already exists.",
+                f"Element {e_inventory.name} version "
+                f"{e_inventory.version} already exists.",
                 fg="red",
             )

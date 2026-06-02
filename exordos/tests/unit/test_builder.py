@@ -32,19 +32,23 @@ class TestBuilder:
 
         assert len(simple_builder._deps) > 1
 
-    def test_from_config(self, build_config: tp.Dict[str, tp.Any]) -> None:
-        work_dir = "/tmp/work_dir"
+    def test_from_config(self, build_config: tp.Dict[str, tp.Any], tmp_path) -> None:
+        work_dir = tmp_path / "work_dir"
+        work_dir.mkdir()
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
 
         builder = SimpleBuilder.from_config(
             work_dir,
             build_config,
             MagicMock(),
-            DummyLogger(),
+            output_dir,
+            logger=DummyLogger(),
         )
 
         assert len(builder._deps) == 2
         assert len(builder._elements) == 1
-        assert builder._work_dir == work_dir
+        assert builder._exordos_dir == work_dir
 
     def test_manifest_rendering_jinja2_variables(self, tmp_path) -> None:
         """Ensure Jinja2 variables render correctly."""
@@ -71,28 +75,29 @@ class TestBuilder:
 
         # Prepare builder with no images to focus on manifest rendering
         builder = SimpleBuilder(
-            work_dir=str(work_dir),
+            exordos_dir=work_dir,
             deps=[],
             elements=[],
             image_builder=MagicMock(spec=base.AbstractImageBuilder),
             logger=DummyLogger(),
-            elements_output_dir=str(out_dir),
+            elements_output_dir=out_dir,
+            version="1.2.3",
         )
 
-        element = base.Element(manifest=manifest_rel, images=[])
+        element = base.Element(manifest=pathlib.Path(manifest_rel), images=[])
 
         # Act
         inventory = builder.build_element(
             element=element,
-            build_dir=None,
+            repo_dir=out_dir,
             developer_keys=None,
-            build_suffix="1.2.3",
-            inventory_mode=True,
             manifest_vars={"foo": "FOO", "bar": "BAR"},
         )
 
         # Assert: rendered manifest exists without the .j2 extension
-        manifests_dir = out_dir / "manifests"
+        # The manifest is now stored in a versioned subdirectory
+        element_dir = out_dir / "my-element" / "1.2.3"
+        manifests_dir = element_dir / "manifests"
         rendered_manifest = manifests_dir / "myapp.yaml"
         assert rendered_manifest.exists(), "Rendered manifest file not found"
 
@@ -123,26 +128,26 @@ class TestBuilder:
         manifest_path.write_text('name: svc\nversion: "{{ version }}"\n')
 
         builder = SimpleBuilder(
-            work_dir=str(work_dir),
+            exordos_dir=work_dir,
             deps=[],
             elements=[],
             image_builder=MagicMock(spec=base.AbstractImageBuilder),
             logger=DummyLogger(),
-            elements_output_dir=str(out_dir),
+            elements_output_dir=out_dir,
+            version="0.0.1",
         )
 
-        element = base.Element(manifest=manifest_rel, images=[])
+        element = base.Element(manifest=pathlib.Path(manifest_rel), images=[])
 
         builder.build_element(
             element=element,
-            build_dir=None,
+            repo_dir=out_dir,
             developer_keys=None,
-            build_suffix="0.0.1",
-            inventory_mode=True,
         )
 
         # The output manifest should be saved without the .jinja2 extension
-        assert (out_dir / "manifests" / "service.yaml").exists()
+        # The manifest is now stored in a versioned subdirectory
+        assert (out_dir / "svc" / "0.0.1" / "manifests" / "service.yaml").exists()
 
     def test_build_multiple_manifests_writes_inventory_json(self, tmp_path) -> None:
         work_dir = tmp_path / "work"
@@ -156,47 +161,55 @@ class TestBuilder:
         (work_dir / manifest_2).write_text("name: app2\nversion: 0\n")
 
         builder = SimpleBuilder(
-            work_dir=str(work_dir),
+            exordos_dir=work_dir,
             deps=[],
             elements=[
-                base.Element(manifest=manifest_1, images=[]),
-                base.Element(manifest=manifest_2, images=[]),
+                base.Element(manifest=pathlib.Path(manifest_1), images=[]),
+                base.Element(manifest=pathlib.Path(manifest_2), images=[]),
             ],
             image_builder=MagicMock(spec=base.AbstractImageBuilder),
             logger=DummyLogger(),
-            elements_output_dir=str(out_dir),
+            elements_output_dir=out_dir,
+            version="9.9.9",
         )
 
         builder.build(
-            build_dir=None,
             developer_keys=None,
-            build_suffix="9.9.9",
-            inventory_mode=True,
             manifest_vars=None,
         )
 
-        inventory_json = out_dir / "inventory.json"
+        # Inventory.json is written to the exordos-elements subdirectory
+        inventory_json = out_dir / "exordos-elements" / "inventory.json"
         assert inventory_json.exists()
 
         data = json.loads(inventory_json.read_text())
-        assert isinstance(data, list)
-        assert len(data) == 2
+        # Inventory format is now {"elements": {...}}
+        assert "elements" in data
+        elements = data["elements"]
+        assert isinstance(elements, dict)
+        assert len(elements) == 2
 
-        names = {item["name"] for item in data}
+        names = set(elements.keys())
         assert names == {"app1", "app2"}
 
-        versions = {item["version"] for item in data}
+        # Each element has a version key with the inventory data
+        versions = {elements[name]["9.9.9"]["version"] for name in names}
         assert versions == {"9.9.9"}
 
-        manifest_names = {
-            pathlib.Path(item["manifests"][0]).name
-            for item in data
-            if item["manifests"]
-        }
-        assert manifest_names == {"app1.yaml", "app2.yaml"}
+        # Check manifests are stored correctly
+        for name in names:
+            elem_data = elements[name]["9.9.9"]
+            assert elem_data["manifests"]
+            manifest_name = pathlib.Path(elem_data["manifests"][0]).name
+            assert manifest_name == f"{name}.yaml"
 
-        assert (out_dir / "manifests" / "app1.yaml").exists()
-        assert (out_dir / "manifests" / "app2.yaml").exists()
+        # Manifests are now in versioned subdirectories under exordos-elements
+        assert (
+            out_dir / "exordos-elements" / "app1" / "9.9.9" / "manifests" / "app1.yaml"
+        ).exists()
+        assert (
+            out_dir / "exordos-elements" / "app2" / "9.9.9" / "manifests" / "app2.yaml"
+        ).exists()
 
     def test_image_from_config_single_format(self) -> None:
         """Image.from_config parses a single format string into a one-element list."""
@@ -232,16 +245,16 @@ class TestBuilder:
         raw_src.write_bytes(b"rawdata")
 
         builder = SimpleBuilder(
-            work_dir=str(tmp_path),
+            exordos_dir=tmp_path,
             deps=[],
             elements=[],
             image_builder=MagicMock(spec=base.AbstractImageBuilder),
             logger=DummyLogger(),
-            elements_output_dir=str(tmp_path / "out"),
+            elements_output_dir=tmp_path / "out",
         )
-        result = builder._convert_image(str(raw_src), "my-img", "raw", str(images_dir))
+        result = builder._convert_image(raw_src, "my-img", "raw")
         assert pathlib.Path(result).name == "my-img.raw"
-        assert pathlib.Path(result).exists()
+        assert (raw_src.parent / result).exists()
 
     def test_build_element_multi_format_inventory(self, tmp_path) -> None:
         """build_element lists all requested format variants in inventory images."""
@@ -273,27 +286,29 @@ class TestBuilder:
         mock_builder.run.side_effect = fake_run
 
         builder = SimpleBuilder(
-            work_dir=str(work_dir),
+            exordos_dir=work_dir,
             deps=[],
-            elements=[base.Element(manifest=manifest_rel, images=[img])],
+            elements=[base.Element(manifest=pathlib.Path(manifest_rel), images=[img])],
             image_builder=mock_builder,
             logger=DummyLogger(),
-            elements_output_dir=str(out_dir),
+            elements_output_dir=out_dir,
         )
 
         builder.build(
-            build_dir=None,
             developer_keys=None,
-            build_suffix="1.0.0",
-            inventory_mode=True,
             manifest_vars=None,
         )
 
-        inventory_json = out_dir / "inventory.json"
+        # Inventory.json is written to the exordos-elements subdirectory
+        inventory_json = out_dir / "exordos-elements" / "inventory.json"
         assert inventory_json.exists()
         data = json.loads(inventory_json.read_text())
-        assert isinstance(data, list)
-        images = data[0]["images"]
+        # Inventory format is now {"elements": {...}}
+        assert "elements" in data
+        elements = data["elements"]
+        assert isinstance(elements, dict)
+        # Images are stored under the element name and version
+        images = elements["myapp"]["0.0.0"]["images"]
         image_names = [pathlib.Path(p).name for p in images]
         assert any(n.endswith(".raw") for n in image_names)
         assert any(n.endswith(".raw.gz") for n in image_names)

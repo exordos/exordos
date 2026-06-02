@@ -21,6 +21,7 @@ import json
 import os
 import pathlib
 import secrets
+import shutil
 import subprocess
 import time
 import typing as tp
@@ -38,11 +39,12 @@ from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
-from exordos.common import version
+from exordos.common import version as version_lib
 import exordos.constants as c
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
+from exordos.repo import fs as repo_fs
 from exordos.stand import models as stand_models
 
 BOOTSTRAP_TAG = "bootstrap"
@@ -61,7 +63,7 @@ def _is_url(value: str) -> bool:
 def _inventory_cache_dir(base_url: str) -> pathlib.Path:
     """Return the local cache directory for a given inventory base URL.
 
-    The path is ``~/.cache/exordos/<name>/<version>/`` derived from the
+    The path is ``~/.cache/exordos/exordos-elements/<name>/<version>/`` derived from the
     last two segments of *base_url*'s path.  Falls back to a SHA-256 hash
     when the URL has fewer than two path segments.
     """
@@ -75,7 +77,11 @@ def _inventory_cache_dir(base_url: str) -> pathlib.Path:
         url_hash = hashlib.sha256(base_url.encode()).hexdigest()[:16]
         element_name = "unknown"
         element_version = url_hash
-    return _INVENTORY_CACHE_BASE / element_name / element_version
+    return (
+        element_name,
+        element_version,
+        _INVENTORY_CACHE_BASE / c.ELEMENT_REPO_PATH / element_name / element_version,
+    )
 
 
 def _download_inventory_json(session: requests.Session, base_url: str) -> dict:
@@ -192,7 +198,17 @@ def _download_inventory_files(
     inventory_local.write_text(json.dumps(raw, indent=2))
 
 
-def _resolve_inventory_from_url(url: str) -> pathlib.Path:
+def _init_cache_repo(repo_driver: repo_fs.FSRepoDriver) -> None:
+    # TODO(akremenetsky): It's internal logic of repository and it should be
+    # moved into repository models one day.
+    repo_inventory_path = _INVENTORY_CACHE_BASE / c.ELEMENT_REPO_PATH / "inventory.json"
+    if not repo_inventory_path.exists():
+        repo_driver.init_repo()
+        with open(repo_inventory_path, "w") as f:
+            json.dump({"elements": {}}, f)
+
+
+def _get_element_inventory_from_url(url: str) -> base_builder.ElementInventory:
     """Download inventory and all artefacts from an Nginx URL, with caching.
 
     Args:
@@ -201,84 +217,42 @@ def _resolve_inventory_from_url(url: str) -> pathlib.Path:
     Returns:
         Local cache directory path accepted by :py:meth:`ElementInventory.load`.
     """
+    repo_driver = repo_fs.FSRepoDriver(_INVENTORY_CACHE_BASE)
+    _init_cache_repo(repo_driver)
+
     base_url = url.rstrip("/")
     if base_url.endswith("/inventory.json"):
         base_url = base_url[: -len("/inventory.json")]
 
-    cache_dir = _inventory_cache_dir(base_url)
+    name, version, cache_dir = _inventory_cache_dir(base_url)
     inventory_local = cache_dir / "inventory.json"
 
     if inventory_local.exists():
         click.secho(f"Using cached inventory from {cache_dir}", fg="cyan")
-        return cache_dir
+        return repo_driver.inventory(name, version)
 
     cache_dir.mkdir(parents=True, exist_ok=True)
     with requests.Session() as session:
-        raw = _download_inventory_json(session, base_url)
-        _download_inventory_files(
-            session, base_url, raw, cache_dir, images_suffix_filter=".qcow2"
-        )
+        try:
+            raw = _download_inventory_json(session, base_url)
+            _download_inventory_files(
+                session, base_url, raw, cache_dir, images_suffix_filter=".qcow2"
+            )
+        except:
+            shutil.rmtree(cache_dir)
+            raise
 
-    return cache_dir
+    # TODO(akremenetsky): It's internal logic of repository and it should be
+    # moved into repository models one day.
+    inventories = repo_driver.inventories()
+    with open(inventory_local) as f:
+        inventories.setdefault(name, {})[version] = json.load(f)
 
+    repo_inventory_path = _INVENTORY_CACHE_BASE / c.ELEMENT_REPO_PATH / "inventory.json"
+    with open(repo_inventory_path, "w") as f:
+        json.dump({"elements": inventories}, f, indent=2, sort_keys=True)
 
-def _ecosystem_realm_url_from_core_url(core_base_url: str) -> str | None:
-    """Derive the ecosystem_realm repository URL from a core element URL.
-
-    Replaces the element-name path segment (e.g. ``core``) with
-    ``ecosystem_realm`` while preserving the version segment and scheme.
-
-    Returns ``None`` when the URL structure is not recognisable.
-    """
-    parsed = urllib.parse.urlparse(core_base_url)
-    parts = [p for p in parsed.path.split("/") if p]
-    if len(parts) < 2:
-        return None
-    version_segment = parts[-1]
-    base_parts = parts[:-2]
-    new_path = "/".join(base_parts + ["ecosystem_realm", version_segment])
-    return urllib.parse.urlunparse(parsed._replace(path=f"/{new_path}"))
-
-
-def _fetch_ecosystem_realm_into_inventory(
-    core_url: str,
-    cache_dir: pathlib.Path,
-) -> None:
-    """Download ecosystem_realm artefacts and merge them into *cache_dir*/inventory.json.
-
-    The ecosystem_realm URL is derived from *core_url* by substituting the
-    element-name segment with ``ecosystem_realm``.  Files are placed into the
-    same *cache_dir* so that :py:meth:`ElementInventory.load` can find them
-    via the merged ``inventory.json``.
-
-    If the ecosystem_realm entry already exists in the cached inventory or the
-    remote URL cannot be determined, the function returns without doing anything.
-    """
-    if core_url.endswith("/inventory.json"):
-        core_url = core_url[: -len("/inventory.json")]
-
-    eco_url = _ecosystem_realm_url_from_core_url(core_url)
-    if eco_url is None:
-        click.secho(
-            "Warning: could not derive ecosystem_realm URL from core URL, skipping",
-            fg="yellow",
-        )
-        return
-
-    inventory_local = cache_dir / "inventory.json"
-    existing_raw = json.loads(inventory_local.read_text())
-    existing_list = existing_raw if isinstance(existing_raw, list) else [existing_raw]
-
-    if any((inv.get("name") == "ecosystem_realm") for inv in existing_list):
-        return
-
-    with requests.Session() as session:
-        eco_raw = _download_inventory_json(session, eco_url)
-        _download_inventory_files(session, eco_url, eco_raw, cache_dir)
-
-    eco_entry = eco_raw if not isinstance(eco_raw, list) else eco_raw[0]
-    existing_list.append(eco_entry)
-    inventory_local.write_text(json.dumps(existing_list, indent=2))
+    return repo_driver.inventory(name, version)
 
 
 def _get_core_image_uri_from_manifest(manifest_path: str) -> str:
@@ -407,7 +381,7 @@ def _bootstrap_core(
     stand_spec: tp.Dict[str, tp.Any] | None,
     stand_main_network: stand_models.Network,
     stand_boot_network: stand_models.Network,
-    disks: list[str] | None,
+    disks: list[int] | None,
     force: bool,
     core_ip: ipaddress.IPv4Address,
     repository: str,
@@ -568,7 +542,6 @@ def _bootstrap_core(
         "0.0.6  "
         "/path/to/core/0.0.6  "
         "https://repository.example.com/exordos-elements/core/0.0.6/  "
-        "https://repository.example.com/exordos-elements/core/0.0.6/inventory.json"
     ),
 )
 @click.option(
@@ -811,15 +784,25 @@ def bootstrap_cmd(
     if not inventory:
         raise click.UsageError("No inventory specified")
 
-    if version.is_version(inventory):
-        inventory = f"{c.ELEMENT_REPO_URL}/core/{inventory.strip()}/"
-
     if _is_url(inventory):
-        inventory_path = _resolve_inventory_from_url(inventory)
-        _fetch_ecosystem_realm_into_inventory(inventory.rstrip("/"), inventory_path)
-        inventory = str(inventory_path)
-    elif not os.path.exists(inventory):
-        raise click.UsageError(f"Inventory path not found: {inventory}")
+        inventory = inventory[:-1] if inventory.endswith("/") else inventory
+        # Detect version
+        inventory = inventory.split("/")[-1]
+
+    if version_lib.is_version(inventory):
+        inventory_instance = _get_element_inventory_from_url(
+            f"{c.ELEMENT_REPO_URL}/core/{inventory.strip()}/"
+        )
+        inventory_eco_instance = _get_element_inventory_from_url(
+            f"{c.ELEMENT_REPO_URL}/ecosystem_realm/{inventory.strip()}/"
+        )
+        eco_manifest_path = str(inventory_eco_instance.manifests[0])
+    else:
+        # Load inventories
+        repo_driver = repo_fs.FSRepoDriver(inventory)
+        inventory_instance = repo_driver.inventory("core")
+        inventory_eco_instance = repo_driver.inventory("ecosystem_realm")
+        eco_manifest_path = str(inventory_eco_instance.manifests[0])
 
     profile = Profile[profile.upper()]
 
@@ -835,9 +818,6 @@ def bootstrap_cmd(
         import secrets
 
         admin_password = secrets.token_urlsafe(16)
-
-    # Load inventory and get image path and image URI.
-    inventory_instance = base_builder.ElementInventory.load(pathlib.Path(inventory))
 
     if not inventory_instance.images:
         raise click.UsageError("No images found in the inventory")
@@ -933,11 +913,6 @@ def bootstrap_cmd(
             disable_telemetry=disable_telemetry,
             org_token=org_token,
         )
-
-    inventory_eco_instance = base_builder.ElementInventory.load(
-        pathlib.Path(inventory), 1
-    )
-    eco_manifest_path = str(inventory_eco_instance.manifests[0])
 
     ssh_public_key_content = None
     if ssh_public_key:
