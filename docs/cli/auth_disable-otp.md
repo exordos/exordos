@@ -1,36 +1,25 @@
 
-# auth_refresh
+# auth_disable-otp
 
-Refresh stored token using refresh token
+Disable two-factor authentication
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         
+ Usage: exordos auth disable-otp [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `ttl`:
-    * Type: integer
-    * Default: `none`
-    * Usage: `--ttl`
-
-  Access token lifetime in seconds (optional)
-
-* `scope`:
+* `password`:
     * Type: text
     * Default: `none`
-    * Usage: `--scope`
+    * Usage: `-p
+--password`
 
-  OAuth scope (optional)
-
-* `project_dir` (REQUIRED):
-    * Type: path
-    * Default: `sentinel.unset`
-    * Usage: `project_dir`
+  Current password (optional, will be prompted if not provided)
 
 * `help`:
     * Type: boolean
@@ -43,13 +32,12 @@ Refresh stored token using refresh token
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         
+ Usage: exordos auth disable-otp [OPTIONS]                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- Refresh stored token using refresh token                                                                                                                                                                                                                                                                  
+ Disable two-factor authentication                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --ttl    INTEGER  Access token lifetime in seconds (optional)                                                                                                                                                                                                                                           │
-│ --scope  TEXT     OAuth scope (optional)                                                                                                                                                                                                                                                                │
-│ --help            Show this message and exit.                                                                                                                                                                                                                                                           │
+│ --password  -p  TEXT  Current password (optional, will be prompted if not provided)                                                                                                                                                                                                                     │
+│ --help                Show this message and exit.                                                                                                                                                                                                                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

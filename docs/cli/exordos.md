@@ -107,6 +107,13 @@ Provides all the necessary tools for work with Exordos Platform
 
   Do not print messages, warnings or errors
 
+* `otp_code`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--otp-code`
+
+  OTP code for two-factor authentication
+
 * `help`:
     * Type: boolean
     * Default: `false`

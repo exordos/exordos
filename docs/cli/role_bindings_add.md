@@ -21,13 +21,13 @@ Add a new role_binding to the Exordos installation
 
   UUID of the role_binding
 
-* `project_id` (REQUIRED):
+* `project_id`:
     * Type: uuid
     * Default: `sentinel.unset`
     * Usage: `-p
 --project-id`
 
-  Name of the project in which to deploy the role_binding
+  UUID of the project in which to deploy the role_binding
 
 * `user` (REQUIRED):
     * Type: uuid
@@ -56,13 +56,4 @@ Add a new role_binding to the Exordos installation
                                                                                                                                                                                                                                                                                                            
  Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
- Add a new role_binding to the Exordos installation                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid        -u  UUID  UUID of the role_binding                                                                                                                                                                                                                                                     │
-│ *  --project-id  -p  UUID  Name of the project in which to deploy the role_binding [required]                                                                                                                                                                                                           │
-│ *  --user            UUID  role uuid [required]                                                                                                                                                                                                                                                         │
-│ *  --role            UUID  user uuid [required]                                                                                                                                                                                                                                                         │
-│    --help                  Show this message and exit.                                                                                                                                                                                                                                                  │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

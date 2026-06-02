@@ -20,6 +20,22 @@ copy exordos element from local git repo to element nodes, example cmd: exordos 
 
   ssh user name
 
+* `public_key`:
+    * Type: path
+    * Default: `sentinel.unset`
+    * Usage: `-i
+--public-key`
+
+  key or path to it, for example: /home/user/.ssh/id_rsa.pub
+
+* `private_key`:
+    * Type: path
+    * Default: `sentinel.unset`
+    * Usage: `-p
+--private-key`
+
+  key or path to it, for example: /home/user/.ssh/id_rsa.pub
+
 * `y`:
     * Type: boolean
     * Default: `false`
