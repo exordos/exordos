@@ -109,5 +109,5 @@ exordos settings set-context <context_name> \
 
 ```console
 exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gMjfYDwg" \
-  --refresh_token "...bZ1BENYKg" City
+  --refresh_token "...bZ1BENYKg" MyTown
 ```
