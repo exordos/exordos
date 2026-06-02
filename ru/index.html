@@ -307,45 +307,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#установка" class="md-nav__link">
+    Установка
   </a>
   
-    <nav class="md-nav" aria-label="Install">
+    <nav class="md-nav" aria-label="Установка">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#binary-recommended" class="md-nav__link">
-    Binary (recommended)
+  <a href="#бинарный-файл-рекомендуется" class="md-nav__link">
+    Бинарный файл (рекомендуется)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#via-uv" class="md-nav__link">
-    Via uv
+  <a href="#через-uv" class="md-nav__link">
+    Через uv
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#via-pip" class="md-nav__link">
-    Via pip
+  <a href="#через-pip" class="md-nav__link">
+    Через pip
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#local-build-dependencies" class="md-nav__link">
-    Local build dependencies
+  <a href="#зависимости-для-локальной-сборки" class="md-nav__link">
+    Зависимости для локальной сборки
   </a>
   
-    <nav class="md-nav" aria-label="Local build dependencies">
+    <nav class="md-nav" aria-label="Зависимости для локальной сборки">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#qemu-and-libvirt-ubuntu" class="md-nav__link">
-    QEMU and libvirt (Ubuntu)
+  <a href="#qemu-и-libvirt-ubuntu" class="md-nav__link">
+    QEMU и libvirt (Ubuntu)
   </a>
   
 </li>
@@ -368,43 +368,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quickstart" class="md-nav__link">
-    Quickstart
+  <a href="#быстрый-старт" class="md-nav__link">
+    Быстрый старт
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#exordos-configuration-file" class="md-nav__link">
-    Exordos configuration file
+  <a href="#файл-конфигурации-exordos" class="md-nav__link">
+    Файл конфигурации Exordos
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#build-project" class="md-nav__link">
-    Build project
+  <a href="#сборка-проекта" class="md-nav__link">
+    Сборка проекта
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#stand-specification" class="md-nav__link">
-    Stand specification
+  <a href="#спецификация-стенда" class="md-nav__link">
+    Спецификация стенда
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#backups" class="md-nav__link">
-    Backups
+  <a href="#резервные-копии" class="md-nav__link">
+    Резервные копии
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#versioning" class="md-nav__link">
-    Versioning
+  <a href="#версионирование" class="md-nav__link">
+    Версионирование
   </a>
   
 </li>
@@ -3361,56 +3361,56 @@
 
 
 <h1 id="exordos-cli">Exordos CLI<a class="headerlink" href="#exordos-cli" title="Permanent link">#</a></h1>
-<p>Exordos CLI is the official command-line interface for the <a href="https://github.com/infraguys/exordos_core">Exordos platform</a>. It provides a unified toolset for managing the full lifecycle of Exordos projects — from building and provisioning elements to bootstrapping installations, managing backups, and interacting with a running Exordos environment.</p>
-<p><strong>📚 Platform Documentation:</strong> <a href="https://exordos.github.io/exordos_core/">exordos.github.io/exordos_core</a></p>
-<p>With a single binary you can:</p>
+<p>Exordos CLI — это интерфейс командной строки для <a href="https://github.com/infraguys/exordos_core">платформы Exordos</a>. Он предоставляет унифицированный набор инструментов для управления полным жизненным циклом проектов Exordos — от сборки и выделения элементов до инициализации установок, управления резервными копиями и взаимодействия с работающей средой Exordos.</p>
+<p><strong>📚 Документация платформы:</strong> <a href="https://exordos.github.io/exordos_core/">exordos.github.io/exordos_core</a></p>
+<p>С помощью одного бинарного файла вы можете:</p>
 <ul>
-<li><strong>Build projects</strong> — compile Exordos project images and artifacts from a declarative <code>exordos.yaml</code> configuration.</li>
-<li><strong>Bootstrap installations</strong> — spin up local virtual machine environments from built images for development and testing.</li>
-<li><strong>Manage installations</strong> — connect via SSH, list, and remove running Exordos instances.</li>
-<li><strong>Interact with the platform</strong> — manage elements, IAM, secrets, compute nodes, realms, and more through a rich set of subcommands.</li>
-<li><strong>Automate backups</strong> — run periodic or one-shot backups of installations with compression, encryption, rotation, and disk-overflow protection.</li>
+<li><strong>Собирать проекты</strong> — компилировать образы и артефакты проектов Exordos из декларативной конфигурации <code>exordos.yaml</code>.</li>
+<li><strong>Инициализировать установки</strong> — запускать локальные виртуальные машины из собранных образов для разработки и тестирования.</li>
+<li><strong>Управлять установками</strong> — подключаться по SSH, перечислять и удалять работающие экземпляры Exordos.</li>
+<li><strong>Взаимодействовать с платформой</strong> — управлять элементами, IAM, секретами, вычислительными узлами, реалмами и многим другим с помощью расширенного набора подкоманд.</li>
+<li><strong>Автоматизировать резервное копирование</strong> — выполнять периодическое или однократное резервное копирование установок со сжатием, шифрованием, ротацией и защитой от переполнения диска.</li>
 </ul>
-<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
-<h3 id="binary-recommended">Binary (recommended)<a class="headerlink" href="#binary-recommended" title="Permanent link">#</a></h3>
-<p>Install the CLI with a single command:</p>
+<h2 id="установка">Установка<a class="headerlink" href="#установка" title="Permanent link">#</a></h2>
+<h3 id="бинарный-файл-рекомендуется">Бинарный файл (рекомендуется)<a class="headerlink" href="#бинарный-файл-рекомендуется" title="Permanent link">#</a></h3>
+<p>Установите CLI одной командой:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://repo.exordos.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>sh
 </code></pre></div>
-<h3 id="via-uv">Via uv<a class="headerlink" href="#via-uv" title="Permanent link">#</a></h3>
+<h3 id="через-uv">Через uv<a class="headerlink" href="#через-uv" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>exordos
 </code></pre></div>
-<h3 id="via-pip">Via pip<a class="headerlink" href="#via-pip" title="Permanent link">#</a></h3>
+<h3 id="через-pip">Через pip<a class="headerlink" href="#через-pip" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>exordos
 </code></pre></div>
 <hr>
-<p>For basic usage (managing a running Exordos platform) no further dependencies are needed.</p>
-<p>If you want to <strong>build elements locally</strong> (compile images with Packer and QEMU) or <strong>bootstrap a local platform deployment</strong> (spin up a local Exordos installation for development and testing), install the additional dependencies below.</p>
-<h3 id="local-build-dependencies">Local build dependencies<a class="headerlink" href="#local-build-dependencies" title="Permanent link">#</a></h3>
-<h4 id="qemu-and-libvirt-ubuntu">QEMU and libvirt (Ubuntu)<a class="headerlink" href="#qemu-and-libvirt-ubuntu" title="Permanent link">#</a></h4>
+<p>Для базового использования (управление работающей платформой Exordos) дополнительные зависимости не требуются.</p>
+<p>Если вы хотите <strong>собирать элементы локально</strong> (компилировать образы с помощью Packer и QEMU) или <strong>инициализировать локальное развертывание платформы</strong> (запустить локальную установку Exordos для разработки и тестирования), установите дополнительные зависимости, указанные ниже.</p>
+<h3 id="зависимости-для-локальной-сборки">Зависимости для локальной сборки<a class="headerlink" href="#зависимости-для-локальной-сборки" title="Permanent link">#</a></h3>
+<h4 id="qemu-и-libvirt-ubuntu">QEMU и libvirt (Ubuntu)<a class="headerlink" href="#qemu-и-libvirt-ubuntu" title="Permanent link">#</a></h4>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>qemu-kvm<span class="w"> </span>qemu-utils<span class="w"> </span>libvirt-daemon-system<span class="w"> </span>libvirt-dev<span class="w"> </span>mkisofs
 sudo<span class="w"> </span>adduser<span class="w"> </span><span class="nv">$USER</span><span class="w"> </span>libvirt
 sudo<span class="w"> </span>adduser<span class="w"> </span><span class="nv">$USER</span><span class="w"> </span>kvm
 </code></pre></div>
-<p>You may need to re-login for the group changes to take effect.</p>
+<p>Возможно, потребуется выйти и войти снова в командную оболочку, чтобы изменения групп вступили в силу.</p>
 <h4 id="packer">Packer<a class="headerlink" href="#packer" title="Permanent link">#</a></h4>
-<p>Download <a href="https://hashicorp-releases.yandexcloud.net/packer/1.9.2/">Packer version 1.9.2</a> or earlier (due to licensing limitations) and place the binary into <code>/usr/local/bin/</code> or any other directory in your <code>$PATH</code>.</p>
-<h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">#</a></h2>
-<p>This section covers the core workflow: initializing a project, building an element, publishing it to a registry, and deploying it to a running Exordos installation.</p>
-<p>For a step-by-step walkthrough with a real example project, see the <a href="https://exordos.github.io/exordos_core/app-developer-guide/#quick-start">App Developer Guide</a> in the platform documentation.</p>
-<h2 id="exordos-configuration-file">Exordos configuration file<a class="headerlink" href="#exordos-configuration-file" title="Permanent link">#</a></h2>
-<p>Each Exordos project is described by an <code>exordos.yaml</code> file. See <a href="exordos-yaml/">exordos.yaml reference</a> for the full format and examples.</p>
-<h2 id="build-project">Build project<a class="headerlink" href="#build-project" title="Permanent link">#</a></h2>
-<p>The <code>exordos build</code> command builds the elements defined in <code>exordos.yaml</code>. The mandatory argument is the path to the project root directory.</p>
+<p>Скачайте <a href="https://hashicorp-releases.yandexcloud.net/packer/1.9.2/">версию Packer 1.9.2</a> или более раннюю (из-за ограничений лицензирования) и поместите бинарный файл в <code>/usr/local/bin/</code> или любой другой каталог в вашем <code>$PATH</code>.</p>
+<h2 id="быстрый-старт">Быстрый старт<a class="headerlink" href="#быстрый-старт" title="Permanent link">#</a></h2>
+<p>Этот раздел охватывает основную цепочку операций: инициализацию проекта, сборку элемента, публикацию его в реестр и развертывание на работающей установке Exordos.</p>
+<p>Для пошагового руководства с реальным примером см. <a href="https://exordos.github.io/exordos_core/app-developer-guide/#quick-start">Руководство разработчика приложения</a> в документации платформы.</p>
+<h2 id="файл-конфигурации-exordos">Файл конфигурации Exordos<a class="headerlink" href="#файл-конфигурации-exordos" title="Permanent link">#</a></h2>
+<p>Каждый проект Exordos описывается файлом <code>exordos.yaml</code>. См. <a href="exordos-yaml/">справочник exordos.yaml</a> для полного описания формата и примеров.</p>
+<h2 id="сборка-проекта">Сборка проекта<a class="headerlink" href="#сборка-проекта" title="Permanent link">#</a></h2>
+<p>Команда <code>exordos build</code> собирает элементы, определенные в <code>exordos.yaml</code>. Обязательным аргументом является путь к корневому каталогу проекта.</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>build<span class="w"> </span>my_project
 </code></pre></div>
-<p>After a successful build, output artifacts are stored in the <code>output</code> directory. For full reference see the <a href="https://exordos.github.io/exordos_core/app-developer-guide/build/">build documentation</a>.</p>
-<h2 id="stand-specification">Stand specification<a class="headerlink" href="#stand-specification" title="Permanent link">#</a></h2>
-<p>For multi-node installations, use a stand specification file to describe the topology. See <a href="stand-spec/">stand specification</a>.</p>
-<h2 id="backups">Backups<a class="headerlink" href="#backups" title="Permanent link">#</a></h2>
-<p>For backing up Exordos installations, see the <a href="backups/">backups documentation</a>.</p>
-<h2 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">#</a></h2>
-<p>For the project versioning scheme used by Exordos, see <a href="versioning/">versioning</a>.</p>
+<p>После успешной сборки выходные артефакты сохраняются в каталоге <code>output</code>. Для полного справочника см. <a href="https://exordos.github.io/exordos_core/app-developer-guide/build/">документацию по сборке</a>.</p>
+<h2 id="спецификация-стенда">Спецификация стенда<a class="headerlink" href="#спецификация-стенда" title="Permanent link">#</a></h2>
+<p>Для многоузловых установок используйте файл спецификации стенда для описания топологии. См. <a href="stand-spec/">спецификация стенда</a>.</p>
+<h2 id="резервные-копии">Резервные копии<a class="headerlink" href="#резервные-копии" title="Permanent link">#</a></h2>
+<p>Для резервного копирования установок Exordos см. <a href="backups/">документацию по резервным копиям</a>.</p>
+<h2 id="версионирование">Версионирование<a class="headerlink" href="#версионирование" title="Permanent link">#</a></h2>
+<p>Для схемы версионирования проектов, используемой в Exordos, см. <a href="versioning/">версионирование</a>.</p>
 
 
 

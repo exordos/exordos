@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#stand-specification" class="md-skip">
+        <a href="#спецификация-стенда" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -3219,15 +3219,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#format" class="md-nav__link">
-    Format
+  <a href="#формат" class="md-nav__link">
+    Формат
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
-    Example
+  <a href="#пример" class="md-nav__link">
+    Пример
   </a>
   
 </li>
@@ -3273,35 +3273,35 @@
   
 
 
-<h1 id="stand-specification">Stand Specification<a class="headerlink" href="#stand-specification" title="Permanent link">#</a></h1>
-<p>For more complicated cases when you need to start an installation with several nodes (that are treated as baremetal nodes) you may use a <code>stand specification</code>. The stand specification is a YAML file that describes the Exordos installation — how many bootstrap nodes, how many baremetal nodes, their characteristics, and other parameters.</p>
-<p>Use option <code>--stand-spec</code> or <code>-s</code> for the <code>bootstrap</code> command to specify a file with the stand description:</p>
+<h1 id="спецификация-стенда">Спецификация стенда<a class="headerlink" href="#спецификация-стенда" title="Permanent link">#</a></h1>
+<p>Для более сложных случаев, когда нужно запустить установку с несколькими узлами (которые рассматриваются как физические узлы), вы можете использовать <code>спецификацию стенда</code>. Спецификация стенда — это YAML-файл, описывающий установку Exordos — сколько узлов инициализации, сколько физических узлов, их характеристики и другие параметры.</p>
+<p>Используйте опцию <code>--stand-spec</code> или <code>-s</code> для команды <code>bootstrap</code>, чтобы указать файл с описанием стенда:</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>bootstrap<span class="w"> </span>-i<span class="w"> </span>output/exordos-core.raw<span class="w"> </span>-f<span class="w"> </span>-m<span class="w"> </span>core<span class="w"> </span>-s<span class="w"> </span>data/stands/stand-small.yaml
 </code></pre></div>
-<h2 id="format">Format<a class="headerlink" href="#format" title="Permanent link">#</a></h2>
+<h2 id="формат">Формат<a class="headerlink" href="#формат" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
-<th>Field</th>
-<th>Description</th>
+<th>Поле</th>
+<th>Описание</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>name</code></td>
-<td>Name of the stand (used as a prefix for created VMs)</td>
+<td>Имя стенда (используется как префикс для созданных ВМ)</td>
 </tr>
 <tr>
 <td><code>bootstraps</code></td>
-<td>List of bootstrap nodes. Each entry defines <code>memory</code> (MB) and <code>cores</code></td>
+<td>Список узлов инициализации. Каждая запись определяет <code>memory</code> (МБ) и <code>cores</code></td>
 </tr>
 <tr>
 <td><code>baremetals</code></td>
-<td>List of baremetal nodes. Each entry defines <code>name</code>, <code>memory</code> (MB), and <code>cores</code></td>
+<td>Список физических узлов. Каждая запись определяет <code>name</code>, <code>memory</code> (МБ) и <code>cores</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h2>
+<h2 id="пример">Пример<a class="headerlink" href="#пример" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-andromeda</span>
 <span class="nt">bootstraps</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
@@ -3314,7 +3314,7 @@
 <span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
 <span class="w">    </span><span class="nt">cores</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </code></pre></div>
-<p>This stand creates one bootstrap node and two baremetal nodes, each with 2 GB RAM and 2 CPU cores.</p>
+<p>Этот стенд создает один узел инициализации и два физических узла, каждый с 2 ГБ ОЗУ и 2 ядрами CPU.</p>
 
 
 

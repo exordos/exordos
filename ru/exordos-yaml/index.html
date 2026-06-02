@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#exordos-configuration-file" class="md-skip">
+        <a href="#файл-конфигурации-exordos" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -3204,37 +3204,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#project-structure" class="md-nav__link">
-    Project structure
+  <a href="#структура-проекта" class="md-nav__link">
+    Структура проекта
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#build-configuration-example" class="md-nav__link">
-    Build configuration example
+  <a href="#пример-конфигурации-сборки" class="md-nav__link">
+    Пример конфигурации сборки
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#push-configuration-file" class="md-nav__link">
-    Push configuration file
+  <a href="#файл-конфигурации-push" class="md-nav__link">
+    Файл конфигурации push
   </a>
   
-    <nav class="md-nav" aria-label="Push configuration file">
+    <nav class="md-nav" aria-label="Файл конфигурации push">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#format" class="md-nav__link">
-    Format
+  <a href="#формат" class="md-nav__link">
+    Формат
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
-    Example
+  <a href="#пример" class="md-nav__link">
+    Пример
   </a>
   
 </li>
@@ -3300,10 +3300,10 @@
   
 
 
-<h1 id="exordos-configuration-file">Exordos configuration file<a class="headerlink" href="#exordos-configuration-file" title="Permanent link">#</a></h1>
-<p>The <code>exordos.yaml</code> file contains the configuration for the Exordos project. It should be placed in the <code>exordos</code> directory in the project root. It consists of several sections such as <code>build</code>, <code>deploy</code>, etc.</p>
-<h2 id="project-structure">Project structure<a class="headerlink" href="#project-structure" title="Permanent link">#</a></h2>
-<p>For every Exordos project the directory <code>exordos</code> should exist in the project root:</p>
+<h1 id="файл-конфигурации-exordos">Файл конфигурации Exordos<a class="headerlink" href="#файл-конфигурации-exordos" title="Permanent link">#</a></h1>
+<p>Файл <code>exordos.yaml</code> содержит конфигурацию для проекта Exordos. Он должен быть помещен в каталог <code>exordos</code> в корне проекта. Он состоит из нескольких разделов, таких как <code>build</code>, <code>deploy</code> и т.д.</p>
+<h2 id="структура-проекта">Структура проекта<a class="headerlink" href="#структура-проекта" title="Permanent link">#</a></h2>
+<p>Для каждого проекта Exordos в корне проекта должен существовать каталог <code>exordos</code>:</p>
 <div class="highlight"><pre><span></span><code>.
 ├──<span class="w"> </span>my_project
 │<span class="w">   </span>└──<span class="w"> </span>main.py
@@ -3312,59 +3312,59 @@
 ├──<span class="w"> </span>pyproject.toml
 └──<span class="w"> </span>README.md
 </code></pre></div>
-<h2 id="build-configuration-example">Build configuration example<a class="headerlink" href="#build-configuration-example" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1"># Build section. It describes the build process of the project.</span>
+<h2 id="пример-конфигурации-сборки">Пример конфигурации сборки<a class="headerlink" href="#пример-конфигурации-сборки" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># Раздел сборки. Описывает процесс сборки проекта.</span>
 <span class="nt">build</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># Dependencies of the project</span>
-<span class="w">  </span><span class="c1"># This section is used to specify build dependencies</span>
-<span class="w">  </span><span class="c1"># for the project</span>
+<span class="w">  </span><span class="c1"># Зависимости проекта</span>
+<span class="w">  </span><span class="c1"># Этот раздел используется для указания зависимостей сборки</span>
+<span class="w">  </span><span class="c1"># для проекта</span>
 <span class="w">  </span><span class="nt">deps</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># Target path in the image</span>
+<span class="w">      </span><span class="c1"># Целевой путь в образе</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dst</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/exordos_core</span>
-<span class="w">      </span><span class="c1"># Local path of the build machine</span>
+<span class="w">      </span><span class="c1"># Локальный путь на машине сборки</span>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../exordos_core</span>
 <span class="w">  </span>
-<span class="w">  </span><span class="c1"># This section describes elements of the project.</span>
-<span class="w">  </span><span class="c1"># Images, artifacts and manifests for every element. </span>
+<span class="w">  </span><span class="c1"># Этот раздел описывает элементы проекта.</span>
+<span class="w">  </span><span class="c1"># Образы, артефакты и манифесты для каждого элемента.</span>
 <span class="w">  </span><span class="nt">elements</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># List of images in the element</span>
+<span class="w">      </span><span class="c1"># Список образов в элементе</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">images</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exordos-core</span>
 <span class="w">        </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
 <span class="w">        </span>
-<span class="w">        </span><span class="c1"># OS profile for the image</span>
+<span class="w">        </span><span class="c1"># Профиль ОС для образа</span>
 <span class="w">        </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu_24</span>
 
-<span class="w">        </span><span class="c1"># Provisioning script</span>
+<span class="w">        </span><span class="c1"># Скрипт настройки</span>
 <span class="w">        </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images/install.sh</span>
 
-<span class="w">        </span><span class="c1"># Override image build parameters, for instance Packer parameters</span>
+<span class="w">        </span><span class="c1"># Переопределить параметры сборки образа, например параметры Packer</span>
 <span class="w">        </span><span class="nt">override</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">disk_size</span><span class="p">:</span><span class="w"> </span><span class="s">"10G"</span>
 
 <span class="w">      </span><span class="nt">manifest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifests/exordos-core.yaml</span>
 <span class="w">      </span>
-<span class="w">      </span><span class="c1"># List of artifacts in the element</span>
+<span class="w">      </span><span class="c1"># Список артефактов в элементе</span>
 <span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/my-config.yaml</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/my-template.yaml</span>
 </code></pre></div>
-<h2 id="push-configuration-file">Push configuration file<a class="headerlink" href="#push-configuration-file" title="Permanent link">#</a></h2>
-<p>The push configuration is kept in a separate file — <code>exordos.push.yaml</code> — placed alongside <code>exordos.yaml</code> in the <code>exordos</code> directory. It defines one or more named push targets, each specifying a driver and a destination path.</p>
-<h3 id="format">Format<a class="headerlink" href="#format" title="Permanent link">#</a></h3>
+<h2 id="файл-конфигурации-push">Файл конфигурации push<a class="headerlink" href="#файл-конфигурации-push" title="Permanent link">#</a></h2>
+<p>Конфигурация push хранится в отдельном файле — <code>exordos.push.yaml</code> — расположенном рядом с <code>exordos.yaml</code> в каталоге <code>exordos</code>. Она определяет один или более именованных целевых объектов push, каждый из которых указывает драйвер и целевой путь.</p>
+<h3 id="формат">Формат<a class="headerlink" href="#формат" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nt">push</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">&lt;target_name&gt;</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;driver&gt;</span><span class="w">   </span><span class="c1"># e.g. "fs" for a local filesystem repository</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;path&gt;</span><span class="w">       </span><span class="c1"># destination path for the built artifacts</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;driver&gt;</span><span class="w">   </span><span class="c1"># например, "fs" для репозитория локальной файловой системы</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;path&gt;</span><span class="w">       </span><span class="c1"># целевой путь для собранных артефактов</span>
 </code></pre></div>
-<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
+<h3 id="пример">Пример<a class="headerlink" href="#пример" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nt">push</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">local</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fs</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/lib/exordos-pools/http</span>
 </code></pre></div>
-<p>To push to a specific target, pass the config file with the <code>-c</code> flag:</p>
+<p>Для отправки в конкретный целевой объект передайте файл конфигурации с флагом <code>-c</code>:</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>push<span class="w"> </span>-c<span class="w"> </span>exordos/exordos.push.yaml
 </code></pre></div>
 

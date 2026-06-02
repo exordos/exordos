@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#adding-and-installing-a-new-realm" class="md-skip">
+        <a href="#добавление-и-установка-нового-реалма" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -3159,50 +3159,50 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#adding-and-installing-a-new-realm-as-current-realm" class="md-nav__link">
-    Adding and installing a new realm as current realm
+  <a href="#добавление-и-установка-нового-реалма-как-текущего" class="md-nav__link">
+    Добавление и установка нового реалма как текущего
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#adding-and-installing-a-new-realm-without-setting-it-as-current-realm" class="md-nav__link">
-    Adding and installing a new realm without setting it as current realm
+  <a href="#добавление-и-установка-нового-реалма-без-установки-в-качестве-текущего" class="md-nav__link">
+    Добавление и установка нового реалма без установки в качестве текущего
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#get-current-realm" class="md-nav__link">
-    Get current realm
+  <a href="#получить-текущий-реалм" class="md-nav__link">
+    Получить текущий реалм
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#list-all-realms" class="md-nav__link">
-    List all realms
+  <a href="#список-всех-реалмов" class="md-nav__link">
+    Список всех реалмов
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#set-current-realm" class="md-nav__link">
-    Set current realm
+  <a href="#установить-текущий-реалм" class="md-nav__link">
+    Установить текущий реалм
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#display-exordos-settings" class="md-nav__link">
-    Display exordos settings
+  <a href="#отобразить-настройки-exordos" class="md-nav__link">
+    Отобразить настройки exordos
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#set-authorization-context" class="md-nav__link">
-    Set authorization context
+  <a href="#установить-контекст-авторизации" class="md-nav__link">
+    Установить контекст авторизации
   </a>
   
 </li>
@@ -3308,32 +3308,32 @@
   
 
 
-<h1 id="adding-and-installing-a-new-realm">Adding and installing a new realm<a class="headerlink" href="#adding-and-installing-a-new-realm" title="Permanent link">#</a></h1>
-<h2 id="adding-and-installing-a-new-realm-as-current-realm">Adding and installing a new realm as current realm<a class="headerlink" href="#adding-and-installing-a-new-realm-as-current-realm" title="Permanent link">#</a></h2>
+<h1 id="добавление-и-установка-нового-реалма">Добавление и установка нового реалма<a class="headerlink" href="#добавление-и-установка-нового-реалма" title="Permanent link">#</a></h1>
+<h2 id="добавление-и-установка-нового-реалма-как-текущего">Добавление и установка нового реалма как текущего<a class="headerlink" href="#добавление-и-установка-нового-реалма-как-текущего" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings set-realm &lt;realm_name&gt; \</span>
 <span class="go">  --endpoint &lt;endpoint_url&gt; \</span>
 <span class="go">  --check_updates \</span>
 <span class="go">  --current</span>
 </code></pre></div>
-<p>Example:</p>
+<p>Пример:</p>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings set-realm production --endpoint http://10.40.0.2:11010 --current</span>
 </code></pre></div>
-<h2 id="adding-and-installing-a-new-realm-without-setting-it-as-current-realm">Adding and installing a new realm without setting it as current realm<a class="headerlink" href="#adding-and-installing-a-new-realm-without-setting-it-as-current-realm" title="Permanent link">#</a></h2>
+<h2 id="добавление-и-установка-нового-реалма-без-установки-в-качестве-текущего">Добавление и установка нового реалма без установки в качестве текущего<a class="headerlink" href="#добавление-и-установка-нового-реалма-без-установки-в-качестве-текущего" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings set-realm &lt;realm_name&gt; \</span>
 <span class="go">  --endpoint &lt;endpoint_url&gt; \</span>
 <span class="go">  --check_updates \</span>
 <span class="go">  --skip_tls_verify</span>
 </code></pre></div>
-<p>Example:</p>
+<p>Пример:</p>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings set-realm production --endpoint http://10.40.0.2:11010</span>
 </code></pre></div>
-<h2 id="get-current-realm">Get current realm<a class="headerlink" href="#get-current-realm" title="Permanent link">#</a></h2>
+<h2 id="получить-текущий-реалм">Получить текущий реалм<a class="headerlink" href="#получить-текущий-реалм" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings current-realm</span>
 </code></pre></div>
-<h2 id="list-all-realms">List all realms<a class="headerlink" href="#list-all-realms" title="Permanent link">#</a></h2>
+<h2 id="список-всех-реалмов">Список всех реалмов<a class="headerlink" href="#список-всех-реалмов" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings list-realms</span>
 </code></pre></div>
-<p>Example:</p>
+<p>Пример:</p>
 <div class="highlight"><pre><span></span><code><span class="gp">user@user:~$ </span>exordos<span class="w"> </span>settings<span class="w"> </span>list-realms
 <span class="go">default:</span>
 <span class="go">  check_updates: true</span>
@@ -3348,13 +3348,13 @@
 <span class="go">  endpoint: http://10.40.0.2:11010</span>
 <span class="go">  skip_tls_verify: true</span>
 </code></pre></div>
-<h2 id="set-current-realm">Set current realm<a class="headerlink" href="#set-current-realm" title="Permanent link">#</a></h2>
+<h2 id="установить-текущий-реалм">Установить текущий реалм<a class="headerlink" href="#установить-текущий-реалм" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings use-realm production</span>
 </code></pre></div>
-<h2 id="display-exordos-settings">Display exordos settings<a class="headerlink" href="#display-exordos-settings" title="Permanent link">#</a></h2>
+<h2 id="отобразить-настройки-exordos">Отобразить настройки exordos<a class="headerlink" href="#отобразить-настройки-exordos" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings view</span>
 </code></pre></div>
-<p>Example:</p>
+<p>Пример:</p>
 <div class="highlight"><pre><span></span><code><span class="gp">user@user:~$ </span>exordos<span class="w"> </span>settings<span class="w"> </span>view
 <span class="go">current-realm: production</span>
 <span class="go">endpoint: http://10.20.0.2:11010</span>
@@ -3373,7 +3373,7 @@
 <span class="go">    skip_tls_verify: true</span>
 <span class="go">schema_version: 1</span>
 </code></pre></div>
-<h2 id="set-authorization-context">Set authorization context<a class="headerlink" href="#set-authorization-context" title="Permanent link">#</a></h2>
+<h2 id="установить-контекст-авторизации">Установить контекст авторизации<a class="headerlink" href="#установить-контекст-авторизации" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings set-context &lt;context_name&gt; \</span>
 <span class="go">  --user &lt;user&gt; \</span>
 <span class="go">  --password &lt;password&gt; \</span>
@@ -3381,9 +3381,9 @@
 <span class="go">  --refresh_token &lt;refresh_token&gt; \</span>
 <span class="go">  &lt;realm_name&gt;</span>
 </code></pre></div>
-<p>Example:</p>
+<p>Пример:</p>
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gMjfYDwg" \</span>
-<span class="go">  --refresh_token "...bZ1BENYKg" City</span>
+<span class="go">  --refresh_token "...bZ1BENYKg" MyTown</span>
 </code></pre></div>
 
 

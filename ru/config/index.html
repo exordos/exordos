@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#config-for-exordos-cli" class="md-skip">
+        <a href="#конфигурация-для-exordos-cli" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -3189,8 +3189,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#realms" class="md-nav__link">
-    Realms
+  <a href="#реалмы" class="md-nav__link">
+    Реалмы
   </a>
   
 </li>
@@ -3203,8 +3203,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#init" class="md-nav__link">
-    Init
+  <a href="#инициализация" class="md-nav__link">
+    Инициализация
   </a>
   
 </li>
@@ -3280,9 +3280,9 @@
   
 
 
-<h1 id="config-for-exordos-cli">Config for exordos cli<a class="headerlink" href="#config-for-exordos-cli" title="Permanent link">#</a></h1>
-<p>Default path for config file: <code>~/.exordos/exordosctl.yaml</code></p>
-<p>Example config:</p>
+<h1 id="конфигурация-для-exordos-cli">Конфигурация для exordos cli<a class="headerlink" href="#конфигурация-для-exordos-cli" title="Permanent link">#</a></h1>
+<p>Путь по умолчанию для файла конфигурации: <code>~/.exordos/exordosctl.yaml</code></p>
+<p>Пример конфигурации:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">current-realm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="nt">realms</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">default</span><span class="p">:</span>
@@ -3307,19 +3307,19 @@
 <span class="w">    </span><span class="nt">skip_tls_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="nt">developer_key_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/.ssh/id_rsa.pub</span>
 </code></pre></div>
-<p>You can change the path to the config file by setting the command line argument <code>--config</code>.</p>
-<p>Example:</p>
+<p>Вы можете изменить путь к файлу конфигурации, установив аргумент командной строки <code>--config</code>.</p>
+<p>Пример:</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>--config<span class="w"> </span>~/.exordos.yaml<span class="w"> </span>elements<span class="w"> </span>list
 </code></pre></div>
-<h2 id="realms">Realms<a class="headerlink" href="#realms" title="Permanent link">#</a></h2>
-<p>Realms are used to separate environments. For example, you can have production and development environments.</p>
-<p>See the <a href="../realms/">realms</a> page for more information.</p>
+<h2 id="реалмы">Реалмы<a class="headerlink" href="#реалмы" title="Permanent link">#</a></h2>
+<p>Реалмы используются для разделения сред. Например, у вас могут быть производственная и разработческая среды.</p>
+<p>См. страницу <a href="../realms/">реалмы</a> для получения дополнительной информации.</p>
 <h2 id="developer_key_path">developer_key_path<a class="headerlink" href="#developer_key_path" title="Permanent link">#</a></h2>
-<p>The path to your ssh key.</p>
-<p>You can change the path to the ssh key by config or by setting the command line argument <code>--developer_key_path</code> or <code>-i</code>
-or by environment variable <code>GEN_DEV_KEYS</code>.</p>
-<h2 id="init">Init<a class="headerlink" href="#init" title="Permanent link">#</a></h2>
-<p>You can interactively init the config file by running the following command:</p>
+<p>Путь к вашему SSH-ключу.</p>
+<p>Вы можете изменить путь к SSH-ключу через конфигурацию или установив аргумент командной строки <code>--developer_key_path</code> или <code>-i</code>
+или через переменную окружения <code>GEN_DEV_KEYS</code>.</p>
+<h2 id="инициализация">Инициализация<a class="headerlink" href="#инициализация" title="Permanent link">#</a></h2>
+<p>Вы можете интерактивно инициализировать файл конфигурации, выполнив следующую команду:</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>init
 </code></pre></div>
 

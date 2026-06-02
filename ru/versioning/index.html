@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#versioning-in-exordos-platform" class="md-skip">
+        <a href="#версионирование-в-платформе-exordos" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -3174,29 +3174,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
+  <a href="#обзор" class="md-nav__link">
+    Обзор
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#version-format" class="md-nav__link">
-    Version Format
+  <a href="#формат-версии" class="md-nav__link">
+    Формат версии
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    Examples
+  <a href="#примеры" class="md-nav__link">
+    Примеры
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-by-exordos" class="md-nav__link">
-    Use by exordos
+  <a href="#использование-в-exordos" class="md-nav__link">
+    Использование в exordos
   </a>
   
 </li>
@@ -3287,30 +3287,28 @@
   
 
 
-<h1 id="versioning-in-exordos-platform">Versioning in Exordos Platform<a class="headerlink" href="#versioning-in-exordos-platform" title="Permanent link">#</a></h1>
-<p>This document describes the versioning strategy used in the Exordos Platform and
-how it's implemented in the exordos package.</p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>The versioning system in Exordos Platform follows semantic versioning principles,
-with additional enhancements for development and release candidate tracking.</p>
-<h2 id="version-format">Version Format<a class="headerlink" href="#version-format" title="Permanent link">#</a></h2>
-<p>Versions follow this format:</p>
+<h1 id="версионирование-в-платформе-exordos">Версионирование в платформе Exordos<a class="headerlink" href="#версионирование-в-платформе-exordos" title="Permanent link">#</a></h1>
+<p>Этот документ описывает стратегию версионирования, используемую в платформе Exordos, и то, как она реализована в пакете exordos.</p>
+<h2 id="обзор">Обзор<a class="headerlink" href="#обзор" title="Permanent link">#</a></h2>
+<p>Система версионирования в платформе Exordos следует принципам семантического версионирования с дополнительными улучшениями для отслеживания разработок и кандидатов на выпуск.</p>
+<h2 id="формат-версии">Формат версии<a class="headerlink" href="#формат-версии" title="Permanent link">#</a></h2>
+<p>Версии следуют этому формату:</p>
 <div class="highlight"><pre><span></span><code>MAJOR.MINOR.PATCH-RC/DEV+DATE.COMMITHEXSHA[:8]
 </code></pre></div>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">#</a></h2>
-<p>Release Version</p>
+<h2 id="примеры">Примеры<a class="headerlink" href="#примеры" title="Permanent link">#</a></h2>
+<p>Релизная версия</p>
 <div class="highlight"><pre><span></span><code>1.0.0
 </code></pre></div>
-<p>Development Version</p>
+<p>Разработческая версия</p>
 <div class="highlight"><pre><span></span><code>0.0.1-dev+20250618190326.a1beab7c
 </code></pre></div>
-<p>Release Candidate Version</p>
+<p>Версия кандидата на выпуск</p>
 <div class="highlight"><pre><span></span><code>0.4.1-rc+20260220064549.9223faa6
 </code></pre></div>
-<h2 id="use-by-exordos">Use by exordos<a class="headerlink" href="#use-by-exordos" title="Permanent link">#</a></h2>
+<h2 id="использование-в-exordos">Использование в exordos<a class="headerlink" href="#использование-в-exordos" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">exordos get-version &lt;ELEMENT_DIR&gt;</span>
 </code></pre></div>
-<p>Example</p>
+<p>Пример</p>
 <div class="highlight"><pre><span></span><code><span class="go">user@user ~ → exordos get-version /home/user/PycharmProjects/exordos/restalchemy</span>
 <span class="go">15.0.5-dev+20260407054854.672dcc2c</span>
 </code></pre></div>
