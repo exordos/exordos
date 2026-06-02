@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import fnmatch
 import os
+import pathlib
 import shutil
 import typing as tp
 
@@ -78,7 +79,7 @@ class LocalPathDependency(base.AbstractDependency):
 
     @classmethod
     def from_config(
-        cls, dep_config: tp.Dict[str, tp.Any], work_dir: str
+        cls, dep_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
     ) -> "LocalPathDependency":
         """Create a dependency item from configuration."""
         if "path" not in dep_config or "src" not in dep_config["path"]:
@@ -150,7 +151,7 @@ class LocalEnvPathDependency(base.AbstractDependency):
 
     @classmethod
     def from_config(
-        cls, dep_config: tp.Dict[str, tp.Any], work_dir: str
+        cls, dep_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
     ) -> "LocalEnvPathDependency":
         """Create a dependency item from configuration."""
         if "path" not in dep_config or "env" not in dep_config["path"]:
@@ -209,7 +210,7 @@ class HttpDependency(base.AbstractDependency):
 
     @classmethod
     def from_config(
-        cls, dep_config: tp.Dict[str, tp.Any], work_dir: str
+        cls, dep_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
     ) -> "HttpDependency":
         """Create a dependency item from configuration."""
         if "http" not in dep_config or "src" not in dep_config["http"]:
@@ -262,7 +263,7 @@ class GitDependency(base.AbstractDependency):
 
     @classmethod
     def from_config(
-        cls, dep_config: tp.Dict[str, tp.Any], work_dir: str
+        cls, dep_config: tp.Dict[str, tp.Any], work_dir: pathlib.Path
     ) -> "GitDependency":
         """Create a dependency item from configuration."""
         if "git" not in dep_config or "src" not in dep_config["git"]:

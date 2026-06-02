@@ -82,3 +82,7 @@ class AbstractRepoDriver(abc.ABC):
     @abc.abstractmethod
     def list(self) -> dict[str, list[str]]:
         """List the elements in the repo."""
+
+    def inventories(self) -> dict:
+        """Return the repo inventory."""
+        return {}

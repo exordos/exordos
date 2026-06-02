@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import os
+import pathlib
 import shutil
 
 from packaging import version
@@ -176,3 +177,37 @@ class FSRepoDriver(base.AbstractRepoDriver):
             }
         except FileNotFoundError:
             raise base.RepoNotFoundError(f"Repo {self._repo_path} not found.")
+
+    def inventories(self) -> dict:
+        """Return the repo inventory."""
+        with open(pathlib.Path(self.elements_path) / "inventory.json") as f:
+            return json.load(f)["elements"]
+
+    def inventory(
+        self, element_name: str, element_version: str | None = None
+    ) -> builder_base.ElementInventory:
+        inventories = self.inventories()
+        versions: dict = inventories.get(element_name)
+
+        if not versions:
+            raise ValueError(f"No `{element_name}` element found")
+
+        # Get any version of element in the inventory
+        if element_version is None:
+            version, inventory_dict = next(iter(versions.items()))
+            inventory_dir = pathlib.Path(self.elements_path) / element_name / version
+            inventory = builder_base.ElementInventory.from_dict(inventory_dict)
+            return inventory.replace_with_abspath(inventory_dir)
+
+        # Get the particular version of the element
+        inventory_dict = versions.get(element_version)
+        if inventory_dict is None:
+            raise ValueError(
+                f"No `{element_name}` element with version `{element_version}` found"
+            )
+
+        inventory_dir = (
+            pathlib.Path(self.elements_path) / element_name / element_version
+        )
+        inventory = builder_base.ElementInventory.from_dict(inventory_dict)
+        return inventory.replace_with_abspath(inventory_dir)

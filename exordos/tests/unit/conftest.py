@@ -28,13 +28,16 @@ from exordos.logger import DummyLogger
 
 
 @pytest.fixture
-def simple_builder() -> SimpleBuilder:
-    work_dir = "/tmp/work_dir"
+def simple_builder(tmp_path) -> SimpleBuilder:
+    work_dir = tmp_path / "work_dir"
+    work_dir.mkdir()
     deps = [MagicMock(spec=AbstractDependency) for _ in range(2)]
     elements = [MagicMock(spec=Element) for _ in range(2)]
     image_builder = MagicMock(spec=AbstractImageBuilder)
     logger = DummyLogger()
-    return SimpleBuilder(work_dir, deps, elements, image_builder, logger)
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    return SimpleBuilder(work_dir, deps, elements, image_builder, logger, output_dir)
 
 
 @pytest.fixture

@@ -16,9 +16,9 @@
 from __future__ import annotations
 
 import os
+import pathlib
 import shutil
 import tempfile
-import typing as tp
 
 import rich_click as click
 
@@ -39,7 +39,6 @@ from exordos.logger import ClickLogger
         "available by default: \n\n"
         "- {{ version }}: version of the element \n\n"
         "- {{ name }}: name of the element \n\n"
-        "- {{ images }}: list of images \n\n"
         "- {{ manifests }}: list of manifests \n\n"
         "\n\n"
         "Additional variables can be passed using the --manifest-var "
@@ -58,29 +57,21 @@ from exordos.logger import ClickLogger
     help="Directory where dependencies will be fetched",
 )
 @click.option(
-    "--build-dir",
-    default=None,
-    help="Directory where temporary build artifacts will be stored",
-)
-@click.option(
     "-o",
     "--output-dir",
-    default=c.DEF_GEN_OUTPUT_DIR_NAME,
+    default=pathlib.Path(c.DEF_GEN_OUTPUT_DIR_NAME),
+    type=click.Path(path_type=pathlib.Path),
     help="Directory where output artifacts will be stored",
 )
 @click.option(
     "-i",
-    "--developer-key-path",
-    default=None,
-    help="Path to developer public key",
-)
-@click.option(
-    "-s",
-    "--version-suffix",
-    default="none",
-    type=click.Choice([s for s in tp.get_args(c.VersionSuffixType)]),
-    show_default=True,
-    help="Version suffix will be used for the build",
+    "--ssh-public-key",
+    multiple=True,
+    type=click.Path(exists=True, path_type=pathlib.Path),
+    help=(
+        "Path to a public SSH key file to inject into the VM. Can be specified "
+        "multiple times. If not provided, no key will be injected."
+    ),
 )
 @click.option(
     "-f",
@@ -88,12 +79,6 @@ from exordos.logger import ClickLogger
     show_default=True,
     is_flag=True,
     help="Rebuild if the output already exists",
-)
-@click.option(
-    "--only-images",
-    show_default=True,
-    is_flag=True,
-    help="Build only images, skip manifests and other artifacts",
 )
 @click.option(
     "--manifest-var",
@@ -110,26 +95,13 @@ def build_cmd(
     ctx: click.Context,
     exordos_cfg_file: str,
     deps_dir: str | None,
-    build_dir: str | None,
-    output_dir: str | None,
-    developer_key_path: str | None,
-    version_suffix: c.VersionSuffixType,
+    output_dir: pathlib.Path,
+    ssh_public_key: tuple[pathlib.Path, ...],
     force: bool,
-    only_images: bool,
     manifest_var: tuple[str, ...],
     project_dir: str,
 ) -> None:
     manifest_vars = utils.convert_input_multiply(manifest_var)
-    inventory = not only_images
-
-    # Leave 'none' for backward compatibility
-    if version_suffix == "none" and inventory:
-        version_suffix = "element"
-        click.secho(
-            "Inventory mode is not supported for 'none' version suffix, "
-            "using 'element' instead",
-            fg="yellow",
-        )
 
     if os.path.exists(output_dir) and not force:
         click.secho(
@@ -141,10 +113,13 @@ def build_cmd(
     elif os.path.exists(output_dir) and force:
         shutil.rmtree(output_dir)
 
-    # Developer keys
-    developer_keys = utils.get_keys_by_path_or_env(
-        developer_key_path, ctx.obj.developer_key_path
-    )
+    # Load SSH keys
+    developer_keys = ""
+    for key_path in ssh_public_key:
+        with open(key_path) as f:
+            developer_keys += f.read().strip() + "\n"
+    if not developer_keys:
+        developer_keys = utils.get_keys_by_path_or_env(None, ctx.obj.developer_key_path)
 
     # Find path to exordos configuration
     try:
@@ -165,24 +140,18 @@ def build_cmd(
         click.secho("No builds found in the configuration", fg="yellow")
         return
 
+    version = utils.get_project_version(project_dir)
+
     logger = ClickLogger()
     packer_image_builder = PackerBuilder(logger)
 
     # Path where exordos.yaml configuration file is located
-    work_dir = os.path.dirname(gen_config_path)
-    # Prepare a build suffix
-    build_suffix = utils.get_version_suffix(version_suffix, project_dir=project_dir)
+    exordos_dir = pathlib.Path(gen_config_path).parent
 
-    for _, build in builds.items():
+    for _, build_cfg in builds.items():
         builder = simple_builder.SimpleBuilder.from_config(
-            work_dir, build, packer_image_builder, logger, output_dir
+            exordos_dir, build_cfg, packer_image_builder, output_dir, version, logger
         )
         with tempfile.TemporaryDirectory() as temp_dir:
             builder.fetch_dependency(deps_dir or temp_dir)
-            builder.build(
-                build_dir,
-                developer_keys,
-                build_suffix,
-                inventory,
-                manifest_vars,
-            )
+            builder.build(developer_keys, manifest_vars)

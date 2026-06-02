@@ -198,7 +198,7 @@ class Stand:
         boot_network: Network,
         cores: int = 1,
         memory: int = 1024,
-        disks: list[str] | None = None,
+        disks: list[int] | None = None,
         name: str = "dev-stand",
         bootstrap_name: str = "bootstrap",
         hypervisors: tp.Collection[Hypervisor] = (),

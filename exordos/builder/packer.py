@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import glob
 import importlib.resources as resources
 import os
 import shutil
@@ -150,6 +151,28 @@ class PackerBuilder(base.DummyImageBuilder):
             result.append(f'{name}="{os.environ.get(name, value)}"')
 
         return "\n".join(result)
+
+    def run(
+        self,
+        image_dir: str,
+        image: base.Image,
+        deps: list[base.AbstractDependency],
+        developer_keys: tp.Optional[str] = None,
+        output_dir: str = c.DEF_GEN_OUTPUT_DIR_NAME,
+    ) -> None:
+        """Run the image builder."""
+        # Packer does not allow to build several images into single directory
+        # so create unique directory for every build and then move the image to
+        # the target `output_dir`
+        tmp_output_dir = os.path.join(output_dir, image.name)
+
+        try:
+            super().run(image_dir, image, deps, developer_keys, tmp_output_dir)
+
+            for img in glob.glob(os.path.join(tmp_output_dir, "*")):
+                shutil.move(img, output_dir)
+        finally:
+            shutil.rmtree(tmp_output_dir)
 
     def pre_build(
         self,
