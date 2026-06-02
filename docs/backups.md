@@ -100,7 +100,7 @@ Let's consider a couple of scenarios to restore a particular machine from the ba
 Optional decryption of the backup
 
 ```bash
-genesis backup-decrypt backup.tar.gz.encrypted
+exordos backup-decrypt backup.tar.gz.encrypted
 ```
 
 Optional decompression of the backup
