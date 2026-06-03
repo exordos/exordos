@@ -319,8 +319,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_login/" class="md-nav__link">
-        auth_login
+      <a href="../auth_disable-otp/" class="md-nav__link">
+        auth_disable-otp
       </a>
     </li>
   
@@ -333,22 +333,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_me/" class="md-nav__link">
-        auth_me
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../auth_refresh/" class="md-nav__link">
-        auth_refresh
+      <a href="../auth_enable-otp/" class="md-nav__link">
+        auth_enable-otp
       </a>
     </li>
   
@@ -685,6 +671,20 @@
     <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ee_define/" class="md-nav__link">
+        ee_define
       </a>
     </li>
   
@@ -3301,7 +3301,7 @@
 </ul>
 <p>UUID of the role_binding</p>
 <ul>
-<li><code>project_id</code> (REQUIRED):<ul>
+<li><code>project_id</code>:<ul>
 <li>Type: uuid</li>
 <li>Default: <code>sentinel.unset</code></li>
 <li>Usage: <code>-p
@@ -3309,7 +3309,7 @@
 </ul>
 </li>
 </ul>
-<p>Name of the project in which to deploy the role_binding</p>
+<p>UUID of the project in which to deploy the role_binding</p>
 <ul>
 <li><code>user</code> (REQUIRED):<ul>
 <li>Type: uuid</li>
@@ -3341,15 +3341,6 @@
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Add a new role_binding to the Exordos installation                                                                                                                                                                                                                                                        </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│    --uuid        -u  UUID  UUID of the role_binding                                                                                                                                                                                                                                                     │</span>
-<span class="go">│ *  --project-id  -p  UUID  Name of the project in which to deploy the role_binding [required]                                                                                                                                                                                                           │</span>
-<span class="go">│ *  --user            UUID  role uuid [required]                                                                                                                                                                                                                                                         │</span>
-<span class="go">│ *  --role            UUID  user uuid [required]                                                                                                                                                                                                                                                         │</span>
-<span class="go">│    --help                  Show this message and exit.                                                                                                                                                                                                                                                  │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 

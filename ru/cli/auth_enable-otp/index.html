@@ -5,20 +5,20 @@
       
       
       
-        <link rel="canonical" href="https://github.com/exordos/exordos/ru/cli/auth_login/">
+        <link rel="canonical" href="https://github.com/exordos/exordos/ru/cli/auth_enable-otp/">
       
       
-        <link rel="prev" href="../../">
+        <link rel="prev" href="../auth_disable-otp/">
       
       
-        <link rel="next" href="../auth_me/">
+        <link rel="next" href="../certificates_add/">
       
       <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.1.0">
     
     
       
-        <title>auth_login - exordos</title>
+        <title>auth_enable-otp - exordos</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#auth_login" class="md-skip">
+        <a href="#auth_enable-otp" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              auth_login
+              auth_enable-otp
             
           </span>
         </div>
@@ -153,7 +153,7 @@
             <ul class="md-select__list">
               
                 <li class="md-select__item">
-                  <a href="../../../cli/auth_login/" hreflang="en" class="md-select__link">
+                  <a href="../../../cli/auth_enable-otp/" hreflang="en" class="md-select__link">
                     English
                   </a>
                 </li>
@@ -317,6 +317,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../auth_disable-otp/" class="md-nav__link">
+        auth_disable-otp
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -329,12 +343,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          auth_login
+          auth_enable-otp
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        auth_login
+        auth_enable-otp
       </a>
       
         
@@ -377,34 +391,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../auth_me/" class="md-nav__link">
-        auth_me
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../auth_refresh/" class="md-nav__link">
-        auth_refresh
-      </a>
     </li>
   
 
@@ -740,6 +726,20 @@
     <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ee_define/" class="md-nav__link">
+        ee_define
       </a>
     </li>
   
@@ -3282,99 +3282,26 @@
   
 
 
-<h1 id="auth_login">auth_login<a class="headerlink" href="#auth_login" title="Permanent link">#</a></h1>
-<p>Authenticate in IAM and store tokens locally</p>
+<h1 id="auth_enable-otp">auth_enable-otp<a class="headerlink" href="#auth_enable-otp" title="Permanent link">#</a></h1>
+<p>Enable two-factor authentication</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos auth login [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                           </span>
+<span class="go"> Usage: exordos auth enable-otp [OPTIONS]                                                                                                                                                                                                                                                                  </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
 <ul>
-<li><code>iam_client_endpoint</code> (REQUIRED):<ul>
-<li>Type: text</li>
-<li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>--iam-client-endpoint</code></li>
-</ul>
-</li>
-</ul>
-<p>Full URL of the IAM client</p>
-<ul>
-<li><code>project_id</code> (REQUIRED):<ul>
-<li>Type: text</li>
-<li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>--project-id</code></li>
-</ul>
-</li>
-</ul>
-<p>Project ID for IAM authentication</p>
-<ul>
-<li><code>client_id</code>:<ul>
+<li><code>password</code>:<ul>
 <li>Type: text</li>
 <li>Default: <code>none</code></li>
-<li>Usage: <code>--client-id</code></li>
+<li>Usage: <code>-p
+--password</code></li>
 </ul>
 </li>
 </ul>
-<p>OAuth client id (optional)</p>
+<p>Current password (optional, will be prompted if not provided)</p>
 <ul>
-<li><code>client_secret</code>:<ul>
-<li>Type: text</li>
-<li>Default: <code>none</code></li>
-<li>Usage: <code>--client-secret</code></li>
-</ul>
-</li>
-</ul>
-<p>OAuth client secret (optional)</p>
-<ul>
-<li><code>scope</code>:<ul>
-<li>Type: text</li>
-<li>Default: <code>profile</code></li>
-<li>Usage: <code>--scope</code></li>
-</ul>
-</li>
-</ul>
-<p>OAuth scope</p>
-<ul>
-<li><code>ttl</code>:<ul>
-<li>Type: integer</li>
-<li>Default: <code>900</code></li>
-<li>Usage: <code>--ttl</code></li>
-</ul>
-</li>
-</ul>
-<p>Access token lifetime in seconds</p>
-<ul>
-<li><code>refresh_ttl</code>:<ul>
-<li>Type: integer</li>
-<li>Default: <code>3600</code></li>
-<li>Usage: <code>--refresh-ttl</code></li>
-</ul>
-</li>
-</ul>
-<p>Refresh token lifetime in seconds</p>
-<ul>
-<li><code>force</code>:<ul>
-<li>Type: boolean</li>
-<li>Default: <code>false</code></li>
-<li>Usage: <code>-f
---force</code></li>
-</ul>
-</li>
-</ul>
-<p>Overwrite existing auth file</p>
-<ul>
-<li>
-<p><code>project_dir</code> (REQUIRED):</p>
-<ul>
-<li>Type: path</li>
-<li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>project_dir</code></li>
-</ul>
-</li>
-<li>
-<p><code>help</code>:</p>
-<ul>
+<li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
 <li>Usage: <code>--help</code></li>
@@ -3384,20 +3311,13 @@
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos auth login [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                           </span>
+<span class="go"> Usage: exordos auth enable-otp [OPTIONS]                                                                                                                                                                                                                                                                  </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Authenticate in IAM and store tokens locally                                                                                                                                                                                                                                                              </span>
+<span class="go"> Enable two-factor authentication                                                                                                                                                                                                                                                                          </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ *  --iam-client-endpoint      TEXT     Full URL of the IAM client [required]                                                                                                                                                                                                                            │</span>
-<span class="go">│ *  --project-id               TEXT     Project ID for IAM authentication [required]                                                                                                                                                                                                                     │</span>
-<span class="go">│    --client-id                TEXT     OAuth client id (optional)                                                                                                                                                                                                                                       │</span>
-<span class="go">│    --client-secret            TEXT     OAuth client secret (optional)                                                                                                                                                                                                                                   │</span>
-<span class="go">│    --scope                    TEXT     OAuth scope [default: profile]                                                                                                                                                                                                                                   │</span>
-<span class="go">│    --ttl                      INTEGER  Access token lifetime in seconds [default: 900]                                                                                                                                                                                                                  │</span>
-<span class="go">│    --refresh-ttl              INTEGER  Refresh token lifetime in seconds [default: 3600]                                                                                                                                                                                                                │</span>
-<span class="go">│    --force                -f           Overwrite existing auth file                                                                                                                                                                                                                                     │</span>
-<span class="go">│    --help                              Show this message and exit.                                                                                                                                                                                                                                      │</span>
+<span class="go">│ --password  -p  TEXT  Current password (optional, will be prompted if not provided)                                                                                                                                                                                                                     │</span>
+<span class="go">│ --help                Show this message and exit.                                                                                                                                                                                                                                                       │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 

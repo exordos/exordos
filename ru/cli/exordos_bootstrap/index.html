@@ -319,8 +319,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_login/" class="md-nav__link">
-        auth_login
+      <a href="../auth_disable-otp/" class="md-nav__link">
+        auth_disable-otp
       </a>
     </li>
   
@@ -333,22 +333,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_me/" class="md-nav__link">
-        auth_me
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../auth_refresh/" class="md-nav__link">
-        auth_refresh
+      <a href="../auth_enable-otp/" class="md-nav__link">
+        auth_enable-otp
       </a>
     </li>
   
@@ -685,6 +671,20 @@
     <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ee_define/" class="md-nav__link">
+        ee_define
       </a>
     </li>
   
@@ -3299,7 +3299,7 @@
 </ul>
 </li>
 </ul>
-<p>Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to <a href="https://repo.exordos.com/exordos-elements/core/">https://repo.exordos.com/exordos-elements/core/</a><version>/. Examples: 0.0.6  /path/to/core/0.0.6  <a href="https://repository.example.com/exordos-elements/core/0.0.6/">https://repository.example.com/exordos-elements/core/0.0.6/</a>  <a href="https://repository.example.com/exordos-elements/core/0.0.6/inventory.json">https://repository.example.com/exordos-elements/core/0.0.6/inventory.json</a></version></version></name></p>
+<p>Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to <a href="https://repo.exordos.com/exordos-elements/core/">https://repo.exordos.com/exordos-elements/core/</a><version>/. Examples: 0.0.6  /path/to/core/0.0.6  <a href="https://repository.example.com/exordos-elements/core/0.0.6/">https://repository.example.com/exordos-elements/core/0.0.6/</a>  </version></version></name></p>
 <ul>
 <li><code>profile</code>:<ul>
 <li>Type: choice</li>
@@ -3309,6 +3309,24 @@
 </li>
 </ul>
 <p>Profile for the installation.</p>
+<ul>
+<li><code>root_disk_size</code>:<ul>
+<li>Type: integer</li>
+<li>Default: <code>10</code></li>
+<li>Usage: <code>--root-disk-size</code></li>
+</ul>
+</li>
+</ul>
+<p>Root disk size in GB</p>
+<ul>
+<li><code>data_disk_size</code>:<ul>
+<li>Type: integer</li>
+<li>Default: <code>10</code></li>
+<li>Usage: <code>--data-disk-size</code></li>
+</ul>
+</li>
+</ul>
+<p>Data disk size in GB</p>
 <ul>
 <li><code>name</code>:<ul>
 <li>Type: text</li>
@@ -3548,8 +3566,9 @@
 <span class="go">│ --inventory                 -i  TEXT                                 Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under               │</span>
 <span class="go">│                                                                      ~/.cache/exordos/&lt;name&gt;/&lt;version&gt;/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to                           │</span>
 <span class="go">│                                                                      https://repo.exordos.com/exordos-elements/core/&lt;version&gt;/. Examples: 0.0.6  /path/to/core/0.0.6  https://repository.example.com/exordos-elements/core/0.0.6/                                                                       │</span>
-<span class="go">│                                                                      https://repository.example.com/exordos-elements/core/0.0.6/inventory.json                                                                                                                                                          │</span>
 <span class="go">│ --profile                       [develop|small|medium|large|legacy]  Profile for the installation. [default: small]                                                                                                                                                                                     │</span>
+<span class="go">│ --root-disk-size                INTEGER                              Root disk size in GB [default: 10]                                                                                                                                                                                                 │</span>
+<span class="go">│ --data-disk-size                INTEGER                              Data disk size in GB [default: 10]                                                                                                                                                                                                 │</span>
 <span class="go">│ --name                          TEXT                                 Name of the installation                                                                                                                                                                                                           │</span>
 <span class="go">│ --launch-mode               -m  [core|element|custom]                Launch mode for start element, core or custom configuration [default: element]                                                                                                                                                     │</span>
 <span class="go">│ --stand-spec                -s  PATH                                 Additional stand specification for core mode.                                                                                                                                                                                      │</span>

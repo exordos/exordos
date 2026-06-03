@@ -5,20 +5,20 @@
       
       
       
-        <link rel="canonical" href="https://github.com/exordos/exordos/ru/cli/auth_refresh/">
+        <link rel="canonical" href="https://github.com/exordos/exordos/ru/cli/ee_define/">
       
       
-        <link rel="prev" href="../auth_me/">
+        <link rel="prev" href="../ee_clear/">
       
       
-        <link rel="next" href="../certificates_add/">
+        <link rel="next" href="../ee_edit/">
       
       <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.1.0">
     
     
       
-        <title>auth_refresh - exordos</title>
+        <title>ee_define - exordos</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#auth_refresh" class="md-skip">
+        <a href="#ee_define" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              auth_refresh
+              ee_define
             
           </span>
         </div>
@@ -153,7 +153,7 @@
             <ul class="md-select__list">
               
                 <li class="md-select__item">
-                  <a href="../../../cli/auth_refresh/" hreflang="en" class="md-select__link">
+                  <a href="../../../cli/ee_define/" hreflang="en" class="md-select__link">
                     English
                   </a>
                 </li>
@@ -319,8 +319,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_login/" class="md-nav__link">
-        auth_login
+      <a href="../auth_disable-otp/" class="md-nav__link">
+        auth_disable-otp
       </a>
     </li>
   
@@ -333,78 +333,9 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_me/" class="md-nav__link">
-        auth_me
+      <a href="../auth_enable-otp/" class="md-nav__link">
+        auth_enable-otp
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          auth_refresh
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        auth_refresh
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Содержание раздела">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Содержание раздела
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-      
-        <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#options" class="md-nav__link">
-    Options
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cli-help" class="md-nav__link">
-    CLI Help
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -741,6 +672,75 @@
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          ee_define
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        ee_define
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание раздела">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание раздела
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    Options
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-help" class="md-nav__link">
+    CLI Help
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3282,44 +3282,64 @@
   
 
 
-<h1 id="auth_refresh">auth_refresh<a class="headerlink" href="#auth_refresh" title="Permanent link">#</a></h1>
-<p>Refresh stored token using refresh token</p>
+<h1 id="ee_define">ee_define<a class="headerlink" href="#ee_define" title="Permanent link">#</a></h1>
+<p>Add resource to manifest</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         </span>
+<span class="go"> Usage: exordos ee define [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                              </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
 <ul>
-<li><code>ttl</code>:<ul>
-<li>Type: integer</li>
-<li>Default: <code>none</code></li>
-<li>Usage: <code>--ttl</code></li>
-</ul>
-</li>
-</ul>
-<p>Access token lifetime in seconds (optional)</p>
+<li>
+<p><code>uuid_name</code> (REQUIRED):</p>
 <ul>
-<li><code>scope</code>:<ul>
 <li>Type: text</li>
-<li>Default: <code>none</code></li>
-<li>Usage: <code>--scope</code></li>
-</ul>
-</li>
-</ul>
-<p>OAuth scope (optional)</p>
-<ul>
-<li>
-<p><code>project_dir</code> (REQUIRED):</p>
-<ul>
-<li>Type: path</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>project_dir</code></li>
+<li>Usage: <code>uuid_name</code></li>
 </ul>
 </li>
 <li>
-<p><code>help</code>:</p>
+<p><code>editor</code>:</p>
 <ul>
+<li>Type: choice</li>
+<li>Default: <code>nano</code></li>
+<li>Usage: <code>-e
+--editor</code></li>
+</ul>
+</li>
+</ul>
+<p>Editor (nano or vim)</p>
+<ul>
+<li><code>repository</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>https://repo.exordos.com/exordos-elements/</code></li>
+<li>Usage: <code>-r
+--repository</code></li>
+</ul>
+</li>
+</ul>
+<p>Repository endpoint</p>
+<ul>
+<li><code>resource_type</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--resource-type</code></li>
+</ul>
+</li>
+</ul>
+<p>Type of resource to define</p>
+<ul>
+<li><code>resource_name</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--resource-name</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of resource to define</p>
+<ul>
+<li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
 <li>Usage: <code>--help</code></li>
@@ -3329,15 +3349,8 @@
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos auth refresh [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                         </span>
+<span class="go"> Usage: exordos ee define [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                              </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Refresh stored token using refresh token                                                                                                                                                                                                                                                                  </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --ttl    INTEGER  Access token lifetime in seconds (optional)                                                                                                                                                                                                                                           │</span>
-<span class="go">│ --scope  TEXT     OAuth scope (optional)                                                                                                                                                                                                                                                                │</span>
-<span class="go">│ --help            Show this message and exit.                                                                                                                                                                                                                                                           │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 

@@ -5,20 +5,20 @@
       
       
       
-        <link rel="canonical" href="https://github.com/exordos/exordos/cli/auth_me/">
+        <link rel="canonical" href="https://github.com/exordos/exordos/cli/auth_disable-otp/">
       
       
-        <link rel="prev" href="../auth_login/">
+        <link rel="prev" href="../..">
       
       
-        <link rel="next" href="../auth_refresh/">
+        <link rel="next" href="../auth_enable-otp/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.1.0">
     
     
       
-        <title>auth_me - exordos</title>
+        <title>auth_disable-otp - exordos</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#auth_me" class="md-skip">
+        <a href="#auth_disable-otp" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              auth_me
+              auth_disable-otp
             
           </span>
         </div>
@@ -159,7 +159,7 @@
                 </li>
               
                 <li class="md-select__item">
-                  <a href="../../ru/cli/auth_me/" hreflang="ru" class="md-select__link">
+                  <a href="../../ru/cli/auth_disable-otp/" hreflang="ru" class="md-select__link">
                     Russian
                   </a>
                 </li>
@@ -317,20 +317,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../auth_login/" class="md-nav__link">
-        auth_login
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -343,12 +329,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          auth_me
+          auth_disable-otp
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        auth_me
+        auth_disable-otp
       </a>
       
         
@@ -402,8 +388,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_refresh/" class="md-nav__link">
-        auth_refresh
+      <a href="../auth_enable-otp/" class="md-nav__link">
+        auth_enable-otp
       </a>
     </li>
   
@@ -740,6 +726,20 @@
     <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ee_define/" class="md-nav__link">
+        ee_define
       </a>
     </li>
   
@@ -3282,26 +3282,26 @@
   
 
 
-<h1 id="auth_me">auth_me<a class="headerlink" href="#auth_me" title="Permanent link">#</a></h1>
-<p>Validate stored token and show user info</p>
+<h1 id="auth_disable-otp">auth_disable-otp<a class="headerlink" href="#auth_disable-otp" title="Permanent link">#</a></h1>
+<p>Disable two-factor authentication</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              </span>
+<span class="go"> Usage: exordos auth disable-otp [OPTIONS]                                                                                                                                                                                                                                                                 </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
 <ul>
-<li>
-<p><code>project_dir</code> (REQUIRED):</p>
-<ul>
-<li>Type: path</li>
-<li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>project_dir</code></li>
+<li><code>password</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-p
+--password</code></li>
 </ul>
 </li>
-<li>
-<p><code>help</code>:</p>
+</ul>
+<p>Current password (optional, will be prompted if not provided)</p>
 <ul>
+<li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
 <li>Usage: <code>--help</code></li>
@@ -3311,12 +3311,13 @@
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              </span>
+<span class="go"> Usage: exordos auth disable-otp [OPTIONS]                                                                                                                                                                                                                                                                 </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Validate stored token and show user info                                                                                                                                                                                                                                                                  </span>
+<span class="go"> Disable two-factor authentication                                                                                                                                                                                                                                                                         </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │</span>
+<span class="go">│ --password  -p  TEXT  Current password (optional, will be prompted if not provided)                                                                                                                                                                                                                     │</span>
+<span class="go">│ --help                Show this message and exit.                                                                                                                                                                                                                                                       │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 

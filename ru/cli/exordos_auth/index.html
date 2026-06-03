@@ -319,8 +319,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_login/" class="md-nav__link">
-        auth_login
+      <a href="../auth_disable-otp/" class="md-nav__link">
+        auth_disable-otp
       </a>
     </li>
   
@@ -333,22 +333,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_me/" class="md-nav__link">
-        auth_me
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../auth_refresh/" class="md-nav__link">
-        auth_refresh
+      <a href="../auth_enable-otp/" class="md-nav__link">
+        auth_enable-otp
       </a>
     </li>
   
@@ -685,6 +671,20 @@
     <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ee_define/" class="md-nav__link">
+        ee_define
       </a>
     </li>
   
@@ -3283,7 +3283,7 @@
 
 
 <h1 id="exordos_auth">exordos_auth<a class="headerlink" href="#exordos_auth" title="Permanent link">#</a></h1>
-<p>Authenticate and manage IAM token</p>
+<p>Authentication and current user management commands</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Usage: exordos auth [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                           </span>
@@ -3303,15 +3303,14 @@
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Usage: exordos auth [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                           </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Authenticate and manage IAM token                                                                                                                                                                                                                                                                         </span>
+<span class="go"> Authentication and current user management commands                                                                                                                                                                                                                                                       </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
 <span class="go">│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 <span class="go">╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ login                                         Authenticate in IAM and store tokens locally                                                                                                                                                                                                              │</span>
-<span class="go">│ me                                            Validate stored token and show user info                                                                                                                                                                                                                  │</span>
-<span class="go">│ refresh                                       Refresh stored token using refresh token                                                                                                                                                                                                                  │</span>
+<span class="go">│ disable-otp                                                                   Disable two-factor authentication                                                                                                                                                                                         │</span>
+<span class="go">│ enable-otp                                                                    Enable two-factor authentication                                                                                                                                                                                          │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 

@@ -319,8 +319,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_login/" class="md-nav__link">
-        auth_login
+      <a href="../auth_disable-otp/" class="md-nav__link">
+        auth_disable-otp
       </a>
     </li>
   
@@ -333,22 +333,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth_me/" class="md-nav__link">
-        auth_me
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../auth_refresh/" class="md-nav__link">
-        auth_refresh
+      <a href="../auth_enable-otp/" class="md-nav__link">
+        auth_enable-otp
       </a>
     </li>
   
@@ -685,6 +671,20 @@
     <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ee_define/" class="md-nav__link">
+        ee_define
       </a>
     </li>
   
@@ -3292,9 +3292,6 @@
 <p>{{ name }}: name of the element</p>
 </li>
 <li>
-<p>{{ images }}: list of images</p>
-</li>
-<li>
 <p>{{ manifests }}: list of manifests</p>
 </li>
 </ul>
@@ -3325,17 +3322,8 @@
 </ul>
 <p>Directory where dependencies will be fetched</p>
 <ul>
-<li><code>build_dir</code>:<ul>
-<li>Type: text</li>
-<li>Default: <code>none</code></li>
-<li>Usage: <code>--build-dir</code></li>
-</ul>
-</li>
-</ul>
-<p>Directory where temporary build artifacts will be stored</p>
-<ul>
 <li><code>output_dir</code>:<ul>
-<li>Type: text</li>
+<li>Type: path</li>
 <li>Default: <code>output</code></li>
 <li>Usage: <code>-o
 --output-dir</code></li>
@@ -3344,25 +3332,15 @@
 </ul>
 <p>Directory where output artifacts will be stored</p>
 <ul>
-<li><code>developer_key_path</code>:<ul>
-<li>Type: text</li>
-<li>Default: <code>none</code></li>
+<li><code>ssh_public_key</code>:<ul>
+<li>Type: path</li>
+<li>Default: <code>sentinel.unset</code></li>
 <li>Usage: <code>-i
---developer-key-path</code></li>
+--ssh-public-key</code></li>
 </ul>
 </li>
 </ul>
-<p>Path to developer public key</p>
-<ul>
-<li><code>version_suffix</code>:<ul>
-<li>Type: choice</li>
-<li>Default: <code>none</code></li>
-<li>Usage: <code>-s
---version-suffix</code></li>
-</ul>
-</li>
-</ul>
-<p>Version suffix will be used for the build</p>
+<p>Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.</p>
 <ul>
 <li><code>force</code>:<ul>
 <li>Type: boolean</li>
@@ -3373,15 +3351,6 @@
 </li>
 </ul>
 <p>Rebuild if the output already exists</p>
-<ul>
-<li><code>only_images</code>:<ul>
-<li>Type: boolean</li>
-<li>Default: <code>false</code></li>
-<li>Usage: <code>--only-images</code></li>
-</ul>
-</li>
-</ul>
-<p>Build only images, skip manifests and other artifacts</p>
 <ul>
 <li><code>manifest_var</code>:<ul>
 <li>Type: text</li>
@@ -3417,22 +3386,18 @@
 <span class="go"> Build a Exordos element. The command build all images, manifests and other artifacts required for the element. The manifest in the project may be a raw YAML file or a template using Jinja2 templates. For Jinja2 templates, the following variables are available by default:                           </span>
 <span class="go"> - {{ version }}: version of the element                                                                                                                                                                                                                                                                   </span>
 <span class="go"> - {{ name }}: name of the element                                                                                                                                                                                                                                                                         </span>
-<span class="go"> - {{ images }}: list of images                                                                                                                                                                                                                                                                            </span>
 <span class="go"> - {{ manifests }}: list of manifests                                                                                                                                                                                                                                                                      </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Additional variables can be passed using the --manifest-var options.                                                                                                                                                                                                                                      </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --exordos-cfg-file    -c  TEXT                   Name of the project configuration file                                                                                                                                                                                                                 │</span>
-<span class="go">│ --deps-dir                TEXT                   Directory where dependencies will be fetched                                                                                                                                                                                                           │</span>
-<span class="go">│ --build-dir               TEXT                   Directory where temporary build artifacts will be stored                                                                                                                                                                                               │</span>
-<span class="go">│ --output-dir          -o  TEXT                   Directory where output artifacts will be stored                                                                                                                                                                                                        │</span>
-<span class="go">│ --developer-key-path  -i  TEXT                   Path to developer public key                                                                                                                                                                                                                           │</span>
-<span class="go">│ --version-suffix      -s  [latest|none|element]  Version suffix will be used for the build [default: none]                                                                                                                                                                                              │</span>
-<span class="go">│ --force               -f                         Rebuild if the output already exists                                                                                                                                                                                                                   │</span>
-<span class="go">│ --only-images                                    Build only images, skip manifests and other artifacts                                                                                                                                                                                                  │</span>
-<span class="go">│ --manifest-var            TEXT                   Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                   │</span>
-<span class="go">│ --help                                           Show this message and exit.                                                                                                                                                                                                                            │</span>
+<span class="go">│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │</span>
+<span class="go">│ --deps-dir              TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                              │</span>
+<span class="go">│ --output-dir        -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                           │</span>
+<span class="go">│ --ssh-public-key    -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                           │</span>
+<span class="go">│ --force             -f        Rebuild if the output already exists                                                                                                                                                                                                                                      │</span>
+<span class="go">│ --manifest-var          TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                      │</span>
+<span class="go">│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
