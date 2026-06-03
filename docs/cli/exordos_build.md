@@ -7,8 +7,6 @@ Build a Exordos element. The command build all images, manifests and other artif
 
 - {{ name }}: name of the element
 
-- {{ images }}: list of images
-
 - {{ manifests }}: list of manifests
 
 Additional variables can be passed using the --manifest-var options.
@@ -38,36 +36,21 @@ Additional variables can be passed using the --manifest-var options.
 
   Directory where dependencies will be fetched
 
-- `build_dir`:
-    - Type: text
-    - Default: `none`
-    - Usage: `--build-dir`
-
-  Directory where temporary build artifacts will be stored
-
 - `output_dir`:
-    - Type: text
+    - Type: path
     - Default: `output`
     - Usage: `-o
 --output-dir`
 
   Directory where output artifacts will be stored
 
-- `developer_key_path`:
-    - Type: text
-    - Default: `none`
+- `ssh_public_key`:
+    - Type: path
+    - Default: `sentinel.unset`
     - Usage: `-i
---developer-key-path`
+--ssh-public-key`
 
-  Path to developer public key
-
-- `version_suffix`:
-    - Type: choice
-    - Default: `none`
-    - Usage: `-s
---version-suffix`
-
-  Version suffix will be used for the build
+  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.
 
 - `force`:
     - Type: boolean
@@ -76,13 +59,6 @@ Additional variables can be passed using the --manifest-var options.
 --force`
 
   Rebuild if the output already exists
-
-- `only_images`:
-    - Type: boolean
-    - Default: `false`
-    - Usage: `--only-images`
-
-  Build only images, skip manifests and other artifacts
 
 - `manifest_var`:
     - Type: text
@@ -112,21 +88,17 @@ Additional variables can be passed using the --manifest-var options.
  Build a Exordos element. The command build all images, manifests and other artifacts required for the element. The manifest in the project may be a raw YAML file or a template using Jinja2 templates. For Jinja2 templates, the following variables are available by default:                           
  - {{ version }}: version of the element                                                                                                                                                                                                                                                                   
  - {{ name }}: name of the element                                                                                                                                                                                                                                                                         
- - {{ images }}: list of images                                                                                                                                                                                                                                                                            
  - {{ manifests }}: list of manifests                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Additional variables can be passed using the --manifest-var options.                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --exordos-cfg-file    -c  TEXT                   Name of the project configuration file                                                                                                                                                                                                                 │
-│ --deps-dir                TEXT                   Directory where dependencies will be fetched                                                                                                                                                                                                           │
-│ --build-dir               TEXT                   Directory where temporary build artifacts will be stored                                                                                                                                                                                               │
-│ --output-dir          -o  TEXT                   Directory where output artifacts will be stored                                                                                                                                                                                                        │
-│ --developer-key-path  -i  TEXT                   Path to developer public key                                                                                                                                                                                                                           │
-│ --version-suffix      -s  [latest|none|element]  Version suffix will be used for the build [default: none]                                                                                                                                                                                              │
-│ --force               -f                         Rebuild if the output already exists                                                                                                                                                                                                                   │
-│ --only-images                                    Build only images, skip manifests and other artifacts                                                                                                                                                                                                  │
-│ --manifest-var            TEXT                   Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                   │
-│ --help                                           Show this message and exit.                                                                                                                                                                                                                            │
+│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
+│ --deps-dir              TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                              │
+│ --output-dir        -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                           │
+│ --ssh-public-key    -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                           │
+│ --force             -f        Rebuild if the output already exists                                                                                                                                                                                                                                      │
+│ --manifest-var          TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                      │
+│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

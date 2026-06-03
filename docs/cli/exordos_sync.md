@@ -46,7 +46,7 @@ copy exordos element from local git repo to element nodes, example cmd: exordos 
 
 * `project_dir`:
     * Type: path
-    * Default: `sentinel.unset`
+    * Default: `.`
     * Usage: `project_dir`
 
 * `help`:

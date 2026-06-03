@@ -23,8 +23,8 @@ import typing as tp
 import uuid as sys_uuid
 
 from bazooka import exceptions as bazooka_exc
+import questionary
 from rich.prompt import Confirm
-from rich.prompt import Prompt
 from rich.text import Text
 import rich_click as click
 
@@ -331,10 +331,13 @@ def install_cmd(
     """Install manifest from a YAML file"""
     if not path_or_name:
         all_elements = repo_lib.get_all_elements(repository)
-        path_or_name = Prompt.ask(
+        path_or_name = questionary.select(
             "Select manifest to install",
             choices=all_elements,
-        )
+        ).ask()
+        if not path_or_name:
+            click.echo("No manifest selected, aborting")
+            return
     manifest = upgrade_manifest(
         base_client.get_user_api_client(ctx.obj.auth_data),
         repository,
@@ -515,6 +518,115 @@ def edit(ctx: click.Context, uuid_name: str, editor: str, repository: str) -> No
     )
 
 
+@ee_group.command(
+    "define", help="Add resource to manifest", context_settings={"show_default": True}
+)
+@click.argument("uuid_name")
+@click.option(
+    "-e",
+    "--editor",
+    default="nano",
+    type=click.Choice(["nano", "vim"], case_sensitive=False),
+    help="Editor (nano or vim)",
+)
+@click.option(
+    "-r",
+    "--repository",
+    default=f"{c.ELEMENT_REPO_URL}/",
+    show_default=True,
+    help="Repository endpoint",
+)
+@click.option(
+    "--resource-type",
+    type=str,
+    required=False,
+    help="Type of resource to define",
+)
+@click.option(
+    "--resource-name",
+    type=str,
+    required=False,
+    help="Name of resource to define",
+)
+@click.pass_context
+def define(
+    ctx: click.Context,
+    uuid_name: str,
+    editor: str,
+    repository: str,
+    resource_type: str,
+    resource_name: str,
+) -> None:
+    # Get Openapi schema
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    schema = client.filter(f"{c.MANIFEST_COLLECTION}schema/")
+
+    # Get resource schema
+    resources = schema["properties"]["resources"]["properties"]
+    if not resource_type:
+        resource_type = questionary.select(
+            "Select resource to define",
+            choices=resources.keys(),
+        ).ask()
+    if not resource_type:
+        click.echo("No resource type selected, aborting")
+        return
+    if resource_type not in resources:
+        click.echo(f"Resource type {resource_type} not found")
+        return
+    resource_ref = resources[resource_type]["additionalProperties"]["$ref"].split("/")[
+        -1
+    ]
+    resource = schema["components"]["schemas"][resource_ref]
+    resource_def = resource["properties"]
+    resource_json = {k: v.get("example", "") for k, v in resource_def.items()}
+    manifest = base_client.get_entity(client, c.MANIFEST_COLLECTION, uuid_name)
+    if resource_type not in manifest["resources"]:
+        manifest["resources"][resource_type] = {}
+    if not resource_name:
+        default_resource_name = f"my_{resource_ref.split('_')[0].lower()}"
+        resource_name = questionary.text(
+            "Enter resource name", default=default_resource_name
+        ).ask()
+    if not resource_name:
+        click.echo("No resource name selected, aborting")
+        return
+    if resource_name in manifest["resources"][resource_type]:
+        click.echo(f"Resource {resource_name} with type {resource_type} already exists")
+        return
+    manifest["resources"][resource_type][resource_name] = resource_json
+
+    # Edit manifest
+    tf_path = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".yaml", mode="a+", delete=False) as tf:
+            utils.dump_yaml(manifest, tf)
+            tf.flush()
+            tf.seek(0)
+
+            line_num = 0
+            for line_num, line in enumerate(tf, 1):
+                if resource_name in line:
+                    break
+
+            tf_path = tf.name
+            subprocess.call([editor, f"+{line_num}", tf_path])
+            manifest = upgrade_manifest(
+                client,
+                repository,
+                tf_path,
+                update_manifest=True,
+                manifest_uuid=manifest["uuid"],
+            )
+    finally:
+        if tf_path and os.path.exists(tf_path):
+            os.remove(tf_path)
+
+    click.echo(
+        f"Element {click.style(manifest['name'], fg='green')} was successfully edited"
+    )
+
+
 @ee_group.command("clear", help="Uninstall all elements, except base")
 @click.option(
     "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
@@ -582,10 +694,12 @@ def ssh_cmd(
         target = targets[0]
     else:
         target = {}
-        target_uuid = Prompt.ask(
-            Text("Select target uuid for ssh"),
+        target_uuid = questionary.select(
+            "Select target uuid for ssh",
             choices=[t["uuid"] for t in targets],
-        )
+        ).ask()
+        if not target_uuid:
+            return None
         for target in targets:
             if target["uuid"] == target_uuid:
                 break

@@ -1,22 +1,25 @@
 
-# auth_me
+# auth_enable-otp
 
-Validate stored token and show user info
+Enable two-factor authentication
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              
+ Usage: exordos auth enable-otp [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `project_dir` (REQUIRED):
-    * Type: path
-    * Default: `sentinel.unset`
-    * Usage: `project_dir`
+* `password`:
+    * Type: text
+    * Default: `none`
+    * Usage: `-p
+--password`
+
+  Current password (optional, will be prompted if not provided)
 
 * `help`:
     * Type: boolean
@@ -29,11 +32,12 @@ Validate stored token and show user info
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos auth me [OPTIONS] PROJECT_DIR                                                                                                                                                                                                                                                              
+ Usage: exordos auth enable-otp [OPTIONS]                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
- Validate stored token and show user info                                                                                                                                                                                                                                                                  
+ Enable two-factor authentication                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
+│ --password  -p  TEXT  Current password (optional, will be prompted if not provided)                                                                                                                                                                                                                     │
+│ --help                Show this message and exit.                                                                                                                                                                                                                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

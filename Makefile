@@ -24,3 +24,6 @@ bootstrap:
 
 find_ascii:
 	grep -rnP "#.*[^\x00-\x7f]" ./exordos
+
+define_resource:
+	./dist/exordos e e define empty

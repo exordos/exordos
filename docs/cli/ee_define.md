@@ -1,17 +1,52 @@
 
-# iam_role_bindings
+# ee_define
 
-Manage role_bindings in the Exordos installation
+Add resource to manifest
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam role_bindings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                              
+ Usage: exordos ee define [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
+
+* `uuid_name` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `uuid_name`
+
+* `editor`:
+    * Type: choice
+    * Default: `nano`
+    * Usage: `-e
+--editor`
+
+  Editor (nano or vim)
+
+* `repository`:
+    * Type: text
+    * Default: `https://repo.exordos.com/exordos-elements/`
+    * Usage: `-r
+--repository`
+
+  Repository endpoint
+
+* `resource_type`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--resource-type`
+
+  Type of resource to define
+
+* `resource_name`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--resource-name`
+
+  Name of resource to define
 
 * `help`:
     * Type: boolean
@@ -24,6 +59,6 @@ Manage role_bindings in the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam role_bindings [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                              
+ Usage: exordos ee define [OPTIONS] UUID_NAME                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
