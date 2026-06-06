@@ -29,6 +29,7 @@ from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
 from exordos.cmd.compute.nodes import commands as nodes_commands
 from exordos.cmd.configs import commands as configs_commands
+from exordos.cmd.dns import dns_group
 from exordos.cmd.em import em_group
 from exordos.cmd.em.elements import commands as elements_commands
 from exordos.cmd.iam import iam_group
@@ -264,6 +265,8 @@ exordos.add_command(realms_group)  # noqa
 
 exordos.add_command(vs_group)  # noqa
 exordos.add_command(vars_commands.vv_group)  # noqa
+
+exordos.add_command(dns_group)
 
 exordos.add_command(compute_group, aliases=["c"])  # noqa
 exordos.add_command(nodes_commands.cn_group)  # noqa

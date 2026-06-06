@@ -82,6 +82,9 @@ PERMISSION_BINDING_COLLECTION = "/v1/iam/permission_bindings/"
 
 CONFIG_COLLECTION = "/v1/config/configs/"
 
+DOMAIN_COLLECTION = "/v1/dns/domains/"
+RECORD_COLLECTION = "/v1/dns/domains/{domain_uuid}/records/"
+
 # Cli
 CONFIG_DIR = "~/.exordos"
 CONFIG_FILE = os.path.expanduser(f"{CONFIG_DIR}/exordosctl.yaml")
