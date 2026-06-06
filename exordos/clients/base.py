@@ -28,11 +28,14 @@ from requests import models as req_models
 import rich_click as click
 
 from exordos.common import crypto
+from exordos.token_cache import TokenCache
 
 GRANT_TYPE_PASSWORD = "password"
 GRANT_TYPE_REFRESH_TOKEN = "refresh_token"
 ENCRYPTED_JSON_CONTENT_TYPE = "application/x-genesis-agent-chacha20-poly1305-encrypted"
 DEFAULT_CLIENT_SLUG = "default"
+DEFAULT_TTL = 3600 * 4
+DEFAULT_REFRESH_TTL = 3600 * 24
 
 
 class DumpToSimpleViewMixin:
@@ -129,11 +132,21 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         client_secret: str = "GenesisCoreSecret",
         client_uuid: str = DEFAULT_CLIENT_SLUG,
         scope: str | None = None,
-        ttl: int = 86400,  # 1 day
+        ttl: int | None = None,
+        refresh_ttl: int | None = None,
         http_client: bazooka.Client | None = None,
         otp_prompt: tp.Callable[[], str] | None = None,
         password_prompt: tp.Callable[[], str] | None = None,
+        realm: str | None = None,
     ):
+        # Try to load from cache if realm is provided and no explicit tokens
+        if realm and not access_token and not refresh_token:
+            cache = TokenCache()
+            cached_tokens = cache.load_tokens(realm)
+            if cached_tokens:
+                access_token = cached_tokens["access_token"]
+                refresh_token = cached_tokens["refresh_token"]
+
         if not (
             access_token
             or refresh_token
@@ -149,18 +162,23 @@ class CoreIamAuthenticator(AbstractAuthenticator):
 
         self._headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
+        self._ttl = ttl or DEFAULT_TTL
+        self._refresh_ttl = refresh_ttl or DEFAULT_REFRESH_TTL
+
         self._data = {
             "grant_type": GRANT_TYPE_PASSWORD,
             "username": username,
             "password": password,
             "scope": scope or self.empty_scope(),
-            "ttl": str(ttl),
+            "ttl": str(self._ttl),
+            "refresh_ttl": str(self._refresh_ttl),
         }
 
         self._access_token = access_token
         self._refresh_token = refresh_token
         self._otp_prompt = otp_prompt
         self._password_prompt = password_prompt
+        self._realm = realm
 
     def _do_authenticate(self, otp: str | None = None) -> dict[str, tp.Any]:
         headers = self._headers.copy()
@@ -197,10 +215,35 @@ class CoreIamAuthenticator(AbstractAuthenticator):
                 otp = self._otp_prompt()
                 data = self._do_authenticate(otp=otp)
             else:
+                if self._realm:
+                    cache = TokenCache()
+                    cache.clear_tokens(self._realm)
+                raise
+        except bazooka_exc.BadRequestError as e:
+            error_data = e.cause.response.json()
+            if (
+                error_data.get("error") == "invalid_grant"
+                and "expire" in error_data.get("error_description", "").lower()
+                and self._realm
+            ):
+                cache = TokenCache()
+                cache.clear_tokens(self._realm)
+                self._refresh_token = None
+                data = self._do_authenticate()
+            else:
                 raise
 
         self._access_token = data["access_token"]
         self._refresh_token = data["refresh_token"]
+
+        # Save tokens to cache if realm is provided
+        if self._realm:
+            cache = TokenCache()
+            cache.save_tokens(
+                self._realm,
+                self._access_token,
+                self._refresh_token,
+            )
 
     def get_auth_header(self) -> dict[str, str]:
         if not self._access_token:

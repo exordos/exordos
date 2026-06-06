@@ -157,6 +157,18 @@ def _get_otp_prompt(otp_code: str | None) -> str:
     default=None,
     help="OTP code for two-factor authentication",
 )
+@click.option(
+    "--ttl",
+    type=float,
+    help="Time to live for the access token",
+    default=None,
+)
+@click.option(
+    "--refresh-ttl",
+    type=float,
+    help="Time to live for the refresh token",
+    default=None,
+)
 @click.pass_context
 def exordos(
     ctx: click.Context,
@@ -173,6 +185,8 @@ def exordos(
     developer_key_path: str | None,
     silent: bool | None,
     otp_code: str | None,
+    ttl: float | None,
+    refresh_ttl: float | None,
 ) -> None:
     if not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
@@ -191,8 +205,8 @@ def exordos(
             [ctx.invoked_subcommand.startswith(cmd) for cmd in COMMANDS_WITHOUT_CONFIG]
         ),
     )
-
-    realm_conf = settings_config.get_realm(cfg, realm)
+    current_realm = settings_config.get_current_realm(cfg)
+    realm_conf = settings_config.get_realm(cfg, realm or current_realm)
     context_conf = settings_config.get_context(realm_conf, context)
 
     def _get_final_value(
@@ -218,6 +232,9 @@ def exordos(
     final_developer_key_path = _get_final_value(
         "developer_key_path", developer_key_path, cfg, {}
     )
+    final_ttl = _get_final_value("ttl", ttl, cfg, context_conf)
+    final_refresh_ttl = _get_final_value("refresh_ttl", refresh_ttl, cfg, context_conf)
+
     need_update = None
     if final_check_updates and version_commands.should_check_version():
         need_update = not version_commands.check_latest_version()
@@ -233,6 +250,8 @@ def exordos(
     )
     password_prompt = PasswordPrompt() if needs_password_prompt else None
 
+    # Get realm name for token caching
+
     auth_data = dict(
         endpoint=final_endpoint,
         username=final_user,
@@ -240,8 +259,11 @@ def exordos(
         access_token=final_access_token,
         refresh_token=final_refresh_token,
         scope=scope,
+        ttl=final_ttl,
+        refresh_ttl=final_refresh_ttl,
         password_prompt=password_prompt,
         otp_prompt=lambda: _get_otp_prompt(otp_code),
+        realm=realm or current_realm,
     )
     ctx.obj = ContextObject(
         auth_data, config, final_developer_key_path, cfg, need_update
