@@ -86,4 +86,43 @@ def add_cmd(
     show_data(data)
 
 
+@click.command("update", help=f"Update {ENTITY}")
+@click.pass_context
+@click.argument(
+    "uuid",
+    type=str,
+    required=True,
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    required=False,
+    help=f"Name of the {ENTITY}",
+)
+@click.option(
+    "-s",
+    "--sync-to-ecosystem",
+    required=False,
+    is_flag=True,
+    help=f"Sync the {ENTITY} to the ecosystem",
+)
+def update_cmd(
+    ctx: click.Context,
+    uuid: sys_uuid.UUID,
+    name: str | None,
+    sync_to_ecosystem: bool | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {}
+    if name is not None:
+        data["name"] = name
+    if sync_to_ecosystem is not None:
+        data["sync_to_ecosystem"] = sync_to_ecosystem
+
+    entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
+    show_data(entity)
+
+
 domains_group.add_command(add_cmd, aliases=["a"])
+domains_group.add_command(update_cmd, aliases=["u"])

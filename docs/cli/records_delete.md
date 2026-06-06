@@ -1,13 +1,13 @@
 
-# domains_delete
+# records_delete
 
-Delete domain
+Delete record
 
 ## Usage
 
 ```console
                                                                                                                                                                
- Usage: exordos dns domains delete [OPTIONS] UUID                                                                                                              
+ Usage: exordos dns records delete [OPTIONS] UUID                                                                                                              
                                                                                                                                                                
 ```
 
@@ -17,6 +17,12 @@ Delete domain
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `uuid`
+
+* `domain_uuid` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-d
+--domain-uuid`
 
 * `help`:
     * Type: boolean
@@ -29,11 +35,12 @@ Delete domain
 
 ```console
                                                                                                                                                                
- Usage: exordos dns domains delete [OPTIONS] UUID                                                                                                              
+ Usage: exordos dns records delete [OPTIONS] UUID                                                                                                              
                                                                                                                                                                
- Delete domain                                                                                                                                                 
+ Delete record                                                                                                                                                 
                                                                                                                                                                
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help  Show this message and exit.                                                                                                                         │
+│ *  --domain-uuid  -d  TEXT  [required]                                                                                                                      │
+│    --help                   Show this message and exit.                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

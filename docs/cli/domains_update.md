@@ -1,13 +1,13 @@
 
-# domains_delete
+# domains_update
 
-Delete domain
+Update domain
 
 ## Usage
 
 ```console
                                                                                                                                                                
- Usage: exordos dns domains delete [OPTIONS] UUID                                                                                                              
+ Usage: exordos dns domains update [OPTIONS] UUID                                                                                                              
                                                                                                                                                                
 ```
 
@@ -17,6 +17,22 @@ Delete domain
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `uuid`
+
+* `name`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-n
+--name`
+
+  Name of the domain
+
+* `sync_to_ecosystem`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-s
+--sync-to-ecosystem`
+
+  Sync the domain to the ecosystem
 
 * `help`:
     * Type: boolean
@@ -29,11 +45,13 @@ Delete domain
 
 ```console
                                                                                                                                                                
- Usage: exordos dns domains delete [OPTIONS] UUID                                                                                                              
+ Usage: exordos dns domains update [OPTIONS] UUID                                                                                                              
                                                                                                                                                                
- Delete domain                                                                                                                                                 
+ Update domain                                                                                                                                                 
                                                                                                                                                                
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help  Show this message and exit.                                                                                                                         │
+│ --name               -n  TEXT  Name of the domain                                                                                                           │
+│ --sync-to-ecosystem  -s        Sync the domain to the ecosystem                                                                                             │
+│ --help                         Show this message and exit.                                                                                                  │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

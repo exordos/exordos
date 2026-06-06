@@ -154,6 +154,34 @@ def show_cmd(
 records_group.add_command(show_cmd, aliases=["get", "g"])
 
 
+@click.command("delete", help=f"Delete {ENTITY}")
+@click.argument(
+    "uuid",
+    type=str,
+    required=True,
+)
+@click.option(
+    "-d",
+    "--domain-uuid",
+    type=str,
+    required=True,
+)
+@click.pass_context
+def delete_cmd(
+    ctx: click.Context,
+    uuid: str,
+    domain_uuid: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    base_client.delete_entity(
+        client, ENTITY_COLLECTION.format(domain_uuid=domain_uuid), uuid
+    )
+    click.echo(f"{ENTITY} {uuid} deleted")
+
+
+records_group.add_command(delete_cmd, aliases=["d"])
+
+
 @click.command("add", help=f"Add a new {ENTITY}")
 @click.pass_context
 @click.option(
@@ -168,7 +196,7 @@ records_group.add_command(show_cmd, aliases=["get", "g"])
     "--project-id",
     type=click.UUID,
     required=True,
-    help=f"Name of the project in which to deploy the {ENTITY}",
+    help=f"UUID of the project in which to deploy the {ENTITY}",
 )
 @click.option(
     "--record-type",
@@ -208,7 +236,7 @@ def add_cmd(
     ttl: int,
     prio: int | None,
     disabled: bool,
-    record: tuple[str, str],
+    record: tuple[str, ...],
     domain_uuid: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -230,3 +258,73 @@ def add_cmd(
 
 
 records_group.add_command(add_cmd, aliases=["a"])
+
+
+@click.command("update", help=f"Update {ENTITY}")
+@click.pass_context
+@click.argument(
+    "uuid",
+    type=str,
+    required=True,
+)
+@click.option(
+    "--record-type",
+    type=click.Choice(["A", "NS", "SOA", "TXT"], case_sensitive=False),
+    required=False,
+)
+@click.option(
+    "--ttl",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--prio",
+    type=int,
+    required=False,
+)
+@click.option(
+    "--disabled",
+    is_flag=True,
+    required=False,
+)
+@click.option(
+    "--record",
+    multiple=True,
+)
+@click.option(
+    "-d",
+    "--domain-uuid",
+    type=str,
+    required=True,
+)
+def update_cmd(
+    ctx: click.Context,
+    uuid: sys_uuid.UUID,
+    record_type: str | None,
+    ttl: int | None,
+    prio: int | None,
+    disabled: bool | None,
+    record: tuple[str, ...] | None,
+    domain_uuid: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {}
+    if record_type is not None:
+        data["record_type"] = record_type
+    if ttl is not None:
+        data["ttl"] = ttl
+    if prio is not None:
+        data["prio"] = prio
+    if disabled is not None:
+        data["disabled"] = disabled
+    record = utils.convert_input_multiply(record)
+    if record:
+        data["record"] = record
+
+    entity = base_client.update_entity(
+        client, ENTITY_COLLECTION.format(domain_uuid=domain_uuid), uuid, data
+    )
+    show_data(entity)
+
+
+records_group.add_command(update_cmd, aliases=["u"])

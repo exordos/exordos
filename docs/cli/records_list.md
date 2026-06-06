@@ -6,9 +6,9 @@ List records
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns records list [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                               
+ Usage: exordos dns records list [OPTIONS]                                                                                                                     
+                                                                                                                                                               
 ```
 
 ## Options
@@ -60,17 +60,18 @@ List records
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns records list [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
- List records                                                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --filters      -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                        │
-│    --output       -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                      │
-│    --watch        -w                          Watch the list of records                                                                                                                                                                                                                                 │
-│    --interval         FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                              │
-│ *  --domain-uuid  -d  TEXT                    [required]                                                                                                                                                                                                                                                │
-│    --help                                     Show this message and exit.                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                               
+ Usage: exordos dns records list [OPTIONS]                                                                                                                     
+                                                                                                                                                               
+ List records                                                                                                                                                  
+                                                                                                                                                               
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --filters      -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f                            │
+│                                               parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                               │
+│    --output       -o  [json|html|table|yaml]  the output format, defaults to table                                                                          │
+│    --watch        -w                          Watch the list of records                                                                                     │
+│    --interval         FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                  │
+│ *  --domain-uuid  -d  TEXT                    [required]                                                                                                    │
+│    --help                                     Show this message and exit.                                                                                   │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

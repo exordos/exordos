@@ -6,9 +6,9 @@ Add a new domain
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns domains add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                               
+ Usage: exordos dns domains add [OPTIONS]                                                                                                                      
+                                                                                                                                                               
 ```
 
 ## Options
@@ -55,16 +55,16 @@ Add a new domain
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns domains add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
- Add a new domain                                                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid               -u  UUID  UUID of the domain                                                                                                                                                                                                                                                    │
-│ *  --project-id         -p  UUID  Name of the project in which to deploy the domain [required]                                                                                                                                                                                                          │
-│    --name               -n  TEXT  Name of the domain                                                                                                                                                                                                                                                    │
-│    --sync-to-ecosystem  -s        Sync the domain to the ecosystem                                                                                                                                                                                                                                      │
-│    --help                         Show this message and exit.                                                                                                                                                                                                                                           │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                               
+ Usage: exordos dns domains add [OPTIONS]                                                                                                                      
+                                                                                                                                                               
+ Add a new domain                                                                                                                                              
+                                                                                                                                                               
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --uuid               -u  UUID  UUID of the domain                                                                                                        │
+│ *  --project-id         -p  UUID  Name of the project in which to deploy the domain [required]                                                              │
+│    --name               -n  TEXT  Name of the domain                                                                                                        │
+│    --sync-to-ecosystem  -s        Sync the domain to the ecosystem                                                                                          │
+│    --help                         Show this message and exit.                                                                                               │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
