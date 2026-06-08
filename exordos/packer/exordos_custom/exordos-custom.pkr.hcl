@@ -16,12 +16,12 @@ locals {
 
 variable cpus {
   type    = number
-  default = 4
+  default = 2
 }
 
 variable memory {
   type    = number
-  default = 4096
+  default = 2048
 }
 
 variable disk_size {
@@ -34,13 +34,23 @@ variable img_format {
   default = "raw"
 }
 
+variable base_image_url {
+  type    = string
+  default = "https://repo.exordos.com/exordos-base/latest/exordos-base.qcow2"
+}
+
+variable base_image_checksum {
+  type    = string
+  default = "file:https://repo.exordos.com/exordos-base/latest/SHA256SUMS"
+}
+
 data "sshkey" "install" {
   name = "packer"
 }
 
-source "qemu" "genesis-base" {
-  iso_url                   = "https://repo.exordos.com/genesis-base/latest/genesis-base.qcow2"
-  iso_checksum              = "file:https://repo.exordos.com/genesis-base/latest/SHA256SUMS"
+source "qemu" "exordos-custom" {
+  iso_url                   = var.base_image_url
+  iso_checksum              = var.base_image_checksum
   accelerator               = "kvm"
   cpu_model                 = "host"
   boot_wait                 = "5s"
@@ -76,10 +86,7 @@ source "qemu" "genesis-base" {
 set -ex
 
 # Logs
-sudo find /var/log -type f -maxdepth 3 -delete
-
-# Temporary remove genesis config in old installations due to new config 90-exordos-net-base-config.yaml
-sudo rm -f /etc/netplan/90-genesis-net-base-config.yaml
+sudo rm -fr /var/log/*
 
 # Remove temporary keys
 # Disable removing host keys temporarily
@@ -109,7 +116,7 @@ sudo sync
 # Minify orphan space
 sudo fstrim -a
 
-# Shutdown machine
+# shutdown machine
 sudo poweroff
 EOF
 }
