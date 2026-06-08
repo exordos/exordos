@@ -18,6 +18,7 @@ from __future__ import annotations
 import glob
 import importlib.resources as resources
 import os
+import re
 import shutil
 import subprocess
 import typing as tp
@@ -118,6 +119,28 @@ def _get_profile_files(base: str) -> list[tp.Any]:
                     profile_files.append(item)
 
     return profile_files
+
+
+def _profile_has_variable(base: str, var_name: str) -> bool:
+    """Check if profile has a specific variable defined in its HCL files."""
+    profile_files = _get_profile_files(base)
+    var_pattern = re.compile(
+        rf'^\s*variable\s+["\']?{re.escape(var_name)}["\']?\s*{{',
+        re.MULTILINE,
+    )
+
+    for bfile in profile_files:
+        # Check only .pkr.hcl files (skip plugins.pkr.hcl)
+        if not str(bfile).endswith(".pkr.hcl") or "plugins" in str(bfile):
+            continue
+        try:
+            content = bfile.read_text()
+            if var_pattern.search(content):
+                return True
+        except Exception:
+            continue
+
+    return False
 
 
 class PackerBuilder(base.DummyImageBuilder):
@@ -251,6 +274,10 @@ class PackerBuilder(base.DummyImageBuilder):
             )
 
         override["img_format"] = "raw"
+
+        # Only pass profile_version if the profile HCL defines this variable
+        if _profile_has_variable(image.profile, "profile_version"):
+            override["profile_version"] = image.profile_version
 
         # Write the packer variables
         variables = PackerVariable.variable_file_content(override)

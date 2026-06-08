@@ -36,6 +36,7 @@ class Image:
 
     script: str
     profile: c.ImageProfileType = "ubuntu_24"
+    profile_version: str = "latest"
     formats: list[str] = dataclasses.field(default_factory=lambda: ["raw"])
     name: str | None = None
     envs: list[str] | None = None
