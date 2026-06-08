@@ -44,7 +44,7 @@ manifests_group = create_entity_group(
     ENTITY_COLLECTION,
     FIELDS_MAP,
     add_show_command=False,
-    add_delete_command=False,
+    add_delete_command=True,
 )
 
 
