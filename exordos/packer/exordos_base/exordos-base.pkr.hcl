@@ -34,13 +34,18 @@ variable img_format {
   default = "raw"
 }
 
+variable profile_version {
+  type    = string
+  default = "latest"
+}
+
 data "sshkey" "install" {
   name = "packer"
 }
 
 source "qemu" "exordos-base" {
-  iso_url                   = "https://repo.exordos.com/exordos-base/latest/exordos-base.qcow2"
-  iso_checksum              = "file:https://repo.exordos.com/exordos-base/latest/SHA256SUMS"
+  iso_url                   = "https://repo.exordos.com/exordos-base/${var.profile_version}/exordos-base.qcow2"
+  iso_checksum              = "file:https://repo.exordos.com/exordos-base/${var.profile_version}/SHA256SUMS"
   accelerator               = "kvm"
   cpu_model                 = "host"
   boot_wait                 = "5s"
