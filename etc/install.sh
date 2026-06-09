@@ -83,12 +83,6 @@ case "$KERN" in
     *) ;;
 esac
 
-SUDO=
-if [ "$(id -u)" -ne 0 ]; then
-    error "This script requires superuser permissions. Please re-run as root."
-    SUDO="sudo"
-fi
-
 NEEDS=$(require curl grep xargs git)
 if [ -n "$NEEDS" ]; then
     status "ERROR: The following tools are required but missing:"
@@ -98,8 +92,51 @@ if [ -n "$NEEDS" ]; then
     exit 1
 fi
 
-# Function to download and extract with fallback from zst to tgz
-download_and_extract() {
+# Function to find a writable bin directory
+find_writable_bindir() {
+    # Check for user's personal bin directory first
+    if [ -d "$HOME/bin" ] && [ -w "$HOME/bin" ]; then
+        echo "$HOME/bin"
+        return
+    fi
+
+    # Check other directories in PATH that are writable
+    for dir in $(echo $PATH | tr ':' ' '); do
+        if [ -d "$dir" ] && [ -w "$dir" ]; then
+            echo "$dir"
+            return
+        fi
+    done
+
+    # If no writable directory found in PATH, try standard system directories with sudo
+    for dir in /usr/local/bin /usr/bin /bin; do
+        if [ -d "$dir" ]; then
+            # Try to create directory if it doesn't exist (with sudo)
+            if ! [ -w "$dir" ]; then
+                status "Need sudo to write to $dir"
+                sudo mkdir -p "$dir" 2>/dev/null || true
+                if [ -w "$dir" ]; then
+                    echo "$dir"
+                    return
+                fi
+            else
+                echo "$dir"
+                return
+            fi
+        fi
+    done
+
+    # If no suitable directory found
+    error "No suitable directory found to install exordos binary"
+}
+
+# Find a writable directory
+BINDIR=$(find_writable_bindir)
+
+status "Installing exordos to $BINDIR"
+
+# Download and install
+download() {
     local url_base="$1"
     local dest_dir="$2"
     local filename="$3"
@@ -110,24 +147,30 @@ download_and_extract() {
             "${url_base}/${filename}" --output "${dest_dir}/exordos"
         return 0
     fi
+    error "Failed to download ${filename}"
 }
 
-GENESIS_CONFIG_FILE=~/.genesis/genesisctl.yaml
-CONFIG_FILE=~/.exordos/exordosctl.yaml
+download "https://repo.exordos.com/exordos/latest" "$BINDIR" "exordos-linux"
+chmod +x "$BINDIR"/exordos
 
-if [ -f "$GENESIS_CONFIG_FILE" ] && [ ! -f "$CONFIG_FILE" ]; then
-    mkdir -p "$(dirname "$CONFIG_FILE")"
-    mv "$GENESIS_CONFIG_FILE" "$CONFIG_FILE"
+OLD_BINARY="/usr/local/bin/exordos"
+if [ -f "$OLD_BINARY" ]; then
+    if [ "$BINDIR" != "/usr/local/bin" ]; then
+        echo "Found old binary at $OLD_BINARY"
+        echo "Current binary is at: $BINDIR/exordos"
+        echo "Do you want to remove the old binary? (y/N)"
+        read -r response
+        case "$response" in
+            [yY])
+                rm "$OLD_BINARY"
+                echo "Old binary removed"
+                ;;
+            *)
+                echo "Keeping old binary"
+                ;;
+        esac
+    fi
 fi
-
-for BINDIR in /usr/local/bin /usr/bin /bin; do
-    echo $PATH | grep -q $BINDIR && break || continue
-done
-
-status "Installing exordos to $BINDIR"
-
-download_and_extract "https://repo.exordos.com/exordos/latest" "$BINDIR" "exordos-linux"
-$SUDO chmod +x "$BINDIR"/exordos
 
 install_success() {
     exordos introduction
