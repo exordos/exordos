@@ -94,11 +94,13 @@ fi
 
 # Function to find a writable bin directory
 find_writable_bindir() {
-    # Check for user's personal bin directory first
-    if [ -d "$HOME/bin" ] && [ -w "$HOME/bin" ]; then
-        echo "$HOME/bin"
-        return
-    fi
+    # Check for user's personal bin directories first
+    for dir in "$HOME/bin" "$HOME/.local/bin"; do
+      if [ -d "$dir" ] && [ -w "$dir" ]; then
+          echo "$dir"
+          return
+      fi
+    done
 
     # Check other directories in PATH that are writable
     for dir in $(echo $PATH | tr ':' ' '); do
@@ -158,11 +160,15 @@ if [ -f "$OLD_BINARY" ]; then
     if [ "$BINDIR" != "/usr/local/bin" ]; then
         echo "Found old binary at $OLD_BINARY"
         echo "Current binary is at: $BINDIR/exordos"
-        echo "Do you want to remove the old binary? (y/N)"
-        read -r response
+        if [ -n "${DELETE_OLD+x}" ]; then
+            response=Y
+        else
+            echo "Do you want to remove the old exordos binary? (y/N)"
+            read -r response
+        fi
         case "$response" in
             [yY])
-                rm "$OLD_BINARY"
+                sudo rm -f "$OLD_BINARY"
                 echo "Old binary removed"
                 ;;
             *)
