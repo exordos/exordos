@@ -567,7 +567,7 @@ def get_ip_from_url(url: str) -> str:
         raise RuntimeError(f"Failed to resolve hostname {hostname}: {e}")
 
 
-def is_debugging():
+def is_debugging() -> bool:
     if sys.gettrace() is not None:
         return True
 

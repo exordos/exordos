@@ -160,7 +160,7 @@ class AbstractQcowBackuper(base.AbstractBackuper):
         encryption: base.EncryptionCreds | None = None,
     ) -> None:
         table = get_table(
-            *["domain", "time start", "time end", "duration (s)", "size", "status"]
+            "domain", "time start", "time end", "duration (s)", "size", "status"
         )
 
         for domain in domains:
@@ -179,5 +179,5 @@ class AbstractQcowBackuper(base.AbstractBackuper):
             table.add_row(domain, ts, te, duration, size, status)
 
         self._logger.info(f"Summary: {backup_path}")
-        if table.rows:
-            print_table(table)
+
+        print_table(table)
