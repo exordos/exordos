@@ -212,6 +212,9 @@ class LocalQcowBackuper(qcow.AbstractQcowBackuper):
 
         # Run the actual backup process in another process.
         # The current process will track the free disk space.
+        if utils.is_debugging():
+            self._logger.warn("Debugging mode detected, set start method to spawn")
+            mp.set_start_method("spawn", force=True)
         backup_process = mp.Process(
             target=self._do_backup,
             args=(backup_path, domains, compress, encryption),

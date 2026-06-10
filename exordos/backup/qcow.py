@@ -25,6 +25,7 @@ from exordos import logger as logger_base
 from exordos import utils
 from exordos.backup import base
 from exordos.common.table import get_table
+from exordos.common.table import print_table
 from exordos.infra.libvirt import libvirt
 
 
@@ -158,13 +159,9 @@ class AbstractQcowBackuper(base.AbstractBackuper):
         domains: tp.List[str],
         encryption: base.EncryptionCreds | None = None,
     ) -> None:
-        table = get_table()
-        table.add_column("domain")
-        table.add_column("time start")
-        table.add_column("time end")
-        table.add_column("duration (s)")
-        table.add_column("size")
-        table.add_column("status")
+        table = get_table(
+            *["domain", "time start", "time end", "duration (s)", "size", "status"]
+        )
 
         for domain in domains:
             domain_backup_path = os.path.join(backup_path, domain)
@@ -182,4 +179,5 @@ class AbstractQcowBackuper(base.AbstractBackuper):
             table.add_row(domain, ts, te, duration, size, status)
 
         self._logger.info(f"Summary: {backup_path}")
-        self._logger.info(table)
+        if table.rows:
+            print_table(table)

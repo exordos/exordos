@@ -23,6 +23,7 @@ import os
 import shutil
 import socket
 import subprocess
+import sys
 import time
 import typing as tp
 import urllib.parse
@@ -564,3 +565,24 @@ def get_ip_from_url(url: str) -> str:
         return ip_info[0][4][0]
     except socket.gaierror as e:
         raise RuntimeError(f"Failed to resolve hostname {hostname}: {e}")
+
+
+def is_debugging():
+    if sys.gettrace() is not None:
+        return True
+
+    if any("pydev" in arg or "debugpy" in arg for arg in sys.argv):
+        return True
+
+    if "pdb" in sys.modules:
+        return True
+    elif "IPython" in sys.modules:
+        return True
+    elif "pydevd" in sys.modules:
+        return True
+    elif "ptvsd" in sys.modules:
+        return True
+    elif "PYDEVD_LOAD_VALUES_ASYNC" in os.environ:
+        return True
+
+    return False
