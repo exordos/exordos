@@ -433,10 +433,10 @@ def uninstall_cmd(ctx: click.Context, path_uuid_name: str) -> None:
             return
         if len(manifests) > 1:
             raise click.ClickException(f"Multiple elements found with name {name}")
-        log.warn(f"manifest {list(filters.values())[0]} not found")
+        log.warning(f"manifest {list(filters.values())[0]} not found")
         return
 
-    log.warn(f"Element {path_uuid_name} not found")
+    log.warning(f"Element {path_uuid_name} not found")
 
 
 @ee_group.command("available", help="Print available elements in repository")
