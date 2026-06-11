@@ -24,7 +24,7 @@ Exordos CLI is the official command-line interface for the [Exordos platform](ht
 Install the CLI with a single command:
 
 ```bash
-curl -fsSL https://repo.exordos.com/install.sh | sudo sh
+curl -fsSL https://repo.exordos.com/install.sh | sh
 ```
 
 ## What Exordos CLI does
