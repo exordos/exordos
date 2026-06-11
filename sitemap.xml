@@ -778,6 +778,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/imports_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/manifests_delete/</loc>
+        <lastmod>2026-06-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/manifests_delete/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/manifests_delete/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/manifests_list/</loc>
         <lastmod>2026-06-11</lastmod>
         <changefreq>daily</changefreq>
@@ -2316,6 +2323,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/imports_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/imports_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/manifests_delete/</loc>
+        <lastmod>2026-06-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/manifests_delete/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/manifests_delete/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/manifests_list/</loc>

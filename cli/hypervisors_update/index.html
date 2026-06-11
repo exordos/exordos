@@ -1830,6 +1830,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../manifests_delete/" class="md-nav__link">
+        manifests_delete
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../manifests_list/" class="md-nav__link">
         manifests_list
       </a>
@@ -3508,7 +3522,7 @@
 <ul>
 <li>Type: integer</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>--avail_cores</code></li>
+<li>Usage: <code>--avail-cores</code></li>
 </ul>
 </li>
 <li>
@@ -3516,7 +3530,7 @@
 <ul>
 <li>Type: integer</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>--avail_ram</code></li>
+<li>Usage: <code>--avail-ram</code></li>
 </ul>
 </li>
 <li>
@@ -3524,7 +3538,7 @@
 <ul>
 <li>Type: float</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>--cores_ratio</code></li>
+<li>Usage: <code>--cores-ratio</code></li>
 </ul>
 </li>
 <li>
@@ -3532,7 +3546,7 @@
 <ul>
 <li>Type: float</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>--ram_ratio</code></li>
+<li>Usage: <code>--ram-ratio</code></li>
 </ul>
 </li>
 <li>
@@ -3541,7 +3555,7 @@
 <li>Type: choice</li>
 <li>Default: <code>sentinel.unset</code></li>
 <li>Usage: <code>-m
---machine_type</code></li>
+--machine-type</code></li>
 </ul>
 </li>
 <li>
@@ -3549,12 +3563,20 @@
 <ul>
 <li>Type: text</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>-d
---driver_spec</code></li>
+<li>Usage: <code>--driver-spec</code></li>
 </ul>
 </li>
 </ul>
-<p>Additional filters to pass to the api. The format is 'key=value'. For example: -d a=b -d c=d --driver_spec e=f</p>
+<p>Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f</p>
+<ul>
+<li><code>driver_spec_full</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--driver-spec-full</code></li>
+</ul>
+</li>
+</ul>
+<p>Full Driver Specification. The format is 'key=value'. For example: --driver-spec-full a=b --driver-spec-full e=f</p>
 <ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
@@ -3565,22 +3587,23 @@
 </ul>
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos compute hypervisors update [OPTIONS] UUID                                                                                                                                                                                                                                                  </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Update hypervisor                                                                                                                                                                                                                                                                                         </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --name          -n  TEXT     Name of the hypervisor                                                                                                                                                                                                                                                     │</span>
-<span class="go">│ --description   -D  TEXT     Description of the hypervisor                                                                                                                                                                                                                                              │</span>
-<span class="go">│ --avail_cores       INTEGER                                                                                                                                                                                                                                                                             │</span>
-<span class="go">│ --avail_ram         INTEGER                                                                                                                                                                                                                                                                             │</span>
-<span class="go">│ --cores_ratio       FLOAT                                                                                                                                                                                                                                                                               │</span>
-<span class="go">│ --ram_ratio         FLOAT                                                                                                                                                                                                                                                                               │</span>
-<span class="go">│ --machine_type  -m  [vm|hw]                                                                                                                                                                                                                                                                             │</span>
-<span class="go">│ --driver_spec   -d  TEXT     Additional filters to pass to the api. The format is 'key=value'. For example: -d a=b -d c=d --driver_spec e=f                                                                                                                                                             │</span>
-<span class="go">│ --help                       Show this message and exit.                                                                                                                                                                                                                                                │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                               </span>
+<span class="go"> Usage: exordos compute hypervisors update [OPTIONS] UUID                                                                                                      </span>
+<span class="go">                                                                                                                                                               </span>
+<span class="go"> Update hypervisor                                                                                                                                             </span>
+<span class="go">                                                                                                                                                               </span>
+<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span class="go">│ --name              -n  TEXT     Name of the hypervisor                                                                                                     │</span>
+<span class="go">│ --description       -D  TEXT     Description of the hypervisor                                                                                              │</span>
+<span class="go">│ --avail-cores           INTEGER                                                                                                                             │</span>
+<span class="go">│ --avail-ram             INTEGER                                                                                                                             │</span>
+<span class="go">│ --cores-ratio           FLOAT                                                                                                                               │</span>
+<span class="go">│ --ram-ratio             FLOAT                                                                                                                               │</span>
+<span class="go">│ --machine-type      -m  [vm|hw]                                                                                                                             │</span>
+<span class="go">│ --driver-spec           TEXT     Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f                              │</span>
+<span class="go">│ --driver-spec-full      TEXT     Full Driver Specification. The format is 'key=value'. For example: --driver-spec-full a=b -d c=d --driver-spec-full e=f         │</span>
+<span class="go">│ --help                           Show this message and exit.                                                                                                │</span>
+<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 
