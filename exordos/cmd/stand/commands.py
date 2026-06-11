@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import contextlib
 import fnmatch
 import hashlib
 import ipaddress
@@ -28,8 +29,11 @@ import typing as tp
 import urllib.parse
 
 import requests
+import rich.console
+import rich.panel
 import rich.progress
 import rich.status
+import rich.table
 import rich_click as click
 import yaml
 
@@ -44,8 +48,55 @@ import exordos.constants as c
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
+from exordos.logger import DummyLogger
 from exordos.repo import fs as repo_fs
 from exordos.stand import models as stand_models
+
+
+@contextlib.contextmanager
+def _status_done(message: str) -> tp.Generator[rich.status.Status, None, None]:
+    """Context manager that shows a spinner while the body executes.
+
+    Silences :class:`ClickLogger` output during the block so intermediate
+    log messages don't interleave with the spinner.  On successful exit
+    replaces the spinner line with a green checkmark followed by *message*.
+    """
+    _real = ClickLogger.__instance__
+    ClickLogger.__instance__ = DummyLogger()
+    try:
+        with rich.status.Status(message, spinner="dots") as status:
+            yield status
+    finally:
+        ClickLogger.__instance__ = _real
+    rich.console.Console().print(f"[green]\u2713[/green] {message}")
+
+
+def _print_bootstrap_summary(
+    installation_name: str,
+    admin_password: str,
+    core_ip: ipaddress.IPv4Address | None,
+) -> None:
+    console = rich.console.Console()
+    table = rich.table.Table(show_header=False, box=None, padding=(0, 2))
+    table.add_column(style="bold cyan", no_wrap=True)
+    table.add_column()
+
+    table.add_row("Realm", installation_name)
+    table.add_row("Username", "admin")
+    table.add_row("Password", admin_password)
+
+    if core_ip is not None:
+        table.add_row("Connection", f"[green]ssh ubuntu@{core_ip}[/green]")
+
+    console.print(
+        rich.panel.Panel(
+            table,
+            title="[bold green]Exordos Bootstrap Summary[/bold green]",
+            border_style="green",
+            expand=False,
+        )
+    )
+
 
 BOOTSTRAP_TAG = "bootstrap"
 LaunchModeType = tp.Literal["core", "element", "custom"]
@@ -397,7 +448,7 @@ def _bootstrap_core(
     realm_secret: str,
     realm_tokens: dict,
     ssh_public_key: str | None = None,
-) -> None:
+) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
 
@@ -507,22 +558,14 @@ def _bootstrap_core(
                         "Failed to save admin password to "
                         f"{save_admin_password_file}: {e}"
                     )
-        else:
-            logger.important(f"Admin password: {admin_password}")
     except Exception:
         infra.delete_stand(dev_stand)
         logger.error(f"Failed to launch Exordos installation {dev_stand.name}")
         raise
 
-    cidr = dev_stand.network.cidr
-    if not no_start:
-        logger.important(
-            f"The stand {name} will be ready soon at:\nssh ubuntu@{cidr[2]}",
-        )
-    else:
-        logger.info(
-            f"The stand {name} is created but not started. You can start it manually."
-        )
+    if no_start:
+        return None
+    return dev_stand.network.cidr[2]
 
 
 @click.command("bootstrap", help="Bootstrap exordos locally")
@@ -907,7 +950,7 @@ def bootstrap_cmd(
     )
     hypervisors.append(hypervisor)
 
-    with rich.status.Status("Registering realm in ecosystem...", spinner="dots"):
+    with _status_done("Registering realm in ecosystem..."):
         realm_uuid, realm_secret, realm_tokens = _register_core(
             ecosystem_endpoint=ecosystem_endpoint,
             disable_telemetry=disable_telemetry,
@@ -928,10 +971,8 @@ def bootstrap_cmd(
         if subprocess.call(["sudo", "-v"]) != 0:
             raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
 
-    with rich.status.Status(
-        f"Launching Exordos installation '{name}'... ", spinner="dots"
-    ):
-        _bootstrap_core(
+    with _status_done(f"Launching Exordos installation '{name}'... "):
+        core_ip_result = _bootstrap_core(
             image_path=image_path,
             image_uri=image_uri,
             profile=profile,
@@ -956,6 +997,13 @@ def bootstrap_cmd(
             realm_tokens=realm_tokens,
             ssh_public_key=ssh_public_key_content,
         )
+
+    _print_bootstrap_summary(
+        installation_name=name,
+        admin_password=admin_password,
+        core_ip=core_ip_result,
+    )
+
     if settings:
         from exordos.cmd.settings.commands import init_config
 
