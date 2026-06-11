@@ -130,7 +130,7 @@ class LocalQcowBackuper(qcow.AbstractQcowBackuper):
 
     def _terminate_backup_process(self, backup_process: mp.Process) -> None:
         """Terminate the backup process and wait for it to terminate."""
-        self._logger.warn("Terminating backup process")
+        self._logger.warning("Terminating backup process")
         backup_process.terminate()
         backup_process.join(5)
 
@@ -155,7 +155,7 @@ class LocalQcowBackuper(qcow.AbstractQcowBackuper):
             disks = libvirt.get_domain_disks(domain)
 
             if len(disks) == 0:
-                self._logger.warn(f"No disks found for domain {domain}")
+                self._logger.warning(f"No disks found for domain {domain}")
                 continue
 
             snapshot_path = disks[0]

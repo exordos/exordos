@@ -317,7 +317,7 @@ def _bootstrap_element(
 
         # Without `force` flag, unable to proceed with the installation
         if not force:
-            logger.warn(
+            logger.warning(
                 f"Exordos element {dev_stand.name} is already running. "
                 "Use '--force' flag to force rerun exordos element.",
             )
@@ -448,7 +448,7 @@ def _bootstrap_core(
 
         # Without `force` flag, unable to proceed with the installation
         if not force:
-            logger.warn(
+            logger.warning(
                 f"Exordos installation {dev_stand.name} is already running. "
                 "Use '--force' flag to force rerun Exordos installation.",
             )
@@ -498,7 +498,7 @@ def _bootstrap_core(
                         f.write(admin_password)
                     logger.info(f"Admin password saved to {save_admin_password_file}")
                 except FileExistsError:
-                    logger.warn(
+                    logger.warning(
                         f"Admin password file {save_admin_password_file} "
                         "already exists. Skipping saving the password."
                     )

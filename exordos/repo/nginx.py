@@ -289,7 +289,7 @@ class NginxRepoDriver(base.AbstractRepoDriver):
                     except requests.HTTPError as e:
                         if e.response.status_code != 404:
                             raise
-                        self._logger.warn(
+                        self._logger.warning(
                             f"File {artifact_name} not found in remote repository"
                         )
 

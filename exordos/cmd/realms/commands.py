@@ -54,11 +54,11 @@ def ssh_cmd(realm: str | None, username: str) -> None:
     stands = infra.list_stands()
 
     if len(stands) == 0:
-        logger.warn("No exordos realms found")
+        logger.warning("No exordos realms found")
         return
 
     if len(stands) > 1 and realm is None:
-        logger.warn("Multiple exordos realms found, please specify one")
+        logger.warning("Multiple exordos realms found, please specify one")
         return
 
     # If the stand is not specified, use the first one

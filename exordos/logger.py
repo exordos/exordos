@@ -27,7 +27,7 @@ class AbstractLogger(abc.ABC):
         """Log an error message."""
 
     @abc.abstractmethod
-    def warn(self, msg: str) -> None:
+    def warning(self, msg: str) -> None:
         """Log a warning message."""
 
     @abc.abstractmethod
@@ -53,7 +53,7 @@ class ClickLogger(AbstractLogger):
         """Log an error message."""
         click.secho(msg, fg="red")
 
-    def warn(self, msg: str) -> None:
+    def warning(self, msg: str) -> None:
         """Log a warning message."""
         click.secho(msg, fg="yellow")
 
@@ -73,7 +73,7 @@ class DummyLogger(AbstractLogger):
         """Log an error message."""
         pass
 
-    def warn(self, msg: str) -> None:
+    def warning(self, msg: str) -> None:
         """Log a warning message."""
         pass
 
