@@ -13,6 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import unittest
 from unittest import mock
 
 import bazooka
@@ -297,6 +298,96 @@ class TestCoreIamAuthenticatorOTP:
         auth.authenticate()
 
         otp_prompt.assert_called_once()
+
+
+class TestCoreIamAuthenticatorTokenCache(unittest.TestCase):
+    """Tests for token caching in CoreIamAuthenticator."""
+
+    def test_caches_tokens_after_authentication(self):
+        """Test that tokens are cached after successful authentication."""
+        from unittest.mock import MagicMock
+        from unittest.mock import patch
+
+        from exordos.token_cache import TokenCache
+
+        realm = "test-realm"
+
+        # Mock HTTP client
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "access_token": "cached_access_token",
+            "refresh_token": "cached_refresh_token",
+        }
+        mock_client.post.return_value = mock_response
+
+        # Mock TokenCache to verify save_tokens is called
+        mock_cache = MagicMock(spec=TokenCache)
+
+        with patch("exordos.clients.base.TokenCache", return_value=mock_cache):
+            # Create authenticator with realm
+            auth = base.CoreIamAuthenticator(
+                base_url="https://example.com/api/core",
+                username="testuser",
+                password="testpass",
+                http_client=mock_client,
+                realm=realm,
+            )
+
+            # Authenticate
+            auth.authenticate()
+
+            # Verify save_tokens was called with correct arguments
+            mock_cache.save_tokens.assert_called_once_with(
+                realm,
+                "cached_access_token",
+                "cached_refresh_token",
+            )
+
+    def test_loads_cached_tokens_on_init(self):
+        """Test that cached tokens are loaded on initialization."""
+        from unittest.mock import MagicMock
+        from unittest.mock import patch
+
+        from exordos.token_cache import TokenCache
+
+        realm = "test-realm"
+        cached_access = "pre_cached_access"
+        cached_refresh = "pre_cached_refresh"
+
+        # Mock HTTP client
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "access_token": "new_access_token",
+            "refresh_token": "new_refresh_token",
+        }
+        mock_client.post.return_value = mock_response
+
+        # Mock TokenCache to return cached tokens
+        mock_cache = MagicMock(spec=TokenCache)
+        mock_cache.load_tokens.return_value = {
+            "access_token": cached_access,
+            "refresh_token": cached_refresh,
+        }
+
+        with patch("exordos.clients.base.TokenCache", return_value=mock_cache):
+            # Create authenticator with realm but no explicit tokens
+            # It should load from cache
+            auth = base.CoreIamAuthenticator(
+                base_url="https://example.com/api/core",
+                username="testuser",
+                password="testpass",
+                http_client=mock_client,
+                realm=realm,
+            )
+
+            # Verify load_tokens was called (may be called multiple times in the __init__)
+            self.assertTrue(mock_cache.load_tokens.called)
+
+            # After all initialization, the final values should be from cache
+            self.assertEqual(auth._access_token, cached_access)
+            self.assertEqual(auth._refresh_token, cached_refresh)
 
 
 class TestGetOtpPrompt:
