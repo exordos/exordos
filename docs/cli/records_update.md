@@ -6,9 +6,9 @@ Update record
 ## Usage
 
 ```console
-                                                                                                                                                               
- Usage: exordos dns records update [OPTIONS] UUID                                                                                                              
-                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos dns records update [OPTIONS] UUID                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -59,18 +59,18 @@ Update record
 ## CLI Help
 
 ```console
-                                                                                                                                                               
- Usage: exordos dns records update [OPTIONS] UUID                                                                                                              
-                                                                                                                                                               
- Update record                                                                                                                                                 
-                                                                                                                                                               
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --record-type      [a|ns|soa|txt]                                                                                                                        │
-│    --ttl              INTEGER                                                                                                                               │
-│    --prio             INTEGER                                                                                                                               │
-│    --disabled                                                                                                                                               │
-│    --record           TEXT                                                                                                                                  │
-│ *  --domain-uuid  -d  TEXT            [required]                                                                                                            │
-│    --help                             Show this message and exit.                                                                                           │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos dns records update [OPTIONS] UUID                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                           
+ Update record                                                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --record-type      [a|ns|soa|txt]                                                                                                                                                                                                                                                                    │
+│    --ttl              INTEGER                                                                                                                                                                                                                                                                           │
+│    --prio             INTEGER                                                                                                                                                                                                                                                                           │
+│    --disabled                                                                                                                                                                                                                                                                                           │
+│    --record           TEXT                                                                                                                                                                                                                                                                              │
+│ *  --domain-uuid  -d  TEXT            [required]                                                                                                                                                                                                                                                        │
+│    --help                             Show this message and exit.                                                                                                                                                                                                                                       │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

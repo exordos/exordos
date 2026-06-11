@@ -34,7 +34,6 @@ ENTITY_COLLECTION = c.MANIFEST_COLLECTION
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
-    "Description": "description",
     "Version": "version",
     "Status": "status",
 }

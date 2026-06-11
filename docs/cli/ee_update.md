@@ -1,7 +1,7 @@
 
 # ee_update
 
-Update element from a YAML file
+Update element
 
 ## Usage
 
@@ -47,7 +47,7 @@ Update element from a YAML file
                                                                                                                                                                                                                                                                                                            
  Usage: exordos ee update [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
- Update element from a YAML file                                                                                                                                                                                                                                                                           
+ Update element                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --repository  -r  TEXT  Repository endpoint [default: https://repo.exordos.com/exordos-elements/]                                                                                                                                                                                                       │

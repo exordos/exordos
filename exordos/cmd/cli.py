@@ -273,52 +273,52 @@ def exordos(
 
 @exordos.command(help="tool for creating docs files for cli commands", hidden=True)
 def dumphelp() -> None:
-    from exordos.common.md_click import dump_helper  # type: ignore
+    from exordos.common.md_click import dump_helper
 
     dump_helper(exordos)
     return None
 
 
-exordos.add_command(auth_commands.auth_group)  # noqa
+exordos.add_command(auth_commands.auth_group)
 
-exordos.add_command(iam_group)  # noqa
-exordos.add_command(secret_group, aliases=["s"])  # noqa
-exordos.add_command(realms_group)  # noqa
+exordos.add_command(iam_group)
+exordos.add_command(secret_group, aliases=["s"])
+exordos.add_command(realms_group)
 
-exordos.add_command(vs_group)  # noqa
-exordos.add_command(vars_commands.vv_group)  # noqa
+exordos.add_command(vs_group)
+exordos.add_command(vars_commands.vv_group)
 
 exordos.add_command(dns_group)
 
-exordos.add_command(compute_group, aliases=["c"])  # noqa
-exordos.add_command(nodes_commands.cn_group)  # noqa
+exordos.add_command(compute_group, aliases=["c"])
+exordos.add_command(nodes_commands.cn_group)
 
-exordos.add_command(em_group, aliases=["e"])  # noqa
-exordos.add_command(elements_commands.ee_group)  # noqa
-exordos.add_command(builds_commands.build_cmd)  # noqa
+exordos.add_command(em_group, aliases=["e"])
+exordos.add_command(elements_commands.ee_group)
+exordos.add_command(builds_commands.build_cmd)
 
-exordos.add_command(configs_commands.configs_group)  # noqa
-exordos.add_command(settings_commands.settings_group)  # noqa
-exordos.add_command(repo_commands.repository_group)  # noqa
-exordos.add_command(repo_commands.push_cmd)  # noqa
+exordos.add_command(configs_commands.configs_group)
+exordos.add_command(settings_commands.settings_group)
+exordos.add_command(repo_commands.repository_group)
+exordos.add_command(repo_commands.push_cmd)
 
-exordos.add_command(initialization_commands.init_cmd)  # noqa
+exordos.add_command(initialization_commands.init_cmd)
 
-exordos.add_command(version_commands.version_cmd)  # noqa
-exordos.add_command(version_commands.latest_cmd)  # noqa
-exordos.add_command(version_commands.get_project_version_cmd)  # noqa
+exordos.add_command(version_commands.version_cmd)
+exordos.add_command(version_commands.latest_cmd)
+exordos.add_command(version_commands.get_project_version_cmd)
 
-exordos.add_command(stand_commands.bootstrap_cmd)  # noqa
-exordos.add_command(stand_commands.backup_cmd)  # noqa
-exordos.add_command(stand_commands.backup_decrypt_cmd)  # noqa
+exordos.add_command(stand_commands.bootstrap_cmd)
+exordos.add_command(stand_commands.backup_cmd)
+exordos.add_command(stand_commands.backup_decrypt_cmd)
 
-exordos.add_command(utils_commands.openapi_spec)  # noqa
-exordos.add_command(utils_commands.hello)  # noqa
-exordos.add_command(utils_commands.autocomplete_help)  # noqa
-exordos.add_command(utils_commands.autocomplete)  # noqa
-exordos.add_command(utils_commands.sync)  # noqa
-exordos.add_command(utils_commands.introduction)  # noqa
-exordos.add_command(utils_commands.ready_api)  # noqa
+exordos.add_command(utils_commands.openapi_spec)
+exordos.add_command(utils_commands.hello)
+exordos.add_command(utils_commands.autocomplete_help)
+exordos.add_command(utils_commands.autocomplete)
+exordos.add_command(utils_commands.sync)
+exordos.add_command(utils_commands.introduction)
+exordos.add_command(utils_commands.ready_api)
 
 
 if __name__ == "__main__":

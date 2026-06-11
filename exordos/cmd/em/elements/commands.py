@@ -49,8 +49,8 @@ ENTITY_COLLECTION = c.ELEMENT_COLLECTION
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
-    "Description": "description",
     "Version": "version",
+    "Manifest": lambda x: x.get("manifest").split("/")[-1],
     "Status": "status",
 }
 
@@ -77,9 +77,7 @@ def show_cmd(ctx: click.Context, name: str) -> None:
     resources = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/resources/"
     )
-    table = get_table(
-        "UUID", "Name", "Kind", "Full hash", "Status", "Created at", "Updated at"
-    )
+    table = get_table("UUID", "Name", "Kind", "Full hash", "Status")
     for resource in resources:
         table.add_row(
             resource["uuid"],
@@ -87,38 +85,32 @@ def show_cmd(ctx: click.Context, name: str) -> None:
             resource["kind"],
             resource["full_hash"],
             resource["status"],
-            resource["created_at"],
-            resource["updated_at"],
         )
     print_table(table, msg="Resources:")
 
     imports = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/imports/"
     )
-    table = get_table("UUID", "Name", "Kind", "Link", "Created at", "Updated at")
+    table = get_table("UUID", "Name", "Kind", "Link")
     for resource in imports:
         table.add_row(
             resource["uuid"],
             resource["name"],
             resource["kind"],
             resource["link"],
-            resource["created_at"],
-            resource["updated_at"],
         )
     print_table(table, msg="Imports:")
 
     exports = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/exports/"
     )
-    table = get_table("UUID", "Name", "Kind", "Link", "Created at", "Updated at")
+    table = get_table("UUID", "Name", "Kind", "Link")
     for resource in exports:
         table.add_row(
             resource["uuid"],
             resource["name"],
             resource["kind"],
             resource["link"],
-            resource["created_at"],
-            resource["updated_at"],
         )
     print_table(table, msg="Exports:")
 
@@ -308,7 +300,7 @@ def upgrade_manifest(
     return new_manifest
 
 
-@click.command("install", help="Install element from a manifest (YAML file)")
+@click.command("install", help="Install element")
 @click.option(
     "-r",
     "--repository",
@@ -351,7 +343,7 @@ def install_cmd(
     )
 
 
-@click.command("update", help="Update element from a YAML file")
+@click.command("update", help="Update element")
 @click.option(
     "-r",
     "--repository",
