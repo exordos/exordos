@@ -11,7 +11,7 @@ help:
 	@echo "bootstrap        - bootstrap exordos core"
 
 mdlint:
-	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" --fix
+	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" --fix
 
 build_empty:
 	./dist/exordos build -i $(SSH_KEY) -f ../exordos_empty -o ../exordos_empty/output --manifest-var repository=$(REPOSITORY)

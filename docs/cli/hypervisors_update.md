@@ -37,36 +37,42 @@ Update hypervisor
 * `avail_cores`:
     * Type: integer
     * Default: `sentinel.unset`
-    * Usage: `--avail_cores`
+    * Usage: `--avail-cores`
 
 * `avail_ram`:
     * Type: integer
     * Default: `sentinel.unset`
-    * Usage: `--avail_ram`
+    * Usage: `--avail-ram`
 
 * `cores_ratio`:
     * Type: float
     * Default: `sentinel.unset`
-    * Usage: `--cores_ratio`
+    * Usage: `--cores-ratio`
 
 * `ram_ratio`:
     * Type: float
     * Default: `sentinel.unset`
-    * Usage: `--ram_ratio`
+    * Usage: `--ram-ratio`
 
 * `machine_type`:
     * Type: choice
     * Default: `sentinel.unset`
     * Usage: `-m
---machine_type`
+--machine-type`
 
 * `driver_spec`:
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-d
---driver_spec`
+    * Usage: `--driver-spec`
 
-  Additional filters to pass to the api. The format is 'key=value'. For example: -d a=b -d c=d --driver_spec e=f
+  Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f
+
+* `driver_spec_full`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--driver-spec-full`
+
+  Full Driver Specification. The format is 'key=value'. For example: --driver-spec-full a=b --driver-spec-full e=f
 
 * `help`:
     * Type: boolean
@@ -78,20 +84,21 @@ Update hypervisor
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute hypervisors update [OPTIONS] UUID                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
- Update hypervisor                                                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name          -n  TEXT     Name of the hypervisor                                                                                                                                                                                                                                                     │
-│ --description   -D  TEXT     Description of the hypervisor                                                                                                                                                                                                                                              │
-│ --avail_cores       INTEGER                                                                                                                                                                                                                                                                             │
-│ --avail_ram         INTEGER                                                                                                                                                                                                                                                                             │
-│ --cores_ratio       FLOAT                                                                                                                                                                                                                                                                               │
-│ --ram_ratio         FLOAT                                                                                                                                                                                                                                                                               │
-│ --machine_type  -m  [vm|hw]                                                                                                                                                                                                                                                                             │
-│ --driver_spec   -d  TEXT     Additional filters to pass to the api. The format is 'key=value'. For example: -d a=b -d c=d --driver_spec e=f                                                                                                                                                             │
-│ --help                       Show this message and exit.                                                                                                                                                                                                                                                │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                               
+ Usage: exordos compute hypervisors update [OPTIONS] UUID                                                                                                      
+                                                                                                                                                               
+ Update hypervisor                                                                                                                                             
+                                                                                                                                                               
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --name              -n  TEXT     Name of the hypervisor                                                                                                     │
+│ --description       -D  TEXT     Description of the hypervisor                                                                                              │
+│ --avail-cores           INTEGER                                                                                                                             │
+│ --avail-ram             INTEGER                                                                                                                             │
+│ --cores-ratio           FLOAT                                                                                                                               │
+│ --ram-ratio             FLOAT                                                                                                                               │
+│ --machine-type      -m  [vm|hw]                                                                                                                             │
+│ --driver-spec           TEXT     Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f                              │
+│ --driver-spec-full      TEXT     Full Driver Specification. The format is 'key=value'. For example: --driver-spec-full a=b -d c=d --driver-spec-full e=f         │
+│ --help                           Show this message and exit.                                                                                                │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

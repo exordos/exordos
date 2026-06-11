@@ -70,39 +70,38 @@ hypervisors_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     help="Description of the hypervisor",
 )
 @click.option(
-    "--avail_cores",
+    "--avail-cores",
     type=int,
     required=False,
 )
 @click.option(
-    "--avail_ram",
+    "--avail-ram",
     type=int,
     required=False,
 )
 @click.option(
-    "--cores_ratio",
+    "--cores-ratio",
     type=float,
     required=False,
 )
 @click.option(
-    "--ram_ratio",
+    "--ram-ratio",
     type=float,
     required=False,
 )
 @click.option(
     "-m",
-    "--machine_type",
+    "--machine-type",
     required=False,
     type=click.Choice(["VM", "HW"], case_sensitive=False),
 )
 @click.option(
-    "-d",
-    "--driver_spec",
+    "--driver-spec",
     multiple=True,
     help=(
         "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: -d "
-        "a=b -d c=d --driver_spec e=f"
+        "The format is 'key=value'. For example: --driver-spec "
+        "a=b --driver-spec e=f"
     ),
 )
 def add_cmd(
@@ -163,39 +162,47 @@ def add_cmd(
     help=f"Description of the {ENTITY}",
 )
 @click.option(
-    "--avail_cores",
+    "--avail-cores",
     type=int,
     required=False,
 )
 @click.option(
-    "--avail_ram",
+    "--avail-ram",
     type=int,
     required=False,
 )
 @click.option(
-    "--cores_ratio",
+    "--cores-ratio",
     type=float,
     required=False,
 )
 @click.option(
-    "--ram_ratio",
+    "--ram-ratio",
     type=float,
     required=False,
 )
 @click.option(
     "-m",
-    "--machine_type",
+    "--machine-type",
     required=False,
     type=click.Choice(["VM", "HW"], case_sensitive=False),
 )
 @click.option(
-    "-d",
-    "--driver_spec",
+    "--driver-spec",
     multiple=True,
     help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: -d "
-        "a=b -d c=d --driver_spec e=f"
+        "Driver Specification. "
+        "The format is 'key=value'. For example: --driver-spec "
+        "a=b --driver-spec e=f"
+    ),
+)
+@click.option(
+    "--driver-spec-full",
+    multiple=True,
+    help=(
+        "Full Driver Specification. "
+        "The format is 'key=value'. For example: --driver-spec-full "
+        "a=b --driver-spec-full e=f"
     ),
 )
 def update_cmd(
@@ -209,6 +216,7 @@ def update_cmd(
     ram_ratio: float | None,
     machine_type: str | None,
     driver_spec: tuple[str, ...],
+    driver_spec_full: tuple[str, ...],
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -228,8 +236,17 @@ def update_cmd(
         data["machine_type"] = machine_type
 
     driver_spec = utils.convert_input_multiply(driver_spec)
-    if driver_spec:
-        data["driver_spec"] = driver_spec
+    driver_spec_full = utils.convert_input_multiply(driver_spec_full)
+    if driver_spec and driver_spec_full:
+        raise click.ClickException(
+            "Both --driver-spec and --driver-spec-full are set. Use only one."
+        )
+    if driver_spec_full:
+        data["driver_spec"] = driver_spec_full
+    elif driver_spec:
+        hypervisor_data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
+        current_spec = hypervisor_data.get("driver_spec") or {}
+        data["driver_spec"] = {**current_spec, **driver_spec}
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
