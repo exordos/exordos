@@ -1,0 +1,75 @@
+type: object
+required:
+  - name
+  - description
+  - schema_version
+  - version
+  - api_version
+  - resources
+properties:
+  name:
+    type: string
+    maxLength: 255
+  description:
+    type: string
+  schema_version:
+    type: integer
+    enum:
+      - 1
+  version:
+    type: string
+    minLength: 5
+    maxLength: 64
+  api_version:
+    type: string
+    enum:
+      - v1
+  requirements:
+    type: object
+    additionalProperties:
+      $ref: '#/components/schemas/requirements'
+  resources:
+    type: object
+    properties: {}
+  exports:
+    type: object
+    additionalProperties:
+      $ref: '#/components/schemas/export'
+  imports:
+    type: object
+    additionalProperties:
+      $ref: '#/components/schemas/import'
+  openapi_spec:
+    type: string
+    nullable: true
+components:
+  schemas:
+    export:
+      type: object
+      properties:
+        link:
+          type: string
+      required:
+        - link
+    requirements:
+      type: object
+      properties:
+        from_version:
+          type: string
+        to_version:
+          type: string
+    import:
+      type: object
+      properties:
+        element:
+          type: string
+        kind:
+          type: string
+          enum:
+            - resource
+        link:
+          type: string
+      required:
+        - element
+        - kind
+        - link

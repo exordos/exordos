@@ -96,14 +96,14 @@ ssh_keys_group = create_entity_group(
     multiple=True,
     type=str,
     required=False,
-    help="node uuids",
+    help="node uuids or names",
 )
 @click.option(
     "--node-set",
     multiple=True,
     type=str,
     required=False,
-    help="node_set uuids",
+    help="node_set uuids or names",
 )
 @click.option(
     "--user",

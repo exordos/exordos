@@ -25,9 +25,9 @@ import urllib.request
 
 import yaml
 
-
-class ManifestNotFound(Exception):
-    """Raised when the requested manifest cannot be located or downloaded."""
+from exordos import constants as c
+from exordos.common import version as version_lib
+from exordos.exceptions import ManifestNotFound
 
 
 def _join_url(*parts: str) -> str:
@@ -39,7 +39,7 @@ def _join_url(*parts: str) -> str:
 
 
 def _http_get(url: str) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "genesis-devtools/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": f"{c.PKG_NAME}/1.0"})
     with urllib.request.urlopen(req, timeout=10) as resp:
         return resp.read()
 
@@ -49,151 +49,284 @@ def _extract_hrefs(html: str) -> list[str]:
     return re.findall(r'href=["\']([^"\']+)["\']', html, flags=re.IGNORECASE)
 
 
-def download_manifest(
-    repository_url: str,
-    manifest_name: str,
-    manifest_version: str | None = None,
-) -> dict[str, tp.Any]:
-    """Download latest manifest by semantic version from a simple HTTP repo.
+class Repository:
+    def __init__(self, repository_url: str):
+        self.repository_url = repository_url
 
-    Directory layout example:
-        <repo>/<name>/<version>/manifests/<name>.yaml
+    def element_url(
+        self,
+        manifest_name: str,
+    ) -> str:
+        return _join_url(self.repository_url, manifest_name)
 
-    Args:
-        repository_url: Base URL of the repository
-                        (e.g., http://host:port/genesis-elements/)
-        manifest_name: Element name (e.g., "demo").
-        manifest_version: Element version (e.g., "0.0.1").
+    @classmethod
+    def element_html(cls, element_url: str) -> str:
+        try:
+            element_html = _http_get(element_url).decode("utf-8", errors="ignore")
+            return element_html
+        except Exception as exc:
+            raise ManifestNotFound(f"Element not found at {element_url}: {exc}")
 
-    Returns:
-        Parsed YAML manifest as a dict.
+    @classmethod
+    def get_inventory_url(
+        cls,
+        element_url: str,
+        version: str,
+    ) -> str:
+        return _join_url(element_url, version, "inventory.json")
 
-    Raises:
-        ManifestNotFound: If the element or its manifest cannot be found.
-    """
-    try:
-        # 1) List repository root to ensure element exists
-        # (optional but validates repo)
-        _http_get(repository_url).decode("utf-8", errors="ignore")
-    except Exception as exc:
-        raise ManifestNotFound(f"Failed to access repository: {repository_url}: {exc}")
+    def get_versions(
+        self,
+        manifest_name: str,
+        element_html: str | None = None,
+        skip_latest: bool = False,
+        stable: bool = False,
+    ) -> list[str]:
+        versions = [
+            h
+            for h in _extract_hrefs(
+                element_html or self.element_html(self.element_url(manifest_name))
+            )
+        ]
+        if not versions:
+            raise ManifestNotFound(
+                f"No version directories found for element '{manifest_name}' "
+                f"at {self.element_url(manifest_name)}"
+            )
+        # Remove last slash from all versions
+        versions = [v.rstrip("/") for v in versions]
+        # Remove latest version from list if exists
+        if skip_latest and "latest" in versions:
+            versions.remove("latest")
+        if stable:
+            versions = [
+                v
+                for v in versions
+                if version_lib.is_version(v) and version_lib.is_stable_version(v)
+            ]
+        return versions
 
-    # 2) List element directory to get versions
-    element_url = _join_url(repository_url, manifest_name)
-    try:
-        element_html = _http_get(element_url).decode("utf-8", errors="ignore")
-    except Exception as exc:
-        raise ManifestNotFound(
-            f"Element '{manifest_name}' not found at {element_url}: {exc}"
-        )
+    def check_repo(self) -> None:
+        try:
+            _http_get(self.repository_url).decode("utf-8", errors="ignore")
+        except Exception as exc:
+            raise ManifestNotFound(
+                f"Failed to access repository: {self.repository_url}: {exc}"
+            )
 
-    if manifest_version is None:
+    def get_all_elements(self) -> list[str]:
+        inventory_url = _join_url(self.repository_url, "inventory.json")
+        try:
+            result = _http_get(inventory_url)
+        except urllib.request.HTTPError as exc:
+            if exc.code == 404:
+                raise ManifestNotFound(
+                    f"Failed to access repository: {inventory_url}: {exc}"
+                )
+            raise
+        inventory = json.loads(result)
+        return sorted(inventory["elements"].keys())
+
+    def get_element_versions(self, element_name: str) -> list[str]:
+        try:
+            # 1) List repository root to ensure element exists
+            # (optional but validates repo)
+            _http_get(self.repository_url).decode("utf-8", errors="ignore")
+        except Exception as exc:
+            raise ManifestNotFound(
+                f"Failed to access repository: {self.repository_url}: {exc}"
+            )
+
+        # 2) List element directory to get versions
+        element_url = _join_url(self.repository_url, element_name)
+        try:
+            element_html = _http_get(element_url).decode("utf-8", errors="ignore")
+        except Exception as exc:
+            raise ManifestNotFound(
+                f"Element '{element_name}' not found at {element_url}: {exc}"
+            )
+
         version_dirs = [h for h in _extract_hrefs(element_html)]
         if not version_dirs:
             raise ManifestNotFound(
-                f"No version directories found for element '{manifest_name}' "
+                f"No version directories found for element '{element_name}' "
                 f"at {element_url}"
             )
+        # Remove last slash from all versions
+        version_dirs = [v.rstrip("/") for v in version_dirs]
+        # Remove latest version from list if exists
+        if "latest" in version_dirs:
+            version_dirs.remove("latest")
+        return version_dirs
 
-        # 3) Pick the highest semantic version
+    def get_element_versions_by_inventory(self, element_name: str) -> list[str]:
+        inventory_url = _join_url(self.repository_url, "inventory.json")
+        result = _http_get(inventory_url)
+        inventory = json.loads(result)
+        if element_name not in inventory["elements"]:
+            raise ManifestNotFound(
+                f"Element '{element_name}' not found in inventory at {inventory_url}"
+            )
+        return sorted(inventory["elements"][element_name].keys())
+
+    def get_manifest(
+        self, element_name: str, element_version: str | None = None
+    ) -> dict:
+        self.check_repo()
+
+        element_url = self.element_url(element_name)
+        if not element_version:
+            element_html = self.element_html(element_url)
+            latest_dir = self._get_latest_version(
+                element_url, element_html, element_version, element_name
+            )
+        else:
+            latest_dir = element_version
+
+        inventory_url = self.get_inventory_url(element_url, latest_dir)
+        inventory = self._element_inventory(inventory_url)
+
+        target_manifest_path = self.get_manifest_path_from_inventory(
+            inventory, element_name, inventory_url
+        )
+
+        manifest_url = self._manifest_url(element_url, latest_dir, target_manifest_path)
+        manifest = self.get_manifest_by_url(manifest_url)
+        return manifest
+
+    def get_element_inventory(
+        self, element_name: str, element_version: str
+    ) -> tp.Tuple[dict[str, tp.Any], dict[str, tp.Any]]:
+        self.check_repo()
+
+        element_url = self.element_url(element_name)
+
+        if not element_version:
+            element_html = self.element_html(element_url)
+            versions = self.get_versions(element_name, element_html)
+            try:
+                latest_dir = self._get_latest_version(
+                    element_url, element_html, element_version, element_name, versions
+                )
+            except Exception as exc:
+                raise ManifestNotFound(
+                    f"Failed to parse versions for '{element_name}' at {element_url}: {exc}"
+                )
+        else:
+            latest_dir = element_version
+
+        inventory_url = self.get_inventory_url(element_url, latest_dir)
+        inventory = self._element_inventory(inventory_url)
+
+        target_manifest_path = self.get_manifest_path_from_inventory(
+            inventory, element_name, inventory_url
+        )
+
+        manifest_url = self._manifest_url(element_url, latest_dir, target_manifest_path)
+        manifest = self.get_manifest_by_url(manifest_url)
+        return manifest, inventory
+
+    def openapi_spec(self, element_name: str, element_version: str) -> dict:
+        element_url = self.element_url(element_name)
+
+        manifest, inventory = self.get_element_inventory(element_name, element_version)
+        for artifact in inventory.get("artifacts", []):
+            if "openapi" in artifact:
+                artifact_url = self._artifact_url(
+                    element_url, element_version, artifact
+                )
+                user_api_spec = self._element_openapi_artifact(artifact_url)
+                return user_api_spec
+        return {}
+
+    @classmethod
+    def get_manifest_path_from_inventory(
+        cls, inventory: dict[str, tp.Any], manifest_name: str, inventory_url: str
+    ) -> str:
+        target_manifest_path = None
+        for manifest_path in inventory["manifests"]:
+            stem = Path(manifest_path).stem
+            if stem == manifest_name:
+                target_manifest_path = manifest_path
+        if target_manifest_path is None:
+            raise ManifestNotFound(
+                f"Manifest '{manifest_name}' not found in inventory at {inventory_url}"
+            )
+        return target_manifest_path
+
+    @classmethod
+    def get_manifest_by_url(cls, manifest_url: str) -> dict[str, tp.Any]:
         try:
-            latest_dir = max(version_dirs)
+            data = _http_get(manifest_url)
+            manifest = yaml.safe_load(data)
+            if not isinstance(manifest, dict):
+                raise ManifestNotFound(
+                    f"Manifest at {manifest_url} is not a YAML mapping"
+                )
+            return manifest
+        except ManifestNotFound:
+            raise
         except Exception as exc:
             raise ManifestNotFound(
-                f"Failed to parse versions for '{manifest_name}' at {element_url}: {exc}"
+                f"Failed to download or parse manifest at {manifest_url}: {exc}"
             )
-    else:
-        latest_dir = manifest_version
 
-    # get inventory.json
-    inventory_url = _join_url(element_url, latest_dir, "inventory.json")
-    try:
-        inventory = json.loads(_http_get(inventory_url))
-    except Exception as exc:
-        raise ManifestNotFound(
-            f"Failed to download or parse inventory at {inventory_url}: {exc}"
-        )
-    # get manifest_name from inventory
-    target_manifest_path = None
-    for manifest_path in inventory["manifests"]:
-        stem = Path(manifest_path).stem
-        if stem == manifest_name:
-            target_manifest_path = manifest_path
-    if target_manifest_path is None:
-        raise ManifestNotFound(
-            f"Manifest '{manifest_name}' not found in inventory at {inventory_url}"
-        )
-    # 4) Build manifest URL and download YAML
-    manifest_url = _join_url(
-        element_url, latest_dir, "manifests/", target_manifest_path
-    )
-    try:
-        data = _http_get(manifest_url)
-        manifest = yaml.safe_load(data)
-        if not isinstance(manifest, dict):
-            raise ManifestNotFound(f"Manifest at {manifest_url} is not a YAML mapping")
-        return manifest
-    except ManifestNotFound:
-        raise
-    except Exception as exc:
-        raise ManifestNotFound(
-            f"Failed to download or parse manifest at {manifest_url}: {exc}"
-        )
-
-
-def get_all_elements(repository_url: str) -> list[str]:
-    inventory_url = _join_url(repository_url, "inventory.json")
-    try:
-        result = _http_get(inventory_url)
-    except urllib.request.HTTPError as exc:
-        if exc.code == 404:
+    @classmethod
+    def _element_inventory(cls, inventory_url: str) -> dict[str, tp.Any]:
+        try:
+            inventory = json.loads(_http_get(inventory_url))
+            return inventory
+        except Exception as exc:
             raise ManifestNotFound(
-                f"Failed to access repository: {inventory_url}: {exc}"
+                f"Failed to download or parse inventory at {inventory_url}: {exc}"
             )
-        raise
-    inventory = json.loads(result)
-    return sorted(inventory["elements"].keys())
 
+    @classmethod
+    def _element_openapi_artifact(cls, artifact_url: str) -> dict[str, tp.Any]:
+        try:
+            artifact = yaml.safe_load(_http_get(artifact_url))
+            return artifact
+        except Exception as exc:
+            raise ManifestNotFound(
+                f"Failed to download or parse artifact at {artifact_url}: {exc}"
+            )
 
-def get_element_versions(repository_url: str, manifest_name: str) -> list[str]:
-    try:
-        # 1) List repository root to ensure element exists
-        # (optional but validates repo)
-        _http_get(repository_url).decode("utf-8", errors="ignore")
-    except Exception as exc:
-        raise ManifestNotFound(f"Failed to access repository: {repository_url}: {exc}")
+    @classmethod
+    def _manifest_url(
+        cls,
+        element_url: str,
+        version: str,
+        manifest_name: str,
+    ) -> str:
+        return _join_url(element_url, version, "manifests/", manifest_name)
 
-    # 2) List element directory to get versions
-    element_url = _join_url(repository_url, manifest_name)
-    try:
-        element_html = _http_get(element_url).decode("utf-8", errors="ignore")
-    except Exception as exc:
-        raise ManifestNotFound(
-            f"Element '{manifest_name}' not found at {element_url}: {exc}"
-        )
+    @classmethod
+    def _artifact_url(
+        cls,
+        element_url: str,
+        version: str,
+        artifact_name: str,
+    ) -> str:
+        return _join_url(element_url, version, "artifacts/", artifact_name)
 
-    version_dirs = [h for h in _extract_hrefs(element_html)]
-    if not version_dirs:
-        raise ManifestNotFound(
-            f"No version directories found for element '{manifest_name}' "
-            f"at {element_url}"
-        )
-    # Remove last slash from all versions
-    version_dirs = [v.rstrip("/") for v in version_dirs]
-    # Remove latest version from list if exists
-    if "latest" in version_dirs:
-        version_dirs.remove("latest")
-    return version_dirs
+    def _get_latest_version(
+        self,
+        element_url: str,
+        element_html: str | None,
+        manifest_version: str | None,
+        manifest_name: str,
+        versions: list[str] | None = None,
+    ) -> str:
+        if manifest_version is None:
+            versions = versions or self.get_versions(manifest_name, element_html)
 
-
-def get_element_versions_by_inventory(
-    repository_url: str, manifest_name: str
-) -> list[str]:
-    inventory_url = _join_url(repository_url, "inventory.json")
-    result = _http_get(inventory_url)
-    inventory = json.loads(result)
-    if manifest_name not in inventory["elements"]:
-        raise ManifestNotFound(
-            f"Element '{manifest_name}' not found in inventory at {inventory_url}"
-        )
-    return sorted(inventory["elements"][manifest_name].keys())
+            # Pick the highest semantic version
+            try:
+                latest_dir = max(versions)
+            except Exception as exc:
+                raise ManifestNotFound(
+                    f"Failed to parse versions for '{manifest_name}' at {element_url}: {exc}"
+                )
+        else:
+            latest_dir = manifest_version
+        return latest_dir

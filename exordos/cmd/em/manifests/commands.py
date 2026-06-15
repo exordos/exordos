@@ -28,6 +28,7 @@ from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
 import exordos.constants as c
+from exordos.spec.schema import validate_manifest
 
 ENTITY = "manifest"
 ENTITY_COLLECTION = c.MANIFEST_COLLECTION
@@ -103,22 +104,15 @@ def show_cmd(ctx: click.Context, uuid: str) -> None:
     help="Repository endpoint",
 )
 @click.argument("path_or_name")
-@click.pass_context
-def validate_cmd(ctx: click.Context, repository: str, path_or_name: str) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-
+def validate_cmd(repository: str, path_or_name: str) -> None:
     if os.path.isfile(path_or_name):
         with open(path_or_name, "r", encoding="utf-8") as f:
             manifest_data = yaml.safe_load(f)
     else:
-        manifest_data = repo_lib.download_manifest(repository, path_or_name)
-    manifest = base_client.add_entity(client, ENTITY_COLLECTION, manifest_data)
-    base_client.action_entity(
-        client, ENTITY_COLLECTION, "validate", manifest["uuid"], invoke=False
-    )
-    click.echo(
-        f"Manifest {manifest['name']} {manifest['version']} validated successfully"
-    )
+        manifest_data = repo_lib.Repository(repository).get_manifest(path_or_name)
+    validate_manifest(manifest_data, repository)
+    name = f"{manifest_data['name']} ({manifest_data['version']})"
+    click.echo(f"Manifest {click.style(name, fg='green')} validated successfully")
 
 
 manifests_group.add_command(show_cmd, aliases=["get", "g"])

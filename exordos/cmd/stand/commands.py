@@ -257,7 +257,7 @@ def _init_cache_repo(repo_driver: repo_fs.FSRepoDriver) -> None:
             json.dump({"elements": {}}, f)
 
 
-def _get_element_inventory_from_url(url: str) -> base_builder.ElementInventory:
+def get_element_inventory_from_url(url: str) -> base_builder.ElementInventory:
     """Download inventory and all artefacts from an Nginx URL, with caching.
 
     Args:
@@ -831,10 +831,10 @@ def bootstrap_cmd(
         inventory = inventory.split("/")[-1]
 
     if version_lib.is_version(inventory):
-        inventory_instance = _get_element_inventory_from_url(
+        inventory_instance = get_element_inventory_from_url(
             f"{c.ELEMENT_REPO_URL}/core/{inventory.strip()}/"
         )
-        inventory_eco_instance = _get_element_inventory_from_url(
+        inventory_eco_instance = get_element_inventory_from_url(
             f"{c.ELEMENT_REPO_URL}/ecosystem_realm/{inventory.strip()}/"
         )
         eco_manifest_path = str(inventory_eco_instance.manifests[0])

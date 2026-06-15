@@ -99,7 +99,8 @@ LAST_CHECK_FILE = os.path.expanduser(f"{CONFIG_DIR}/exordosctl.last_version_chec
 BOOTSTRAP_USER = "ubuntu"
 UPDATE_CHECK_INTERVAL = 60 * 60  # 1 hour in seconds
 
-BASE_ELEMENTS = ["core", "ecosystem_realm"]
+CORE_ELEMENT = "core"
+BASE_ELEMENTS = [CORE_ELEMENT, "ecosystem_realm"]
 
 DEFAULT_TABLE_FORMAT = "table"
 TABLE_FORMATS = ["json", "html", DEFAULT_TABLE_FORMAT, "yaml"]
