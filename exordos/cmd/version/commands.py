@@ -38,7 +38,7 @@ def check_latest_version(echo_on_latest: bool = False) -> bool:
         if version.parse(latest_tag) > version.parse(exordos_version.version_info):
             click.secho(
                 f"New version available: {latest_tag} (current: {exordos_version.version_info}) "
-                f"Update by:\ncurl -fsSL {c.EXORDOS_REPO_URL}/install.sh | sudo sh",
+                f"Update by:\ncurl -fsSL {c.EXORDOS_REPO_URL}/install.sh | sh",
                 fg="yellow",
             )
             return False

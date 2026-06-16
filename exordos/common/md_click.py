@@ -72,19 +72,22 @@ def dump_helper(base_command):
         helptxt = helpdct.get("help")
         usage = helpdct.get("usage")
         parent = helpdct.get("parent", "") or ""
-        options = {
-            opt.name: {
+        options = {}
+        for opt in helpdct.get("params", []):
+            default = getattr(opt, "default", None)
+            if callable(default):
+                default = default()
+            prop = {
                 "usage": "\n".join(opt.opts),
                 "prompt": getattr(opt, "prompt", None),
                 "required": getattr(opt, "required", None),
-                "default": getattr(opt, "default", None),
+                "default": default,
                 "help": getattr(opt, "help", None),
                 "type": getattr(t, "name", str(t))
                 if (t := getattr(opt, "type", None))
                 else "None",
             }
-            for opt in helpdct.get("params", [])
-        }
+            options[opt.name] = prop
         full_command = command.name
         if parent:
             full_command = f"{parent}_{full_command}"

@@ -15,9 +15,15 @@
 #    under the License.
 
 
-class DevToolsException(Exception):
+class ExordosException(Exception):
     """Base exception for all exceptions."""
 
 
-class RunException(DevToolsException):
+class RunException(ExordosException):
+    pass
+
+
+class ManifestNotFound(ExordosException):
+    """Raised when the requested manifest cannot be located or downloaded."""
+
     pass

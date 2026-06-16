@@ -6,9 +6,9 @@ Update domain
 ## Usage
 
 ```console
-                                                                                                                                                               
- Usage: exordos dns domains update [OPTIONS] UUID                                                                                                              
-                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos dns domains update [OPTIONS] UUID                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -44,14 +44,14 @@ Update domain
 ## CLI Help
 
 ```console
-                                                                                                                                                               
- Usage: exordos dns domains update [OPTIONS] UUID                                                                                                              
-                                                                                                                                                               
- Update domain                                                                                                                                                 
-                                                                                                                                                               
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name               -n  TEXT  Name of the domain                                                                                                           │
-│ --sync-to-ecosystem  -s        Sync the domain to the ecosystem                                                                                             │
-│ --help                         Show this message and exit.                                                                                                  │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos dns domains update [OPTIONS] UUID                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                           
+ Update domain                                                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --name               -n  TEXT  Name of the domain                                                                                                                                                                                                                                                       │
+│ --sync-to-ecosystem  -s        Sync the domain to the ecosystem                                                                                                                                                                                                                                         │
+│ --help                         Show this message and exit.                                                                                                                                                                                                                                              │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

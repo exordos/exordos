@@ -17,7 +17,7 @@
 from exordos import exceptions
 
 
-class ScenarioException(exceptions.DevToolsException):
+class ScenarioException(exceptions.ExordosException):
     """Base exception for all scenario exceptions."""
 
     pass

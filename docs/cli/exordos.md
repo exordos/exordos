@@ -114,6 +114,20 @@ Provides all the necessary tools for work with Exordos Platform
 
   OTP code for two-factor authentication
 
+* `ttl`:
+    * Type: float
+    * Default: `none`
+    * Usage: `--ttl`
+
+  Time to live for the access token
+
+* `refresh_ttl`:
+    * Type: float
+    * Default: `none`
+    * Usage: `--refresh-ttl`
+
+  Time to live for the refresh token
+
 * `help`:
     * Type: boolean
     * Default: `false`

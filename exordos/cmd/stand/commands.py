@@ -100,8 +100,6 @@ def _print_bootstrap_summary(
 
 BOOTSTRAP_TAG = "bootstrap"
 LaunchModeType = tp.Literal["core", "element", "custom"]
-GC_CIDR = ipaddress.IPv4Network("10.20.0.0/22")
-GC_BOOT_CIDR = ipaddress.IPv4Network("10.30.0.0/24")
 _INVENTORY_CACHE_BASE = pathlib.Path.home() / ".cache" / "exordos"
 
 
@@ -632,7 +630,7 @@ def _bootstrap_core(
 )
 @click.option(
     "--cidr",
-    default=GC_CIDR,
+    default=c.GC_CIDR,
     help="The main network CIDR",
     show_default=True,
     type=ipaddress.IPv4Network,
@@ -656,7 +654,7 @@ def _bootstrap_core(
 )
 @click.option(
     "--boot-cidr",
-    default=GC_BOOT_CIDR,
+    default=c.GC_BOOT_CIDR,
     help="The bootstrap network CIDR",
     show_default=True,
     type=ipaddress.IPv4Network,

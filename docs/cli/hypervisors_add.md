@@ -68,7 +68,7 @@ Add a new hypervisor
     * Default: `sentinel.unset`
     * Usage: `--driver-spec`
 
-  Additional filters to pass to the api. The format is 'key=value'. For example: -d a=b -d c=d --driver_spec e=f
+  Additional filters to pass to the api. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f
 
 * `help`:
     * Type: boolean
@@ -94,7 +94,7 @@ Add a new hypervisor
 │ --cores-ratio       FLOAT                                                                                                                                                                                                                                                                               │
 │ --ram-ratio         FLOAT                                                                                                                                                                                                                                                                               │
 │ --machine-type  -m  [vm|hw]                                                                                                                                                                                                                                                                             │
-│ --driver-spec       TEXT     Additional filters to pass to the api. The format is 'key=value'. For example: -d a=b -d c=d --driver_spec e=f                                                                                                                                                             │
+│ --driver-spec       TEXT     Additional filters to pass to the api. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f                                                                                                                                                         │
 │ --help                       Show this message and exit.                                                                                                                                                                                                                                                │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

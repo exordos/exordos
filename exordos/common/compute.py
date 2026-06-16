@@ -108,3 +108,22 @@ def get_compute_targets_from_service(client, service_data: dict) -> list:
             }
         )
     return targets
+
+
+def get_compute_targets_all(client) -> list:
+    targets = []
+
+    nodes = base_client.list_entities(client, c.NODE_COLLECTION)
+    for node in nodes:
+        targets.append(
+            {
+                "target": {
+                    "kind": "node",
+                    "node": node["uuid"],
+                },
+                "ips": [node["default_network"].get("ipv4", None)],
+                "project_id": node["project_id"],
+                "name": node["name"],
+            }
+        )
+    return targets

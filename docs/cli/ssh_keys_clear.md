@@ -1,38 +1,25 @@
 
-# ee_install
+# ssh_keys_clear
 
-Install element
+Delete all ssh_keys
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee install [OPTIONS] [PATH_OR_NAME]                                                                                                                                                                                                                                                        
+ Usage: exordos secret ssh_keys clear [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `repository`:
-    * Type: text
-    * Default: `https://repo.exordos.com/exordos-elements/`
-    * Usage: `-r
---repository`
+* `y`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--y
+-y`
 
-  Repository endpoint
-
-* `version`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-v
---version`
-
-  version of the element
-
-* `path_or_name`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `path_or_name`
+  Automatically answer yes for all questions
 
 * `help`:
     * Type: boolean
@@ -45,13 +32,12 @@ Install element
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee install [OPTIONS] [PATH_OR_NAME]                                                                                                                                                                                                                                                        
+ Usage: exordos secret ssh_keys clear [OPTIONS]                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
- Install element                                                                                                                                                                                                                                                                                           
+ Delete all ssh_keys                                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --repository  -r  TEXT  Repository endpoint [default: https://repo.exordos.com/exordos-elements/]                                                                                                                                                                                                       │
-│ --version     -v  TEXT  version of the element                                                                                                                                                                                                                                                          │
-│ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │
+│ --y     -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │
+│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

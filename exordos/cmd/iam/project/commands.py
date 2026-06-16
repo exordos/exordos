@@ -15,77 +15,25 @@
 #    under the License.
 from __future__ import annotations
 
-import typing as tp
 import uuid as sys_uuid
 
 import rich_click as click
 
 from exordos import constants as c
-from exordos import utils
 from exordos.clients import base_client
-from exordos.common.table import get_table
-from exordos.common.table import print_table
+from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
 
 ENTITY = "project"
+ENTITY_COLLECTION = c.PROJECT_COLLECTION
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Name": "name",
+    "Organization": "organization",
+    "Status": "status",
+}
 
-
-@click.group("projects", help=f"Manage {ENTITY}s in the Exordos installation")
-def projects_group():
-    pass
-
-
-@projects_group.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-f",
-    "--filters",
-    multiple=True,
-    help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: --f "
-        "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
-    ),
-)
-@click.pass_context
-def list_projects(
-    ctx: click.Context,
-    filters: tuple[str, ...],
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    filters = utils.convert_input_multiply(filters)
-    entities = base_client.list_entities(client, c.PROJECT_COLLECTION, **filters)
-    _print_entities(entities)
-
-
-@projects_group.command("show", help=f"Show {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def show_project(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, c.PROJECT_COLLECTION, uuid)
-    show_data(data)
-
-
-@projects_group.command("delete", help=f"Delete {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def delete_project(
-    ctx: click.Context,
-    uuid: sys_uuid.UUID | None,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    base_client.delete_entity(client, c.PROJECT_COLLECTION, uuid)
+projects_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @projects_group.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
@@ -138,21 +86,3 @@ def add_cmd(
 
     entity = base_client.add_entity(client, c.PROJECT_COLLECTION, data)
     show_data(entity)
-
-
-def _print_entities(projects: tp.List[dict]) -> None:
-    table = get_table()
-    table.add_column("UUID")
-    table.add_column("Name")
-    table.add_column("Organization")
-    table.add_column("Status")
-
-    for project in projects:
-        table.add_row(
-            project["uuid"],
-            project["name"],
-            project["organization"],
-            project["status"],
-        )
-
-    print_table(table)
