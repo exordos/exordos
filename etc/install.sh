@@ -147,6 +147,7 @@ find_writable_bindir() {
     error "No suitable directory found to install exordos binary"
 }
 
+OLD_BINARY=$(which exordos 2>/dev/null || echo "/usr/local/bin/exordos")
 # Find a writable directory
 BINDIR=$(find_writable_bindir)
 
@@ -170,7 +171,6 @@ download() {
 download "https://repo.exordos.com/exordos/latest" "$BINDIR" "exordos-linux"
 chmod +x "$BINDIR"/exordos
 
-OLD_BINARY="/usr/local/bin/exordos"
 if [ -f "$OLD_BINARY" ]; then
     if [ "$BINDIR" != "/usr/local/bin" ]; then
         echo "Found old binary at $OLD_BINARY"

@@ -345,4 +345,4 @@ def ready_api(ctx: click.Context) -> None:
         client.filter("")
         click.echo("Exordos Api ready to use")
     except Exception:
-        raise click.ClickException("Exordos Api not ready to use")
+        raise click.ClickException(f"Exordos Api ({ctx.obj.auth_data['endpoint']}) not ready to use")
