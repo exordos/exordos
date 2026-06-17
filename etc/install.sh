@@ -110,6 +110,21 @@ find_writable_bindir() {
         fi
     done
 
+    # Create $HOME/.local/bin if it doesn't exist and add to PATH
+    if [ ! -d "$HOME/.local/bin" ]; then
+        mkdir -p "$HOME/.local/bin"
+        export PATH="$HOME/.local/bin:$PATH"
+        # Add to shell profile for persistence
+        if [ -n "${BASH_VERSION-}" ]; then
+            PROFILE="$HOME/.bashrc"
+        else
+            PROFILE="$HOME/.profile"
+        fi
+        if ! grep -q 'export PATH="\$HOME/.local/bin:\$PATH"' "$PROFILE" 2>/dev/null; then
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$PROFILE"
+        fi
+    fi
+
     # If no writable directory found in PATH, try standard system directories with sudo
     for dir in /usr/local/bin /usr/bin /bin; do
         if [ -d "$dir" ]; then
