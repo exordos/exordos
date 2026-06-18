@@ -1,25 +1,22 @@
 
-# projects_list
+# load_balancers_show
 
-List projects
+Show load_balancer
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network load_balancers show [OPTIONS] UUID                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `filters`:
+* `uuid` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-f
---filters`
-
-  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+    * Usage: `uuid`
 
 * `output`:
     * Type: choice
@@ -28,21 +25,6 @@ List projects
 -o`
 
   the output format, defaults to table
-
-* `watch`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `-w
---watch`
-
-  Watch the list of projects
-
-* `interval`:
-    * Type: float range
-    * Default: `0.5`
-    * Usage: `--interval`
-
-  Refresh interval in seconds.
 
 * `help`:
     * Type: boolean
@@ -55,15 +37,12 @@ List projects
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network load_balancers show [OPTIONS] UUID                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- List projects                                                                                                                                                                                                                                                                                             
+ Show load_balancer                                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of projects                                                                                                                                                                                                                                      │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
+│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

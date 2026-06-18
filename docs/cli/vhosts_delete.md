@@ -1,48 +1,28 @@
 
-# projects_list
+# vhosts_delete
 
-List projects
+Delete vhost
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network vhosts delete [OPTIONS] UUID                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `filters`:
+* `uuid` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-f
---filters`
+    * Usage: `uuid`
 
-  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
-
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
--o`
-
-  the output format, defaults to table
-
-* `watch`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `-w
---watch`
-
-  Watch the list of projects
-
-* `interval`:
-    * Type: float range
-    * Default: `0.5`
-    * Usage: `--interval`
-
-  Refresh interval in seconds.
+* `lb_uuid` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-d
+--lb-uuid`
 
 * `help`:
     * Type: boolean
@@ -55,15 +35,12 @@ List projects
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network vhosts delete [OPTIONS] UUID                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
- List projects                                                                                                                                                                                                                                                                                             
+ Delete vhost                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of projects                                                                                                                                                                                                                                      │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│ *  --lb-uuid  -d  TEXT  [required]                                                                                                                                                                                                                                                                      │
+│    --help               Show this message and exit.                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

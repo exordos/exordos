@@ -1,13 +1,13 @@
 
-# iam_projects
+# network_load_balancers
 
-Manage projects in the Exordos installation
+Manage load_balancers in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network load_balancers [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,6 +24,6 @@ Manage projects in the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network load_balancers [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```

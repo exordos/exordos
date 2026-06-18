@@ -1,25 +1,22 @@
 
-# projects_list
+# routes_show
 
-List projects
+Show route
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network routes show [OPTIONS] UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `filters`:
+* `uuid` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-f
---filters`
-
-  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+    * Usage: `uuid`
 
 * `output`:
     * Type: choice
@@ -29,20 +26,17 @@ List projects
 
   the output format, defaults to table
 
-* `watch`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `-w
---watch`
+* `lb_uuid` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-d
+--lb-uuid`
 
-  Watch the list of projects
-
-* `interval`:
-    * Type: float range
-    * Default: `0.5`
-    * Usage: `--interval`
-
-  Refresh interval in seconds.
+* `vhost_uuid` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-v
+--vhost-uuid`
 
 * `help`:
     * Type: boolean
@@ -55,15 +49,14 @@ List projects
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network routes show [OPTIONS] UUID                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
- List projects                                                                                                                                                                                                                                                                                             
+ Show route                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of projects                                                                                                                                                                                                                                      │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│    --output      -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                       │
+│ *  --lb-uuid     -d  TEXT                    [required]                                                                                                                                                                                                                                                 │
+│ *  --vhost-uuid  -v  TEXT                    [required]                                                                                                                                                                                                                                                 │
+│    --help                                    Show this message and exit.                                                                                                                                                                                                                                │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

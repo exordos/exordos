@@ -50,7 +50,7 @@ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_key
     * Default: `false`
     * Usage: `--current-realm`
 
-  add ssh keys to all current realm nodes and sets. If you want to use another realm, change it by global cli option --realm
+  add ssh keys to all current realm nodes and sets. If you want to use another realm, additionally change it by global cli option --realm
 
 * `element`:
     * Type: text
@@ -107,7 +107,7 @@ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_key
 │ --project-id         -p  UUID  Name of the project in which to deploy the ssh_key                                                                                                                                                                                                                       │
 │ --name               -n  TEXT  Name of the ssh_key                                                                                                                                                                                                                                                      │
 │ --description        -D  TEXT  Description of the ssh_key                                                                                                                                                                                                                                               │
-│ --current-realm                add ssh keys to all current realm nodes and sets. If you want to use another realm, change it by global cli option --realm                                                                                                                                               │
+│ --current-realm                add ssh keys to all current realm nodes and sets. If you want to use another realm, additionally change it by global cli option --realm                                                                                                                                  │
 │ --element                TEXT  element uuid or name                                                                                                                                                                                                                                                     │
 │ --node                   TEXT  node uuids                                                                                                                                                                                                                                                               │
 │ --node-set               TEXT  node_set uuids                                                                                                                                                                                                                                                           │

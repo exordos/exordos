@@ -1,13 +1,13 @@
 
-# iam_projects
+# exordos_network
 
-Manage projects in the Exordos installation
+network group in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,6 +24,6 @@ Manage projects in the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```

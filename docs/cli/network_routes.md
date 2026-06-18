@@ -1,13 +1,13 @@
 
-# iam_projects
+# network_routes
 
-Manage projects in the Exordos installation
+Manage routes
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network routes [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,6 +24,6 @@ Manage projects in the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network routes [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
