@@ -1,7 +1,7 @@
 
 # dns_records
 
-Manage records
+Manage records in the Exordos installation
 
 ## Usage
 

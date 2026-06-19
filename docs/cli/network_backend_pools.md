@@ -1,7 +1,7 @@
 
 # network_backend_pools
 
-Manage backend_pools
+Manage backend_pools in the Exordos installation
 
 ## Usage
 

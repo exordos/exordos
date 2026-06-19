@@ -18,17 +18,15 @@ Delete route
     * Default: `sentinel.unset`
     * Usage: `uuid`
 
-* `lb_uuid` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-d
---lb-uuid`
-
 * `vhost_uuid` (REQUIRED):
-    * Type: text
+    * Type: uuid
     * Default: `sentinel.unset`
-    * Usage: `-v
---vhost-uuid`
+    * Usage: `--vhost-uuid`
+
+* `lb_uuid` (REQUIRED):
+    * Type: uuid
+    * Default: `sentinel.unset`
+    * Usage: `--lb-uuid`
 
 * `help`:
     * Type: boolean
@@ -46,8 +44,8 @@ Delete route
  Delete route                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --lb-uuid     -d  TEXT  [required]                                                                                                                                                                                                                                                                   │
-│ *  --vhost-uuid  -v  TEXT  [required]                                                                                                                                                                                                                                                                   │
-│    --help                  Show this message and exit.                                                                                                                                                                                                                                                  │
+│ *  --vhost-uuid  UUID  [required]                                                                                                                                                                                                                                                                       │
+│ *  --lb-uuid     UUID  [required]                                                                                                                                                                                                                                                                       │
+│    --help              Show this message and exit.                                                                                                                                                                                                                                                      │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
