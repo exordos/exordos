@@ -624,7 +624,7 @@ def define(
     "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
 )
 @click.pass_context
-def clear(ctx: click.Context, y: bool) -> None:  # pragma: no cover
+def clear(ctx: click.Context, y: bool) -> bool:  # pragma: no cover
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     entities = base_client.list_entities(client, ENTITY_COLLECTION)
     for entity in entities:
@@ -637,7 +637,8 @@ def clear(ctx: click.Context, y: bool) -> None:  # pragma: no cover
                 f"Uninstalling element {click.style(uninstalled_name, fg='green')}"
             )
             base_client.delete_entity(client, ENTITY_COLLECTION, entity["uuid"])
-    return None
+        return True
+    return False
 
 
 @ee_group.command(
