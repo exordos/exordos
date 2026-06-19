@@ -25,7 +25,7 @@ dependencies = [
     "pyyaml>=6.0.0,<7.0.0",  # MIT
     "GitPython>=3.1.30,<4.0.0",
     "bazooka>=1.0.0,<2.0.0",  # Apache-2.0
-    "cryptography>=45.0.5,<47.0.0",  # BSD-3
+    "cryptography>=49.0.0",  # BSD-3
     "boto3>=1.37.0,<2.0.0",  # Apache-2.0
     "Jinja2>=3.1.5,<4.0.0",  # BSD License (BSD-3-Clause)
     "packaging==26.0",  # Apache-2.0 or BSD
