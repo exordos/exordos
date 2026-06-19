@@ -64,6 +64,27 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/auth_enable-otp/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/backend_pools_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/backend_pools_delete/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/backend_pools_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/backend_pools_list/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/backend_pools_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/backend_pools_show/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/certificates_add/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -540,6 +561,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_latest/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_network/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_openapi/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -778,6 +806,27 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/imports_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/load_balancers_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/load_balancers_delete/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/load_balancers_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/load_balancers_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/load_balancers_list/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/load_balancers_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/load_balancers_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/load_balancers_show/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/load_balancers_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/manifests_delete/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -804,6 +853,34 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/manifests_validate/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/manifests_validate/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/network_backend_pools/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_backend_pools/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_backend_pools/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/network_load_balancers/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_load_balancers/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_load_balancers/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/network_routes/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_routes/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_routes/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/network_vhosts/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_vhosts/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_vhosts/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/organizations_add/</loc>
@@ -1149,6 +1226,27 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/roles_update/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/routes_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/routes_delete/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/routes_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/routes_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/routes_list/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/routes_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/routes_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/routes_show/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/routes_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/rsa_keys_add/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -1492,6 +1590,27 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/values_update/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/vhosts_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/vhosts_delete/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/vhosts_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/vhosts_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/vhosts_list/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/vhosts_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/vhosts_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/vhosts_show/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/vhosts_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/vs_profiles/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -1616,6 +1735,27 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/auth_enable-otp/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/auth_enable-otp/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/backend_pools_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_delete/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/backend_pools_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/backend_pools_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_list/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/backend_pools_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/backend_pools_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_show/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/backend_pools_show/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/certificates_add/</loc>
@@ -2094,6 +2234,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_latest/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_network/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_openapi/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -2332,6 +2479,27 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/imports_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/load_balancers_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/load_balancers_delete/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/load_balancers_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/load_balancers_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/load_balancers_list/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/load_balancers_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/load_balancers_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/load_balancers_show/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/load_balancers_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/manifests_delete/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -2358,6 +2526,34 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/manifests_validate/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/manifests_validate/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/network_backend_pools/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_backend_pools/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_backend_pools/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/network_load_balancers/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_load_balancers/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_load_balancers/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/network_routes/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_routes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_routes/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/network_vhosts/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_vhosts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_vhosts/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/organizations_add/</loc>
@@ -2703,6 +2899,27 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/roles_update/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/routes_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/routes_delete/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/routes_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/routes_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/routes_list/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/routes_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/routes_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/routes_show/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/routes_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/rsa_keys_add/</loc>
         <lastmod>2026-06-19</lastmod>
         <changefreq>daily</changefreq>
@@ -3044,6 +3261,27 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/values_update/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/values_update/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/vhosts_delete/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/vhosts_delete/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/vhosts_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/vhosts_list/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/vhosts_list/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/vhosts_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/vhosts_show/</loc>
+        <lastmod>2026-06-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/vhosts_show/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/vhosts_show/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/vs_profiles/</loc>
