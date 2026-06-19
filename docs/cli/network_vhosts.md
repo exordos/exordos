@@ -1,13 +1,13 @@
 
-# iam_projects
+# network_vhosts
 
-Manage projects in the Exordos installation
+Manage vhosts
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network vhosts [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,6 +24,6 @@ Manage projects in the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network vhosts [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```

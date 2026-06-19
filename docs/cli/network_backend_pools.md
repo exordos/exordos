@@ -1,13 +1,13 @@
 
-# iam_projects
+# network_backend_pools
 
-Manage projects in the Exordos installation
+Manage backend_pools
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network backend_pools [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,6 +24,6 @@ Manage projects in the Exordos installation
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                   
+ Usage: exordos network backend_pools [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```

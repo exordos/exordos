@@ -1,13 +1,13 @@
 
-# projects_list
+# vhosts_list
 
-List projects
+List vhosts
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network vhosts list [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -35,7 +35,7 @@ List projects
     * Usage: `-w
 --watch`
 
-  Watch the list of projects
+  Watch the list of vhosts
 
 * `interval`:
     * Type: float range
@@ -43,6 +43,12 @@ List projects
     * Usage: `--interval`
 
   Refresh interval in seconds.
+
+* `lb_uuid` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-d
+--lb-uuid`
 
 * `help`:
     * Type: boolean
@@ -55,15 +61,16 @@ List projects
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam projects list [OPTIONS]                                                                                                                                                                                                                                                                
+ Usage: exordos network vhosts list [OPTIONS]                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
- List projects                                                                                                                                                                                                                                                                                             
+ List vhosts                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of projects                                                                                                                                                                                                                                      │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│    --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                           │
+│    --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                         │
+│    --watch     -w                          Watch the list of vhosts                                                                                                                                                                                                                                     │
+│    --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                 │
+│ *  --lb-uuid   -d  TEXT                    [required]                                                                                                                                                                                                                                                   │
+│    --help                                  Show this message and exit.                                                                                                                                                                                                                                  │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

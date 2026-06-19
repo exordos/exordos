@@ -86,6 +86,12 @@ CONFIG_COLLECTION = "/v1/config/configs/"
 DOMAIN_COLLECTION = "/v1/dns/domains/"
 RECORD_COLLECTION = "/v1/dns/domains/{domain_uuid}/records/"
 
+
+LB_COLLECTION = "/v1/network/lb/"
+BACKEND_POOL_COLLECTION = "/v1/network/lb/{lb_uuid}/backend_pools/"
+VHOST_COLLECTION = "/v1/network/lb/{lb_uuid}/vhosts/"
+ROUTE_COLLECTION = "/v1/network/lb/{lb_uuid}/vhosts/{vhost_uuid}/routes/"
+
 # Cli
 CONFIG_DIR = "~/.exordos"
 CONFIG_FILE = os.path.expanduser(f"{CONFIG_DIR}/exordosctl.yaml")
