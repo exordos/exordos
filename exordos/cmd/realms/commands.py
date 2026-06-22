@@ -146,8 +146,29 @@ def delete_cmd(ctx: click.Context, name: str) -> None:
     infra = libvirt_infra.LibvirtInfraDriver()
     local_stands = infra.list_stands()
 
+    def clear_local_realm() -> None:
+        try:
+            import time
+
+            from rich.progress import track
+
+            from exordos.cmd.em.elements.commands import clear
+
+            click.echo(f"Clearing local realm {stand.name}...")
+            was_cleared = ctx.invoke(
+                clear,
+                y=True,
+            )
+
+            if was_cleared:
+                for _ in track(range(5), description="Waiting clearing resources..."):
+                    time.sleep(1)
+        except Exception:
+            pass
+
     for stand in local_stands:
         if stand.name == name:
+            clear_local_realm()
             click.echo(f"Deleting local realm {stand.name}...")
             infra.delete_stand(stand)
             return None
@@ -156,13 +177,15 @@ def delete_cmd(ctx: click.Context, name: str) -> None:
     config_realm = config.get("realms", {}).get(name)
     if config_realm:
         try:
-            config_ip = get_ip_from_url(config_realm.get("endpoint", ""))
+            endpoint = config_realm.get("endpoint", "")
+            config_ip = get_ip_from_url(endpoint)
             for stand in local_stands:
                 if stand.network.dhcp:
                     ip = libvirt.get_domain_ip(stand.bootstraps[0].name)
                 else:
                     ip = stand.network.cidr[2]
                 if str(ip) == config_ip:
+                    clear_local_realm()
                     click.echo(f"Deleting local realm {stand.name}...")
                     infra.delete_stand(stand)
                     return None
