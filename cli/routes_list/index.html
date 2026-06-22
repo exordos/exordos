@@ -3779,21 +3779,19 @@
 <p>Refresh interval in seconds.</p>
 <ul>
 <li>
-<p><code>lb_uuid</code> (REQUIRED):</p>
+<p><code>vhost_uuid</code> (REQUIRED):</p>
 <ul>
-<li>Type: text</li>
+<li>Type: uuid</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>-d
---lb-uuid</code></li>
+<li>Usage: <code>--vhost-uuid</code></li>
 </ul>
 </li>
 <li>
-<p><code>vhost_uuid</code> (REQUIRED):</p>
+<p><code>lb_uuid</code> (REQUIRED):</p>
 <ul>
-<li>Type: text</li>
+<li>Type: uuid</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>-v
---vhost-uuid</code></li>
+<li>Usage: <code>--lb-uuid</code></li>
 </ul>
 </li>
 <li>
@@ -3817,8 +3815,8 @@
 <span class="go">│    --output      -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                       │</span>
 <span class="go">│    --watch       -w                          Watch the list of routes                                                                                                                                                                                                                                   │</span>
 <span class="go">│    --interval        FLOAT RANGE [x&gt;=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                               │</span>
-<span class="go">│ *  --lb-uuid     -d  TEXT                    [required]                                                                                                                                                                                                                                                 │</span>
-<span class="go">│ *  --vhost-uuid  -v  TEXT                    [required]                                                                                                                                                                                                                                                 │</span>
+<span class="go">│ *  --vhost-uuid      UUID                    [required]                                                                                                                                                                                                                                                 │</span>
+<span class="go">│ *  --lb-uuid         UUID                    [required]                                                                                                                                                                                                                                                 │</span>
 <span class="go">│    --help                                    Show this message and exit.                                                                                                                                                                                                                                │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
