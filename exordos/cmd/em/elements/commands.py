@@ -576,7 +576,9 @@ def define(
     if resource_type not in manifest["resources"]:
         manifest["resources"][resource_type] = {}
     if not resource_name:
-        default_resource_name = f"my_{resource_ref.split('_')[0].lower()}"
+        default_resource_name = (
+            f"{manifest['name']}_{resource_ref.split('_')[0].lower()}"
+        )
         resource_name = questionary.text(
             "Enter resource name", default=default_resource_name
         ).ask()
@@ -586,6 +588,10 @@ def define(
     if resource_name in manifest["resources"][resource_type]:
         click.echo(f"Resource {resource_name} with type {resource_type} already exists")
         return
+    if "name" in resource_json.keys():
+        resource_json["name"] = resource_name
+    if "description" in resource_json.keys():
+        resource_json["description"] = ""
     manifest["resources"][resource_type][resource_name] = resource_json
 
     # Edit manifest

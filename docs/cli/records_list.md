@@ -45,10 +45,9 @@ List records
   Refresh interval in seconds.
 
 * `domain_uuid` (REQUIRED):
-    * Type: text
+    * Type: uuid
     * Default: `sentinel.unset`
-    * Usage: `-d
---domain-uuid`
+    * Usage: `--domain-uuid`
 
 * `help`:
     * Type: boolean
@@ -70,7 +69,7 @@ List records
 │    --output       -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                      │
 │    --watch        -w                          Watch the list of records                                                                                                                                                                                                                                 │
 │    --interval         FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                              │
-│ *  --domain-uuid  -d  TEXT                    [required]                                                                                                                                                                                                                                                │
+│ *  --domain-uuid      UUID                    [required]                                                                                                                                                                                                                                                │
 │    --help                                     Show this message and exit.                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

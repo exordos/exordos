@@ -30,6 +30,21 @@ from exordos.common.table import print_table
 from exordos.common.table import show_data
 
 
+def add_dynamic_parents(parents: list[str] | None = None):
+    def decorator(f):
+        if parents is None:
+            return f
+        for parent in parents:
+            f = click.option(
+                f"--{parent}-uuid",
+                type=click.UUID,
+                required=True,
+            )(f)
+        return f
+
+    return decorator
+
+
 def create_entity_group(
     entity_name: str,
     entity_collection: str,
@@ -39,6 +54,7 @@ def create_entity_group(
     add_show_command: bool = True,
     add_delete_command: bool = True,
     add_clear_command: bool = False,
+    parents: list[str] | None = None,
 ) -> ClickAliasedGroup:
     """Create a universal click group for entity management."""
 
@@ -85,6 +101,7 @@ def create_entity_group(
             default=0.5,
             help="Refresh interval in seconds.",
         )
+        @add_dynamic_parents(parents)
         @click.pass_context
         def list_cmd(
             ctx: click.Context,
@@ -92,6 +109,7 @@ def create_entity_group(
             output: str,
             watch: bool,
             interval: float,
+            **kwargs,
         ) -> None:
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             filters = utils.convert_input_multiply(filters)
@@ -99,13 +117,13 @@ def create_entity_group(
                 with Live(refresh_per_second=4) as live:
                     while True:
                         entities = base_client.list_entities(
-                            client, entity_collection, **filters
+                            client, entity_collection.format(**kwargs), **filters
                         )
                         live.update(fill_table(entities, fields_map), refresh=True)
                         time.sleep(interval)
             else:
                 entities = base_client.list_entities(
-                    client, entity_collection, **filters
+                    client, entity_collection.format(**kwargs), **filters
                 )
                 print_table(fill_table(entities, fields_map), output)
 
@@ -127,14 +145,18 @@ def create_entity_group(
             type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
             help="the output format, defaults to table",
         )
+        @add_dynamic_parents(parents)
         @click.pass_context
         def show_cmd(
             ctx: click.Context,
             uuid: str,
             output: str,
+            **kwargs,
         ) -> None:
             client = base_client.get_user_api_client(ctx.obj.auth_data)
-            data = base_client.get_entity(client, entity_collection, uuid)
+            data = base_client.get_entity(
+                client, entity_collection.format(**kwargs), uuid
+            )
             show_data(data, output)
 
         entity_group.add_command(show_cmd, aliases=["get", "g"])
@@ -148,13 +170,15 @@ def create_entity_group(
             type=str,
             required=True,
         )
+        @add_dynamic_parents(parents)
         @click.pass_context
         def delete_cmd(
             ctx: click.Context,
             uuid: str,
+            **kwargs,
         ) -> None:
             client = base_client.get_user_api_client(ctx.obj.auth_data)
-            base_client.delete_entity(client, entity_collection, uuid)
+            base_client.delete_entity(client, entity_collection.format(**kwargs), uuid)
             click.echo(f"{entity_name} {uuid} deleted")
 
         entity_group.add_command(delete_cmd, aliases=["d"])

@@ -44,17 +44,15 @@ List routes
 
   Refresh interval in seconds.
 
-* `lb_uuid` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-d
---lb-uuid`
-
 * `vhost_uuid` (REQUIRED):
-    * Type: text
+    * Type: uuid
     * Default: `sentinel.unset`
-    * Usage: `-v
---vhost-uuid`
+    * Usage: `--vhost-uuid`
+
+* `lb_uuid` (REQUIRED):
+    * Type: uuid
+    * Default: `sentinel.unset`
+    * Usage: `--lb-uuid`
 
 * `help`:
     * Type: boolean
@@ -76,8 +74,8 @@ List routes
 │    --output      -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                       │
 │    --watch       -w                          Watch the list of routes                                                                                                                                                                                                                                   │
 │    --interval        FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                               │
-│ *  --lb-uuid     -d  TEXT                    [required]                                                                                                                                                                                                                                                 │
-│ *  --vhost-uuid  -v  TEXT                    [required]                                                                                                                                                                                                                                                 │
+│ *  --vhost-uuid      UUID                    [required]                                                                                                                                                                                                                                                 │
+│ *  --lb-uuid         UUID                    [required]                                                                                                                                                                                                                                                 │
 │    --help                                    Show this message and exit.                                                                                                                                                                                                                                │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

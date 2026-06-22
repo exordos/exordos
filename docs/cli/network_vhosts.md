@@ -1,7 +1,7 @@
 
 # network_vhosts
 
-Manage vhosts
+Manage vhosts in the Exordos installation
 
 ## Usage
 

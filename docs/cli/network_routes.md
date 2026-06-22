@@ -1,7 +1,7 @@
 
 # network_routes
 
-Manage routes
+Manage routes in the Exordos installation
 
 ## Usage
 
