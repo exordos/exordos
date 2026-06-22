@@ -61,6 +61,9 @@ jobs:
     strategy:
       matrix:
         include:
+          - os: ubuntu-26.04
+            artifact-suffix: linux-ubuntu-resolute
+            python-version: "3.14"
           - os: ubuntu-latest
             artifact-suffix: linux
             python-version: "3.14"
@@ -124,6 +127,11 @@ jobs:
       with:
         name: exordos-linux
         path: dist/
+    - name: Download Linux ubuntu-resolute binary
+      uses: actions/download-artifact@v8
+      with:
+        name: exordos-linux-ubuntu-resolute
+        path: dist/
     - name: Download macOS arm binary
       uses: actions/download-artifact@v8
       with:
@@ -161,6 +169,11 @@ jobs:
       with:
         name: exordos-linux
         path: dist/
+    - name: Download Linux ubuntu-resolute binary
+      uses: actions/download-artifact@v8
+      with:
+        name: exordos-linux-ubuntu-resolute
+        path: dist/
     - name: Download macOS arm binary
       uses: actions/download-artifact@v8
       with:
@@ -180,6 +193,8 @@ jobs:
         # Upload VERSION release
         curl -X PUT --upload-file ./dist/exordos-linux \
           $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-linux
+        curl -X PUT --upload-file ./dist/exordos-linux-ubuntu-resolute \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-linux-ubuntu-resolute
         curl -X PUT --upload-file ./dist/exordos-macos-arm \
           $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/exordos-macos-arm
         curl -X PUT --upload-file ./dist/exordos-windows.exe \
@@ -188,6 +203,8 @@ jobs:
         # Upload latest release
         curl -X PUT --upload-file ./dist/exordos-linux \
           $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-linux
+        curl -X PUT --upload-file ./dist/exordos-linux \
+          $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-linux-ubuntu-resolute
         curl -X PUT --upload-file ./dist/exordos-macos-arm \
           $REPO_ENDPOINT_PUT/${PROJECT_NAME}/latest/exordos-macos-arm
         curl -X PUT --upload-file ./dist/exordos-windows.exe \
