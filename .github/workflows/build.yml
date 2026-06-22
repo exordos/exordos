@@ -8,6 +8,9 @@ jobs:
     strategy:
       matrix:
         include:
+          - os: ubuntu-26.04
+            artifact-suffix: linux-ubuntu-resolute
+            python-version: "3.14"
           - os: ubuntu-latest
             artifact-suffix: linux
             python-version: "3.14"

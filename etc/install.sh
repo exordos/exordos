@@ -102,6 +102,15 @@ find_writable_bindir() {
       fi
     done
 
+    # If ~/.local/bin is in PATH but doesn't exist, create it
+    if echo "$PATH" | tr ':' '\n' | grep -q "$HOME/.local/bin"; then
+        if [ ! -d "$HOME/.local/bin" ]; then
+          mkdir -p "$HOME/.local/bin"
+        fi
+        echo "$HOME/.local/bin"
+        return
+    fi
+
     # Check other directories in PATH that are writable
     for dir in $(echo $PATH | tr ':' ' '); do
         if [ -d "$dir" ] && [ -w "$dir" ]; then
@@ -113,7 +122,6 @@ find_writable_bindir() {
     # Create $HOME/.local/bin if it doesn't exist and add to PATH
     if [ ! -d "$HOME/.local/bin" ]; then
         mkdir -p "$HOME/.local/bin"
-        export PATH="$HOME/.local/bin:$PATH"
         # Add to shell profile for persistence
         if [ -n "${BASH_VERSION-}" ]; then
             PROFILE="$HOME/.bashrc"
@@ -123,6 +131,9 @@ find_writable_bindir() {
         if ! grep -q 'export PATH="\$HOME/.local/bin:\$PATH"' "$PROFILE" 2>/dev/null; then
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$PROFILE"
         fi
+        . "$PROFILE"
+        echo "$HOME/.local/bin"
+        return
     fi
 
     # If no writable directory found in PATH, try standard system directories with sudo
@@ -153,6 +164,19 @@ BINDIR=$(find_writable_bindir)
 
 status "Installing exordos to $BINDIR"
 
+# Determine the correct filename based on OS version
+LINUX_FILENAME="exordos-linux"
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "ubuntu" ]; then
+        # Check Ubuntu version for Resolute (26.04)
+        VERSION_MAJOR="${VERSION_ID%%.*}"
+        if [ "$VERSION_MAJOR" = "26" ]; then
+            LINUX_FILENAME="exordos-linux-ubuntu-resolute"
+        fi
+    fi
+fi
+
 # Download and install
 download() {
     local url_base="$1"
@@ -168,11 +192,11 @@ download() {
     error "Failed to download ${filename}"
 }
 
-download "https://repo.exordos.com/exordos/latest" "$BINDIR" "exordos-linux"
+download "https://repo.exordos.com/exordos/latest" "$BINDIR" "$LINUX_FILENAME"
 chmod +x "$BINDIR"/exordos
 
 if [ -f "$OLD_BINARY" ]; then
-    if [ "$BINDIR" != "/usr/local/bin" ]; then
+    if [ "$BINDIR/exordos" != "$OLD_BINARY" ]; then
         echo "Found old binary at $OLD_BINARY"
         echo "Current binary is at: $BINDIR/exordos"
         if [ -n "${DELETE_OLD+x}" ]; then
