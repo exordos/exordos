@@ -153,3 +153,15 @@ def action_entity(
         client.do_action(collection, uuid=uuid, name=action, invoke=invoke, **kwargs)
     except bazooka_exc.NotFoundError:
         raise click.ClickException(f"UUID {uuid} not found")
+
+
+def add_fields_to_url(
+    collection: str,
+    fields: tuple[str, ...],
+) -> str:
+    if not fields:
+        return collection
+    fields_query = "&".join(f"fields={f}" for f in fields)
+    separator = "&" if "?" in collection else "?"
+    collection = f"{collection}{separator}{fields_query}"
+    return collection

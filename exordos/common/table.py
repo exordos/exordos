@@ -41,7 +41,7 @@ def dump_yaml_ruamel_to_str(data: tp.Union[dict, list]) -> str:
 
 
 def table_to_list_of_dicts(table: Table) -> tp.List[dict]:
-    headers = [col.header for col in table.columns]
+    headers = [col.header.lower() for col in table.columns]
     rows_data = zip(*(col.cells for col in table.columns))
     return [dict(zip(headers, row)) for row in rows_data]
 
@@ -51,7 +51,23 @@ def get_table(*args, **kwargs) -> Table:
     return table
 
 
-def fill_table(entities: tp.List[dict], fields_map: dict):
+def fill_table(
+    entities: tp.List[dict],
+    fields_map: dict,
+    fields: tp.Optional[tuple[str, ...]] = None,
+):
+    if entities:
+        fields_map = {
+            k: v for k, v in fields_map.items() if callable(v) or v in entities[0]
+        }
+    if fields:
+        normalized_fields = {f.lower() for f in fields}
+        fields_map = {
+            k: v
+            for k, v in fields_map.items()
+            if k.lower() in normalized_fields
+            or (isinstance(v, str) and v.lower() in normalized_fields)
+        }
     table = get_table(*fields_map.keys())
 
     for entity in entities:

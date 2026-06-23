@@ -82,6 +82,12 @@ def create_entity_group(
             ),
         )
         @click.option(
+            "--fields",
+            multiple=True,
+            type=str,
+            help="fields to show, defaults to all, for example: --fields name --fields status",
+        )
+        @click.option(
             "--output",
             "-o",
             default=c.DEFAULT_TABLE_FORMAT,
@@ -106,6 +112,7 @@ def create_entity_group(
         def list_cmd(
             ctx: click.Context,
             filters: tuple[str, ...],
+            fields: tuple[str, ...],
             output: str,
             watch: bool,
             interval: float,
@@ -113,19 +120,19 @@ def create_entity_group(
         ) -> None:
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             filters = utils.convert_input_multiply(filters)
+            url = entity_collection.format(**kwargs)
+            url = base_client.add_fields_to_url(url, fields)
             if watch:
                 with Live(refresh_per_second=4) as live:
                     while True:
-                        entities = base_client.list_entities(
-                            client, entity_collection.format(**kwargs), **filters
+                        entities = base_client.list_entities(client, url, **filters)
+                        live.update(
+                            fill_table(entities, fields_map, fields), refresh=True
                         )
-                        live.update(fill_table(entities, fields_map), refresh=True)
                         time.sleep(interval)
             else:
-                entities = base_client.list_entities(
-                    client, entity_collection.format(**kwargs), **filters
-                )
-                print_table(fill_table(entities, fields_map), output)
+                entities = base_client.list_entities(client, url, **filters)
+                print_table(fill_table(entities, fields_map, fields), output)
 
         entity_group.add_command(list_cmd, aliases=["l"])
 

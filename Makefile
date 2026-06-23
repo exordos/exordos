@@ -35,5 +35,8 @@ validate_element:
 add_ssh_keys:
 	./dist/exordos secret ssh_keys add --current-realm --target_public_key $(SSH_KEY)
 
+add_ssh_keys_element:
+	./dist/exordos secret ssh_keys add --element $(ELEMENT_NAME) --target_public_key $(SSH_KEY)
+
 clear_ssh_keys:
 	./dist/exordos secret ssh_keys clear -y

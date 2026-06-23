@@ -1,7 +1,7 @@
 
 # users_add
 
-Add a new user to the Exordos installation
+Add a new user
 
 ## Usage
 
@@ -108,7 +108,7 @@ Add a new user to the Exordos installation
                                                                                                                                                                                                                                                                                                            
  Usage: exordos iam users add [OPTIONS]                                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Add a new user to the Exordos installation                                                                                                                                                                                                                                                                
+ Add a new user                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --uuid                       -u  UUID  UUID of the user                                                                                                                                                                                                                                              │

@@ -22,6 +22,7 @@ from bazooka import exceptions as bazooka_exc
 from requests.exceptions import RequestException
 import rich_click as click
 
+from exordos import exceptions as exordos_exc
 from exordos.clients.base import PasswordPrompt
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.auth import commands as auth_commands
@@ -335,7 +336,7 @@ if __name__ == "__main__":
             error_message = f"Error: [{e.response.status_code}] {e.response.text}"
         else:
             error_message = f"Error: {e}"
-    except (ValueError, FileNotFoundError) as e:
+    except (ValueError, FileNotFoundError, exordos_exc.ExordosException) as e:
         error_message = f"Error: {e}"
     finally:
         if error_message:

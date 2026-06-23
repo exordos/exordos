@@ -26,7 +26,7 @@ RC_BRANCHES = ("master", "main")
 
 
 def get_project_version(version: ScmVersion) -> str:
-    path = "."
+    path = version.config.root
     if not os.path.exists(path):
         raise FileNotFoundError(f"File {path} not found")
 
