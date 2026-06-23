@@ -128,10 +128,9 @@ find_writable_bindir() {
         else
             PROFILE="$HOME/.profile"
         fi
-        if ! grep -q 'export PATH="\$HOME/.local/bin:\$PATH"' "$PROFILE" 2>/dev/null; then
+        if ! grep -q '.local/bin' "$PROFILE" 2>/dev/null; then
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$PROFILE"
         fi
-        . "$PROFILE"
         echo "$HOME/.local/bin"
         return
     fi
@@ -158,6 +157,8 @@ find_writable_bindir() {
     error "No suitable directory found to install exordos binary"
 }
 
+! command -v exordos >/dev/null 2>&1
+OLD_BINARY_EXISTS=$?
 OLD_BINARY=$(which exordos 2>/dev/null || echo "/usr/local/bin/exordos")
 # Find a writable directory
 BINDIR=$(find_writable_bindir)
@@ -218,7 +219,20 @@ if [ -f "$OLD_BINARY" ]; then
 fi
 
 install_success() {
-    exordos introduction
+  # if exordos cmd did not exist before the launch of this script, this is installing, not updating
+  if [ "$OLD_BINARY_EXISTS" -eq 0 ]; then
+      "$BINDIR"/exordos introduction
+  else
+    status "exordos was successfully updated"
+  fi
+
+  # if command is not available, print instructions to run exordos
+  if ! command -v exordos >/dev/null 2>&1; then
+    status ""
+    status "To run exordos, either restart your shell or run:"
+    status ""
+    status "    $BINDIR/exordos"
+  fi
 }
 trap install_success EXIT
 

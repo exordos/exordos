@@ -633,6 +633,7 @@ def define(
 def clear(ctx: click.Context, y: bool) -> bool:  # pragma: no cover
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     entities = base_client.list_entities(client, ENTITY_COLLECTION)
+    was_uninstalled = False
     for entity in entities:
         if entity["name"] in c.BASE_ELEMENTS:
             click.echo(f"Skipping base element {entity['name']}")
@@ -643,8 +644,8 @@ def clear(ctx: click.Context, y: bool) -> bool:  # pragma: no cover
                 f"Uninstalling element {click.style(uninstalled_name, fg='green')}"
             )
             base_client.delete_entity(client, ENTITY_COLLECTION, entity["uuid"])
-        return True
-    return False
+            was_uninstalled = True
+    return was_uninstalled
 
 
 @ee_group.command(
