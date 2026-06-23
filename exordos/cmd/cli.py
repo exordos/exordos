@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sys
 import typing as tp
 import uuid as sys_uuid
 
@@ -324,15 +325,19 @@ exordos.add_command(utils_commands.ready_api)
 
 
 if __name__ == "__main__":
+    error_message = ""
     try:
         exordos()
     except bazooka_exc.BaseHTTPException as e:
-        click.secho(f"Error: [{e.code}] {e.cause.response.text}", fg="red")
+        error_message = f"Error: [{e.code}] {e.cause.response.text}"
     except RequestException as e:
         if e.response is not None:
-            click.secho(
-                f"Error: [{e.response.status_code}] {e.response.text}", fg="red"
-            )
-        click.secho(f"Error: {e}", fg="red")
+            error_message = f"Error: [{e.response.status_code}] {e.response.text}"
+        else:
+            error_message = f"Error: {e}"
     except (ValueError, FileNotFoundError) as e:
-        click.secho(f"Error: {e}", fg="red")
+        error_message = f"Error: {e}"
+    finally:
+        if error_message:
+            click.secho(error_message, fg="red")
+            sys.exit(1)
