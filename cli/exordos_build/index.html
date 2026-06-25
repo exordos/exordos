@@ -3809,6 +3809,16 @@
 </ul>
 <p>Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2</p>
 <ul>
+<li><code>validate</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>true</code></li>
+<li>Usage: <code>-v
+--validate</code></li>
+</ul>
+</li>
+</ul>
+<p>Validate the manifest after building</p>
+<ul>
 <li>
 <p><code>project_dir</code>:</p>
 <ul>
@@ -3845,6 +3855,7 @@
 <span class="go">│ --ssh-public-key    -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                           │</span>
 <span class="go">│ --force             -f        Rebuild if the output already exists                                                                                                                                                                                                                                      │</span>
 <span class="go">│ --manifest-var          TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                      │</span>
+<span class="go">│ --validate          -v        Validate the manifest after building                                                                                                                                                                                                                                      │</span>
 <span class="go">│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
