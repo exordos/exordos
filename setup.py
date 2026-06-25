@@ -34,7 +34,10 @@ def get_project_version(version: ScmVersion) -> str:
         raise ValueError(f"Path {path} is not a directory")
 
     # Open the git repo
-    repo = git.Repo(path)
+    try:
+        repo = git.Repo(path)
+    except git.exc.InvalidGitRepositoryError:
+        return str(version.tag)
 
     # If a tag is set, return it as version
     for tag in repo.tags:
