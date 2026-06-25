@@ -50,7 +50,7 @@ FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
     "Version": "version",
-    "Manifest": lambda x: x.get("manifest").split("/")[-1],
+    "Manifest": lambda x: (x.get("manifest") or "").split("/")[-1],
     "Status": "status",
 }
 
