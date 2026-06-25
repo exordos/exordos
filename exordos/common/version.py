@@ -19,6 +19,7 @@ import re
 import time
 
 import git
+from packaging import version as packaging_version
 
 import exordos.constants as c
 
@@ -91,3 +92,55 @@ def get_project_version(
 
 def is_version(version: str) -> bool:
     return re.match(VERSION_REGEXP, version.strip()) is not None
+
+
+def is_stable_version(version: str) -> bool:
+    try:
+        return not packaging_version.parse(version).is_prerelease
+    except packaging_version.InvalidVersion:
+        return False
+
+
+def get_target_version(versions: list, req_spec: dict) -> str:
+    if not versions:
+        return ""
+    from_ver_str = req_spec.get("from_version")
+    to_ver_str = req_spec.get("to_version")
+
+    from_ver = None
+    if from_ver_str:
+        try:
+            from_ver = packaging_version.parse(from_ver_str)
+        except Exception:
+            pass
+
+    to_ver = None
+    if to_ver_str:
+        try:
+            to_ver = packaging_version.parse(to_ver_str)
+        except Exception:
+            pass
+
+    parsed_versions: list[tuple[packaging_version.Version, str]] = []
+    for ver in versions:
+        try:
+            parsed_versions.append((packaging_version.parse(ver), ver))
+        except Exception:
+            continue
+
+    parsed_versions.sort(key=lambda x: x[0])
+
+    if from_ver and to_ver:
+        for p_ver, ver in reversed(parsed_versions):
+            if from_ver <= p_ver <= to_ver:
+                return ver
+    elif from_ver:
+        for p_ver, ver in reversed(parsed_versions):
+            if p_ver >= from_ver:
+                return ver
+    elif to_ver:
+        for p_ver, ver in reversed(parsed_versions):
+            if p_ver <= to_ver:
+                return ver
+
+    return versions[-1]

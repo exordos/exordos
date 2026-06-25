@@ -27,6 +27,7 @@ from exordos.builder import builder as simple_builder
 from exordos.builder.packer import PackerBuilder
 import exordos.constants as c
 from exordos.logger import ClickLogger
+from exordos.spec import schema
 
 
 @click.command(
@@ -89,6 +90,13 @@ from exordos.logger import ClickLogger
         "key1=value1 --manifest-var key2=value2"
     ),
 )
+@click.option(
+    "-v",
+    "--validate",
+    default=True,
+    is_flag=True,
+    help="Validate the manifest after building",
+)
 @click.argument("project_dir", type=click.Path(), default=".")
 @click.pass_context
 def build_cmd(
@@ -99,6 +107,7 @@ def build_cmd(
     ssh_public_key: tuple[pathlib.Path, ...],
     force: bool,
     manifest_var: tuple[str, ...],
+    validate: bool,
     project_dir: str,
 ) -> None:
     manifest_vars = utils.convert_input_multiply(manifest_var)
@@ -133,7 +142,7 @@ def build_cmd(
 
     # NOTE(slashburygin): openapi_schema_validator is very heavy for cli, need replace it to simple validator
     spec = utils.load_spec()
-    utils.validate_config(gen_config, spec)
+    schema.validate_yaml(gen_config, spec)
     # Take all build sections from the configuration
     builds = {k: v for k, v in gen_config.items() if k.startswith("build")}
     if not builds:
@@ -154,4 +163,4 @@ def build_cmd(
         )
         with tempfile.TemporaryDirectory() as temp_dir:
             builder.fetch_dependency(deps_dir or temp_dir)
-            builder.build(developer_keys, manifest_vars)
+            builder.build(developer_keys, manifest_vars, validate)

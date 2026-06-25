@@ -67,6 +67,14 @@ Additional variables can be passed using the --manifest-var options.
 
   Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2
 
+- `validate`:
+    - Type: boolean
+    - Default: `true`
+    - Usage: `-v
+--validate`
+
+  Validate the manifest after building
+
 - `project_dir`:
     - Type: path
     - Default: `.`
@@ -99,6 +107,7 @@ Additional variables can be passed using the --manifest-var options.
 │ --ssh-public-key    -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                           │
 │ --force             -f        Rebuild if the output already exists                                                                                                                                                                                                                                      │
 │ --manifest-var          TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                      │
+│ --validate          -v        Validate the manifest after building                                                                                                                                                                                                                                      │
 │ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

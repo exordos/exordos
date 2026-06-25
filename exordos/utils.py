@@ -521,23 +521,6 @@ def convert_to_nearest_type(value: str) -> bool | int | float | list | dict | st
 PROJECT_PATH = get_project_path()
 
 
-def validate_config(data: dict, schema: tp.Optional[dict]) -> None:
-    try:
-        from jsonschema.exceptions import ValidationError
-        import openapi_schema_validator
-
-        if data and schema:
-            try:
-                openapi_schema_validator.validate(
-                    data, schema, cls=openapi_schema_validator.OAS30Validator
-                )
-            except ValidationError as err:
-                raise ValueError(f"{err.message} in {err.json_path}")
-    except ModuleNotFoundError:
-        pass
-    return None
-
-
 def load_spec() -> dict:
     spec_path = os.path.join(PROJECT_PATH, c.PKG_NAME, "spec", "exordos_spec.yaml")
     return load_yaml(spec_path)

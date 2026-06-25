@@ -219,7 +219,7 @@ def upgrade_manifest(
             raise click.ClickException(f"{path_or_name} is not a file")
         manifest = utils.load_yaml(path_or_name)
     else:
-        manifest = repo_lib.download_manifest(repository, path_or_name, version)
+        manifest = repo_lib.Repository(repository).get_manifest(path_or_name, version)
 
     requirements: dict = manifest.get("requirements", {})
 
@@ -257,7 +257,7 @@ def upgrade_manifest(
             click.echo(
                 f"The following dependency element will be installed: {requirement}"
             )
-        req_manifest = repo_lib.download_manifest(repository, requirement)
+        req_manifest = repo_lib.Repository(repository).get_manifest(requirement)
 
         # Determine requirements for the element
         req_requirements = req_manifest.get("requirements", {})
@@ -322,7 +322,7 @@ def install_cmd(
 ) -> None:
     """Install manifest from a YAML file"""
     if not path_or_name:
-        all_elements = repo_lib.get_all_elements(repository)
+        all_elements = repo_lib.Repository(c.ELEMENT_REPO_URL).get_all_elements()
         path_or_name = questionary.select(
             "Select manifest to install",
             choices=all_elements,
@@ -434,7 +434,7 @@ def uninstall_cmd(ctx: click.Context, path_uuid_name: str) -> None:
 @ee_group.command("available", help="Print available elements in repository")
 def available_elements() -> None:
     """Update manifest from a YAML file"""
-    elements = repo_lib.get_all_elements(c.ELEMENT_REPO_URL)
+    elements = repo_lib.Repository(c.ELEMENT_REPO_URL).get_all_elements()
     for e in elements:
         click.echo(e)
 
@@ -443,9 +443,9 @@ def available_elements() -> None:
 @click.argument("name")
 def versions(name) -> None:
     """Update manifest from a YAML file"""
-    element_versions = repo_lib.get_element_versions_by_inventory(
-        c.ELEMENT_REPO_URL, name
-    )
+    element_versions = repo_lib.Repository(
+        c.ELEMENT_REPO_URL
+    ).get_element_versions_by_inventory(name)
     for version in element_versions:
         click.echo(version)
 

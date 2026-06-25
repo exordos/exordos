@@ -14,10 +14,10 @@ help:
 mdlint:
 	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" --fix
 
-build_empty:
+build_element:
 	./dist/exordos build -i $(SSH_KEY) -f ../$(ELEMENT_PATH) -o ../$(ELEMENT_PATH)/output
 
-push_empty:
+push_element:
 	./dist/exordos repo push -t my_push_name -f --latest ../$(ELEMENT_PATH) -e ../$(ELEMENT_PATH)/output
 
 bootstrap:
@@ -28,6 +28,9 @@ find_ascii:
 
 define_resource:
 	./dist/exordos e e define $(ELEMENT_NAME)
+
+validate_element:
+	./dist/exordos e m validate $(ELEMENT_NAME)
 
 add_ssh_keys:
 	./dist/exordos secret ssh_keys add --current-realm --target_public_key $(SSH_KEY)

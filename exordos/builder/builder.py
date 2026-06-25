@@ -26,12 +26,14 @@ import typing as tp
 
 import jinja2
 import rich_click as click
+import yaml
 
 from exordos import constants as c
 from exordos.builder import base
 from exordos.logger import AbstractLogger
 from exordos.logger import DummyLogger
 from exordos.repo import fs as repo_fs
+from exordos.spec import schema
 
 
 class SimpleBuilder:
@@ -58,6 +60,8 @@ class SimpleBuilder:
         self._logger = logger or DummyLogger()
         self._elements_output_dir = elements_output_dir
         self._version = version
+        self._inventories = []
+        self._repo_dir = None
 
         if not os.path.exists(self._elements_output_dir):
             os.makedirs(self._elements_output_dir)
@@ -225,6 +229,7 @@ class SimpleBuilder:
         repo_dir: pathlib.Path,
         developer_keys: str | None = None,
         manifest_vars: dict[str, tp.Any] | None = None,
+        validate: bool = False,
     ) -> base.ElementInventory | None:
         """Build an element."""
         self._logger.info(f"Building element: {element}")
@@ -234,7 +239,7 @@ class SimpleBuilder:
         # We used the `--only-images` flag earlier to skip manifest processing.
         if not element.manifest:
             self._build_images(element, repo_dir, developer_keys)
-            return
+            return None
 
         # Prepare manifest variables
         manifest_vars = (manifest_vars or {}).copy()
@@ -259,6 +264,15 @@ class SimpleBuilder:
         # Render manifest
         manifests_dir = element_dir / "manifests"
         manifests = self._build_manifest(element, manifests_dir, manifest_vars)
+
+        if validate:
+            for manifest in manifests:
+                path = self._repo_dir / name / self._version / "manifests" / manifest
+                with open(path, "r") as f:
+                    manifest = yaml.safe_load(f)
+                schema.validate_manifest(
+                    manifest, manifest_vars.get("repository", c.ELEMENT_REPO_URL)
+                )
 
         # Build artifacts and configs
         for artifact in element.artifacts:
@@ -291,39 +305,40 @@ class SimpleBuilder:
         self,
         developer_keys: str | None = None,
         manifest_vars: dict[str, tp.Any] | None = None,
+        validate: bool = False,
     ) -> None:
         """Build all elements."""
         self._logger.important("Building elements")
-        repo_dir = self._elements_output_dir
+        self._repo_dir = self._elements_output_dir
 
         # Initialize repository if any element has a manifest
         if any(e.manifest for e in self._elements):
             repo = repo_fs.FSRepoDriver(self._elements_output_dir)
             repo.init_repo()
-            repo_dir = pathlib.Path(repo.elements_path)
+            self._repo_dir = pathlib.Path(repo.elements_path)
 
-        inventories = []
         for e in self._elements:
             inventory = self.build_element(
                 e,
-                repo_dir,
+                self._repo_dir,
                 developer_keys,
                 manifest_vars,
+                validate,
             )
             if inventory:
-                inventories.append(inventory)
+                self._inventories.append(inventory)
 
         # Save inventories
         # TODO(akremenetsky): It's internal logic of repository and it should be
         # moved into repository models one day.
-        if inventories:
+        if self._inventories:
             data = {"elements": {}}
-            for inventory in inventories:
+            for inventory in self._inventories:
                 data["elements"][inventory.name] = {
                     inventory.version: inventory.to_dict()
                 }
 
-            with open(repo_dir / "inventory.json", "w") as f:
+            with open(self._repo_dir / "inventory.json", "w") as f:
                 json.dump(data, f, indent=2, sort_keys=True)
 
     @classmethod

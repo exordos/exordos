@@ -64,14 +64,14 @@ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_key
     * Default: `sentinel.unset`
     * Usage: `--node`
 
-  node uuids
+  node uuids or names
 
 * `node_set`:
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `--node-set`
 
-  node_set uuids
+  node_set uuids or names
 
 * `user`:
     * Type: text
@@ -109,8 +109,8 @@ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_key
 │ --description        -D  TEXT  Description of the ssh_key                                                                                                                                                                                                                                               │
 │ --current-realm                add ssh keys to all current realm nodes and sets. If you want to use another realm, additionally change it by global cli option --realm                                                                                                                                  │
 │ --element                TEXT  element uuid or name                                                                                                                                                                                                                                                     │
-│ --node                   TEXT  node uuids                                                                                                                                                                                                                                                               │
-│ --node-set               TEXT  node_set uuids                                                                                                                                                                                                                                                           │
+│ --node                   TEXT  node uuids or names                                                                                                                                                                                                                                                      │
+│ --node-set               TEXT  node_set uuids or names                                                                                                                                                                                                                                                  │
 │ --user                   TEXT  user name of the ssh_key                                                                                                                                                                                                                                                 │
 │ --target_public_key      TEXT  key or path to it, for example: /home/user/.ssh/id_rsa.pub                                                                                                                                                                                                               │
 │ --help                         Show this message and exit.                                                                                                                                                                                                                                              │
