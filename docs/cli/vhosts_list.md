@@ -21,6 +21,13 @@ List vhosts
 
   Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
 
+* `fields`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--fields`
+
+  fields to show, defaults to all, for example: --fields name --fields status
+
 * `output`:
     * Type: choice
     * Default: `table`
@@ -66,6 +73,7 @@ List vhosts
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                           │
+│    --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                  │
 │    --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                         │
 │    --watch     -w                          Watch the list of vhosts                                                                                                                                                                                                                                     │
 │    --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                 │

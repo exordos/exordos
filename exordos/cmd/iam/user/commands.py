@@ -15,79 +15,31 @@
 #    under the License.
 from __future__ import annotations
 
-import typing as tp
 import uuid as sys_uuid
 
-from rich.prompt import Prompt
+import questionary
 import rich_click as click
 
 from exordos import constants as c
-from exordos import utils
 from exordos.clients import base_client
-from exordos.common.table import get_table
-from exordos.common.table import print_table
+from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
 
 ENTITY = "user"
 ENTITY_COLLECTION = c.USER_COLLECTION
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Username": "username",
+    "First Name": "first_name",
+    "Last Name": "last_name",
+    "Email": "email",
+    "Status": "status",
+}
+
+users_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
-def users_group():
-    pass
-
-
-@users_group.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-f",
-    "--filters",
-    multiple=True,
-    help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: --f "
-        "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
-    ),
-)
-@click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    filters = utils.convert_input_multiply(filters)
-    entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities)
-
-
-@users_group.command("show", help=f"Show {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def show_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data)
-
-
-@users_group.command("delete", help=f"Delete {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def delete_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
-
-
-@users_group.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
+@click.command("add", help=f"Add a new {ENTITY}")
 @click.pass_context
 @click.option(
     "-u",
@@ -195,7 +147,7 @@ def add_cmd(
         "uuid": str(uuid),
         "username": name,
         "password": password
-        or Prompt.ask("Enter password for {ENTITY} {name}:", password=True),
+        or questionary.password(f"Enter password for {ENTITY} {name}:").ask(),
         "description": description,
         "email": email,
         "email_verified": email_verified,
@@ -221,23 +173,46 @@ def add_cmd(
     show_data(entity)
 
 
-def _print_entities(users: tp.List[dict]) -> None:
-    table = get_table()
-    table.add_column("UUID")
-    table.add_column("Username")
-    table.add_column("First Name")
-    table.add_column("Last Name")
-    table.add_column("Email")
-    table.add_column("Status")
+@users_group.command("change_password", help=f"Change password of the {ENTITY}")
+@click.pass_context
+@click.argument(
+    "user",
+    type=str,
+    required=True,
+    help=f"{ENTITY} UUID or username",
+)
+@click.option(
+    "-o",
+    "--old-password",
+    type=str,
+    required=True,
+    help=f"Old password of the {ENTITY}",
+)
+@click.option(
+    "-n",
+    "--new-password",
+    type=str,
+    required=False,
+    help=f"New password of the {ENTITY}. If not provided, will be asked interactively",
+)
+def change_password_cmd(
+    ctx: click.Context,
+    uuid: sys_uuid.UUID,
+    old_password: str,
+    new_password: str | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
 
-    for user in users:
-        table.add_row(
-            user["uuid"],
-            user["username"],
-            user.get("first_name", ""),
-            user.get("last_name", ""),
-            user["email"],
-            user["status"],
-        )
+    data = {
+        "old_password": old_password,
+        "new_password": new_password
+        or questionary.password(f"Enter new_password for {ENTITY} {uuid}:").ask(),
+    }
 
-    print_table(table)
+    base_client.action_entity(
+        client, ENTITY_COLLECTION, "change_password", uuid, **data
+    )
+    click.echo(f"Password changed for {ENTITY} {uuid}")
+
+
+users_group.add_command(add_cmd, aliases=["a"])
