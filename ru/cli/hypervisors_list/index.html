@@ -3342,6 +3342,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../users_change_password/" class="md-nav__link">
+        users_change_password
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../users_delete/" class="md-nav__link">
         users_delete
       </a>
@@ -3749,6 +3763,15 @@
 </ul>
 <p>Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW</p>
 <ul>
+<li><code>fields</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--fields</code></li>
+</ul>
+</li>
+</ul>
+<p>fields to show, defaults to all, for example: --fields name --fields status</p>
+<ul>
 <li><code>output</code>:<ul>
 <li>Type: choice</li>
 <li>Default: <code>table</code></li>
@@ -3794,6 +3817,7 @@
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
 <span class="go">│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │</span>
+<span class="go">│ --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                     │</span>
 <span class="go">│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │</span>
 <span class="go">│ --watch     -w                          Watch the list of hypervisors                                                                                                                                                                                                                                   │</span>
 <span class="go">│ --interval      FLOAT RANGE [x&gt;=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │</span>
