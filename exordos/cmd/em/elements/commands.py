@@ -16,13 +16,14 @@
 from __future__ import annotations
 
 import os
+import pathlib
 import subprocess
 import tempfile
 import time
 import typing as tp
 import uuid as sys_uuid
 
-from bazooka import exceptions as bazooka_exc
+from packaging import version as packaging_version
 import questionary
 from rich.prompt import Confirm
 from rich.text import Text
@@ -30,15 +31,15 @@ import rich_click as click
 
 from exordos import utils
 from exordos.clients import base_client
-from exordos.clients import repo as repo_lib
 from exordos.cmd.base import create_entity_group
 from exordos.common import compute
 from exordos.common import ssh
+from exordos.common import version as version_lib
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
 import exordos.constants as c
-from exordos.logger import ClickLogger
+from exordos.repo import utils as repo_utils
 
 if tp.TYPE_CHECKING:
     from exordos.clients.base import CollectionBaseClient
@@ -46,6 +47,9 @@ if tp.TYPE_CHECKING:
 
 ENTITY = "element"
 ENTITY_COLLECTION = c.ELEMENT_COLLECTION
+DEFAULT_UPLOAD_REPO_NAME = "exordos-upload-repo"
+DEFAULT_PRIORITY = 4096
+DEFAULT_TIMEOUT = 600.0
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
@@ -141,173 +145,143 @@ def show_element_ips(ctx: click.Context, name: str) -> None:
         click.echo(node["default_network"].get("ipv4", None))
 
 
-def _apply_with_cleanup(
-    client: "CollectionBaseClient",
-    manifest_data: dict[str, tp.Any],
-    install_only: bool = False,
-    update_manifest: bool = False,
-    **kwargs: tp.Any,
-) -> dict[str, tp.Any]:
-    """Apply a manifest and clean up old versions on success."""
+def _get_sort_key(
+    element: dict[str, tp.Any], repo_priorities: dict[str, int]
+) -> tuple[int, packaging_version.Version]:
+    """Get sort key for element: (repository_priority, version).
 
-    found_manifest_uuids = [
-        item["uuid"]
-        for item in base_client.list_entities(
-            client, c.MANIFEST_COLLECTION, name=manifest_data["name"]
-        )
-    ]
-    if update_manifest:
-        manifest_uuid = kwargs["manifest_uuid"]
-        manifest_data.pop("created_at", None)
-        manifest_data.pop("updated_at", None)
-        manifest_data.pop("status", None)
-        manifest_data.pop("uuid", None)
-        try:
-            manifest_data = base_client.update_entity(
-                client, c.MANIFEST_COLLECTION, manifest_uuid, manifest_data
-            )
-        except bazooka_exc.NotFoundError:
-            manifest_data = base_client.add_entity(
-                client, c.MANIFEST_COLLECTION, manifest_data
-            )
-        manifest_data["uuid"] = manifest_uuid
-    else:
-        manifest_data = base_client.add_entity(
-            client, c.MANIFEST_COLLECTION, manifest_data
-        )
-    manifest_uuid = manifest_data["uuid"]
+    Args:
+        element: Element dictionary containing version and repository reference.
+        repo_priorities: Dictionary mapping repository UUID to priority value.
 
-    try:
-        if install_only:
-            base_client.action_entity(
-                client, c.MANIFEST_COLLECTION, "install", manifest_uuid
-            )
-        else:
-            base_client.action_entity(
-                client, c.MANIFEST_COLLECTION, "upgrade", manifest_uuid
-            )
-    except Exception:
-        base_client.delete_entity(client, c.MANIFEST_COLLECTION, manifest_uuid)
-        raise
-
-    for found_manifest_uuid in found_manifest_uuids:
-        if found_manifest_uuid != manifest_uuid:
-            base_client.delete_entity(
-                client, c.MANIFEST_COLLECTION, found_manifest_uuid
-            )
-
-    return manifest_data
-
-
-def upgrade_manifest(
-    client: "CollectionBaseClient",
-    repository: str,
-    path_or_name: str,
-    install_only: bool = False,
-    version: str | None = None,
-    update_manifest: bool = False,
-    **kwargs: tp.Any,
-) -> dict[str, tp.Any]:
-    """Install or update element from a YAML file or repository.
-
-    The command will install the element if it's not installed or update it
-    if it's installed.
+    Returns:
+        Tuple of (repository_priority, version) for sorting.
+        Higher values indicate higher priority.
     """
+    version_obj = packaging_version.parse(element["version"])
 
-    if os.path.exists(path_or_name):
-        if not os.path.isfile(path_or_name):
-            raise click.ClickException(f"{path_or_name} is not a file")
-        manifest = utils.load_yaml(path_or_name)
-    else:
-        manifest = repo_lib.Repository(repository).get_manifest(path_or_name, version)
-
-    requirements: dict = manifest.get("requirements", {})
-
-    installed = bool(
-        base_client.list_entities(client, ENTITY_COLLECTION, name=manifest["name"])
-    )
-
-    if installed and install_only:
-        raise click.ClickException(f"Element {manifest['name']} is already installed")
-
-    # Install element if no requirements
-    if not requirements:
-        new_manifest = _apply_with_cleanup(
-            client, manifest, install_only, update_manifest, **kwargs
-        )
-        return new_manifest
-
-    # Resolve dependencies
-    installed_elements = {
-        e["name"] for e in base_client.list_entities(client, ENTITY_COLLECTION)
-    }
-    required_elements = [
-        item for item in requirements.keys() if item not in installed_elements
-    ]
-    all_installed_elements = required_elements.copy()
-    all_installed_elements.append(manifest["name"])
-    click.echo(
-        f"The following elements will be {'installed' if install_only else 'upgraded'} first: "
-        f"{click.style(', '.join(all_installed_elements), fg='green')}"
-    )
-
-    while required_elements:
-        requirement = required_elements.pop()
-        if requirement not in installed_elements:
-            click.echo(
-                f"The following dependency element will be installed: {requirement}"
-            )
-        req_manifest = repo_lib.Repository(repository).get_manifest(requirement)
-
-        # Determine requirements for the element
-        req_requirements = req_manifest.get("requirements", {})
-        req_required_elements = [
-            item for item in req_requirements.keys() if item not in installed_elements
-        ]
-        required_elements.extend(req_required_elements)
-        required_elements = list(set(required_elements))
-
-        # NOTE(akremenetsky): We should install the element since there are
-        # unresolved dependencies but for the simplicity we will install it here
-        req_manifest = base_client.add_entity(
-            client, c.MANIFEST_COLLECTION, req_manifest
-        )
+    repo_priority = 0
+    repository_ref = element.get("repository")
+    if repository_ref:
         try:
-            base_client.action_entity(
-                client, c.MANIFEST_COLLECTION, "install", req_manifest["uuid"]
-            )
-        except bazooka_exc.BaseHTTPException as e:
-            if e.code == 400 and e.cause.response.json().get("code") == 1000:
-                required_elements.insert(0, req_manifest["name"])
-                continue
-            else:
-                raise
-        installed_name = f"{req_manifest['name']} ({req_manifest['version']})"
-        click.echo(
-            f"Element {click.style(installed_name, fg='green')} was installed successfully"
+            repo_uuid = repository_ref.rstrip("/").split("/")[-1]
+            if utils.is_valid_uuid(repo_uuid):
+                repo_priority = repo_priorities.get(repo_uuid, 0)
+        except Exception:
+            pass
+
+    return (repo_priority, version_obj)
+
+
+def _select_element_by_name(
+    client: "CollectionBaseClient",
+    name: str,
+    version_filter: str | None,
+    exclude_uuid: str | None = None,
+) -> dict[str, tp.Any]:
+    """Select the best element by name, sorting by (repository_priority, version).
+
+    Filters out development versions unless version_filter is specified.
+    Sorts elements by repository priority (higher is better) and version
+    (higher is better), then returns the highest priority element.
+
+    Args:
+        client: API client for making requests.
+        name: Element name to search for.
+        version_filter: Optional version string to filter by.
+            If None, only stable versions are considered.
+
+    Returns:
+        Dictionary representing the selected element.
+
+    Raises:
+        click.ClickException: If no elements found or no stable versions available.
+    """
+    elements = base_client.list_entities(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
+    )
+
+    if exclude_uuid:
+        elements = [e for e in elements if e["uuid"] != exclude_uuid]
+
+    if not elements:
+        raise click.ClickException(f"No elements found with name '{name}'")
+
+    # Fetch all repositories once to build priority cache
+    repo_priorities: dict[str, int] = {}
+    try:
+        repositories = base_client.list_entities(client, c.REPOSITORY_COLLECTION)
+        for repo in repositories:
+            repo_priorities[repo["uuid"]] = repo.get("priority", 0)
+    except Exception:
+        pass
+
+    # Filter out development versions unless version is explicitly provided
+    if version_filter is None:
+        elements = [e for e in elements if version_lib.is_stable_version(e["version"])]
+
+    if not elements:
+        raise click.ClickException(
+            f"No stable versions found for element '{name}'. "
+            "Use --version to install a development version."
         )
 
-        installed_elements.add(req_manifest["name"])
+    # Filter by version if specified
+    if version_filter:
+        elements = [e for e in elements if e["version"] == version_filter]
+        if not elements:
+            raise click.ClickException(
+                f"No elements found with name '{name}' and version '{version_filter}'"
+            )
 
-        # TODO(akremenetsky): The installation is stuck for some reason
-        # so we need to wait a bit. Solve the issue in GC and remove this
-        # sleep.
-        time.sleep(3)
+    # Sort by (repository_priority, version) - higher is better
+    elements.sort(key=lambda e: _get_sort_key(e, repo_priorities), reverse=True)
 
-    new_manifest = _apply_with_cleanup(
-        client, manifest, install_only, update_manifest, **kwargs
+    return elements[0]
+
+
+def _select_current_element_by_name(
+    client: "CollectionBaseClient", name: str
+) -> dict[str, tp.Any]:
+    """Select current installed element by name (ACTIVE or IN_PROGRESS status).
+
+    Args:
+        client: API client for making requests.
+        name: Element name to search for.
+
+    Returns:
+        Dictionary representing the current element.
+
+    Raises:
+        click.ClickException: If no active or in-progress elements found.
+    """
+    elements = base_client.list_entities(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
     )
-    return new_manifest
+
+    active_elements = [
+        e
+        for e in elements
+        if e.get("status") in ("ACTIVE", "IN_PROGRESS")
+        or e.get("installation_state") == "INSTALLED"
+    ]
+
+    if not active_elements:
+        raise click.ClickException(
+            f"No installed element found with name '{name}'. "
+            "Use install command to install the element first."
+        )
+
+    if len(active_elements) > 1:
+        raise click.ClickException(
+            f"Multiple installed elements found with name '{name}'. "
+            "Please specify the UUID of the element to update."
+        )
+
+    return active_elements[0]
 
 
 @click.command("install", help="Install element")
-@click.option(
-    "-r",
-    "--repository",
-    default=f"{c.ELEMENT_REPO_URL}/",
-    show_default=True,
-    help="Repository endpoint",
-)
 @click.option(
     "-v",
     "--version",
@@ -315,29 +289,90 @@ def upgrade_manifest(
     required=False,
     help="version of the element",
 )
-@click.argument("path_or_name", required=False)
+@click.option(
+    "-p",
+    "--project-id",
+    type=click.UUID,
+    default=sys_uuid.UUID(int=0),
+    help="Project UUID, required only if the upload repository doesn't exist yet",
+)
+@click.option(
+    "--timeout",
+    type=float,
+    default=DEFAULT_TIMEOUT,
+    show_default=True,
+    help="Seconds to wait for repository upload and element sync to complete",
+)
+@click.argument("uuid_or_name_or_path", required=False)
 @click.pass_context
 def install_cmd(
-    ctx: click.Context, repository: str, version: str | None, path_or_name: str | None
+    ctx: click.Context,
+    version: str | None,
+    project_id: sys_uuid.UUID,
+    timeout: float,
+    uuid_or_name_or_path: str | None,
 ) -> None:
-    """Install manifest from a YAML file"""
-    if not path_or_name:
-        all_elements = repo_lib.Repository(c.ELEMENT_REPO_URL).get_all_elements()
-        path_or_name = questionary.select(
-            "Select manifest to install",
-            choices=all_elements,
+    """Install element from repository API by UUID, name, or manifest path"""
+    if not uuid_or_name_or_path:
+        all_elements = base_client.list_entities(
+            base_client.get_user_api_client(ctx.obj.auth_data),
+            c.REPOSITORY_ELEMENT_COLLECTION,
+        )
+        element_names = sorted(set(e["name"] for e in all_elements))
+        uuid_or_name_or_path = questionary.select(
+            "Select element to install",
+            choices=element_names,
         ).ask()
-        if not path_or_name:
-            click.echo("No manifest selected, aborting")
+        if not uuid_or_name_or_path:
+            click.echo("No element selected, aborting")
             return
-    manifest = upgrade_manifest(
-        base_client.get_user_api_client(ctx.obj.auth_data),
-        repository,
-        path_or_name,
-        install_only=True,
-        version=version,
+
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
+    if os.path.isfile(uuid_or_name_or_path):
+        manifest_path = pathlib.Path(uuid_or_name_or_path)
+        manifest_data = utils.load_yaml(str(manifest_path))
+        name = manifest_data.get("name")
+        e_version = manifest_data.get("version")
+
+        driver_spec = {"kind": "database"}
+        repository = repo_utils.ensure_repository(
+            client,
+            DEFAULT_UPLOAD_REPO_NAME,
+            driver_spec,
+            project_id,
+            DEFAULT_PRIORITY,
+            sync_mode="copy",
+        )
+
+        repo_utils.do_upload(client, DEFAULT_UPLOAD_REPO_NAME, manifest_path)
+
+        click.echo(f"Waiting for {name} ({e_version}) to become AVAILABLE...")
+        repo_element = repo_utils.wait_for_repo_element(
+            client, repository["uuid"], name, e_version, "AVAILABLE", timeout
+        )
+
+        base_client.action_entity(
+            client, c.REPOSITORY_ELEMENT_COLLECTION, "install", repo_element["uuid"]
+        )
+
+        installed_name = f"{name} ({e_version})"
+        click.echo(
+            f"Element {click.style(installed_name, fg='green')} was installed successfully"
+        )
+        return
+
+    if utils.is_valid_uuid(uuid_or_name_or_path):
+        element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=uuid_or_name_or_path)
+    else:
+        element = _select_element_by_name(client, uuid_or_name_or_path, version)
+
+    element_uuid = element["uuid"]
+    base_client.action_entity(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, "install", element_uuid
     )
-    installed_name = f"{manifest['name']} ({manifest['version']})"
+
+    installed_name = f"{element['name']} ({element['version']})"
     click.echo(
         f"Element {click.style(installed_name, fg='green')} was installed successfully"
     )
@@ -345,115 +380,170 @@ def install_cmd(
 
 @click.command("update", help="Update element")
 @click.option(
-    "-r",
-    "--repository",
-    default=f"{c.ELEMENT_REPO_URL}/",
-    show_default=True,
-    help="Repository endpoint",
-)
-@click.option(
     "-v",
     "--version",
     type=str,
     required=False,
     help="version of the element",
 )
-@click.argument("path_or_name")
+@click.option(
+    "--yes", "-y", "y", help="Automatically answer yes for all questions", is_flag=True
+)
+@click.option(
+    "-p",
+    "--project-id",
+    type=click.UUID,
+    default=sys_uuid.UUID(int=0),
+    help="Project UUID, required only if the upload repository doesn't exist yet",
+)
+@click.option(
+    "--timeout",
+    type=float,
+    default=DEFAULT_TIMEOUT,
+    show_default=True,
+    help="Seconds to wait for repository upload and element sync to complete",
+)
+@click.argument("uuid_or_name_or_path", required=False)
 @click.pass_context
 def update_cmd(
-    ctx: click.Context, repository: str, version: str | None, path_or_name: str
+    ctx: click.Context,
+    version: str | None,
+    y: bool,
+    project_id: sys_uuid.UUID,
+    timeout: float,
+    uuid_or_name_or_path: str | None,
 ) -> None:
-    """Update manifest from a YAML file"""
-    manifest = upgrade_manifest(
-        base_client.get_user_api_client(ctx.obj.auth_data),
-        repository,
-        path_or_name,
-        version=version,
+    """Update element from repository API by UUID, name, or manifest path"""
+    if not uuid_or_name_or_path:
+        all_elements = base_client.list_entities(
+            base_client.get_user_api_client(ctx.obj.auth_data),
+            c.REPOSITORY_ELEMENT_COLLECTION,
+        )
+        element_names = sorted(set(e["name"] for e in all_elements))
+        uuid_or_name_or_path = questionary.select(
+            "Select element to update",
+            choices=element_names,
+        ).ask()
+        if not uuid_or_name_or_path:
+            click.echo("No element selected, aborting")
+            return
+
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
+    if os.path.isfile(uuid_or_name_or_path):
+        manifest_path = pathlib.Path(uuid_or_name_or_path)
+        manifest_data = utils.load_yaml(str(manifest_path))
+        name = manifest_data.get("name")
+        e_version = manifest_data.get("version")
+
+        current_element = _select_current_element_by_name(client, name)
+
+        if not (
+            y
+            or questionary.confirm(
+                f"Update {current_element['name']} "
+                f"({current_element['version']} -> {e_version})?"
+            ).ask()
+        ):
+            return
+
+        driver_spec = {"kind": "database"}
+        repository = repo_utils.ensure_repository(
+            client,
+            DEFAULT_UPLOAD_REPO_NAME,
+            driver_spec,
+            project_id,
+            DEFAULT_PRIORITY,
+            sync_mode="copy",
+        )
+
+        repo_utils.do_upload(client, DEFAULT_UPLOAD_REPO_NAME, manifest_path)
+
+        click.echo(f"Waiting for {name} ({e_version}) to become AVAILABLE...")
+        target_element = repo_utils.wait_for_repo_element(
+            client, repository["uuid"], name, e_version, "AVAILABLE", timeout
+        )
+
+        base_client.action_entity(
+            client,
+            c.REPOSITORY_ELEMENT_COLLECTION,
+            "upgrade",
+            current_element["uuid"],
+            target=target_element["uuid"],
+        )
+
+        installed_name = (
+            f"{current_element['name']} ({current_element['version']} -> {e_version})"
+        )
+        click.echo(
+            f"Element {click.style(installed_name, fg='green')} was updated successfully"
+        )
+        return
+
+    if utils.is_valid_uuid(uuid_or_name_or_path):
+        current_element = client.get(
+            c.REPOSITORY_ELEMENT_COLLECTION, uuid=uuid_or_name_or_path
+        )
+    else:
+        current_element = _select_current_element_by_name(client, uuid_or_name_or_path)
+
+    target_element = _select_element_by_name(
+        client, current_element["name"], version, exclude_uuid=current_element["uuid"]
+    )
+
+    if not (
+        y
+        or questionary.confirm(
+            f"Update {current_element['name']} "
+            f"({current_element['version']} -> {target_element['version']})?"
+        ).ask()
+    ):
+        return
+
+    base_client.action_entity(
+        client,
+        c.REPOSITORY_ELEMENT_COLLECTION,
+        "upgrade",
+        current_element["uuid"],
+        target=target_element["uuid"],
+    )
+
+    installed_name = (
+        f"{current_element['name']} ({current_element['version']}"
+        f" -> {target_element['version']})"
     )
     click.echo(
-        f"Element {click.style(manifest['name'], fg='green')} was successfully updated to version {click.style(manifest['version'], fg='green')}"
+        f"Element {click.style(installed_name, fg='green')} was updated successfully"
     )
 
 
-@click.command("uninstall", help="Uninstall manifest by UUID, path or name")
-@click.argument("path_uuid_name", type=str)
+@click.command("uninstall", help="Uninstall element by UUID or name")
+@click.argument("uuid_or_name", type=str)
 @click.option(
     "--yes", "-y", "y", help="Automatically answer yes for all questions", is_flag=True
 )
 @click.pass_context
-def uninstall_cmd(ctx: click.Context, path_uuid_name: str, y: bool) -> None:
-    """Uninstall manifest by UUID, path or name"""
+def uninstall_cmd(ctx: click.Context, uuid_or_name: str, y: bool) -> None:
+    """Uninstall element by UUID or name"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    log = ClickLogger()
 
-    if not (y or questionary.confirm(f"Delete {ENTITY} {path_uuid_name}?").ask()):
+    if not (y or questionary.confirm(f"Delete {ENTITY} {uuid_or_name}?").ask()):
         return
 
-    def _uninstall(element_uuid: str, element_name: str = None) -> None:
-        base_client.action_entity(
-            client, c.MANIFEST_COLLECTION, "uninstall", element_uuid
-        )
-        base_client.delete_entity(client, c.MANIFEST_COLLECTION, element_uuid)
-        log.important(
-            f"Element {element_name or element_uuid} uninstalled successfully"
-        )
+    if utils.is_valid_uuid(uuid_or_name):
+        element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=uuid_or_name)
+        element_uuid = element["uuid"]
+    else:
+        element = _select_current_element_by_name(client, uuid_or_name)
+        element_uuid = element["uuid"]
 
-    # UUID
-    if utils.is_valid_uuid(path_uuid_name):
-        _uninstall(path_uuid_name)
-        return
+    base_client.action_entity(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, "uninstall", element_uuid
+    )
 
-    # Name
-    name = path_uuid_name
-
-    manifests = base_client.list_entities(client, c.MANIFEST_COLLECTION, name=name)
-    if len(manifests) == 1:
-        uuid = manifests[0]["uuid"]
-        _uninstall(uuid, name)
-        return
-    elif len(manifests) > 1:
-        raise click.ClickException(f"Multiple elements found with name {name}")
-
-    # Path
-    if os.path.exists(path_uuid_name):
-        manifest = utils.load_yaml(path_uuid_name)
-        if "uuid" in manifest:
-            filters = {"uuid": manifest["uuid"]}
-        elif "name" in manifest:
-            filters = {"name": manifest["name"]}
-        else:
-            raise click.ClickException("Manifest must have uuid or name")
-
-        manifests = base_client.list_entities(client, c.MANIFEST_COLLECTION, **filters)
-        if len(manifests) == 1:
-            uuid = manifests[0]["uuid"]
-            _uninstall(uuid, manifests[0]["name"])
-            return
-        if len(manifests) > 1:
-            raise click.ClickException(f"Multiple elements found with name {name}")
-        log.warning(f"manifest {list(filters.values())[0]} not found")
-        return
-
-    log.warning(f"Element {path_uuid_name} not found")
-
-
-@ee_group.command("available", help="Print available elements in repository")
-def available_elements() -> None:
-    """Update manifest from a YAML file"""
-    elements = repo_lib.Repository(c.ELEMENT_REPO_URL).get_all_elements()
-    for e in elements:
-        click.echo(e)
-
-
-@ee_group.command("versions", help="Print available elements in repository")
-@click.argument("name")
-def versions(name) -> None:
-    """Update manifest from a YAML file"""
-    element_versions = repo_lib.Repository(
-        c.ELEMENT_REPO_URL
-    ).get_element_versions_by_inventory(name)
-    for version in element_versions:
-        click.echo(version)
+    click.echo(
+        f"Element {click.style(element['name'], fg='green')} was uninstalled successfully"
+    )
 
 
 def edit_data(data: str, editor: str = "nano") -> tp.Tuple[str, dict]:
@@ -482,37 +572,41 @@ def edit_data(data: str, editor: str = "nano") -> tp.Tuple[str, dict]:
     type=click.Choice(["nano", "vim"], case_sensitive=False),
     help="Editor (nano or vim)",
 )
-@click.option(
-    "-r",
-    "--repository",
-    default=f"{c.ELEMENT_REPO_URL}/",
-    show_default=True,
-    help="Repository endpoint",
-)
 @click.pass_context
-def edit(ctx: click.Context, uuid_name: str, editor: str, repository: str) -> None:
+def edit(ctx: click.Context, uuid_name: str, editor: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, c.MANIFEST_COLLECTION, uuid_name)
+    element = base_client.get_entity(client, c.ELEMENT_COLLECTION, uuid_name)
+    manifest_ref = element.get("manifest", "")
+    if not manifest_ref:
+        raise click.ClickException(
+            f"Element {element['name']} has no manifest reference"
+        )
+    manifest_uuid = manifest_ref.rstrip("/").split("/")[-1]
+    repo_element = base_client.get_entity(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, manifest_uuid
+    )
+    manifest = repo_element.get("manifest", {})
     tf_path = None
     try:
         with tempfile.NamedTemporaryFile(suffix=".yaml", mode="a+", delete=False) as tf:
-            utils.dump_yaml(data, tf)
+            utils.dump_yaml(manifest, tf)
             tf.flush()
             tf_path = tf.name
             subprocess.call([editor, tf_path])
             tf.seek(0)
-            manifest = upgrade_manifest(
-                client,
-                repository,
-                tf_path,
-                update_manifest=True,
-                manifest_uuid=data["uuid"],
-            )
+            updated_manifest = utils.load_yaml(tf_path)
+        base_client.action_entity(
+            client,
+            c.REPOSITORY_ELEMENT_COLLECTION,
+            "edit",
+            repo_element["uuid"],
+            manifest=updated_manifest,
+        )
     finally:
         if tf_path and os.path.exists(tf_path):
             os.remove(tf_path)
     click.echo(
-        f"Element {click.style(manifest['name'], fg='green')} was successfully edited"
+        f"Element {click.style(element['name'], fg='green')} was successfully edited"
     )
 
 
@@ -526,13 +620,6 @@ def edit(ctx: click.Context, uuid_name: str, editor: str, repository: str) -> No
     default="nano",
     type=click.Choice(["nano", "vim"], case_sensitive=False),
     help="Editor (nano or vim)",
-)
-@click.option(
-    "-r",
-    "--repository",
-    default=f"{c.ELEMENT_REPO_URL}/",
-    show_default=True,
-    help="Repository endpoint",
 )
 @click.option(
     "--resource-type",
@@ -551,7 +638,6 @@ def define(
     ctx: click.Context,
     uuid_name: str,
     editor: str,
-    repository: str,
     resource_type: str,
     resource_name: str,
 ) -> None:
@@ -582,13 +668,23 @@ def define(
         for k, v in resource_def.items()
         if not v.get("readOnly", False)
     }
-    manifest = base_client.get_entity(client, c.MANIFEST_COLLECTION, uuid_name)
+    element = base_client.get_entity(client, c.ELEMENT_COLLECTION, uuid_name)
+    manifest_ref = element.get("manifest", "")
+    if not manifest_ref:
+        raise click.ClickException(
+            f"Element {element['name']} has no manifest reference"
+        )
+    manifest_uuid = manifest_ref.rstrip("/").split("/")[-1]
+    repo_element = base_client.get_entity(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, manifest_uuid
+    )
+    manifest = repo_element.get("manifest", {})
+    if "resources" not in manifest:
+        manifest["resources"] = {}
     if resource_type not in manifest["resources"]:
         manifest["resources"][resource_type] = {}
     if not resource_name:
-        default_resource_name = (
-            f"{manifest['name']}_{resource_ref.split('_')[0].lower()}"
-        )
+        default_resource_name = f"{manifest.get('name', element['name'])}_{resource_ref.split('_')[0].lower()}"
         resource_name = questionary.text(
             "Enter resource name", default=default_resource_name
         ).ask()
@@ -619,19 +715,21 @@ def define(
 
             tf_path = tf.name
             subprocess.call([editor, f"+{line_num}", tf_path])
-            manifest = upgrade_manifest(
-                client,
-                repository,
-                tf_path,
-                update_manifest=True,
-                manifest_uuid=manifest["uuid"],
-            )
+            tf.seek(0)
+            updated_manifest = utils.load_yaml(tf_path)
+        base_client.action_entity(
+            client,
+            c.REPOSITORY_ELEMENT_COLLECTION,
+            "edit",
+            repo_element["uuid"],
+            manifest=updated_manifest,
+        )
     finally:
         if tf_path and os.path.exists(tf_path):
             os.remove(tf_path)
 
     click.echo(
-        f"Element {click.style(manifest['name'], fg='green')} was successfully edited"
+        f"Element {click.style(element['name'], fg='green')} was successfully edited"
     )
 
 
@@ -642,20 +740,58 @@ def define(
 @click.pass_context
 def clear(ctx: click.Context, y: bool) -> bool:  # pragma: no cover
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    entities = base_client.list_entities(client, ENTITY_COLLECTION)
-    was_uninstalled = False
-    for entity in entities:
-        if entity["name"] in c.BASE_ELEMENTS:
-            click.echo(f"Skipping base element {entity['name']}")
-            continue
-        if y or Confirm.ask(f"Do you want to uninstall {entity['name']}?"):
-            uninstalled_name = f"{entity['name']} ({entity['version']})"
+
+    if not (y or click.confirm("Do you want to uninstall all non-base elements?")):
+        return False
+
+    def get_installed_elements():
+        repo_elements = base_client.list_entities(
+            client, c.REPOSITORY_ELEMENT_COLLECTION
+        )
+        return [
+            e
+            for e in repo_elements
+            if e.get("status") in ("IN_PROGRESS", "ACTIVE")
+            and e.get("name") not in c.BASE_ELEMENTS
+        ]
+
+    installed = get_installed_elements()
+    max_attempts = len(installed) + 1
+
+    for attempt in range(1, max_attempts + 1):
+        if not installed:
+            break
+
+        click.echo(
+            f"Uninstall attempt {attempt}/{max_attempts}: "
+            f"{len(installed)} element(s) remaining"
+        )
+        for element in installed:
+            uninstalled_name = f"{element['name']} ({element['version']})"
             click.echo(
-                f"Uninstalling element {click.style(uninstalled_name, fg='green')}"
+                f"  Uninstalling element {click.style(uninstalled_name, fg='green')}"
             )
-            base_client.delete_entity(client, ENTITY_COLLECTION, entity["uuid"])
-            was_uninstalled = True
-    return was_uninstalled
+            try:
+                base_client.action_entity(
+                    client,
+                    c.REPOSITORY_ELEMENT_COLLECTION,
+                    "uninstall",
+                    element["uuid"],
+                )
+            except Exception:
+                pass
+
+        time.sleep(0.2)
+        installed = get_installed_elements()
+
+    if installed:
+        remaining = ", ".join(e["name"] for e in installed)
+        raise click.ClickException(
+            f"Failed to uninstall all elements. Remaining: {remaining}"
+        )
+
+    click.echo("All non-base elements were successfully uninstalled")
+    return True
 
 
 @ee_group.command(

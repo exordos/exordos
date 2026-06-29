@@ -58,6 +58,9 @@ RESOURCE_COLLECTION = "/v1/em/resources/"
 IMPORTS_COLLECTION = "/v1/em/imports/"
 EXPORTS_COLLECTION = "/v1/em/exports/"
 
+REPOSITORY_COLLECTION = "/v1/repo/repositories/"
+REPOSITORY_ELEMENT_COLLECTION = "/v1/repo/elements/"
+
 PROFILE_COLLECTION = "/v1/vs/profiles/"
 VALUE_COLLECTION = "/v1/vs/values/"
 VARIABLE_COLLECTION = "/v1/vs/variables/"

@@ -57,6 +57,12 @@ class AbstractRepoDriver(abc.ABC):
         """Return the name of the repo."""
         ...
 
+    @property
+    @abc.abstractmethod
+    def elements_path(self) -> str:
+        """Return the base path/URL for elements in the repo."""
+        ...
+
     @abc.abstractmethod
     def init_repo(self) -> None:
         """Initialize the repo."""

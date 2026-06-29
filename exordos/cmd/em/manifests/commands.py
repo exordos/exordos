@@ -115,4 +115,23 @@ def validate_cmd(repository: str, path_or_name: str) -> None:
     click.echo(f"Manifest {click.style(name, fg='green')} validated successfully")
 
 
+@click.command("uninstall", help=f"Uninstall {ENTITY} by UUID or name")
+@click.argument(
+    "uuid_or_name",
+    type=str,
+    required=True,
+)
+@click.pass_context
+def uninstall_cmd(ctx: click.Context, uuid_or_name: str) -> None:
+    """Uninstall manifest by UUID or name"""
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    manifest = base_client.get_entity(client, ENTITY_COLLECTION, uuid_or_name)
+
+    base_client.action_entity(client, ENTITY_COLLECTION, "uninstall", manifest["uuid"])
+
+    name = f"{manifest['name']} ({manifest['version']})"
+    click.echo(f"Manifest {click.style(name, fg='green')} was uninstalled successfully")
+
+
 manifests_group.add_command(show_cmd, aliases=["get", "g"])
+manifests_group.add_command(uninstall_cmd)

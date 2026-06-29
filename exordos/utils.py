@@ -81,14 +81,12 @@ def load_driver(config_file: str, group: str = c.EP_BACKUP_DRIVERS) -> tp.Any:
 def get_exordos_config(
     project_dir: str,
     exordos_cfg_file: str = c.DEF_GEN_CFG_FILE_NAME,
-    exordosctl_cfg_file: str = c.CONFIG_FILE,
 ) -> tp.Tuple[tp.Dict[str, tp.Any], str]:
     """Find the project configuration file."""
     alternatives = [
         os.path.join(project_dir, exordos_cfg_file),
         os.path.join(project_dir, c.DEF_GEN_WORK_DIR_NAME, exordos_cfg_file),
         os.path.join(project_dir, "genesis", "genesis.yaml"),
-        exordosctl_cfg_file,
     ]
 
     for alt in alternatives:
@@ -569,3 +567,7 @@ def is_debugging() -> bool:
         return True
 
     return False
+
+
+def urn(namespace: str, uuid: str) -> str:
+    return f"urn:{namespace}:{uuid}"

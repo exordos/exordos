@@ -17,9 +17,11 @@ import json
 import pathlib
 import typing as tp
 from unittest.mock import MagicMock
+import uuid as sys_uuid
 
 from exordos.builder import base
 from exordos.builder.builder import SimpleBuilder
+from exordos.builder.builder import _urn_image
 from exordos.logger import DummyLogger
 
 
@@ -312,3 +314,222 @@ class TestBuilder:
         image_names = [pathlib.Path(p).name for p in images]
         assert any(n.endswith(".raw") for n in image_names)
         assert any(n.endswith(".raw.gz") for n in image_names)
+
+
+class TestImageNames:
+    """Tests for the Image.names property."""
+
+    def test_names_none_returns_empty(self) -> None:
+        img = base.Image(script="/tmp/install.sh", formats=["raw"], name=None)
+        assert img.names == tuple()
+
+    def test_names_single_raw(self) -> None:
+        img = base.Image(script="/tmp/install.sh", formats=["raw"], name="foo")
+        assert img.names == ("foo.raw",)
+
+    def test_names_qcow2(self) -> None:
+        img = base.Image(script="/tmp/install.sh", formats=["qcow2"], name="foo")
+        assert img.names == ("foo.qcow2",)
+
+    def test_names_gz_appends_raw(self) -> None:
+        """Compression formats are applied to raw images."""
+        img = base.Image(script="/tmp/install.sh", formats=["gz"], name="foo")
+        assert img.names == ("foo.raw.gz",)
+
+    def test_names_zst_appends_raw(self) -> None:
+        img = base.Image(script="/tmp/install.sh", formats=["zst"], name="foo")
+        assert img.names == ("foo.raw.zst",)
+
+    def test_names_multi_format(self) -> None:
+        img = base.Image(
+            script="/tmp/install.sh", formats=["raw", "gz", "qcow2"], name="bar"
+        )
+        assert img.names == ("bar.raw", "bar.raw.gz", "bar.qcow2")
+
+
+class TestElementInventoryIndex:
+    """Tests for ElementInventory index computation."""
+
+    def test_compute_index_entry_is_deterministic(self) -> None:
+        """Same inputs always produce the same UUID."""
+        path = pathlib.Path("foo.raw")
+        first = base.ElementInventory.compute_index_entry(
+            "images", "elem", "1.0.0", path
+        )
+        second = base.ElementInventory.compute_index_entry(
+            "images", "elem", "1.0.0", path
+        )
+        assert first == second
+        # Result is a valid UUID string
+        sys_uuid.UUID(first)
+
+    def test_compute_index_entry_differs_per_category(self) -> None:
+        path = pathlib.Path("foo.raw")
+        images_key = base.ElementInventory.compute_index_entry(
+            "images", "elem", "1.0.0", path
+        )
+        manifests_key = base.ElementInventory.compute_index_entry(
+            "manifests", "elem", "1.0.0", path
+        )
+        assert images_key != manifests_key
+
+    def test_compute_index_entry_differs_per_path(self) -> None:
+        a = base.ElementInventory.compute_index_entry(
+            "images", "elem", "1.0.0", pathlib.Path("a.raw")
+        )
+        b = base.ElementInventory.compute_index_entry(
+            "images", "elem", "1.0.0", pathlib.Path("b.raw")
+        )
+        assert a != b
+
+    def test_compute_index_entry_differs_per_version(self) -> None:
+        a = base.ElementInventory.compute_index_entry(
+            "images", "elem", "1.0.0", pathlib.Path("foo.raw")
+        )
+        b = base.ElementInventory.compute_index_entry(
+            "images", "elem", "2.0.0", pathlib.Path("foo.raw")
+        )
+        assert a != b
+
+    def test_compute_index_builds_all_categories(self) -> None:
+        inv = base.ElementInventory(
+            name="elem",
+            version="1.0.0",
+            images=[pathlib.Path("foo.raw")],
+            manifests=[pathlib.Path("elem.yaml")],
+            configs=[],
+            templates=[],
+            artifacts=[],
+        )
+        index = inv.compute_index()
+        assert set(index.keys()) == set(base.ElementInventory.categories())
+        assert len(index["images"]) == 1
+        assert len(index["manifests"]) == 1
+        assert (
+            index["images"][
+                base.ElementInventory.compute_index_entry(
+                    "images", "elem", "1.0.0", pathlib.Path("foo.raw")
+                )
+            ]
+            == "foo.raw"
+        )
+        assert (
+            index["manifests"][
+                base.ElementInventory.compute_index_entry(
+                    "manifests", "elem", "1.0.0", pathlib.Path("elem.yaml")
+                )
+            ]
+            == "elem.yaml"
+        )
+
+    def test_post_init_populates_index(self) -> None:
+        """Index is computed automatically on construction."""
+        inv = base.ElementInventory(
+            name="elem",
+            version="1.0.0",
+            images=[pathlib.Path("foo.raw")],
+        )
+        assert inv.index
+        assert "images" in inv.index
+        assert len(inv.index["images"]) == 1
+
+    def test_to_dict_includes_index(self) -> None:
+        inv = base.ElementInventory(
+            name="elem",
+            version="1.0.0",
+            images=[pathlib.Path("foo.raw")],
+        )
+        data = inv.to_dict()
+        assert data["name"] == "elem"
+        assert data["version"] == "1.0.0"
+        assert data["index"] == inv.index
+        assert data["images"] == ["foo.raw"]
+
+
+class TestBuildImagesDict:
+    """Tests for SimpleBuilder._build_images_dict and _urn_image."""
+
+    def _builder(self, tmp_path) -> SimpleBuilder:
+        return SimpleBuilder(
+            exordos_dir=tmp_path,
+            deps=[],
+            elements=[],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=tmp_path / "out",
+        )
+
+    def test_urn_image_format(self) -> None:
+        assert _urn_image("abc-123") == "urn:images:abc-123"
+        assert _urn_image(sys_uuid.UUID(int=0)) == f"urn:images:{sys_uuid.UUID(int=0)}"
+
+    def test_single_image_includes_no_ext_key(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        img = base.Image(script="/tmp/install.sh", formats=["qcow2"], name="foo")
+        result = builder._build_images_dict([img], "elem", "1.0.0")
+        # Both the bare name and the name with extension are present
+        assert "foo" in result
+        assert "foo_qcow2" in result
+        # Both point to a valid urn:images:<uuid>
+        for v in result.values():
+            assert v.startswith("urn:images:")
+            sys_uuid.UUID(v[len("urn:images:") :])
+
+    def test_single_zst_image_no_ext_key(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        img = base.Image(script="/tmp/install.sh", formats=["zst"], name="bar")
+        result = builder._build_images_dict([img], "elem", "1.0.0")
+        assert "bar" in result
+        assert "bar_raw_zst" in result
+
+    def test_multi_image_zst_gets_no_ext_key(self, tmp_path) -> None:
+        """When a ZST image is present among many, it gets the bare-name key."""
+        builder = self._builder(tmp_path)
+        img = base.Image(
+            script="/tmp/install.sh", formats=["raw.zst", "qcow2"], name="baz"
+        )
+        # Image.names for zst -> "baz.raw.zst", qcow2 -> "baz.qcow2"
+        result = builder._build_images_dict([img], "elem", "1.0.0")
+        assert "baz" in result  # bare name maps to the zst image
+        assert "baz_raw_zst" in result
+        assert "baz_qcow2" in result
+        # The bare name and the zst-with-ext key point to the same URI
+        assert result["baz"] == result["baz_raw_zst"]
+
+    def test_multi_image_no_zst_no_bare_key(self, tmp_path) -> None:
+        """Without a ZST image, no bare-name key is added."""
+        builder = self._builder(tmp_path)
+        img = base.Image(script="/tmp/install.sh", formats=["raw", "qcow2"], name="qux")
+        result = builder._build_images_dict([img], "elem", "1.0.0")
+        assert "qux" not in result
+        assert "qux_raw" in result
+        assert "qux_qcow2" in result
+
+    def test_multiple_zst_images_all_present(self, tmp_path) -> None:
+        """All ZST images are kept when several are present; only the first
+        gets the bare-name key."""
+        builder = self._builder(tmp_path)
+        img1 = base.Image(script="/tmp/install.sh", formats=["zst"], name="foo")
+        img2 = base.Image(script="/tmp/install.sh", formats=["zst"], name="bar")
+        result = builder._build_images_dict([img1, img2], "elem", "1.0.0")
+        # Both zst images are present with their full-name keys
+        assert "foo_raw_zst" in result
+        assert "bar_raw_zst" in result
+        # Only the first zst image gets the bare-name key
+        assert "foo" in result
+        assert result["foo"] == result["foo_raw_zst"]
+        assert "bar" not in result
+
+    def test_index_matches_compute_index_entry(self, tmp_path) -> None:
+        """The URI uuid matches compute_index_entry for the image path."""
+        builder = self._builder(tmp_path)
+        img = base.Image(script="/tmp/install.sh", formats=["raw"], name="foo")
+        result = builder._build_images_dict([img], "elem", "1.0.0")
+        expected_uuid = base.ElementInventory.compute_index_entry(
+            "images", "elem", "1.0.0", pathlib.Path("foo.raw")
+        )
+        assert result["foo_raw"] == _urn_image(expected_uuid)
+
+    def test_empty_images(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        assert builder._build_images_dict([], "elem", "1.0.0") == {}

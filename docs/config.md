@@ -27,6 +27,14 @@ realms:
     check_updates: true
     endpoint: http://10.40.0.2:11010
     skip_tls_verify: true
+repositories:
+  my-repo:
+    driver: nginx
+    url: http://repo.example.com:8080/
+    auth: [user, pass]
+  local-repo:
+    driver: nginx
+    url: http://10.20.0.2:8080/repo/
 developer_key_path: ~/.ssh/id_rsa.pub
 ```
 
@@ -51,9 +59,39 @@ The path to your ssh key.
 You can change the path to the ssh key by config or by setting the command line argument `--developer_key_path` or `-i`
 or by environment variable `GEN_DEV_KEYS`.
 
-## Init
+## Repositories
 
-You can interactively init the config file by running the following command:
+Repositories are used to store and distribute build artifacts. You can manage them in the config file under the `repositories` key, or by using the `exordos settings repo` commands.
+
+### List repositories
+
+```bash
+exordos settings repo list
+```
+
+Show repositories in JSON format with sensitive data:
+
+```bash
+exordos settings repo list -o json --show-sensitive
+```
+
+### Add a repository
+
+```bash
+exordos settings repo add my-repo --driver nginx --url http://repo.example.com:8080/ --username user --password pass
+```
+
+The credentials are stored as `auth: [user, pass]` in the configuration file.
+
+### Delete a repository
+
+```bash
+exordos settings repo delete my-repo
+```
+
+## Initialization
+
+You can interactively initialize the config file by running the following command:
 
 ```bash
 exordos settings init

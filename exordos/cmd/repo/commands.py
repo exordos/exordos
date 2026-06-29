@@ -15,23 +15,50 @@
 #    under the License.
 from __future__ import annotations
 
-import json
 import pathlib
 import typing as tp
+import uuid as sys_uuid
 
-import rich.status as rich_status
 import rich_click as click
 
 from exordos import constants as c
-from exordos.builder import base as base_builder
-from exordos.common.table import get_table
-from exordos.common.table import print_table
-from exordos.repo import base as base_repo
-from exordos.repo import fs as repo_fs
+from exordos.clients import base_client
+from exordos.cmd.base import create_entity_group
+from exordos.cmd.repo.elements import commands as elements_commands
+from exordos.common.table import show_data
 from exordos.repo import utils as repo_utils
 
 if tp.TYPE_CHECKING:
     from exordos.common.cmd_context import ContextObject
+
+
+# Repository management constants and functions
+REPOSITORY_ENTITY = "repository"
+REPOSITORY_FIELDS_MAP = {
+    "UUID": "uuid",
+    "Project": "project_id",
+    "Name": "name",
+    "Priority": "priority",
+    "Refresh Rate": "refresh_rate",
+    "Sync mode": "sync_mode",
+    "URI": lambda x: x.get("driver_spec", {}).get("url", ""),
+    "Status": "status",
+}
+
+
+def _build_driver_spec(
+    url: str | None,
+    username: str | None,
+    password: str | None,
+) -> dict[str, str] | None:
+    if url is None:
+        return None
+    spec = {"kind": "nginx", "url": url}
+    if username is not None:
+        spec["username"] = username
+    if password is not None:
+        spec["password"] = password
+    return spec
 
 
 @click.group("repo", help="Manage Exordos repository")
@@ -39,142 +66,285 @@ def repository_group():
     pass
 
 
-@repository_group.command("init", help="Initialize the repository")
-@click.option(
-    "-c",
-    "--exordos-cfg-file",
-    default=c.DEF_GEN_CFG_FILE_NAME,
-    help="Name of the project configuration file",
+# Repository list and delete commands (from create_entity_group)
+_repository_group = create_entity_group(
+    REPOSITORY_ENTITY,
+    c.REPOSITORY_COLLECTION,
+    REPOSITORY_FIELDS_MAP,
+    None,
+    add_list_command=True,
+    add_show_command=True,
+    add_delete_command=True,
 )
-@click.option(
-    "-t",
-    "--target",
-    default=None,
-    help="Target repository to push to",
-)
-@click.option(
-    "-f",
-    "--force",
-    show_default=True,
-    is_flag=True,
-    help="Force init even if the repo already exists",
-)
-@click.argument("project_dir", type=click.Path(), default=".")
-@click.pass_obj
-def repo_init_cmd(
-    obj: "ContextObject",
-    exordos_cfg_file: str,
-    target: str | None,
-    force: bool,
-    project_dir: str,
-) -> None:
 
-    driver = repo_utils.load_repo_driver(
-        exordos_cfg_file, target, project_dir, obj.cfg_path
+# Add list and delete commands to main repo group
+repository_group.add_command(_repository_group.commands["list"], aliases=["l"])
+repository_group.add_command(_repository_group.commands["show"], aliases=["get", "g"])
+repository_group.add_command(_repository_group.commands["delete"], aliases=["d"])
+
+
+@click.command("add", help=f"Add a new {REPOSITORY_ENTITY}")
+@click.pass_context
+@click.option(
+    "-u",
+    "--uuid",
+    type=click.UUID,
+    default=None,
+    help=f"UUID of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "-p",
+    "--project-id",
+    type=click.UUID,
+    required=True,
+    help=f"UUID of the project in which to deploy the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default="",
+    help=f"Name of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default="",
+    help=f"Description of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "--priority",
+    type=int,
+    default=2048,
+    help=f"Priority of the {REPOSITORY_ENTITY} (0-4096)",
+)
+@click.option(
+    "--refresh-rate",
+    type=int,
+    default=3600,
+    help=f"Refresh rate of the {REPOSITORY_ENTITY} in seconds",
+)
+@click.option(
+    "--sync-mode",
+    type=click.Choice(["copy", "lazy"]),
+    default="lazy",
+    help=f"Sync mode of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "--repo-url",
+    type=str,
+    required=True,
+    help="URL of the repository. Example: https://repo.exordos.com/exordos-elements/",
+)
+@click.option(
+    "--repo-user",
+    type=str,
+    default=None,
+    help="Username for the repository",
+)
+@click.option(
+    "--repo-password",
+    type=str,
+    default=None,
+    help="Password for the repository",
+)
+def repository_add_cmd(
+    ctx: click.Context,
+    uuid: sys_uuid.UUID | None,
+    project_id: sys_uuid.UUID,
+    name: str,
+    description: str,
+    priority: int,
+    refresh_rate: int,
+    sync_mode: str,
+    repo_url: str,
+    repo_user: str | None,
+    repo_password: str | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    if uuid is None:
+        uuid = sys_uuid.uuid4()
+    data = {
+        "uuid": str(uuid),
+        "project_id": str(project_id),
+        "name": name,
+        "description": description,
+        "priority": priority,
+        "refresh_rate": refresh_rate,
+        "sync_mode": sync_mode,
+    }
+    driver_spec = _build_driver_spec(repo_url, repo_user, repo_password)
+    if driver_spec is not None:
+        data["driver_spec"] = driver_spec
+    entity = base_client.add_entity(client, c.REPOSITORY_COLLECTION, data)
+    show_data(entity)
+
+
+@click.command("update", help=f"Update {REPOSITORY_ENTITY}")
+@click.pass_context
+@click.argument(
+    "uuid",
+    type=str,
+    required=True,
+)
+@click.option(
+    "-p",
+    "--project-id",
+    type=click.UUID,
+    default=None,
+    help=f"UUID of the project in which to deploy the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default=None,
+    help=f"Name of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default=None,
+    help=f"Description of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "--status",
+    type=click.Choice(["NEW", "ACTIVE", "IN_PROGRESS", "DISABLED", "ERROR"]),
+    default=None,
+    help=f"Status of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "--priority",
+    type=int,
+    default=None,
+    help=f"Priority of the {REPOSITORY_ENTITY} (0-4096)",
+)
+@click.option(
+    "--refresh-rate",
+    type=int,
+    default=None,
+    help=f"Refresh rate of the {REPOSITORY_ENTITY} in seconds",
+)
+@click.option(
+    "--sync-mode",
+    type=click.Choice(["copy", "lazy"]),
+    default=None,
+    help=f"Sync mode of the {REPOSITORY_ENTITY}",
+)
+@click.option(
+    "--repo-url",
+    type=str,
+    default=None,
+    help="URL of the repository. Example: https://repo.exordos.com/exordos-elements/",
+)
+@click.option(
+    "--repo-user",
+    type=str,
+    default=None,
+    help="Username for the repository",
+)
+@click.option(
+    "--repo-password",
+    type=str,
+    default=None,
+    help="Password for the repository",
+)
+def repository_update_cmd(
+    ctx: click.Context,
+    uuid: str,
+    project_id: sys_uuid.UUID | None,
+    name: str | None,
+    description: str | None,
+    status: str | None,
+    priority: int | None,
+    refresh_rate: int | None,
+    sync_mode: str | None,
+    repo_url: str | None,
+    repo_user: str | None,
+    repo_password: str | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {}
+    if project_id is not None:
+        data["project_id"] = str(project_id)
+    if name is not None:
+        data["name"] = name
+    if description is not None:
+        data["description"] = description
+    if status is not None:
+        data["status"] = status
+    if priority is not None:
+        data["priority"] = priority
+    if refresh_rate is not None:
+        data["refresh_rate"] = refresh_rate
+    if sync_mode is not None:
+        data["sync_mode"] = sync_mode
+
+    driver_spec = _build_driver_spec(repo_url, repo_user, repo_password)
+    if driver_spec is not None:
+        data["driver_spec"] = driver_spec
+
+    entity = base_client.update_entity(client, c.REPOSITORY_COLLECTION, uuid, data)
+    show_data(entity)
+
+
+repository_group.add_command(repository_add_cmd, aliases=["a"])
+repository_group.add_command(repository_update_cmd, aliases=["u"])
+
+
+@click.command("refresh", help=f"Refresh {REPOSITORY_ENTITY}")
+@click.pass_context
+@click.argument(
+    "name_or_uuid",
+    type=str,
+    required=True,
+)
+def repository_refresh_cmd(
+    ctx: click.Context,
+    name_or_uuid: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    entity_uuid = base_client._get_entity_uuid(
+        client, c.REPOSITORY_COLLECTION, name_or_uuid
+    )
+    base_client.action_entity(client, c.REPOSITORY_COLLECTION, "refresh", entity_uuid)
+    click.echo(
+        f"Repository {click.style(name_or_uuid, fg='green')} was refreshed successfully"
     )
 
-    try:
-        driver.init_repo()
-    except base_repo.RepoAlreadyExistsError:
-        if force:
-            driver.delete_repo()
-            driver.init_repo()
-            return
 
-        click.secho(
-            "Repository already exists.",
-            fg="red",
-        )
+repository_group.add_command(repository_refresh_cmd)
 
 
-@repository_group.command("delete", help="Delete the repository")
+@click.command("upload", help=f"Upload element to {REPOSITORY_ENTITY}")
+@click.pass_context
 @click.option(
-    "-c",
-    "--exordos-cfg-file",
-    default=c.DEF_GEN_CFG_FILE_NAME,
-    help="Name of the project configuration file",
+    "-r",
+    "--repository",
+    type=str,
+    required=True,
+    help="Repository name or UUID to upload element to",
 )
-@click.option(
-    "-t",
-    "--target",
-    default=None,
-    help="Target repository to push to",
+@click.argument(
+    "manifest",
+    type=pathlib.Path,
+    required=True,
 )
-@click.argument("project_dir", type=click.Path(), default=".")
-@click.pass_obj
-def repo_delete_cmd(
-    obj: "ContextObject",
-    exordos_cfg_file: str,
-    target: str | None,
-    project_dir: str,
+def repository_upload_cmd(
+    ctx: click.Context,
+    repository: str,
+    manifest: pathlib.Path,
 ) -> None:
-    driver = repo_utils.load_repo_driver(
-        exordos_cfg_file, target, project_dir, obj.cfg_path
-    )
-    driver.delete_repo()
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    repo_utils.do_upload(client, repository, manifest)
 
 
-@repository_group.command("list", help="List elements in the repository")
-@click.option(
-    "-c",
-    "--exordos-cfg-file",
-    default=c.DEF_GEN_CFG_FILE_NAME,
-    help="Name of the project configuration file",
-)
-@click.option(
-    "-t",
-    "--target",
-    default=None,
-    help="Target repository to push to",
-)
-@click.option(
-    "-e",
-    "--element",
-    default=None,
-    help="Element to list",
-)
-@click.argument("project_dir", type=click.Path(), default=".")
-@click.pass_obj
-def repo_list_cmd(
-    obj: "ContextObject",
-    exordos_cfg_file: str,
-    target: str | None,
-    element: str | None,
-    project_dir: str,
-) -> None:
-    table = get_table()
-    driver = repo_utils.load_repo_driver(
-        exordos_cfg_file, target, project_dir, obj.cfg_path
-    )
-    try:
-        elements = driver.list()
-    except base_repo.RepoNotFoundError:
-        click.secho("Repository not found", fg="red")
-        return
+repository_group.add_command(repository_upload_cmd)
 
-    click.secho(f"Repository: {driver.name}", fg="green")
-    if element is not None:
-        if element not in elements:
-            raise click.UsageError(f"Element {element} not found")
-
-        table.add_column("version")
-
-        for version in sorted(elements[element]):
-            table.add_row(version)
-
-        print_table(table)
-        return
-
-    table.add_column("name")
-    table.add_column("last version")
-    table.add_column("versions")
-
-    for element in elements:
-        table.add_row(
-            element, sorted(elements[element])[-1], str(len(elements[element]))
-        )
-
-    print_table(table)
+# Add elements subgroup
+repository_group.add_command(elements_commands.elements_group, aliases=["e"])
 
 
 @repository_group.command("push", help="Push the element to the repository")
@@ -196,7 +366,7 @@ def repo_list_cmd(
     help=(
         "Additional params to pass to the driver. "
         "The format is 'key=value'. For example: --driver-params "
-        'url=http://repo.local.genesis-core.tech:8080/ --driver-params auth=["user","password"]'
+        'url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]'
     ),
 )
 @click.option(
@@ -242,38 +412,4 @@ def push_cmd(
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
     )
-
-    # Every build creates a local repo with built elements into it.
-    build_repo = repo_fs.FSRepoDriver(element_dir)
-    build_repo_dir = pathlib.Path(build_repo.elements_path)
-
-    with open(build_repo_dir / "inventory.json") as f:
-        repo_inventory = json.load(f)
-        repo_elements = repo_inventory["elements"]
-
-    for e_name in repo_elements:
-        # FIXME(akremenetsky): In the build repo only single version is available
-        e_version = tuple(repo_elements[e_name].keys())[0]
-        e_dir = build_repo_dir / e_name / e_version
-        e_inventory = base_builder.ElementInventory.from_dict(
-            repo_elements[e_name][e_version]
-        )
-        e_inventory = e_inventory.replace_with_abspath(e_dir)
-
-        try:
-            with rich_status.Status("Push the element to the repo...", spinner="dots"):
-                repo_driver.push(e_inventory, latest=latest)
-        except base_repo.ElementAlreadyExistsError:
-            if force:
-                repo_driver.remove(e_inventory)
-                with rich_status.Status(
-                    "Push the element to the repo...", spinner="dots"
-                ):
-                    repo_driver.push(e_inventory, latest=latest)
-                    continue
-
-            click.secho(
-                f"Element {e_inventory.name} version "
-                f"{e_inventory.version} already exists.",
-                fg="red",
-            )
+    repo_utils.do_push(repo_driver, element_dir, force, latest)

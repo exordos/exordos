@@ -169,6 +169,14 @@ Closes #123
 - **Title**: Use imperative, present tense: "Add feature", not "Added feature"
 - **Description**: Clear summary of changes
 
+## Verification
+
+When verifying changes, follow these rules:
+
+- **Linting**: Run `tox -e ruff`. Do not invoke `ruff` directly — always go through tox.
+- **Type checking**: Do NOT run `tox -e mypy` (or mypy in any form). Skip type checking entirely.
+- **Tests**: Prefer `tox -e py312` or `pytest exordos/tests/unit/` for the relevant test scope.
+
 ## Additional Guidelines
 
 ### License

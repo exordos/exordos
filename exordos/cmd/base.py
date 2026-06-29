@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+from collections.abc import Callable
 import time
 
 import questionary
@@ -31,9 +32,25 @@ from exordos.common.table import show_data
 
 
 def add_dynamic_parents(parents: list[str] | None = None):
+    """Add required parent UUID options for nested collections.
+
+    For a nested collection such as
+    ``v1/repo/repositories/{repository_uuid}/elements/`` this decorator
+    injects one required ``--<parent>-uuid`` option per parent name. The
+    captured UUIDs are then used by the command to build the full collection
+    URL.
+
+    Example:
+        >>> @add_dynamic_parents(parents=["repository"])
+        ... @click.pass_context
+        ... def list_cmd(ctx: click.Context, repository_uuid: str, **kwargs):
+        ...     collection = f"v1/repo/repositories/{repository_uuid}/elements/"
+    """
+
     def decorator(f):
         if parents is None:
             return f
+
         for parent in parents:
             f = click.option(
                 f"--{parent}-uuid",
@@ -55,6 +72,8 @@ def create_entity_group(
     add_delete_command: bool = True,
     add_clear_command: bool = False,
     parents: list[str] | None = None,
+    post_fetch_handler: Callable[[list[dict], dict], list[dict]] | None = None,
+    extra_options: list[click.Option] | None = None,
 ) -> ClickAliasedGroup:
     """Create a universal click group for entity management."""
 
@@ -125,15 +144,29 @@ def create_entity_group(
             if watch:
                 with Live(refresh_per_second=4) as live:
                     while True:
-                        entities = base_client.list_entities(client, url, **filters)
+                        entities = base_client.list_entities(
+                            client,
+                            url,
+                            **filters,
+                        )
+                        if post_fetch_handler:
+                            entities = post_fetch_handler(entities, kwargs)
                         live.update(
                             fill_table(entities, fields_map, fields), refresh=True
                         )
                         time.sleep(interval)
             else:
-                entities = base_client.list_entities(client, url, **filters)
+                entities = base_client.list_entities(
+                    client,
+                    url,
+                    **filters,
+                )
+                if post_fetch_handler:
+                    entities = post_fetch_handler(entities, kwargs)
                 print_table(fill_table(entities, fields_map, fields), output)
 
+        if extra_options:
+            list_cmd.params.extend(extra_options)
         entity_group.add_command(list_cmd, aliases=["l"])
 
     # Show command
@@ -178,7 +211,11 @@ def create_entity_group(
             required=True,
         )
         @click.option(
-            "--yes", "-y", "y", help="Automatically answer yes for all questions", is_flag=True
+            "--yes",
+            "-y",
+            "y",
+            help="Automatically answer yes for all questions",
+            is_flag=True,
         )
         @add_dynamic_parents(parents)
         @click.pass_context
