@@ -42,7 +42,7 @@ DEFAULT_IAM_SCOPE = "profile"
 ENV_GEN_DEV_KEYS = "GEN_DEV_KEYS"
 
 # Types
-ImageProfileType = tp.Literal["ubuntu_24", "exordos_base"]
+ImageProfileType = tp.Literal["ubuntu_24", "exordos_base", "exordos_base_minimal"]
 ImageFormatType = tp.Literal["raw", "qcow2", "gz", "zst"]
 NetType = tp.Literal["network", "bridge"]
 VersionSuffixType = tp.Literal["latest", "none", "element"]
