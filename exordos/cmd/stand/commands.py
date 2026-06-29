@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import contextlib
 import fnmatch
 import hashlib
 import ipaddress
@@ -29,7 +28,6 @@ import typing as tp
 import urllib.parse
 
 import requests
-import rich.console
 import rich.panel
 import rich.progress
 import rich.status
@@ -41,40 +39,24 @@ from exordos import utils
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
+from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
+from exordos.common import status as status_lib
 from exordos.common import version as version_lib
 import exordos.constants as c
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
-from exordos.logger import DummyLogger
 from exordos.repo import fs as repo_fs
 from exordos.stand import models as stand_models
-
-
-@contextlib.contextmanager
-def _status_done(message: str) -> tp.Generator[rich.status.Status, None, None]:
-    """Context manager that shows a spinner while the body executes.
-
-    Silences :class:`ClickLogger` output during the block so intermediate
-    log messages don't interleave with the spinner.  On successful exit
-    replaces the spinner line with a green checkmark followed by *message*.
-    """
-    _real = ClickLogger.__instance__
-    ClickLogger.__instance__ = DummyLogger()
-    try:
-        with rich.status.Status(message, spinner="dots") as status:
-            yield status
-    finally:
-        ClickLogger.__instance__ = _real
-    rich.console.Console().print(f"[green]\u2713[/green] {message}")
 
 
 def _print_bootstrap_summary(
     installation_name: str,
     admin_password: str,
     core_ip: ipaddress.IPv4Address | None,
+    realm_updated: bool = False,
 ) -> None:
     console = rich.console.Console()
     table = rich.table.Table(show_header=False, box=None, padding=(0, 2))
@@ -87,6 +69,13 @@ def _print_bootstrap_summary(
 
     if core_ip is not None:
         table.add_row("Connection", f"[green]ssh ubuntu@{core_ip}[/green]")
+
+    if realm_updated:
+        table.add_row(
+            "Settings",
+            f"[green]Realm '{installation_name}' saved to "
+            f"~/.exordos/exordosctl.yaml[/green]",
+        )
 
     console.print(
         rich.panel.Panel(
@@ -480,7 +469,7 @@ def _bootstrap_core(
     disks: list[int] | None,
     force: bool,
     core_ip: ipaddress.IPv4Address,
-    repository: str,
+    repository: tp.Tuple[str, ...],
     admin_password: str,
     save_admin_password_file: str | None,
     manifest_path: str,
@@ -615,6 +604,54 @@ def _bootstrap_core(
     return dev_stand.network.cidr[2]
 
 
+def _update_realm_config(
+    realm_name: str,
+    realm_ip: ipaddress.IPv4Address,
+    cidr: ipaddress.IPv4Network,
+    admin_password: str,
+    cfg_path: str = c.CONFIG_FILE,
+) -> None:
+    """Update the realm entry in exordosctl.yaml after bootstrap."""
+    logger = ClickLogger()
+
+    try:
+        with open(cfg_path, "r") as f:
+            config = yaml.safe_load(f) or {}
+    except FileNotFoundError:
+        config = {}
+
+    if "realms" not in config:
+        config["realms"] = {}
+
+    existing = config["realms"].get(realm_name, {})
+    existing_meta = existing.get("meta", {})
+
+    config["realms"][realm_name] = {
+        "endpoint": f"http://{realm_ip}/api/core",
+        "check_updates": existing.get("check_updates", True),
+        "skip_tls_verify": existing.get("skip_tls_verify", True),
+        "local": True,
+        "meta": {**existing_meta, "cidr": str(cidr)},
+        "contexts": existing.get("contexts", {}),
+        "current-context": existing.get("current-context"),
+    }
+
+    if not config["realms"][realm_name]["contexts"]:
+        config["realms"][realm_name]["contexts"] = {
+            "admin": {
+                "user": "admin",
+                "password": admin_password,
+            }
+        }
+        config["realms"][realm_name]["current-context"] = "admin"
+
+    if not config.get("current-realm"):
+        config["current-realm"] = realm_name
+
+    settings_config.save_config(config, cfg_path)
+    logger.info(f"Realm '{realm_name}' configuration updated in {cfg_path}")
+
+
 @click.command("bootstrap", help="Bootstrap exordos locally")
 @click.option(
     "-i",
@@ -732,9 +769,10 @@ def _bootstrap_core(
 @click.option(
     "-r",
     "--repository",
-    default=f"{c.EXORDOS_REPO_URL}/",
+    multiple=True,
+    default=(f"{c.ELEMENT_REPO_URL}/",),
     type=str,
-    help="Default element repository",
+    help="Default element repository (can be specified multiple times)",
     show_default=True,
 )
 @click.option(
@@ -863,7 +901,16 @@ def _bootstrap_core(
     "--elements",
     multiple=True,
     type=str,
-    help="Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas",
+    help=(
+        "Elements to install. Can be specified multiple times. "
+        "Example: --elements empty --elements dbaas"
+    ),
+)
+@click.option(
+    "--no-update-realm",
+    is_flag=True,
+    default=False,
+    help="Do not update the realm configuration in exordosctl.yaml after bootstrap",
 )
 @click.pass_context
 def bootstrap_cmd(
@@ -882,7 +929,7 @@ def bootstrap_cmd(
     boot_bridge: str | None,
     force: bool,
     no_wait: bool,
-    repository: str,
+    repository: tp.Tuple[str, ...],
     admin_password: str | None,
     save_admin_password_file: str | None,
     hyper_connection_uri: str,
@@ -899,6 +946,7 @@ def bootstrap_cmd(
     settings: bool,
     ssh_public_key: tp.Tuple[str, ...],
     elements: tp.Tuple[str, ...],
+    no_update_realm: bool,
 ) -> None:
     if not inventory:
         raise click.UsageError("No inventory specified")
@@ -1060,7 +1108,7 @@ def bootstrap_cmd(
             fg="cyan",
         )
     else:
-        with _status_done("Registering realm in ecosystem..."):
+        with status_lib.status_done("Registering realm in ecosystem..."):
             realm_uuid, realm_secret, realm_tokens = _register_core(
                 ecosystem_endpoint=ecosystem_endpoint,
                 disable_telemetry=disable_telemetry,
@@ -1081,7 +1129,7 @@ def bootstrap_cmd(
         if subprocess.call(["sudo", "-v"]) != 0:
             raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
 
-    with _status_done(f"Launching Exordos installation '{name}'... "):
+    with status_lib.status_done(f"Launching Exordos installation '{name}'... "):
         core_ip_result = _bootstrap_core(
             image_path=image_path,
             image_uri=image_uri,
@@ -1109,10 +1157,24 @@ def bootstrap_cmd(
             elements=list(elements) if elements else None,
         )
 
+    realm_updated = False
+    if not no_update_realm:
+        realm_ip = core_ip_result if core_ip_result is not None else core_ip
+        if realm_ip is not None:
+            _update_realm_config(
+                realm_name=name,
+                realm_ip=realm_ip,
+                cidr=cidr,
+                admin_password=admin_password,
+                cfg_path=ctx.obj.cfg_path,
+            )
+            realm_updated = True
+
     _print_bootstrap_summary(
         installation_name=name,
         admin_password=admin_password,
         core_ip=core_ip_result,
+        realm_updated=realm_updated,
     )
 
     if settings:

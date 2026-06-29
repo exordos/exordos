@@ -105,6 +105,38 @@ class TestCli:
             assert result.exit_code == 0
             assert f"realm '{new_realm}' set" in result.output
 
+    def test_set_realm_with_local_and_meta(self, cli_runner, cli_config_data):
+        new_realm = "test-realm-meta"
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            settings_config.save_config(cli_config_data, f.name)
+            result = cli_runner.invoke(
+                cli.exordos,
+                [
+                    "--config",
+                    f.name,
+                    "settings",
+                    "set-realm",
+                    new_realm,
+                    "--endpoint",
+                    "http://example.com",
+                    "--local",
+                    "--meta",
+                    "cidr=10.20.0.0/22",
+                    "--meta",
+                    "region=eu",
+                ],
+            )
+            assert result.exit_code == 0
+            assert f"realm '{new_realm}' set" in result.output
+
+            saved = settings_config.load_config(
+                get_current_context(silent=True), f.name
+            )
+            realm_data = saved["realms"][new_realm]
+            assert realm_data["local"] is True
+            assert realm_data["meta"]["cidr"] == "10.20.0.0/22"
+            assert realm_data["meta"]["region"] == "eu"
+
     def test_delete_realm_command(self, cli_runner, cli_config_data):
         new_realm = "test-realm"
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
@@ -208,3 +240,69 @@ class TestCli:
             )
             assert result.exit_code == 0
             assert "Context 'new-new-context' deleted" in result.output
+
+    def test_repo_commands(self, cli_runner):
+        result = cli_runner.invoke(cli.exordos, ["repo", "--help"])
+        assert result.exit_code == 0
+        assert "add" in result.output
+        assert "update" in result.output
+
+    def test_repo_elements_commands(self, cli_runner):
+        result = cli_runner.invoke(cli.exordos, ["repo", "elements", "--help"])
+        assert result.exit_code == 0
+        assert "list" in result.output
+        assert "show" in result.output
+
+    def test_list_repos_command(self, cli_runner):
+        result = cli_runner.invoke(
+            cli.exordos, self._def_args + ["settings", "repo", "list"]
+        )
+        assert result.exit_code == 0
+        assert "default-repo" in result.output
+        assert "another-repo" in result.output
+        # password is masked by default
+        assert "admin" not in result.output
+
+    def test_list_repos_show_sensitive(self, cli_runner):
+        result = cli_runner.invoke(
+            cli.exordos,
+            self._def_args + ["settings", "repo", "list", "--show-sensitive"],
+        )
+        assert result.exit_code == 0
+        assert "admin" in result.output
+
+    def test_add_repo_command(self, cli_runner, cli_config_data):
+        new_repo = "test-repo"
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            settings_config.save_config(cli_config_data, f.name)
+            result = cli_runner.invoke(
+                cli.exordos,
+                [
+                    "--config",
+                    f.name,
+                    "settings",
+                    "repo",
+                    "add",
+                    new_repo,
+                    "--driver",
+                    "nginx",
+                    "--url",
+                    "http://example.com:8080/",
+                    "--username",
+                    "user",
+                    "--password",
+                    "pass",
+                ],
+            )
+            assert result.exit_code == 0
+            assert f"repo '{new_repo}' set" in result.output
+
+    def test_delete_repo_command(self, cli_runner, cli_config_data):
+        repo = "another-repo"
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            settings_config.save_config(cli_config_data, f.name)
+            result = cli_runner.invoke(
+                cli.exordos, ["--config", f.name, "settings", "repo", "delete", repo]
+            )
+            assert result.exit_code == 0
+            assert f"repo '{repo}' deleted" in result.output

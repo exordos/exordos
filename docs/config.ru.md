@@ -27,6 +27,14 @@ realms:
     check_updates: true
     endpoint: http://10.40.0.2:11010
     skip_tls_verify: true
+repositories:
+  my-repo:
+    driver: nginx
+    url: http://repo.example.com:8080/
+    auth: [user, pass]
+  local-repo:
+    driver: nginx
+    url: http://10.20.0.2:8080/repo/
 developer_key_path: ~/.ssh/id_rsa.pub
 ```
 
@@ -50,6 +58,36 @@ exordos --config ~/.exordos.yaml elements list
 
 Вы можете изменить путь к SSH-ключу через конфигурацию или установив аргумент командной строки `--developer_key_path` или `-i`
 или через переменную окружения `GEN_DEV_KEYS`.
+
+## Репозитории
+
+Репозитории используются для хранения и распространения артефактов сборки. Вы можете управлять ими в файле конфигурации через ключ `repositories` или с помощью команд `exordos settings repo`.
+
+### Список репозиториев
+
+```bash
+exordos settings repo list
+```
+
+Показать репозитории в формате JSON с чувствительными данными:
+
+```bash
+exordos settings repo list -o json --show-sensitive
+```
+
+### Добавить репозиторий
+
+```bash
+exordos settings repo add my-repo --driver nginx --url http://repo.example.com:8080/ --username user --password pass
+```
+
+Учётные данные сохраняются как `auth: [user, pass]` в файле конфигурации.
+
+### Удалить репозиторий
+
+```bash
+exordos settings repo delete my-repo
+```
 
 ## Инициализация
 

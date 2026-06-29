@@ -31,6 +31,7 @@ from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
 from exordos.cmd.compute.nodes import commands as nodes_commands
 from exordos.cmd.configs import commands as configs_commands
+from exordos.cmd.deploy import commands as deploy_commands
 from exordos.cmd.dns import dns_group
 from exordos.cmd.em import em_group
 from exordos.cmd.em.elements import commands as elements_commands
@@ -308,6 +309,7 @@ exordos.add_command(configs_commands.configs_group)
 exordos.add_command(settings_commands.settings_group)
 exordos.add_command(repo_commands.repository_group)
 exordos.add_command(repo_commands.push_cmd)
+exordos.add_command(deploy_commands.deploy_cmd)
 
 exordos.add_command(initialization_commands.init_cmd)
 

@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import dataclasses
+import ipaddress
 import os
 
 import requests
@@ -27,7 +28,21 @@ from exordos.common.table import print_table
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
+from exordos.stand import models as stand_models
 from exordos.utils import get_ip_from_url
+
+
+def get_stand_core_ip(
+    stand: "stand_models.Stand",
+) -> str | ipaddress.IPv4Address | None:
+    """Return the core VM's IP address for a local libvirt stand.
+
+    Shared by the realm listing/deletion commands here and by
+    `exordos deploy`'s bind-address auto-detection.
+    """
+    if stand.network.dhcp:
+        return libvirt.get_domain_ip(stand.bootstraps[0].name)
+    return stand.network.cidr[2]
 
 
 @click.group("realms", cls=ClickAliasedGroup, help="Manage realms")
@@ -71,10 +86,7 @@ def ssh_cmd(realm: str | None, username: str) -> None:
     else:
         raise click.UsageError("No exordos realm found")
 
-    if dev_stand.network.dhcp:
-        ip_address = libvirt.get_domain_ip(dev_stand.bootstraps[0].name)
-    else:
-        ip_address = dev_stand.network.cidr[2]
+    ip_address = get_stand_core_ip(dev_stand)
 
     os.system(f"ssh {username}@{ip_address}")
 
@@ -107,10 +119,7 @@ def list_cmd(ctx: click.Context) -> None:
 
     # Get the list of local realms by libvirt
     for stand in infra.list_stands():
-        if stand.network.dhcp:
-            ip = libvirt.get_domain_ip(stand.bootstraps[0].name)
-        else:
-            ip = stand.network.cidr[2]
+        ip = get_stand_core_ip(stand)
         realms[str(ip)] = Realm(stand.name, str(ip), "local", "Active")
 
     # Get the list of remote realms by config
@@ -180,10 +189,7 @@ def delete_cmd(ctx: click.Context, name: str) -> None:
             endpoint = config_realm.get("endpoint", "")
             config_ip = get_ip_from_url(endpoint)
             for stand in local_stands:
-                if stand.network.dhcp:
-                    ip = libvirt.get_domain_ip(stand.bootstraps[0].name)
-                else:
-                    ip = stand.network.cidr[2]
+                ip = get_stand_core_ip(stand)
                 if str(ip) == config_ip:
                     clear_local_realm()
                     click.echo(f"Deleting local realm {stand.name}...")

@@ -91,6 +91,13 @@ def get_current_realm(config: dict) -> dict | None:
     return config.get("current-realm")
 
 
+def get_repo(config: dict, repo: str) -> dict:
+    """Return a repository entry from settings by name."""
+    if "repositories" not in config or repo not in config["repositories"]:
+        return {}
+    return config["repositories"][repo]
+
+
 def get_realm(config: dict, realm: str | None = None) -> dict:
     if not realm:
         realm = get_current_realm(config)

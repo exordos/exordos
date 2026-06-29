@@ -28,3 +28,11 @@ realms:
         password: slavoniy_password
     current-context: default
 current-realm: default-realm
+repositories:
+  default-repo:
+    driver: nginx
+    url: http://10.20.0.2:8080/repo/
+    auth: [admin, admin]
+  another-repo:
+    driver: nginx
+    url: http://10.30.0.2:8080/repo/

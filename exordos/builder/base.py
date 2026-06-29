@@ -21,6 +21,7 @@ import json
 import os
 import pathlib
 import typing as tp
+import uuid
 
 import yaml
 
@@ -46,6 +47,21 @@ class Image:
     def format(self) -> str:
         """Return the primary (first) image format."""
         return self.formats[0]
+
+    @property
+    def names(self) -> tuple[str, ...]:
+        """Return all image names with their extensions."""
+        if self.name is None:
+            return tuple()
+
+        result = []
+        for fmt in self.formats:
+            if fmt in ("gz", "zst"):
+                # Compression formats are applied to raw images
+                result.append(f"{self.name}.raw.{fmt}")
+            else:
+                result.append(f"{self.name}.{fmt}")
+        return tuple(result)
 
     @classmethod
     def _resolve_formats(cls, raw_format_str: str) -> list[str]:
@@ -132,7 +148,7 @@ class Artifact:
 
 @dataclasses.dataclass
 class Element:
-    """Element representation."""
+    """Element representation in the exordos.yaml configuration."""
 
     manifest: pathlib.Path | None = None
     images: list[Image] = dataclasses.field(default_factory=list)
@@ -184,27 +200,74 @@ class Element:
         )
 
 
-class ElementInventory(tp.NamedTuple):
+@dataclasses.dataclass
+class ElementInventory:
     """Element inventory."""
 
     file_name = pathlib.Path("inventory.json")
 
+    # Base namespace for the element index. Per-category namespaces are
+    # derived from this one so each category gets a stable, distinct UUID
+    # space.
+    _INDEX_NAMESPACE = uuid.uuid5(
+        uuid.UUID("3b621be9-1acf-42db-a686-6f3bede48527"), "exordos"
+    )
+
     name: str
     version: str
-    images: tp.Collection[pathlib.Path] = tuple()
-    manifests: tp.Collection[pathlib.Path] = tuple()
-    configs: tp.Collection[pathlib.Path] = tuple()
-    templates: tp.Collection[pathlib.Path] = tuple()
-    artifacts: tp.Collection[pathlib.Path] = tuple()
+    images: tp.Collection[pathlib.Path] = dataclasses.field(default_factory=tuple)
+    manifests: tp.Collection[pathlib.Path] = dataclasses.field(default_factory=tuple)
+    configs: tp.Collection[pathlib.Path] = dataclasses.field(default_factory=tuple)
+    templates: tp.Collection[pathlib.Path] = dataclasses.field(default_factory=tuple)
+    artifacts: tp.Collection[pathlib.Path] = dataclasses.field(default_factory=tuple)
+    # Derived automatically in __post_init__; never set externally.
+    index: dict[str, dict[str, str]] = dataclasses.field(
+        init=False, default_factory=dict
+    )
+
+    def __post_init__(self) -> None:
+        """Compute the element index automatically."""
+        self.index = self.compute_index()
 
     @classmethod
     def categories(cls) -> tuple[str, str, str, str, str]:
         return "images", "manifests", "configs", "templates", "artifacts"
 
+    @classmethod
+    def compute_index_entry(
+        cls, category: str, name: str, version: str, path: pathlib.Path
+    ) -> str:
+        """Compute a single index key for one item.
+
+        Returns the UUID (as a string) that maps to ``path.name`` under
+        the given ``category`` for element ``name``/``version``.
+        """
+        namespace = uuid.uuid5(cls._INDEX_NAMESPACE, category)
+        key = f"{name}-{version}-{path.name}"
+        return str(uuid.uuid5(namespace, key))
+
+    def compute_index(self) -> dict[str, dict[str, str]]:
+        """Build the index: ``{category: {uuid: file_name}}``.
+
+        Each category gets its own UUID namespace derived from the base
+        namespace. The key for an item is ``uuid5(category_namespace,
+        f"{name}-{version}-{basename}")``.
+        """
+        index: dict[str, dict[str, str]] = {}
+        for category in self.categories():
+            entries: dict[str, str] = {}
+            for path in getattr(self, category):
+                entries[
+                    self.compute_index_entry(category, self.name, self.version, path)
+                ] = path.name
+            index[category] = entries
+        return index
+
     def to_dict(self) -> dict[str, tp.Any]:
         data = {
             "name": self.name,
             "version": self.version,
+            "index": self.index,
         }
         for category in self.categories():
             data[category] = [str(p) for p in getattr(self, category)]

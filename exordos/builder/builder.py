@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import gzip
+import itertools
 import json
 import os
 import pathlib
@@ -23,6 +24,7 @@ import shutil
 import subprocess
 import tempfile
 import typing as tp
+import uuid as sys_uuid
 
 import jinja2
 import rich_click as click
@@ -34,6 +36,10 @@ from exordos.logger import AbstractLogger
 from exordos.logger import DummyLogger
 from exordos.repo import fs as repo_fs
 from exordos.spec import schema
+
+
+def _urn_image(uuid: str | sys_uuid.UUID) -> str:
+    return f"urn:images:{uuid}"
 
 
 class SimpleBuilder:
@@ -181,6 +187,84 @@ class SimpleBuilder:
 
         return image_paths
 
+    def _build_images_dict(
+        self,
+        element_images: list[base.Image],
+        element_name: str,
+        element_version: str,
+    ) -> dict[str, str]:
+        """Build images dictionary with URI mappings for manifest templates.
+
+        Creates a mapping from image name variants to URIs that can be used in
+        Jinja2 manifest templates. The mapping includes:
+        - Base name without extension (for single images or ZST images)
+        - Full name with dots and hyphens replaced by underscores
+
+        Args:
+            element_images: List of Image objects from the element
+            element_name: Name of the element
+            element_version: Version of the element
+
+        Returns:
+            Dictionary mapping image name variants to URIs.
+
+        Example:
+            If element_images has formats ["qcow2", "raw"] with name "foo":
+            {
+                "foo": "urn:images:{uuid}",
+                "foo_qcow2": "urn:images:{uuid}",
+                "foo_raw": "urn:images:{uuid}"
+            }
+
+            If element_images has formats ["raw.zst", "qcow2"] with name "bar":
+            {
+                "bar": "urn:images:{uuid}",
+                "bar_raw_zst": "urn:images:{uuid}",
+                "bar_qcow2": "urn:images:{uuid}"
+            }
+        """
+        images: dict[str, str] = {}
+
+        image_names = list(
+            itertools.chain.from_iterable(img.names for img in element_images)
+        )
+
+        def add_image(name: str, include_no_ext: bool = False) -> None:
+            idx = base.ElementInventory.compute_index_entry(
+                "images",
+                element_name,
+                element_version,
+                pathlib.Path(name),
+            )
+            if include_no_ext:
+                # Remove all known image extensions from the end
+                base_name = name
+                for ext in [".raw.zst", ".raw.gz", ".raw", ".qcow2", ".gz", ".zst"]:
+                    if base_name.endswith(ext):
+                        base_name = base_name[: -len(ext)]
+                        break
+                image_no_ext = base_name.replace("-", "_").lower()
+                images[image_no_ext] = _urn_image(idx)
+            image_ext = name.replace("-", "_").replace(".", "_").lower()
+            images[image_ext] = _urn_image(idx)
+
+        if len(image_names) == 1:
+            add_image(image_names[0], include_no_ext=True)
+        # ZST image is more preferred. Allow to use it without extension
+        elif any(i.endswith(".zst") for i in image_names):
+            zst_added = False
+            for image_name in image_names:
+                if image_name.endswith(".zst"):
+                    add_image(image_name, include_no_ext=not zst_added)
+                    zst_added = True
+                else:
+                    add_image(image_name)
+        else:
+            for image_name in image_names:
+                add_image(image_name)
+
+        return images
+
     def _build_manifest(
         self,
         element: base.Element,
@@ -190,14 +274,23 @@ class SimpleBuilder:
         """Build manifests for the element."""
         orig_manifest_path = self._exordos_dir / element.manifest
 
+        # Compute images indexes
+        images = self._build_images_dict(
+            element.images,
+            manifest_vars["name"],
+            manifest_vars["version"],
+        )
+
         # Render templated manifests
         jinja2_extensions = (".jinja2", ".j2")
+
         if str(element.manifest).endswith(jinja2_extensions):
             # Render Jinja2 manifest
             with open(orig_manifest_path) as f:
                 template = jinja2.Template(f.read())
             rendered_manifest = template.render(
                 manifests=[element.manifest.name],
+                images=images,
                 **manifest_vars,
             )
 

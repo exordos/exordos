@@ -15,13 +15,16 @@
 #    under the License.
 from __future__ import annotations
 
+import copy
 import json
 import os
+import typing as tp
 
 import rich_click as click
 import yaml
 
 from exordos import constants as c
+from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.settings.config import get_current_realm
 from exordos.cmd.settings.config import save_config
 
@@ -88,17 +91,18 @@ def use_realm(ctx: click.Context, realm: str) -> None:
 @click.pass_context
 def list_realms(ctx: click.Context, output: str, show_sensitive: bool) -> None:
     config = ctx.obj.cfg
+    realms = copy.deepcopy(config.get("realms", {}))
 
     if not show_sensitive:
-        for realm in config.get("realms", {}).values():
+        for realm in realms.values():
             for context in realm.get("contexts", {}).values():
                 context["password"] = "*"
                 context["user"] = "*"
 
     if output == "json":
-        click.echo(json.dumps(config.get("realms", {}), indent=2))
+        click.echo(json.dumps(realms, indent=2))
     else:
-        click.echo(yaml.dump(config.get("realms", {}), default_flow_style=False))
+        click.echo(yaml.dump(realms, default_flow_style=False))
 
 
 @settings_group.command("set-realm", help="Set a realm entry in settings")
@@ -125,6 +129,19 @@ def list_realms(ctx: click.Context, output: str, show_sensitive: bool) -> None:
     help="Skip TLS certificate verification",
 )
 @click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="Mark the realm as local",
+)
+@click.option(
+    "-m",
+    "--meta",
+    multiple=True,
+    type=str,
+    help="Arbitrary key=value metadata for the realm (can be repeated)",
+)
+@click.option(
     "--current",
     is_flag=True,
     default=False,
@@ -137,6 +154,8 @@ def set_realm(
     endpoint: str | None,
     check_updates: bool,
     skip_tls_verify: bool,
+    local: bool,
+    meta: tuple[str, ...],
     current: bool,
 ) -> None:
     config = ctx.obj.cfg
@@ -144,12 +163,26 @@ def set_realm(
     if "realms" not in config:
         config["realms"] = {}
 
-    realm_config = {
+    meta_dict: dict[str, str] = {}
+    if realm in config["realms"]:
+        meta_dict = config["realms"][realm].get("meta", {})
+    for item in meta:
+        if "=" not in item:
+            raise click.ClickException(
+                f"Invalid meta value '{item}', expected key=value format"
+            )
+        key, _, value = item.partition("=")
+        meta_dict[key.strip()] = value.strip()
+
+    realm_config: dict[str, tp.Any] = {
         "endpoint": endpoint,
         "check_updates": check_updates,
         "skip_tls_verify": skip_tls_verify,
+        "local": local,
         "contexts": {},
     }
+    if meta_dict:
+        realm_config["meta"] = meta_dict
     if realm in config["realms"]:
         realm_config["contexts"] = config["realms"][realm].get("contexts", {})
     config["realms"][realm] = realm_config
@@ -175,6 +208,113 @@ def delete_realm(ctx: click.Context, realm: str) -> None:
     del config["realms"][realm]
     save_config(config, ctx.obj.cfg_path)
     click.echo(f"realm '{realm}' deleted")
+
+
+@click.group(
+    "repo",
+    cls=ClickAliasedGroup,
+    help="Manage repository entries in the settings file",
+)
+def repo_group():
+    pass
+
+
+@repo_group.command("list", help="List repositories from the settings file")
+@click.option(
+    "-o",
+    "--output",
+    type=click.Choice(["json", "yaml"]),
+    default="yaml",
+    help="Output format",
+)
+@click.option(
+    "--show-sensitive",
+    is_flag=True,
+    default=False,
+    help="Show sensitive data",
+)
+@click.pass_context
+def list_repos(ctx: click.Context, output: str, show_sensitive: bool) -> None:
+    config = ctx.obj.cfg
+    repositories = copy.deepcopy(config.get("repositories", {}))
+
+    if not show_sensitive:
+        for repo in repositories.values():
+            if "auth" in repo:
+                repo["auth"] = ["*", "*"]
+
+    if output == "json":
+        click.echo(json.dumps(repositories, indent=2))
+    else:
+        click.echo(yaml.dump(repositories, default_flow_style=False))
+
+
+@repo_group.command("add", help="Add a repository entry to the settings file")
+@click.argument("repo", type=str, required=True)
+@click.option(
+    "-d",
+    "--driver",
+    required=True,
+    type=str,
+    help="Driver kind for the repository, e.g. nginx",
+)
+@click.option(
+    "-u",
+    "--url",
+    required=True,
+    type=str,
+    help="URL of the repository",
+)
+@click.option(
+    "--username",
+    type=str,
+    default=None,
+    help="Username for the repository",
+)
+@click.option(
+    "--password",
+    type=str,
+    default=None,
+    help="Password for the repository",
+)
+@click.pass_context
+def add_repo(
+    ctx: click.Context,
+    repo: str,
+    driver: str,
+    url: str,
+    username: str | None,
+    password: str | None,
+) -> None:
+    config = ctx.obj.cfg
+
+    if "repositories" not in config:
+        config["repositories"] = {}
+
+    repo_config: dict[str, tp.Any] = {"driver": driver, "url": url}
+    if username is not None and password is not None:
+        repo_config["auth"] = [username, password]
+    config["repositories"][repo] = repo_config
+
+    save_config(config, ctx.obj.cfg_path)
+    click.echo(f"repo '{repo}' set")
+
+
+@repo_group.command("delete", help="Delete a repository from the settings file")
+@click.argument("repo", type=str, required=True)
+@click.pass_context
+def delete_repo(ctx: click.Context, repo: str) -> None:
+    config = ctx.obj.cfg
+
+    if "repositories" not in config or repo not in config["repositories"]:
+        raise click.ClickException(f"repo '{repo}' not found")
+
+    del config["repositories"][repo]
+    save_config(config, ctx.obj.cfg_path)
+    click.echo(f"repo '{repo}' deleted")
+
+
+settings_group.add_command(repo_group)
 
 
 @settings_group.command("set", help="Set an individual value in a settings file")
