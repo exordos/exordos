@@ -442,6 +442,7 @@ def _bootstrap_core(
     no_start: bool,
     ecosystem_endpoint: str,
     disable_telemetry: bool,
+    registration_auto_provision: bool,
     realm_uuid: str,
     realm_secret: str,
     realm_tokens: dict,
@@ -521,6 +522,7 @@ def _bootstrap_core(
             profile=profile.value,
             ecosystem_endpoint=ecosystem_endpoint,
             disable_telemetry=disable_telemetry,
+            registration_auto_provision=registration_auto_provision,
             realm_uuid=realm_uuid,
             realm_secret=realm_secret,
             realm_tokens=realm_tokens,
@@ -760,6 +762,15 @@ def _bootstrap_core(
     help="Disable telemetry. Anonymized data only is sent by default.",
 )
 @click.option(
+    "--registration-auto-provision",
+    is_flag=True,
+    envvar="REGISTRATION_AUTO_PROVISION",
+    help=(
+        "Automatically provision a personal organization and project for a user "
+        "when they confirm their email."
+    ),
+)
+@click.option(
     "--org-token",
     prompt=False,
     hide_input=True,
@@ -817,6 +828,7 @@ def bootstrap_cmd(
     no_start: bool,
     no_registration: bool,
     disable_telemetry: bool,
+    registration_auto_provision: bool,
     org_token: str | None,
     ecosystem_endpoint: str,
     settings: bool,
@@ -990,6 +1002,7 @@ def bootstrap_cmd(
             no_start=no_start,
             ecosystem_endpoint=ecosystem_endpoint,
             disable_telemetry=disable_telemetry,
+            registration_auto_provision=registration_auto_provision,
             realm_uuid=realm_uuid,
             realm_secret=realm_secret,
             realm_tokens=realm_tokens,
