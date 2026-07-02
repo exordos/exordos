@@ -44,6 +44,7 @@ from exordos.cmd.settings import commands as settings_commands
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand import commands as stand_commands
 from exordos.cmd.stand import utils_commands
+from exordos.cmd.ua import ua_group
 from exordos.cmd.version import commands as version_commands
 from exordos.cmd.vs import vs_group
 from exordos.cmd.vs.vars import commands as vars_commands
@@ -315,6 +316,8 @@ exordos.add_command(version_commands.get_project_version_cmd)
 exordos.add_command(stand_commands.bootstrap_cmd)
 exordos.add_command(stand_commands.backup_cmd)
 exordos.add_command(stand_commands.backup_decrypt_cmd)
+
+exordos.add_command(ua_group)
 
 exordos.add_command(utils_commands.openapi_spec)
 exordos.add_command(utils_commands.hello)
