@@ -571,7 +571,11 @@ def define(
     ]
     resource = schema["components"]["schemas"][resource_ref]
     resource_def = resource["properties"]
-    resource_json = {k: v.get("example", "") for k, v in resource_def.items()}
+    resource_json = {
+        k: v.get("example", "")
+        for k, v in resource_def.items()
+        if not v.get("readOnly", False)
+    }
     manifest = base_client.get_entity(client, c.MANIFEST_COLLECTION, uuid_name)
     if resource_type not in manifest["resources"]:
         manifest["resources"][resource_type] = {}

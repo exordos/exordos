@@ -86,6 +86,9 @@ CONFIG_COLLECTION = "/v1/config/configs/"
 DOMAIN_COLLECTION = "/v1/dns/domains/"
 RECORD_COLLECTION = "/v1/dns/domains/{domain_uuid}/records/"
 
+AGENT_COLLECTION = "/v1/ua/agents/"
+ACTUAL_RESOURCE_COLLECTION = "/v1/ua/resources/"
+TARGET_RESOURCE_COLLECTION = "/v1/ua/target_resources/"
 
 LB_COLLECTION = "/v1/network/lb/"
 BACKEND_POOL_COLLECTION = "/v1/network/lb/{lb_uuid}/backend_pools/"
