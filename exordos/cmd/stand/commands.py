@@ -414,6 +414,41 @@ def _register_core(
     return realm_uuid, realm_secret, tokens_dict
 
 
+REALM_SPEC_REQUIRED_KEYS = (
+    "realm_uuid",
+    "realm_secret",
+    "realm_tokens",
+    "ecosystem_endpoint",
+    "admin_password",
+)
+
+
+def _load_realm_spec(path: str) -> dict:
+    """Load and validate a realm spec delivered by the exordos ecosystem.
+
+    Managed realm nodes receive `/etc/exordos/realm_spec.json` from the
+    ecosystem builder agent (see exordos_ecosystem `docs/realm-manager.md`).
+    The file carries a pre-assigned realm identity, so bootstrap must use
+    it instead of self-registering a new realm.
+    """
+    with open(path) as f:
+        spec = json.load(f)
+
+    spec_version = spec.get("version", 1)
+    if spec_version != 1:
+        raise click.UsageError(
+            f"Unsupported realm spec version: {spec_version}"
+        )
+
+    missing = [key for key in REALM_SPEC_REQUIRED_KEYS if not spec.get(key)]
+    if missing:
+        raise click.UsageError(
+            f"Realm spec {path} misses required keys: {', '.join(missing)}"
+        )
+
+    return spec
+
+
 def _iam_default_client_settings() -> dict:
     return {
         "default_client_uuid": "00000000-0000-0000-0000-000000000000",
@@ -775,6 +810,26 @@ def _bootstrap_core(
     help="Ecosystem's endpoint to connect to",
 )
 @click.option(
+    "--realm-spec",
+    default=None,
+    type=click.Path(exists=True),
+    envvar="REALM_SPEC",
+    help=(
+        "Path to a realm spec file (realm_spec.json) delivered by the "
+        "exordos ecosystem to managed realm nodes. Provides a pre-assigned "
+        "realm identity (uuid, secret, tokens), the ecosystem endpoint and "
+        "the admin password; self-registration is skipped."
+    ),
+)
+@click.option(
+    "--download-only",
+    is_flag=True,
+    help=(
+        "Only resolve and download the element inventories (populating "
+        "the local cache), then exit without bootstrapping."
+    ),
+)
+@click.option(
     "--settings",
     show_default=True,
     is_flag=True,
@@ -819,6 +874,8 @@ def bootstrap_cmd(
     disable_telemetry: bool,
     org_token: str | None,
     ecosystem_endpoint: str,
+    realm_spec: str | None,
+    download_only: bool,
     settings: bool,
     ssh_public_key: tp.Tuple[str, ...],
 ) -> None:
@@ -844,6 +901,30 @@ def bootstrap_cmd(
         inventory_instance = repo_driver.inventory("core")
         inventory_eco_instance = repo_driver.inventory("ecosystem_realm")
         eco_manifest_path = str(inventory_eco_instance.manifests[0])
+
+    if download_only:
+        click.secho(
+            "Element inventories are downloaded and cached. "
+            "Exiting (--download-only).",
+            fg="green",
+        )
+        return
+
+    realm_spec_data = None
+    if realm_spec is not None:
+        if org_token or no_registration:
+            raise click.UsageError(
+                "--realm-spec cannot be combined with --org-token "
+                "or --no-registration"
+            )
+        if launch_mode != "core":
+            raise click.UsageError(
+                "--realm-spec is only supported in 'core' launch mode"
+            )
+        realm_spec_data = _load_realm_spec(realm_spec)
+        admin_password = realm_spec_data["admin_password"]
+        ecosystem_endpoint = realm_spec_data["ecosystem_endpoint"]
+        disable_telemetry = bool(realm_spec_data.get("disable_telemetry", False))
 
     profile = Profile[profile.upper()]
 
@@ -948,12 +1029,24 @@ def bootstrap_cmd(
     )
     hypervisors.append(hypervisor)
 
-    with _status_done("Registering realm in ecosystem..."):
-        realm_uuid, realm_secret, realm_tokens = _register_core(
-            ecosystem_endpoint=ecosystem_endpoint,
-            disable_telemetry=disable_telemetry,
-            org_token=org_token,
+    if realm_spec_data is not None:
+        # Managed realm: the identity was pre-assigned by the ecosystem
+        # and the parent realm row already exists there. The child flips
+        # it to ACTIVE by self-reporting with this uuid+secret.
+        realm_uuid = realm_spec_data["realm_uuid"]
+        realm_secret = realm_spec_data["realm_secret"]
+        realm_tokens = realm_spec_data["realm_tokens"]
+        click.secho(
+            "Using pre-assigned realm identity from the realm spec",
+            fg="cyan",
         )
+    else:
+        with _status_done("Registering realm in ecosystem..."):
+            realm_uuid, realm_secret, realm_tokens = _register_core(
+                ecosystem_endpoint=ecosystem_endpoint,
+                disable_telemetry=disable_telemetry,
+                org_token=org_token,
+            )
 
     ssh_public_key_content = None
     if ssh_public_key:
