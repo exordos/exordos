@@ -70,8 +70,7 @@ Additional variables can be passed using the --manifest-var options.
 - `validate`:
     - Type: boolean
     - Default: `true`
-    - Usage: `-v
---validate`
+    - Usage: `--validate`
 
   Validate the manifest after building
 
@@ -101,13 +100,13 @@ Additional variables can be passed using the --manifest-var options.
  Additional variables can be passed using the --manifest-var options.                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
-│ --deps-dir              TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                              │
-│ --output-dir        -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                           │
-│ --ssh-public-key    -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                           │
-│ --force             -f        Rebuild if the output already exists                                                                                                                                                                                                                                      │
-│ --manifest-var          TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                      │
-│ --validate          -v        Validate the manifest after building                                                                                                                                                                                                                                      │
-│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
+│ --exordos-cfg-file        -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                              │
+│ --deps-dir                    TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                        │
+│ --output-dir              -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                     │
+│ --ssh-public-key          -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                     │
+│ --force                   -f        Rebuild if the output already exists                                                                                                                                                                                                                                │
+│ --manifest-var                TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                │
+│ --validate/--no-validate            Validate the manifest after building [default: validate]                                                                                                                                                                                                            │
+│ --help                              Show this message and exit.                                                                                                                                                                                                                                         │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

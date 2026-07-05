@@ -1,22 +1,32 @@
 
-# resources_show
+# agents_list
 
-Show resource
+List agents
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ua resources show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos ua agents list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `uuid` (REQUIRED):
+* `filters`:
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `uuid`
+    * Usage: `-f
+--filters`
+
+  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+
+* `fields`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--fields`
+
+  fields to show, defaults to all, for example: --fields name --fields status
 
 * `output`:
     * Type: choice
@@ -25,6 +35,21 @@ Show resource
 -o`
 
   the output format, defaults to table
+
+* `watch`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-w
+--watch`
+
+  Watch the list of agents
+
+* `interval`:
+    * Type: float range
+    * Default: `0.5`
+    * Usage: `--interval`
+
+  Refresh interval in seconds.
 
 * `help`:
     * Type: boolean
@@ -37,12 +62,16 @@ Show resource
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ua resources show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos ua agents list [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
- Show resource                                                                                                                                                                                                                                                                                             
+ List agents                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
-│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
+│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
+│ --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                     │
+│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
+│ --watch     -w                          Watch the list of agents                                                                                                                                                                                                                                        │
+│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
+│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -1,13 +1,13 @@
 
-# resources_show
+# target_resources_show
 
-Show resource
+Show target_resource
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ua resources show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos ua target_resources show [OPTIONS] UUID                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,9 +37,9 @@ Show resource
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ua resources show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos ua target_resources show [OPTIONS] UUID                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
- Show resource                                                                                                                                                                                                                                                                                             
+ Show target_resource                                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │

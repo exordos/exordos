@@ -298,8 +298,8 @@ exordos.add_command(network_group)
 exordos.add_command(compute_group, aliases=["c"])
 exordos.add_command(nodes_commands.cn_group)
 
-exordos.add_command(em_group, aliases=["e"])
-exordos.add_command(elements_commands.ee_group)
+exordos.add_command(em_group, aliases=["e"]) # exordos em e l, exordos e e l
+exordos.add_command(elements_commands.ee_group, aliases=["elements"]) # exordos ee l, exordos elements l
 exordos.add_command(builds_commands.build_cmd)
 
 exordos.add_command(configs_commands.configs_group)

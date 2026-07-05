@@ -1,13 +1,13 @@
 
-# resources_show
+# agents_show
 
-Show resource
+Show agent
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ua resources show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos ua agents show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,9 +37,9 @@ Show resource
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ua resources show [OPTIONS] UUID                                                                                                                                                                                                                                                           
+ Usage: exordos ua agents show [OPTIONS] UUID                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
- Show resource                                                                                                                                                                                                                                                                                             
+ Show agent                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │

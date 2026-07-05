@@ -91,8 +91,8 @@ from exordos.spec import schema
     ),
 )
 @click.option(
-    "-v",
-    "--validate",
+    "--validate/--no-validate",
+    show_default=True,
     default=True,
     is_flag=True,
     help="Validate the manifest after building",
