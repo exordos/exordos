@@ -319,6 +319,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../agents_list/" class="md-nav__link">
+        agents_list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents_show/" class="md-nav__link">
+        agents_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../auth_disable-otp/" class="md-nav__link">
         auth_disable-otp
       </a>
@@ -1510,6 +1538,20 @@
     <li class="md-nav__item">
       <a href="../exordos_sync/" class="md-nav__link">
         exordos_sync
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exordos_ua/" class="md-nav__link">
+        exordos_ua
       </a>
     </li>
   
@@ -3328,6 +3370,76 @@
   
   
     <li class="md-nav__item">
+      <a href="../target_resources_list/" class="md-nav__link">
+        target_resources_list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../target_resources_show/" class="md-nav__link">
+        target_resources_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ua_agents/" class="md-nav__link">
+        ua_agents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ua_resources/" class="md-nav__link">
+        ua_resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ua_target_resources/" class="md-nav__link">
+        ua_target_resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../users_add/" class="md-nav__link">
         users_add
       </a>
@@ -3826,8 +3938,7 @@
 <li><code>validate</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>true</code></li>
-<li>Usage: <code>-v
---validate</code></li>
+<li>Usage: <code>--validate</code></li>
 </ul>
 </li>
 </ul>
@@ -3863,14 +3974,14 @@
 <span class="go"> Additional variables can be passed using the --manifest-var options.                                                                                                                                                                                                                                      </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │</span>
-<span class="go">│ --deps-dir              TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                              │</span>
-<span class="go">│ --output-dir        -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                           │</span>
-<span class="go">│ --ssh-public-key    -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                           │</span>
-<span class="go">│ --force             -f        Rebuild if the output already exists                                                                                                                                                                                                                                      │</span>
-<span class="go">│ --manifest-var          TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                      │</span>
-<span class="go">│ --validate          -v        Validate the manifest after building                                                                                                                                                                                                                                      │</span>
-<span class="go">│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │</span>
+<span class="go">│ --exordos-cfg-file        -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                              │</span>
+<span class="go">│ --deps-dir                    TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                        │</span>
+<span class="go">│ --output-dir              -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                     │</span>
+<span class="go">│ --ssh-public-key          -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                     │</span>
+<span class="go">│ --force                   -f        Rebuild if the output already exists                                                                                                                                                                                                                                │</span>
+<span class="go">│ --manifest-var                TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                │</span>
+<span class="go">│ --validate/--no-validate            Validate the manifest after building [default: validate]                                                                                                                                                                                                            │</span>
+<span class="go">│ --help                              Show this message and exit.                                                                                                                                                                                                                                         │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
