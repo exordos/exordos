@@ -4122,6 +4122,15 @@
 </ul>
 <p>Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.</p>
 <ul>
+<li><code>elements</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--elements</code></li>
+</ul>
+</li>
+</ul>
+<p>Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -4167,6 +4176,7 @@
 <span class="go">│ --ecosystem-endpoint            TEXT                                 Ecosystem's endpoint to connect to                                                                                                                                                                                                 │</span>
 <span class="go">│ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │</span>
 <span class="go">│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.                                                                                    │</span>
+<span class="go">│ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │</span>
 <span class="go">│ --help                                                               Show this message and exit.                                                                                                                                                                                                        │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
