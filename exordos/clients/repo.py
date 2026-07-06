@@ -82,16 +82,14 @@ class Repository:
         skip_latest: bool = False,
         stable: bool = False,
     ) -> list[str]:
-        versions = [
-            h
-            for h in _extract_hrefs(
-                element_html or self.element_html(self.element_url(manifest_name))
-            )
-        ]
+        element_url = self.element_url(manifest_name)
+        if not element_html:
+            element_html = self.element_html(element_url)
+        versions = _extract_hrefs(element_html)
         if not versions:
             raise ManifestNotFound(
                 f"No version directories found for element '{manifest_name}' "
-                f"at {self.element_url(manifest_name)}"
+                f"at {element_url}, (html: {str(element_html)})"
             )
         # Remove last slash from all versions
         versions = [v.rstrip("/") for v in versions]
