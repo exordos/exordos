@@ -214,6 +214,13 @@ Bootstrap exordos locally
 
   Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.
 
+* `elements`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--elements`
+
+  Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -260,6 +267,7 @@ Bootstrap exordos locally
 │ --ecosystem-endpoint            TEXT                                 Ecosystem's endpoint to connect to                                                                                                                                                                                                 │
 │ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │
 │ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.                                                                                    │
+│ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │
 │ --help                                                               Show this message and exit.                                                                                                                                                                                                        │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
