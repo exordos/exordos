@@ -446,13 +446,14 @@ def _bootstrap_core(
     realm_secret: str,
     realm_tokens: dict,
     ssh_public_key: str | None = None,
+    elements: list[str] | None = None,
 ) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
 
     if not hypervisors:
         logger.error("No hypervisors provided")
-        return
+        return None
 
     # Single bootstrap stand
     if stand_spec is None:
@@ -486,7 +487,7 @@ def _bootstrap_core(
 
     if not dev_stand.is_valid():
         logger.error(f"Invalid stand {dev_stand} from spec {stand_spec}")
-        return
+        return None
 
     infra = libvirt_infra.LibvirtInfraDriver()
 
@@ -501,7 +502,7 @@ def _bootstrap_core(
                 f"Exordos installation {dev_stand.name} is already running. "
                 "Use '--force' flag to force rerun Exordos installation.",
             )
-            return
+            return None
 
         infra.delete_stand(stand)
         logger.info(f"Destroyed old Exordos installation: {dev_stand.name}")
@@ -526,6 +527,7 @@ def _bootstrap_core(
             realm_tokens=realm_tokens,
             developer_keys=ssh_public_key,
             iam=iam,
+            elements=elements,
         )
         logger.info(f"Launched Exordos installation in `{profile.value}` profile")
 
@@ -790,6 +792,12 @@ def _bootstrap_core(
         "If not provided, no key will be injected."
     ),
 )
+@click.option(
+    "--elements",
+    multiple=True,
+    type=str,
+    help="Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas",
+)
 @click.pass_context
 def bootstrap_cmd(
     ctx: click.Context,
@@ -821,6 +829,7 @@ def bootstrap_cmd(
     ecosystem_endpoint: str,
     settings: bool,
     ssh_public_key: tp.Tuple[str, ...],
+    elements: tp.Tuple[str, ...],
 ) -> None:
     if not inventory:
         raise click.UsageError("No inventory specified")
@@ -994,6 +1003,7 @@ def bootstrap_cmd(
             realm_secret=realm_secret,
             realm_tokens=realm_tokens,
             ssh_public_key=ssh_public_key_content,
+            elements=list(elements) if elements else None,
         )
 
     _print_bootstrap_summary(
