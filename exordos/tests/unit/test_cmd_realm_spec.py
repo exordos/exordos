@@ -79,3 +79,41 @@ class TestLoadRealmSpec:
 
         with pytest.raises(click.UsageError, match="version"):
             _load_realm_spec(str(path))
+
+    def test_empty_realm_tokens_allowed(self, tmp_path) -> None:
+        # An empty realm_tokens object is valid (only presence is required).
+        spec = _valid_spec()
+        spec["realm_tokens"] = {}
+        path = tmp_path / "realm_spec.json"
+        path.write_text(json.dumps(spec))
+
+        assert _load_realm_spec(str(path))["realm_tokens"] == {}
+
+    def test_empty_string_key_rejected(self, tmp_path) -> None:
+        spec = _valid_spec()
+        spec["admin_password"] = ""
+        path = tmp_path / "realm_spec.json"
+        path.write_text(json.dumps(spec))
+
+        with pytest.raises(click.UsageError, match="admin_password"):
+            _load_realm_spec(str(path))
+
+    def test_not_a_json_object(self, tmp_path) -> None:
+        path = tmp_path / "realm_spec.json"
+        path.write_text(json.dumps(["not", "an", "object"]))
+
+        with pytest.raises(click.UsageError, match="must be a JSON object"):
+            _load_realm_spec(str(path))
+
+    def test_invalid_json(self, tmp_path) -> None:
+        path = tmp_path / "realm_spec.json"
+        path.write_text("{not valid json")
+
+        with pytest.raises(click.UsageError, match="not a valid JSON"):
+            _load_realm_spec(str(path))
+
+    def test_unreadable_file(self, tmp_path) -> None:
+        path = tmp_path / "does_not_exist.json"
+
+        with pytest.raises(click.ClickException, match="Failed to read"):
+            _load_realm_spec(str(path))
