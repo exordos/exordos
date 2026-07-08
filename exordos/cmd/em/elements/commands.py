@@ -378,7 +378,7 @@ def update_cmd(
 @click.command("uninstall", help="Uninstall manifest by UUID, path or name")
 @click.argument("path_uuid_name", type=str)
 @click.option(
-    "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+    "--yes", "-y", "y", help="Automatically answer yes for all questions", is_flag=True
 )
 @click.pass_context
 def uninstall_cmd(ctx: click.Context, path_uuid_name: str, y: bool) -> None:
