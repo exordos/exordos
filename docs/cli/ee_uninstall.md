@@ -18,6 +18,14 @@ Uninstall manifest by UUID, path or name
     * Default: `sentinel.unset`
     * Usage: `path_uuid_name`
 
+* `y`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--yes
+-y`
+
+  Automatically answer yes for all questions
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -34,6 +42,7 @@ Uninstall manifest by UUID, path or name
  Uninstall manifest by UUID, path or name                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
+│ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │
+│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -18,6 +18,14 @@ Delete vhost
     * Default: `sentinel.unset`
     * Usage: `uuid`
 
+* `y`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--yes
+-y`
+
+  Automatically answer yes for all questions
+
 * `lb_uuid` (REQUIRED):
     * Type: uuid
     * Default: `sentinel.unset`
@@ -39,7 +47,8 @@ Delete vhost
  Delete vhost                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --lb-uuid  UUID  [required]                                                                                                                                                                                                                                                                          │
-│    --help           Show this message and exit.                                                                                                                                                                                                                                                         │
+│    --yes      -y        Automatically answer yes for all questions                                                                                                                                                                                                                                      │
+│ *  --lb-uuid      UUID  [required]                                                                                                                                                                                                                                                                      │
+│    --help               Show this message and exit.                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

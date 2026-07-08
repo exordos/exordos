@@ -177,16 +177,23 @@ def create_entity_group(
             type=str,
             required=True,
         )
+        @click.option(
+            "--yes", "-y", "y", help="Automatically answer yes for all questions", is_flag=True
+        )
         @add_dynamic_parents(parents)
         @click.pass_context
         def delete_cmd(
             ctx: click.Context,
             uuid: str,
+            y: bool,
             **kwargs,
         ) -> None:
-            client = base_client.get_user_api_client(ctx.obj.auth_data)
-            base_client.delete_entity(client, entity_collection.format(**kwargs), uuid)
-            click.echo(f"{entity_name} {uuid} deleted")
+            if y or questionary.confirm(f"Delete {entity_name} {uuid}?").ask():
+                client = base_client.get_user_api_client(ctx.obj.auth_data)
+                base_client.delete_entity(
+                    client, entity_collection.format(**kwargs), uuid
+                )
+                click.echo(f"{entity_name} {uuid} deleted")
 
         entity_group.add_command(delete_cmd, aliases=["d"])
 
