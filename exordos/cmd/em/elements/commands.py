@@ -377,11 +377,17 @@ def update_cmd(
 
 @click.command("uninstall", help="Uninstall manifest by UUID, path or name")
 @click.argument("path_uuid_name", type=str)
+@click.option(
+    "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+)
 @click.pass_context
-def uninstall_cmd(ctx: click.Context, path_uuid_name: str) -> None:
+def uninstall_cmd(ctx: click.Context, path_uuid_name: str, y: bool) -> None:
     """Uninstall manifest by UUID, path or name"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     log = ClickLogger()
+
+    if not (y or questionary.confirm(f"Delete {ENTITY} {path_uuid_name}?").ask()):
+        return
 
     def _uninstall(element_uuid: str, element_name: str = None) -> None:
         base_client.action_entity(
