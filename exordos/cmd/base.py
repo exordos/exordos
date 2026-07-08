@@ -178,7 +178,7 @@ def create_entity_group(
             required=True,
         )
         @click.option(
-            "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+            "--yes", "-y", "y", help="Automatically answer yes for all questions", is_flag=True
         )
         @add_dynamic_parents(parents)
         @click.pass_context
