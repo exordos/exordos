@@ -431,16 +431,28 @@ def _load_realm_spec(path: str) -> dict:
     The file carries a pre-assigned realm identity, so bootstrap must use
     it instead of self-registering a new realm.
     """
-    with open(path) as f:
-        spec = json.load(f)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            spec = json.load(f)
+    except json.JSONDecodeError as e:
+        raise click.UsageError(f"Realm spec {path} is not a valid JSON file: {e}")
+    except OSError as e:
+        raise click.ClickException(f"Failed to read realm spec {path}: {e}")
+
+    if not isinstance(spec, dict):
+        raise click.UsageError(f"Realm spec {path} must be a JSON object")
 
     spec_version = spec.get("version", 1)
     if spec_version != 1:
-        raise click.UsageError(
-            f"Unsupported realm spec version: {spec_version}"
-        )
+        raise click.UsageError(f"Unsupported realm spec version: {spec_version}")
 
-    missing = [key for key in REALM_SPEC_REQUIRED_KEYS if not spec.get(key)]
+    # realm_tokens may legitimately be an empty object; only enforce that
+    # it is present. The remaining keys must be non-empty.
+    missing = [
+        key
+        for key in REALM_SPEC_REQUIRED_KEYS
+        if spec.get(key) is None or (key != "realm_tokens" and not spec.get(key))
+    ]
     if missing:
         raise click.UsageError(
             f"Realm spec {path} misses required keys: {', '.join(missing)}"
@@ -913,8 +925,7 @@ def bootstrap_cmd(
 
     if download_only:
         click.secho(
-            "Element inventories are downloaded and cached. "
-            "Exiting (--download-only).",
+            "Element inventories are downloaded and cached. Exiting (--download-only).",
             fg="green",
         )
         return
@@ -923,8 +934,7 @@ def bootstrap_cmd(
     if realm_spec is not None:
         if org_token or no_registration:
             raise click.UsageError(
-                "--realm-spec cannot be combined with --org-token "
-                "or --no-registration"
+                "--realm-spec cannot be combined with --org-token or --no-registration"
             )
         if launch_mode != "core":
             raise click.UsageError(
