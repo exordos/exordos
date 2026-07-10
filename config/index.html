@@ -3777,8 +3777,42 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#init" class="md-nav__link">
-    Init
+  <a href="#repositories" class="md-nav__link">
+    Repositories
+  </a>
+  
+    <nav class="md-nav" aria-label="Repositories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-repositories" class="md-nav__link">
+    List repositories
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-a-repository" class="md-nav__link">
+    Add a repository
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-a-repository" class="md-nav__link">
+    Delete a repository
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    Initialization
   </a>
   
 </li>
@@ -3879,6 +3913,14 @@
 <span class="w">    </span><span class="nt">check_updates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://10.40.0.2:11010</span>
 <span class="w">    </span><span class="nt">skip_tls_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">repositories</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-repo</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://repo.example.com:8080/</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">user</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pass</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">local-repo</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://10.20.0.2:8080/repo/</span>
 <span class="nt">developer_key_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/.ssh/id_rsa.pub</span>
 </code></pre></div>
 <p>You can change the path to the config file by setting the command line argument <code>--config</code>.</p>
@@ -3892,8 +3934,23 @@
 <p>The path to your ssh key.</p>
 <p>You can change the path to the ssh key by config or by setting the command line argument <code>--developer_key_path</code> or <code>-i</code>
 or by environment variable <code>GEN_DEV_KEYS</code>.</p>
-<h2 id="init">Init<a class="headerlink" href="#init" title="Permanent link">#</a></h2>
-<p>You can interactively init the config file by running the following command:</p>
+<h2 id="repositories">Repositories<a class="headerlink" href="#repositories" title="Permanent link">#</a></h2>
+<p>Repositories are used to store and distribute build artifacts. You can manage them in the config file under the <code>repositories</code> key, or by using the <code>exordos settings repo</code> commands.</p>
+<h3 id="list-repositories">List repositories<a class="headerlink" href="#list-repositories" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>list
+</code></pre></div>
+<p>Show repositories in JSON format with sensitive data:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>list<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span>--show-sensitive
+</code></pre></div>
+<h3 id="add-a-repository">Add a repository<a class="headerlink" href="#add-a-repository" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>my-repo<span class="w"> </span>--driver<span class="w"> </span>nginx<span class="w"> </span>--url<span class="w"> </span>http://repo.example.com:8080/<span class="w"> </span>--username<span class="w"> </span>user<span class="w"> </span>--password<span class="w"> </span>pass
+</code></pre></div>
+<p>The credentials are stored as <code>auth: [user, pass]</code> in the configuration file.</p>
+<h3 id="delete-a-repository">Delete a repository<a class="headerlink" href="#delete-a-repository" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>delete<span class="w"> </span>my-repo
+</code></pre></div>
+<h2 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h2>
+<p>You can interactively initialize the config file by running the following command:</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>init
 </code></pre></div>
 

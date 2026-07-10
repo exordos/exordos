@@ -3777,6 +3777,40 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#репозитории" class="md-nav__link">
+    Репозитории
+  </a>
+  
+    <nav class="md-nav" aria-label="Репозитории">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#список-репозиториев" class="md-nav__link">
+    Список репозиториев
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#добавить-репозиторий" class="md-nav__link">
+    Добавить репозиторий
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#удалить-репозиторий" class="md-nav__link">
+    Удалить репозиторий
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#инициализация" class="md-nav__link">
     Инициализация
   </a>
@@ -3879,6 +3913,14 @@
 <span class="w">    </span><span class="nt">check_updates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://10.40.0.2:11010</span>
 <span class="w">    </span><span class="nt">skip_tls_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">repositories</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-repo</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://repo.example.com:8080/</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">user</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pass</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">local-repo</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://10.20.0.2:8080/repo/</span>
 <span class="nt">developer_key_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/.ssh/id_rsa.pub</span>
 </code></pre></div>
 <p>Вы можете изменить путь к файлу конфигурации, установив аргумент командной строки <code>--config</code>.</p>
@@ -3892,6 +3934,21 @@
 <p>Путь к вашему SSH-ключу.</p>
 <p>Вы можете изменить путь к SSH-ключу через конфигурацию или установив аргумент командной строки <code>--developer_key_path</code> или <code>-i</code>
 или через переменную окружения <code>GEN_DEV_KEYS</code>.</p>
+<h2 id="репозитории">Репозитории<a class="headerlink" href="#репозитории" title="Permanent link">#</a></h2>
+<p>Репозитории используются для хранения и распространения артефактов сборки. Вы можете управлять ими в файле конфигурации через ключ <code>repositories</code> или с помощью команд <code>exordos settings repo</code>.</p>
+<h3 id="список-репозиториев">Список репозиториев<a class="headerlink" href="#список-репозиториев" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>list
+</code></pre></div>
+<p>Показать репозитории в формате JSON с чувствительными данными:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>list<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span>--show-sensitive
+</code></pre></div>
+<h3 id="добавить-репозиторий">Добавить репозиторий<a class="headerlink" href="#добавить-репозиторий" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>my-repo<span class="w"> </span>--driver<span class="w"> </span>nginx<span class="w"> </span>--url<span class="w"> </span>http://repo.example.com:8080/<span class="w"> </span>--username<span class="w"> </span>user<span class="w"> </span>--password<span class="w"> </span>pass
+</code></pre></div>
+<p>Учётные данные сохраняются как <code>auth: [user, pass]</code> в файле конфигурации.</p>
+<h3 id="удалить-репозиторий">Удалить репозиторий<a class="headerlink" href="#удалить-репозиторий" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>repo<span class="w"> </span>delete<span class="w"> </span>my-repo
+</code></pre></div>
 <h2 id="инициализация">Инициализация<a class="headerlink" href="#инициализация" title="Permanent link">#</a></h2>
 <p>Вы можете интерактивно инициализировать файл конфигурации, выполнив следующую команду:</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>settings<span class="w"> </span>init
