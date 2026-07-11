@@ -37,7 +37,7 @@ domain_template = """
   <name>{name}</name>
   <uuid>{uuid}</uuid>
   <metadata>
-    <genesis:genesis xmlns:genesis="https://github.com/infraguys">
+    <genesis:genesis xmlns:genesis="https://github.com/exordos">
       {meta_tags}
     </genesis:genesis>
   </metadata>
