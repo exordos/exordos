@@ -458,6 +458,34 @@ def _iam_default_client_settings() -> dict:
     }
 
 
+def _save_admin_password_file(
+    path: str, admin_password: str, logger: ClickLogger
+) -> None:
+    password_path = pathlib.Path(path)
+    if ".." in password_path.parts:
+        logger.error("Invalid password file path (contains '..'). Skipping save.")
+        return
+
+    try:
+        password_path.parent.mkdir(parents=True, exist_ok=True)
+
+        def secure_opener(file_path: str, flags: int) -> int:
+            return os.open(file_path, flags, 0o600)
+
+        with open(
+            password_path, "x", encoding="utf-8", opener=secure_opener
+        ) as password_file:
+            password_file.write(admin_password)
+        logger.info(f"Admin password saved to {password_path}")
+    except FileExistsError:
+        logger.warning(
+            f"Admin password file {password_path} already exists. "
+            "Skipping saving the password."
+        )
+    except OSError as e:
+        logger.error(f"Failed to save admin password to {password_path}: {e}")
+
+
 def _bootstrap_core(
     image_path: str | None,
     image_uri: str | None,
@@ -568,32 +596,7 @@ def _bootstrap_core(
         logger.info(f"Launched Exordos installation in `{profile.value}` profile")
 
         if save_admin_password_file:
-            # Basic security check to prevent path traversal.
-            if ".." in pathlib.Path(save_admin_password_file).parts:
-                logger.error(
-                    "Invalid password file path (contains '..'). Skipping save."
-                )
-            else:
-                try:
-                    # Ensure parent directory exists.
-                    pathlib.Path(save_admin_password_file).parent.mkdir(
-                        parents=True, exist_ok=True
-                    )
-                    # Use exclusive creation ('x' mode) to prevent race conditions
-                    # and accidental overwrites.
-                    with open(save_admin_password_file, "x") as f:
-                        f.write(admin_password)
-                    logger.info(f"Admin password saved to {save_admin_password_file}")
-                except FileExistsError:
-                    logger.warning(
-                        f"Admin password file {save_admin_password_file} "
-                        "already exists. Skipping saving the password."
-                    )
-                except OSError as e:
-                    logger.error(
-                        "Failed to save admin password to "
-                        f"{save_admin_password_file}: {e}"
-                    )
+            _save_admin_password_file(save_admin_password_file, admin_password, logger)
     except Exception:
         infra.delete_stand(dev_stand)
         logger.error(f"Failed to launch Exordos installation {dev_stand.name}")
