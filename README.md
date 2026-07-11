@@ -17,7 +17,7 @@
 
 **📚 CLI Documentation:** [exordos.github.io/exordos](https://exordos.github.io/exordos/) | **📚 Platform Documentation:** [exordos.github.io/exordos_core](https://exordos.github.io/exordos_core/)
 
-Exordos CLI is the official command-line interface for the [Exordos platform](https://github.com/infraguys/exordos_core). It provides a unified toolset for managing the full lifecycle of Exordos projects — from building and provisioning elements to bootstrapping installations, managing backups, and interacting with a running Exordos environment.
+Exordos CLI is the official command-line interface for the [Exordos Core platform](https://github.com/exordos/exordos_core). It provides a unified toolset for managing the full lifecycle of Exordos projects — from building and provisioning elements to bootstrapping installations, managing backups, and interacting with a running Exordos Core environment.
 
 # 🚀 To start using Exordos
 
@@ -29,7 +29,7 @@ curl -fsSL https://repo.exordos.com/install.sh | sh
 
 ## What Exordos CLI does
 
-Exordos CLI bridges the gap between your local development environment and the Exordos platform. With a single binary you can:
+Exordos CLI bridges the gap between your local development environment and the Exordos Core platform. With a single binary you can:
 
 - **Build projects** — compile Exordos project images and artifacts from a declarative `exordos.yaml` configuration.
 - **Bootstrap installations** — spin up local virtual machine environments from built images for development and testing.
@@ -47,3 +47,27 @@ Contributing to the project is highly appreciated! However, some rules should be
 - Changes should include not only new functionality or bug fixes, but also tests for the new code.
 - After the changes are completed and **tested**, a Pull Request should be created with a clear description of the new functionality. Add one of the project maintainers as a reviewer.
 - Changes can be merged only after receiving approval from one of the project maintainers.
+
+## Local test environment on Ubuntu
+
+The test environments require a working Python 3 installation. Check both command names:
+
+```bash
+python3 --version
+python --version
+```
+
+If `python3` works but the unversioned `python` command is missing, install Ubuntu's compatibility package:
+
+```bash
+sudo apt update
+sudo apt install python-is-python3
+```
+
+`python-is-python3` only provides the `python -> python3` link; it does not install Python 3 itself.
+
+Tox uses `uv` for environment creation. In a sandbox or another restricted environment where `~/.cache/uv` is read-only, point the cache to a writable temporary directory:
+
+```bash
+UV_CACHE_DIR="${TMPDIR:-/tmp}/uv-cache" tox -e develop
+```
