@@ -14,6 +14,7 @@ import rich_click as click
 
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.network.backend_pools import commands as backend_pools_commands
+from exordos.cmd.network.border import commands as border_commands
 from exordos.cmd.network.lb import commands as lb_commands
 from exordos.cmd.network.routes import commands as routes_commands
 from exordos.cmd.network.vhosts import commands as vhosts_commands
@@ -30,3 +31,4 @@ network_group.add_command(lb_commands.lbs_group, aliases=["l"])
 network_group.add_command(backend_pools_commands.backend_pools_group, aliases=["b"])
 network_group.add_command(vhosts_commands.vhosts_group, aliases=["v"])
 network_group.add_command(routes_commands.routes_group, aliases=["r"])
+network_group.add_command(border_commands.borders_group, aliases=["bo"])

@@ -98,6 +98,9 @@ BACKEND_POOL_COLLECTION = "/v1/network/lb/{lb_uuid}/backend_pools/"
 VHOST_COLLECTION = "/v1/network/lb/{lb_uuid}/vhosts/"
 ROUTE_COLLECTION = "/v1/network/lb/{lb_uuid}/vhosts/{vhost_uuid}/routes/"
 
+# SNAT/DNAT rules are inline on the border resource (no sub-collections).
+BORDER_COLLECTION = "/v1/network/border/"
+
 # Cli
 CONFIG_DIR = "~/.exordos"
 CONFIG_FILE = os.path.expanduser(f"{CONFIG_DIR}/exordosctl.yaml")
