@@ -30,8 +30,8 @@ ENTITY_COLLECTION = c.USER_COLLECTION
 FIELDS_MAP = {
     "UUID": "uuid",
     "Username": "username",
-    "First Name": "first_name",
-    "Last Name": "last_name",
+    "First Name": lambda x: x.get("first_name", ""),
+    "Last Name": lambda x: x.get("last_name", ""),
     "Email": "email",
     "Status": "status",
 }
