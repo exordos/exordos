@@ -65,6 +65,8 @@ PROFILE_COLLECTION = "/v1/vs/profiles/"
 VALUE_COLLECTION = "/v1/vs/values/"
 VARIABLE_COLLECTION = "/v1/vs/variables/"
 
+LIMIT_COLLECTION = "/v1/quota/limits/"
+
 CERTIFICATE_COLLECTION = "/v1/secret/certificates/"
 PASSWORD_COLLECTION = "/v1/secret/passwords/"
 SSH_KEY_COLLECTION = "/v1/secret/ssh_keys/"

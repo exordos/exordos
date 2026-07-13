@@ -29,6 +29,12 @@ build_element:
 push_element:
 	./dist/exordos repo push -t my_push_name -f --latest ../$(ELEMENT_PATH) -e ../$(ELEMENT_PATH)/output
 
+install_element:
+	./dist/exordos e e install $(ELEMENT_NAME)
+
+list_elements:
+	./dist/exordos e e d $(ELEMENT_NAME)
+
 bootstrap:
 	./dist/exordos bootstrap -i ../exordos_core/output -f -m core --admin-password admin --cidr 10.20.0.0/22 --ssh-public-key $(SSH_KEY)
 
@@ -58,3 +64,15 @@ list_ecosystem_realms:
 
 delete_ecosystem_realm:
 	./dist/exordos -u jdoe@corp.com -p 12345678 realms d example
+
+limits:
+	./dist/exordos limits l
+
+add_limit:
+	./dist/exordos limits add -p 11111113-bc70-4760-9fbf-9fcfe40da329 -r secret_ssh_keys -l 1
+
+add_limit_field:
+	./dist/exordos limits add -p 11111113-bc70-4760-9fbf-9fcfe40da329 -r nodes -f cores -l 1
+
+clear_limits:
+	./dist/exordos limits clear -y
