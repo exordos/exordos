@@ -26,14 +26,6 @@ Add resource to manifest
 
   Editor (nano or vim)
 
-* `repository`:
-    * Type: text
-    * Default: `https://repo.exordos.com/exordos-elements/`
-    * Usage: `-r
---repository`
-
-  Repository endpoint
-
 * `resource_type`:
     * Type: text
     * Default: `sentinel.unset`

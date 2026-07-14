@@ -1,22 +1,22 @@
 
 # ee_uninstall
 
-Uninstall manifest by UUID, path or name
+Uninstall element by UUID or name
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee uninstall [OPTIONS] PATH_UUID_NAME                                                                                                                                                                                                                                                      
+ Usage: exordos ee uninstall [OPTIONS] UUID_OR_NAME                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `path_uuid_name` (REQUIRED):
+* `uuid_or_name` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `path_uuid_name`
+    * Usage: `uuid_or_name`
 
 * `y`:
     * Type: boolean
@@ -37,9 +37,9 @@ Uninstall manifest by UUID, path or name
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee uninstall [OPTIONS] PATH_UUID_NAME                                                                                                                                                                                                                                                      
+ Usage: exordos ee uninstall [OPTIONS] UUID_OR_NAME                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
- Uninstall manifest by UUID, path or name                                                                                                                                                                                                                                                                  
+ Uninstall element by UUID or name                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │

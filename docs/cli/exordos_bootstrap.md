@@ -117,11 +117,11 @@ Bootstrap exordos locally
 
 * `repository`:
     * Type: text
-    * Default: `https://repo.exordos.com/`
+    * Default: `('https://repo.exordos.com/exordos-elements/',)`
     * Usage: `-r
 --repository`
 
-  Default element repository
+  Default element repository (can be specified multiple times)
 
 * `admin_password`:
     * Type: text
@@ -200,6 +200,20 @@ Bootstrap exordos locally
 
   Ecosystem's endpoint to connect to
 
+* `realm_spec`:
+    * Type: path
+    * Default: `none`
+    * Usage: `--realm-spec`
+
+  Path to a realm spec file (realm_spec.json) delivered by the exordos ecosystem to managed realm nodes. Provides a pre-assigned realm identity (uuid, secret, tokens), the ecosystem endpoint and the admin password; self-registration is skipped.
+
+* `download_only`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--download-only`
+
+  Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.
+
 * `settings`:
     * Type: boolean
     * Default: `false`
@@ -220,6 +234,13 @@ Bootstrap exordos locally
     * Usage: `--elements`
 
   Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas
+
+* `no_update_realm`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--no-update-realm`
+
+  Do not update the realm configuration in exordosctl.yaml after bootstrap
 
 * `help`:
     * Type: boolean
@@ -253,7 +274,7 @@ Bootstrap exordos locally
 │ --boot-bridge                   TEXT                                 Name of the linux bridge for the bootstrap network, it will be created if not set.                                                                                                                                                 │
 │ --force                     -f                                       Rebuild if the output already exists                                                                                                                                                                                               │
 │ --no-wait                                                            Cancel waiting for the installation to start                                                                                                                                                                                       │
-│ --repository                -r  TEXT                                 Default element repository [default: https://repo.exordos.com/]                                                                                                                                                                    │
+│ --repository                -r  TEXT                                 Default element repository (can be specified multiple times) [default: https://repo.exordos.com/exordos-elements/]                                                                                                                 │
 │ --admin-password                TEXT                                 A password for the admin user in. If not provided, the password will be generated.                                                                                                                                                 │
 │ --save-admin-password-file      TEXT                                 If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.                                                                                                                         │
 │ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. If not set, the first address of the network(--cidr option) will be used.                                               │
@@ -265,9 +286,13 @@ Bootstrap exordos locally
 │ --disable-telemetry                                                  Disable telemetry. Anonymized data only is sent by default.                                                                                                                                                                        │
 │ --org-token                     TEXT                                 Organization token, used to register stand in ecosystem                                                                                                                                                                            │
 │ --ecosystem-endpoint            TEXT                                 Ecosystem's endpoint to connect to                                                                                                                                                                                                 │
+│ --realm-spec                    PATH                                 Path to a realm spec file (realm_spec.json) delivered by the exordos ecosystem to managed realm nodes. Provides a pre-assigned realm identity (uuid, secret, tokens), the ecosystem endpoint and the admin password;               │
+│                                                                      self-registration is skipped.                                                                                                                                                                                                      │
+│ --download-only                                                      Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.                                                                                                                   │
 │ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │
 │ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.                                                                                    │
 │ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │
+│ --no-update-realm                                                    Do not update the realm configuration in exordosctl.yaml after bootstrap                                                                                                                                                           │
 │ --help                                                               Show this message and exit.                                                                                                                                                                                                        │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

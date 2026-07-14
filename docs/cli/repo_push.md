@@ -34,7 +34,7 @@ Push the element to the repository
     * Default: `sentinel.unset`
     * Usage: `--driver-params`
 
-  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=<http://repo.local.genesis-core.tech:8080/> --driver-params auth=["user","password"]
+  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=<http://repo.local.exordos.com:8080/> --driver-params auth=["user","password"]
 
 * `target`:
     * Type: text
@@ -91,7 +91,7 @@ Push the element to the repository
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
 │ --driver            -d  TEXT  Driver to use, nginx for example                                                                                                                                                                                                                                          │
-│ --driver-params         TEXT  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.genesis-core.tech:8080/ --driver-params auth=["user","password"]                                                                                   │
+│ --driver-params         TEXT  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                                         │
 │ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │
 │ --element-dir       -e  PATH  Directory where element artifacts are stored                                                                                                                                                                                                                              │
 │ --force             -f        Force push even if the element already exists                                                                                                                                                                                                                             │

@@ -7,19 +7,11 @@ Update element
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee update [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                           
+ Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
-
-* `repository`:
-    * Type: text
-    * Default: `https://repo.exordos.com/exordos-elements/`
-    * Usage: `-r
---repository`
-
-  Repository endpoint
 
 * `version`:
     * Type: text
@@ -29,10 +21,33 @@ Update element
 
   version of the element
 
-* `path_or_name` (REQUIRED):
+* `y`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--yes
+-y`
+
+  Automatically answer yes for all questions
+
+* `project_id`:
+    * Type: uuid
+    * Default: `00000000-0000-0000-0000-000000000000`
+    * Usage: `-p
+--project-id`
+
+  Project UUID, required only if the upload repository doesn't exist yet
+
+* `timeout`:
+    * Type: float
+    * Default: `600.0`
+    * Usage: `--timeout`
+
+  Seconds to wait for repository upload and element sync to complete
+
+* `uuid_or_name_or_path`:
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `path_or_name`
+    * Usage: `uuid_or_name_or_path`
 
 * `help`:
     * Type: boolean
@@ -45,13 +60,15 @@ Update element
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee update [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                           
+ Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
  Update element                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --repository  -r  TEXT  Repository endpoint [default: https://repo.exordos.com/exordos-elements/]                                                                                                                                                                                                       │
-│ --version     -v  TEXT  version of the element                                                                                                                                                                                                                                                          │
-│ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │
+│ --version     -v  TEXT   version of the element                                                                                                                                                                                                                                                         │
+│ --yes         -y         Automatically answer yes for all questions                                                                                                                                                                                                                                     │
+│ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                         │
+│ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                            │
+│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

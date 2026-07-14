@@ -12,7 +12,7 @@ help:
 	@echo "bootstrap        - bootstrap exordos core"
 
 mdlint:
-	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" --fix
+	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" "#!.tox" --fix
 
 build_element:
 	./dist/exordos build -i $(SSH_KEY) -f ../$(ELEMENT_PATH) -o ../$(ELEMENT_PATH)/output

@@ -1,55 +1,30 @@
 
-# idps_list
+# repo_upload
 
-List idps
+Upload element to repository
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos repo upload [OPTIONS] MANIFEST                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `filters`:
+* `repository` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-f
---filters`
+    * Usage: `-r
+--repository`
 
-  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+  Repository name or UUID to upload element to
 
-* `fields`:
-    * Type: text
+* `manifest` (REQUIRED):
+    * Type: Path
     * Default: `sentinel.unset`
-    * Usage: `--fields`
-
-  fields to show, defaults to all, for example: --fields name --fields status
-
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
--o`
-
-  the output format, defaults to table
-
-* `watch`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `-w
---watch`
-
-  Watch the list of idps
-
-* `interval`:
-    * Type: float range
-    * Default: `0.5`
-    * Usage: `--interval`
-
-  Refresh interval in seconds.
+    * Usage: `manifest`
 
 * `help`:
     * Type: boolean
@@ -62,16 +37,12 @@ List idps
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos repo upload [OPTIONS] MANIFEST                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
- List idps                                                                                                                                                                                                                                                                                                 
+ Upload element to repository                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
-│ --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                     │
-│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of idps                                                                                                                                                                                                                                          │
-│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
-│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
+│ *  --repository  -r  TEXT  Repository name or UUID to upload element to [required]                                                                                                                                                                                                                      │
+│    --help                  Show this message and exit.                                                                                                                                                                                                                                                  │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

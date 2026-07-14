@@ -1,13 +1,13 @@
 
-# idps_list
+# elements_list
 
-List idps
+List repo elements
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos repo elements list [OPTIONS]                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -42,7 +42,7 @@ List idps
     * Usage: `-w
 --watch`
 
-  Watch the list of idps
+  Watch the list of repo elements
 
 * `interval`:
     * Type: float range
@@ -50,6 +50,13 @@ List idps
     * Usage: `--interval`
 
   Refresh interval in seconds.
+
+* `dev`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--dev`
+
+  Show all versions including dev
 
 * `help`:
     * Type: boolean
@@ -62,16 +69,17 @@ List idps
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps list [OPTIONS]                                                                                                                                                                                                                                                                    
+ Usage: exordos repo elements list [OPTIONS]                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
- List idps                                                                                                                                                                                                                                                                                                 
+ List repo elements                                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
 │ --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                     │
 │ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
-│ --watch     -w                          Watch the list of idps                                                                                                                                                                                                                                          │
+│ --watch     -w                          Watch the list of repo elements                                                                                                                                                                                                                                 │
 │ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
+│ --dev                                   Show all versions including dev                                                                                                                                                                                                                                 │
 │ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

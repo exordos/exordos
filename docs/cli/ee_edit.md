@@ -26,14 +26,6 @@ Edit manifest
 
   Editor (nano or vim)
 
-* `repository`:
-    * Type: text
-    * Default: `https://repo.exordos.com/exordos-elements/`
-    * Usage: `-r
---repository`
-
-  Repository endpoint
-
 * `help`:
     * Type: boolean
     * Default: `false`

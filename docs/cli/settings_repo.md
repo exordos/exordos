@@ -1,22 +1,17 @@
 
-# ee_versions
+# settings_repo
 
-Print available elements in repository
+Manage repository entries in the settings file
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee versions [OPTIONS] NAME                                                                                                                                                                                                                                                                 
+ Usage: exordos settings repo [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
-
-* `name` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `name`
 
 * `help`:
     * Type: boolean
@@ -29,6 +24,6 @@ Print available elements in repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee versions [OPTIONS] NAME                                                                                                                                                                                                                                                                 
+ Usage: exordos settings repo [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
