@@ -823,20 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../ee_available/" class="md-nav__link">
-        ee_available
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
       </a>
@@ -977,8 +963,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../ee_versions/" class="md-nav__link">
-        ee_versions
+      <a href="../elements_list/" class="md-nav__link">
+        elements_list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elements_show/" class="md-nav__link">
+        elements_show
       </a>
     </li>
   
@@ -1272,6 +1272,20 @@
     <li class="md-nav__item">
       <a href="../exordos_configs/" class="md-nav__link">
         exordos_configs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exordos_deploy/" class="md-nav__link">
+        exordos_deploy
       </a>
     </li>
   
@@ -2012,6 +2026,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../manifests_uninstall/" class="md-nav__link">
+        manifests_uninstall
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../manifests_validate/" class="md-nav__link">
         manifests_validate
       </a>
@@ -2558,6 +2586,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../repo_add/" class="md-nav__link">
+        repo_add
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../repo_delete/" class="md-nav__link">
         repo_delete
       </a>
@@ -2572,8 +2614,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../repo_init/" class="md-nav__link">
-        repo_init
+      <a href="../repo_elements/" class="md-nav__link">
+        repo_elements
       </a>
     </li>
   
@@ -2602,6 +2644,62 @@
     <li class="md-nav__item">
       <a href="../repo_push/" class="md-nav__link">
         repo_push
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_refresh/" class="md-nav__link">
+        repo_refresh
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_show/" class="md-nav__link">
+        repo_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_update/" class="md-nav__link">
+        repo_update
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_upload/" class="md-nav__link">
+        repo_upload
       </a>
     </li>
   
@@ -3176,6 +3274,20 @@
     <li class="md-nav__item">
       <a href="../settings_rename-context/" class="md-nav__link">
         settings_rename-context
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings_repo/" class="md-nav__link">
+        settings_repo
       </a>
     </li>
   
@@ -3997,13 +4109,13 @@
 <ul>
 <li><code>repository</code>:<ul>
 <li>Type: text</li>
-<li>Default: <code>https://repo.exordos.com/</code></li>
+<li>Default: <code>('https://repo.exordos.com/exordos-elements/',)</code></li>
 <li>Usage: <code>-r
 --repository</code></li>
 </ul>
 </li>
 </ul>
-<p>Default element repository</p>
+<p>Default element repository (can be specified multiple times)</p>
 <ul>
 <li><code>admin_password</code>:<ul>
 <li>Type: text</li>
@@ -4104,6 +4216,24 @@
 </ul>
 <p>Ecosystem's endpoint to connect to</p>
 <ul>
+<li><code>realm_spec</code>:<ul>
+<li>Type: path</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>--realm-spec</code></li>
+</ul>
+</li>
+</ul>
+<p>Path to a realm spec file (realm_spec.json) delivered by the exordos ecosystem to managed realm nodes. Provides a pre-assigned realm identity (uuid, secret, tokens), the ecosystem endpoint and the admin password; self-registration is skipped.</p>
+<ul>
+<li><code>download_only</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>--download-only</code></li>
+</ul>
+</li>
+</ul>
+<p>Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.</p>
+<ul>
 <li><code>settings</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -4130,6 +4260,15 @@
 </li>
 </ul>
 <p>Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas</p>
+<ul>
+<li><code>no_update_realm</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>--no-update-realm</code></li>
+</ul>
+</li>
+</ul>
+<p>Do not update the realm configuration in exordosctl.yaml after bootstrap</p>
 <ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
@@ -4162,7 +4301,7 @@
 <span class="go">│ --boot-bridge                   TEXT                                 Name of the linux bridge for the bootstrap network, it will be created if not set.                                                                                                                                                 │</span>
 <span class="go">│ --force                     -f                                       Rebuild if the output already exists                                                                                                                                                                                               │</span>
 <span class="go">│ --no-wait                                                            Cancel waiting for the installation to start                                                                                                                                                                                       │</span>
-<span class="go">│ --repository                -r  TEXT                                 Default element repository [default: https://repo.exordos.com/]                                                                                                                                                                    │</span>
+<span class="go">│ --repository                -r  TEXT                                 Default element repository (can be specified multiple times) [default: https://repo.exordos.com/exordos-elements/]                                                                                                                 │</span>
 <span class="go">│ --admin-password                TEXT                                 A password for the admin user in. If not provided, the password will be generated.                                                                                                                                                 │</span>
 <span class="go">│ --save-admin-password-file      TEXT                                 If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.                                                                                                                         │</span>
 <span class="go">│ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. If not set, the first address of the network(--cidr option) will be used.                                               │</span>
@@ -4174,9 +4313,13 @@
 <span class="go">│ --disable-telemetry                                                  Disable telemetry. Anonymized data only is sent by default.                                                                                                                                                                        │</span>
 <span class="go">│ --org-token                     TEXT                                 Organization token, used to register stand in ecosystem                                                                                                                                                                            │</span>
 <span class="go">│ --ecosystem-endpoint            TEXT                                 Ecosystem's endpoint to connect to                                                                                                                                                                                                 │</span>
+<span class="go">│ --realm-spec                    PATH                                 Path to a realm spec file (realm_spec.json) delivered by the exordos ecosystem to managed realm nodes. Provides a pre-assigned realm identity (uuid, secret, tokens), the ecosystem endpoint and the admin password;               │</span>
+<span class="go">│                                                                      self-registration is skipped.                                                                                                                                                                                                      │</span>
+<span class="go">│ --download-only                                                      Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.                                                                                                                   │</span>
 <span class="go">│ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │</span>
 <span class="go">│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.                                                                                    │</span>
 <span class="go">│ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │</span>
+<span class="go">│ --no-update-realm                                                    Do not update the realm configuration in exordosctl.yaml after bootstrap                                                                                                                                                           │</span>
 <span class="go">│ --help                                                               Show this message and exit.                                                                                                                                                                                                        │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>

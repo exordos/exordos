@@ -11,7 +11,7 @@
         <link rel="prev" href="../ee_uninstall/">
       
       
-        <link rel="next" href="../ee_versions/">
+        <link rel="next" href="../elements_list/">
       
       <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.1.0">
@@ -823,20 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../ee_available/" class="md-nav__link">
-        ee_available
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
       </a>
@@ -1032,8 +1018,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../ee_versions/" class="md-nav__link">
-        ee_versions
+      <a href="../elements_list/" class="md-nav__link">
+        elements_list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elements_show/" class="md-nav__link">
+        elements_show
       </a>
     </li>
   
@@ -1272,6 +1272,20 @@
     <li class="md-nav__item">
       <a href="../exordos_configs/" class="md-nav__link">
         exordos_configs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exordos_deploy/" class="md-nav__link">
+        exordos_deploy
       </a>
     </li>
   
@@ -2012,6 +2026,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../manifests_uninstall/" class="md-nav__link">
+        manifests_uninstall
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../manifests_validate/" class="md-nav__link">
         manifests_validate
       </a>
@@ -2558,6 +2586,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../repo_add/" class="md-nav__link">
+        repo_add
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../repo_delete/" class="md-nav__link">
         repo_delete
       </a>
@@ -2572,8 +2614,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../repo_init/" class="md-nav__link">
-        repo_init
+      <a href="../repo_elements/" class="md-nav__link">
+        repo_elements
       </a>
     </li>
   
@@ -2602,6 +2644,62 @@
     <li class="md-nav__item">
       <a href="../repo_push/" class="md-nav__link">
         repo_push
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_refresh/" class="md-nav__link">
+        repo_refresh
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_show/" class="md-nav__link">
+        repo_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_update/" class="md-nav__link">
+        repo_update
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_upload/" class="md-nav__link">
+        repo_upload
       </a>
     </li>
   
@@ -3176,6 +3274,20 @@
     <li class="md-nav__item">
       <a href="../settings_rename-context/" class="md-nav__link">
         settings_rename-context
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings_repo/" class="md-nav__link">
+        settings_repo
       </a>
     </li>
   
@@ -3860,20 +3972,10 @@
 <p>Update element</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos ee update [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                           </span>
+<span class="go"> Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                                 </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
-<ul>
-<li><code>repository</code>:<ul>
-<li>Type: text</li>
-<li>Default: <code>https://repo.exordos.com/exordos-elements/</code></li>
-<li>Usage: <code>-r
---repository</code></li>
-</ul>
-</li>
-</ul>
-<p>Repository endpoint</p>
 <ul>
 <li><code>version</code>:<ul>
 <li>Type: text</li>
@@ -3885,12 +3987,41 @@
 </ul>
 <p>version of the element</p>
 <ul>
+<li><code>y</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>--yes
+-y</code></li>
+</ul>
+</li>
+</ul>
+<p>Automatically answer yes for all questions</p>
+<ul>
+<li><code>project_id</code>:<ul>
+<li>Type: uuid</li>
+<li>Default: <code>00000000-0000-0000-0000-000000000000</code></li>
+<li>Usage: <code>-p
+--project-id</code></li>
+</ul>
+</li>
+</ul>
+<p>Project UUID, required only if the upload repository doesn't exist yet</p>
+<ul>
+<li><code>timeout</code>:<ul>
+<li>Type: float</li>
+<li>Default: <code>600.0</code></li>
+<li>Usage: <code>--timeout</code></li>
+</ul>
+</li>
+</ul>
+<p>Seconds to wait for repository upload and element sync to complete</p>
+<ul>
 <li>
-<p><code>path_or_name</code> (REQUIRED):</p>
+<p><code>uuid_or_name_or_path</code>:</p>
 <ul>
 <li>Type: text</li>
 <li>Default: <code>sentinel.unset</code></li>
-<li>Usage: <code>path_or_name</code></li>
+<li>Usage: <code>uuid_or_name_or_path</code></li>
 </ul>
 </li>
 <li>
@@ -3905,14 +4036,16 @@
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos ee update [OPTIONS] PATH_OR_NAME                                                                                                                                                                                                                                                           </span>
+<span class="go"> Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                                 </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Update element                                                                                                                                                                                                                                                                                            </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --repository  -r  TEXT  Repository endpoint [default: https://repo.exordos.com/exordos-elements/]                                                                                                                                                                                                       │</span>
-<span class="go">│ --version     -v  TEXT  version of the element                                                                                                                                                                                                                                                          │</span>
-<span class="go">│ --help                  Show this message and exit.                                                                                                                                                                                                                                                     │</span>
+<span class="go">│ --version     -v  TEXT   version of the element                                                                                                                                                                                                                                                         │</span>
+<span class="go">│ --yes         -y         Automatically answer yes for all questions                                                                                                                                                                                                                                     │</span>
+<span class="go">│ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                         │</span>
+<span class="go">│ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                            │</span>
+<span class="go">│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 

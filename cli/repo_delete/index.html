@@ -8,10 +8,10 @@
         <link rel="canonical" href="https://github.com/exordos/exordos/cli/repo_delete/">
       
       
-        <link rel="prev" href="../records_update/">
+        <link rel="prev" href="../repo_add/">
       
       
-        <link rel="next" href="../repo_init/">
+        <link rel="next" href="../repo_elements/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.1.0">
@@ -823,20 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../ee_available/" class="md-nav__link">
-        ee_available
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../ee_clear/" class="md-nav__link">
         ee_clear
       </a>
@@ -977,8 +963,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../ee_versions/" class="md-nav__link">
-        ee_versions
+      <a href="../elements_list/" class="md-nav__link">
+        elements_list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elements_show/" class="md-nav__link">
+        elements_show
       </a>
     </li>
   
@@ -1217,6 +1217,20 @@
     <li class="md-nav__item">
       <a href="../exordos_configs/" class="md-nav__link">
         exordos_configs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exordos_deploy/" class="md-nav__link">
+        exordos_deploy
       </a>
     </li>
   
@@ -1957,6 +1971,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../manifests_uninstall/" class="md-nav__link">
+        manifests_uninstall
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../manifests_validate/" class="md-nav__link">
         manifests_validate
       </a>
@@ -2501,6 +2529,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../repo_add/" class="md-nav__link">
+        repo_add
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -2572,8 +2614,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../repo_init/" class="md-nav__link">
-        repo_init
+      <a href="../repo_elements/" class="md-nav__link">
+        repo_elements
       </a>
     </li>
   
@@ -2602,6 +2644,62 @@
     <li class="md-nav__item">
       <a href="../repo_push/" class="md-nav__link">
         repo_push
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_refresh/" class="md-nav__link">
+        repo_refresh
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_show/" class="md-nav__link">
+        repo_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_update/" class="md-nav__link">
+        repo_update
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_upload/" class="md-nav__link">
+        repo_upload
       </a>
     </li>
   
@@ -3176,6 +3274,20 @@
     <li class="md-nav__item">
       <a href="../settings_rename-context/" class="md-nav__link">
         settings_rename-context
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings_repo/" class="md-nav__link">
+        settings_repo
       </a>
     </li>
   
@@ -3857,45 +3969,35 @@
 
 
 <h1 id="repo_delete">repo_delete<a class="headerlink" href="#repo_delete" title="Permanent link">#</a></h1>
-<p>Delete the repository</p>
+<p>Delete repository</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        </span>
+<span class="go"> Usage: exordos repo delete [OPTIONS] UUID                                                                                                                                                                                                                                                                 </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
 <ul>
-<li><code>exordos_cfg_file</code>:<ul>
-<li>Type: text</li>
-<li>Default: <code>exordos.yaml</code></li>
-<li>Usage: <code>-c
---exordos-cfg-file</code></li>
-</ul>
-</li>
-</ul>
-<p>Name of the project configuration file</p>
-<ul>
-<li><code>target</code>:<ul>
-<li>Type: text</li>
-<li>Default: <code>none</code></li>
-<li>Usage: <code>-t
---target</code></li>
-</ul>
-</li>
-</ul>
-<p>Target repository to push to</p>
-<ul>
 <li>
-<p><code>project_dir</code>:</p>
+<p><code>uuid</code> (REQUIRED):</p>
 <ul>
-<li>Type: path</li>
-<li>Default: <code>.</code></li>
-<li>Usage: <code>project_dir</code></li>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>uuid</code></li>
 </ul>
 </li>
 <li>
-<p><code>help</code>:</p>
+<p><code>y</code>:</p>
 <ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>--yes
+-y</code></li>
+</ul>
+</li>
+</ul>
+<p>Automatically answer yes for all questions</p>
+<ul>
+<li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
 <li>Usage: <code>--help</code></li>
@@ -3905,14 +4007,13 @@
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        </span>
+<span class="go"> Usage: exordos repo delete [OPTIONS] UUID                                                                                                                                                                                                                                                                 </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Delete the repository                                                                                                                                                                                                                                                                                     </span>
+<span class="go"> Delete repository                                                                                                                                                                                                                                                                                         </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │</span>
-<span class="go">│ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │</span>
-<span class="go">│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │</span>
+<span class="go">│ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │</span>
+<span class="go">│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
