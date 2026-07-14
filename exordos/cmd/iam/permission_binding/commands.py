@@ -15,80 +15,28 @@
 #    under the License.
 from __future__ import annotations
 
-import typing as tp
 import uuid as sys_uuid
 
 import rich_click as click
 
 from exordos import constants as c
-from exordos import utils
 from exordos.clients import base_client
-from exordos.common.table import get_table
-from exordos.common.table import print_table
+from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
 
 ENTITY = "permission_binding"
 ENTITY_COLLECTION = c.PERMISSION_BINDING_COLLECTION
+FIELDS_MAP = {
+    "UUID": "uuid",
+    "Role": "role",
+    "Permission": "permission",
+}
 
 
-@click.group(f"{ENTITY}s", help=f"Manage {ENTITY}s in the Exordos installation")
-def permission_bindings_group():
-    pass
+permission_bindings_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
-@permission_bindings_group.command("list", help=f"List {ENTITY}s")
-@click.option(
-    "-f",
-    "--filters",
-    multiple=True,
-    help=(
-        "Additional filters to pass to the api. "
-        "The format is 'key=value'. For example: --f "
-        "parent=11111111-1111-1111-1111-11111111111 --filters status=NEW"
-    ),
-)
-@click.pass_context
-def list_cmd(ctx: click.Context, filters: tuple[str, ...]) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    filters = utils.convert_input_multiply(filters)
-    entities = base_client.list_entities(client, ENTITY_COLLECTION, **filters)
-    _print_entities(entities)
-
-
-@permission_bindings_group.command("show", help=f"Show {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def show_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data)
-
-
-@permission_bindings_group.command("delete", help=f"Delete {ENTITY}")
-@click.argument(
-    "uuid",
-    type=str,
-    required=True,
-)
-@click.pass_context
-def delete_cmd(
-    ctx: click.Context,
-    uuid: str,
-) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    base_client.delete_entity(client, ENTITY_COLLECTION, uuid)
-
-
-@permission_bindings_group.command(
-    "add", help=f"Add a new {ENTITY} to the Exordos installation"
-)
+@click.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
 @click.pass_context
 @click.option(
     "-u",
@@ -138,17 +86,4 @@ def add_cmd(
     show_data(entity)
 
 
-def _print_entities(permission_bindings: tp.List[dict]) -> None:
-    table = get_table()
-    table.add_column("UUID")
-    table.add_column("Role")
-    table.add_column("Permission")
-
-    for permission_binding in permission_bindings:
-        table.add_row(
-            permission_binding["uuid"],
-            permission_binding["role"],
-            permission_binding["permission"],
-        )
-
-    print_table(table)
+permission_bindings_group.add_command(add_cmd, aliases=["a"])

@@ -42,6 +42,21 @@ Set a realm entry in settings
 
   Skip TLS certificate verification
 
+* `local`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--local`
+
+  Mark the realm as local
+
+* `meta`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-m
+--meta`
+
+  Arbitrary key=value metadata for the realm (can be repeated)
+
 * `current`:
     * Type: boolean
     * Default: `false`
@@ -68,6 +83,8 @@ Set a realm entry in settings
 │ *  --endpoint         -e  TEXT  Endpoint for the realm [required]                                                                                                                                                                                                                                       │
 │    --check_updates    -c        Check for updates on startup                                                                                                                                                                                                                                            │
 │    --skip_tls_verify  -s        Skip TLS certificate verification                                                                                                                                                                                                                                       │
+│    --local                      Mark the realm as local                                                                                                                                                                                                                                                 │
+│    --meta             -m  TEXT  Arbitrary key=value metadata for the realm (can be repeated)                                                                                                                                                                                                            │
 │    --current                    Set as current realm                                                                                                                                                                                                                                                    │
 │    --help                       Show this message and exit.                                                                                                                                                                                                                                             │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯

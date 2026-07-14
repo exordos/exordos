@@ -18,6 +18,14 @@ Show permission_binding
     * Default: `sentinel.unset`
     * Usage: `uuid`
 
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  the output format, defaults to table
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -34,6 +42,7 @@ Show permission_binding
  Show permission_binding                                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
+│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
+│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

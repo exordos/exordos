@@ -18,6 +18,14 @@ Delete permission_binding
     * Default: `sentinel.unset`
     * Usage: `uuid`
 
+* `y`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--yes
+-y`
+
+  Automatically answer yes for all questions
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -34,6 +42,7 @@ Delete permission_binding
  Delete permission_binding                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
+│ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │
+│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

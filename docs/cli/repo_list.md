@@ -1,46 +1,55 @@
 
 # repo_list
 
-List elements in the repository
+List repositorys
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo list [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
+ Usage: exordos repo list [OPTIONS]                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `exordos_cfg_file`:
+* `filters`:
     * Type: text
-    * Default: `exordos.yaml`
-    * Usage: `-c
---exordos-cfg-file`
+    * Default: `sentinel.unset`
+    * Usage: `-f
+--filters`
 
-  Name of the project configuration file
+  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
 
-* `target`:
+* `fields`:
     * Type: text
-    * Default: `none`
-    * Usage: `-t
---target`
+    * Default: `sentinel.unset`
+    * Usage: `--fields`
 
-  Target repository to push to
+  fields to show, defaults to all, for example: --fields name --fields status
 
-* `element`:
-    * Type: text
-    * Default: `none`
-    * Usage: `-e
---element`
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
 
-  Element to list
+  the output format, defaults to table
 
-* `project_dir`:
-    * Type: path
-    * Default: `.`
-    * Usage: `project_dir`
+* `watch`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-w
+--watch`
+
+  Watch the list of repositorys
+
+* `interval`:
+    * Type: float range
+    * Default: `0.5`
+    * Usage: `--interval`
+
+  Refresh interval in seconds.
 
 * `help`:
     * Type: boolean
@@ -53,14 +62,16 @@ List elements in the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo list [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                          
+ Usage: exordos repo list [OPTIONS]                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
- List elements in the repository                                                                                                                                                                                                                                                                           
+ List repositorys                                                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
-│ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │
-│ --element           -e  TEXT  Element to list                                                                                                                                                                                                                                                           │
-│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
+│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
+│ --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                     │
+│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
+│ --watch     -w                          Watch the list of repositorys                                                                                                                                                                                                                                   │
+│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
+│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

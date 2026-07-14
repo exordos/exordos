@@ -1,38 +1,30 @@
 
 # repo_delete
 
-Delete the repository
+Delete repository
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        
+ Usage: exordos repo delete [OPTIONS] UUID                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `exordos_cfg_file`:
+* `uuid` (REQUIRED):
     * Type: text
-    * Default: `exordos.yaml`
-    * Usage: `-c
---exordos-cfg-file`
+    * Default: `sentinel.unset`
+    * Usage: `uuid`
 
-  Name of the project configuration file
+* `y`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--yes
+-y`
 
-* `target`:
-    * Type: text
-    * Default: `none`
-    * Usage: `-t
---target`
-
-  Target repository to push to
-
-* `project_dir`:
-    * Type: path
-    * Default: `.`
-    * Usage: `project_dir`
+  Automatically answer yes for all questions
 
 * `help`:
     * Type: boolean
@@ -45,13 +37,12 @@ Delete the repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo delete [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                        
+ Usage: exordos repo delete [OPTIONS] UUID                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- Delete the repository                                                                                                                                                                                                                                                                                     
+ Delete repository                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
-│ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │
-│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
+│ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │
+│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

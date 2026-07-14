@@ -1,13 +1,13 @@
 
-# exordos_repo
+# repo_elements
 
-Manage Exordos repository
+Manage repo elements
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                           
+ Usage: exordos repo elements [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -24,22 +24,15 @@ Manage Exordos repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                           
+ Usage: exordos repo elements [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
- Manage Exordos repository                                                                                                                                                                                                                                                                                 
+ Manage repo elements                                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                                           Add a new repository                                                                                                                                                                                                                      │
-│ delete                                                        Delete repository                                                                                                                                                                                                                         │
-│ elements                                                      Manage repo elements                                                                                                                                                                                                                      │
-│ list                                                          List repositorys                                                                                                                                                                                                                          │
-│ push                                                          Push the element to the repository                                                                                                                                                                                                        │
-│ refresh                                                       Refresh repository                                                                                                                                                                                                                        │
-│ show                                                          Show repository                                                                                                                                                                                                                           │
-│ update                                                        Update repository                                                                                                                                                                                                                         │
-│ upload                                                        Upload element to repository                                                                                                                                                                                                              │
+│ list                                                           List repo elements                                                                                                                                                                                                                       │
+│ show                                                           Show repo element                                                                                                                                                                                                                        │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
