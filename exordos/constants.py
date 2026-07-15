@@ -83,6 +83,7 @@ ROLE_COLLECTION = "/v1/iam/roles/"
 PERMISSION_COLLECTION = "/v1/iam/permissions/"
 ROLE_BINDING_COLLECTION = "/v1/iam/role_bindings/"
 PERMISSION_BINDING_COLLECTION = "/v1/iam/permission_bindings/"
+ORGANIZATION_MEMBER_COLLECTION = "/v1/iam/organizations/{organization_uuid}/members/"
 
 CONFIG_COLLECTION = "/v1/config/configs/"
 

@@ -16,6 +16,7 @@ from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.iam.client import commands as client_commands
 from exordos.cmd.iam.idp import commands as idp_commands
 from exordos.cmd.iam.organization import commands as organization_commands
+from exordos.cmd.iam.organization_member import commands as organization_member_commands
 from exordos.cmd.iam.permission import commands as permission_commands
 from exordos.cmd.iam.permission_binding import commands as permission_binding_commands
 from exordos.cmd.iam.project import commands as project_commands
@@ -31,6 +32,9 @@ def iam_group():
 
 # 1
 iam_group.add_command(organization_commands.organizations_group, aliases=["o"])  # noqa
+iam_group.add_command(
+    organization_member_commands.organization_members_group, aliases=["om"]
+)  # noqa
 iam_group.add_command(project_commands.projects_group, aliases=["pr"])  # noqa
 
 # 2

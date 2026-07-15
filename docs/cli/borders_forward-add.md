@@ -1,40 +1,27 @@
 
-# users_change_password
+# borders_forward-add
 
-Change password of the user
+Add a DNAT forward to a border
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users change_password [OPTIONS] USER                                                                                                                                                                                                                                                   
+ Usage: exordos network borders forward-add [OPTIONS] BORDER SPEC                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `user` (REQUIRED):
-    * Type: uuid
-    * Default: `sentinel.unset`
-    * Usage: `user`
-
-  user UUID or username
-
-* `old_password` (REQUIRED):
+* `border` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-o
---old-password`
+    * Usage: `border`
 
-  Old password of the user
-
-* `new_password`:
+* `spec` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-n
---new-password`
-
-  New password of the user. If not provided, will be asked interactively
+    * Usage: `spec`
 
 * `help`:
     * Type: boolean
@@ -47,6 +34,6 @@ Change password of the user
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users change_password [OPTIONS] USER                                                                                                                                                                                                                                                   
+ Usage: exordos network borders forward-add [OPTIONS] BORDER SPEC                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```

@@ -960,7 +960,9 @@ def bootstrap_cmd(
         inventory = inventory.split("/")[-1]
 
     if version_lib.is_version(inventory):
-        element_repo_url = repository[0].rstrip("/") if repository else c.ELEMENT_REPO_URL
+        element_repo_url = (
+            repository[0].rstrip("/") if repository else c.ELEMENT_REPO_URL
+        )
         inventory_instance = get_element_inventory_from_url(
             f"{element_repo_url}/core/{inventory.strip()}/"
         )

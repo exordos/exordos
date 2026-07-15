@@ -17,6 +17,7 @@
 import abc
 import base64
 import inspect
+import json
 import typing as tp
 from urllib.parse import urljoin
 import uuid as sys_uuid
@@ -463,6 +464,8 @@ class CollectionBaseClient:
         try:
             return resp.json()
         except bazooka_exc.BaseHTTPException:
+            return None
+        except json.JSONDecodeError:
             return None
 
 
