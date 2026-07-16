@@ -24,7 +24,6 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
 
-
 # ---------------------------------------------------------------------------
 # border
 #
@@ -96,9 +95,7 @@ def _parse_forward(spec: str) -> dict:
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the border")
 @click.option("-n", "--name", type=str, default="border", help="Name of the border")
 @click.option("-D", "--description", type=str, default="", help="Description")
-@click.option(
-    "-p", "--project-id", type=click.UUID, required=True, help="Project UUID"
-)
+@click.option("-p", "--project-id", type=click.UUID, required=True, help="Project UUID")
 @click.option(
     "--node",
     type=click.UUID,
@@ -113,10 +110,18 @@ def _parse_forward(spec: str) -> dict:
     show_default=True,
     help="core_agent: the core node's agent; core: a dedicated VM gateway",
 )
-@click.option("--cpu", type=int, default=1, show_default=True, help="VM vCPUs (kind=core)")
-@click.option("--ram", type=int, default=512, show_default=True, help="VM RAM MB (kind=core)")
 @click.option(
-    "--disk-size", type=int, default=10, show_default=True, help="VM disk GB (kind=core)"
+    "--cpu", type=int, default=1, show_default=True, help="VM vCPUs (kind=core)"
+)
+@click.option(
+    "--ram", type=int, default=512, show_default=True, help="VM RAM MB (kind=core)"
+)
+@click.option(
+    "--disk-size",
+    type=int,
+    default=10,
+    show_default=True,
+    help="VM disk GB (kind=core)",
 )
 @click.option(
     "-s",
@@ -191,7 +196,9 @@ def snat_add_cmd(ctx: click.Context, border: str, spec: str) -> None:
     rule = _parse_snat(spec)
     entity = _get_border(ctx, border)
     rules = [
-        r for r in entity.get("snat_rules") or [] if r["source_cidr"] != rule["source_cidr"]
+        r
+        for r in entity.get("snat_rules") or []
+        if r["source_cidr"] != rule["source_cidr"]
     ]
     rules.append(rule)
     _update_rules(ctx, border, "snat_rules", rules)
@@ -241,9 +248,7 @@ def forward_del_cmd(ctx: click.Context, border: str, listen: str) -> None:
         )
     entity = _get_border(ctx, border)
     forwards = entity.get("forwards") or []
-    kept = [
-        f for f in forwards if (f["proto"], f["listen_port"]) != (proto, int(port))
-    ]
+    kept = [f for f in forwards if (f["proto"], f["listen_port"]) != (proto, int(port))]
     if len(kept) == len(forwards):
         raise click.ClickException(f"No forward on {listen}")
     _update_rules(ctx, border, "forwards", kept)

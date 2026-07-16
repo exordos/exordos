@@ -266,7 +266,7 @@ def _install_packages() -> None:
     run_command(cmd)
     cmd = ["apt-get", "install", "-y"]
     cmd.extend(packages)
-    run_command(cmd)
+    run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"))
 
 
 def _add_user_to_groups(user: str | None) -> None:

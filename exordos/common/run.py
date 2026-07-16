@@ -17,7 +17,9 @@
 #    under the License.
 
 import logging
+import os
 import subprocess
+import typing as tp
 
 from exordos.exceptions import RunException
 
@@ -90,7 +92,9 @@ def runsh(command: str | list, sudo: bool = False) -> ShellCommandResult:
     )
 
 
-def run_command(cmd: str | list, check: bool = True) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: str | list, check: bool = True, env: tp.Optional[tp.Dict[str, str]] = None
+) -> subprocess.CompletedProcess:
     """Run shell command and return result."""
     try:
         result = subprocess.run(
@@ -98,6 +102,7 @@ def run_command(cmd: str | list, check: bool = True) -> subprocess.CompletedProc
             check=check,
             capture_output=True,
             text=True,
+            env={**os.environ, **env} if env is not None else None,
         )
         return result
     except subprocess.CalledProcessError as e:
