@@ -132,7 +132,7 @@ class Hypervisor:
     network: str
     connection_uri: str
     storage_pool: str = "default"
-    driver: str = "libvirt"
+    kind: str = "libvirt"
     machine_prefix: str = "vm-"
     iface_rom_file: str = "/usr/share/qemu/1af41041.rom"
 
