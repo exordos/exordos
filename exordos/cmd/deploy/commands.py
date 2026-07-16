@@ -71,19 +71,19 @@ def _find_local_ip_in_network(
     return None
 
 
-def _is_local_realm(config: dict[str, tp.Any]) -> bool:
-    """Check whether the current realm is local.
+def _is_local_realm(config: dict[str, tp.Any], realm: str | None = None) -> bool:
+    """Check whether the given (or current) realm is local.
 
     A realm is considered local when:
       1. ``local: true`` is set in the realm configuration.
       2. If ``meta.cidr`` is present, a local interface has an IP in that
          network.
     """
-    current_realm = config.get("current-realm")
-    if not current_realm:
+    realm_name = realm or config.get("current-realm")
+    if not realm_name:
         return False
 
-    realm_config = config.get("realms", {}).get(current_realm)
+    realm_config = (config.get("realms") or {}).get(realm_name)
     if not realm_config:
         return False
 
@@ -102,15 +102,15 @@ def _is_local_realm(config: dict[str, tp.Any]) -> bool:
     return True
 
 
-def _get_local_host_bind(config: dict[str, tp.Any]) -> str:
+def _get_local_host_bind(config: dict[str, tp.Any], realm: str | None = None) -> str:
     """Return the bind address for the local HTTP server.
 
-    Uses the host IP from the current realm's ``meta.cidr`` network.
+    Uses the host IP from the given (or current) realm's ``meta.cidr`` network.
     Raises an error if no local IP matching the realm CIDR is found.
     """
-    current_realm = config.get("current-realm")
-    if current_realm:
-        realm_config = config.get("realms", {}).get(current_realm, {})
+    realm_name = realm or config.get("current-realm")
+    if realm_name:
+        realm_config = (config.get("realms") or {}).get(realm_name, {})
         cidr_str = realm_config.get("meta", {}).get("cidr")
         if cidr_str:
             try:
@@ -338,6 +338,15 @@ def _deploy_element(
     ),
 )
 @click.option(
+    "-r",
+    "--realm",
+    default=None,
+    help=(
+        "Name of the realm to deploy to. If omitted, the current realm "
+        "from the configuration is used."
+    ),
+)
+@click.option(
     "-c",
     "--exordosctl-cfg-file",
     default=c.CONFIG_FILE,
@@ -355,8 +364,16 @@ def deploy_cmd(
     timeout: float,
     element: str | None,
     exordosctl_cfg_file: str,
+    realm: str | None,
 ) -> None:
     inventory_elements = _load_build_inventory(element_dir)
+    if realm:
+        if realm not in (obj.cfg.get("realms") or {}):
+            raise click.ClickException(
+                f"Realm '{realm}' not found in configuration. "
+                f"Available: {', '.join(sorted((obj.cfg.get('realms') or {}).keys()))}"
+            )
+        obj.auth_data["realm"] = realm
     client = base_client.get_user_api_client(obj.auth_data)
 
     available = sorted(inventory_elements.keys())
@@ -385,8 +402,8 @@ def deploy_cmd(
     # and install the element directly from it. This only works with a
     # local realm where there is direct network connectivity between the
     # host and the realm's Core VM.
-    if not repository and _is_local_realm(obj.cfg):
-        bind_host = _get_local_host_bind(obj.cfg)
+    if not repository and _is_local_realm(obj.cfg, realm):
+        bind_host = _get_local_host_bind(obj.cfg, realm)
 
         with local_server.serve_directory(element_dir, bind_host) as base_url:
             url = f"{base_url}{c.ELEMENT_REPO_PATH}/"
