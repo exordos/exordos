@@ -379,6 +379,21 @@ class TestDeployCmdPushMode:
         deploy_elements_mock.assert_called_once()
 
 
+class TestDeployCmdRealmValidation:
+    def test_invalid_realm_raises(self, tmp_path: pathlib.Path) -> None:
+        output_dir = _make_build_output(tmp_path)
+
+        runner = CliRunner()
+        result = runner.invoke(
+            deploy_commands.deploy_cmd,
+            ["-e", str(output_dir), "--realm", "nonexistent"],
+            obj=_obj(),
+        )
+
+        assert result.exit_code != 0
+        assert "Realm 'nonexistent' not found" in result.output
+
+
 class TestDeployCmdLocalMode:
     def test_errors_without_local_realm(self, tmp_path: pathlib.Path) -> None:
         output_dir = _make_build_output(tmp_path)
