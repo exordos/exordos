@@ -382,9 +382,10 @@ def _bootstrap_element(
 
 def _register_core(
     ecosystem_endpoint: str,
-    disable_telemetry: bool,
     org_token: str | None,
-) -> tuple[str, str, str]:
+    stand_uuid: str | None = None,
+    stand_secret: str | None = None,
+) -> tuple[str, str, dict]:
     from exordos.clients import ecosystem
 
     logger = ClickLogger()
@@ -393,6 +394,8 @@ def _register_core(
     realm_uuid, realm_secret, tokens_dict = ecosystem.register_realm(
         ecosystem_endpoint=ecosystem_endpoint,
         org_token=org_token,
+        stand_uuid=stand_uuid,
+        stand_secret=stand_secret,
     )
 
     if tokens_dict:
@@ -653,6 +656,40 @@ def _update_realm_config(
 
     settings_config.save_config(config, cfg_path)
     logger.info(f"Realm '{realm_name}' configuration updated in {cfg_path}")
+
+
+@click.command("register", help="Manually register exordos realm in ecosystem")
+@click.option(
+    "--ecosystem-endpoint",
+    default=None,
+    type=str,
+    envvar="ECOSYSTEM_ENDPOINT",
+    help="Ecosystem's endpoint to connect to",
+)
+@click.option(
+    "--realm-spec",
+    required=True,
+    type=click.Path(exists=True),
+    envvar="REALM_SPEC",
+    help=(
+        "Path to a realm spec file (realm_spec.json) delivered by the "
+        "exordos ecosystem to managed realm nodes. Provides a pre-assigned "
+        "realm identity (uuid, secret, tokens), the ecosystem endpoint and "
+        "the admin password; self-registration is skipped."
+    ),
+)
+def register_realm_cmd(
+    ecosystem_endpoint: str | None,
+    realm_spec: str,
+) -> None:
+    realm_spec_data = _load_realm_spec(realm_spec)
+    ecosystem_endpoint = ecosystem_endpoint or realm_spec_data["ecosystem_endpoint"]
+    _register_core(
+        ecosystem_endpoint,
+        None,
+        realm_spec_data["realm_uuid"],
+        realm_spec_data["realm_secret"],
+    )
 
 
 @click.command("bootstrap", help="Bootstrap exordos locally")
@@ -1117,7 +1154,6 @@ def bootstrap_cmd(
         with status_lib.status_done("Registering realm in ecosystem..."):
             realm_uuid, realm_secret, realm_tokens = _register_core(
                 ecosystem_endpoint=ecosystem_endpoint,
-                disable_telemetry=disable_telemetry,
                 org_token=org_token,
             )
 

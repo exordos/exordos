@@ -26,6 +26,8 @@ import rich_click as click
 def register_realm(
     ecosystem_endpoint: str,
     org_token: str | None = None,
+    stand_uuid: str | None = None,
+    stand_secret: str | None = None,
 ) -> tuple[str, str, dict[str, str] | None]:
     """
     Register stand in ecosystem.
@@ -33,6 +35,8 @@ def register_realm(
     Args:
         ecosystem_endpoint: Ecosystem API endpoint
         org_token: Optional organization token for authorization
+        stand_uuid: Optional stand UUID
+        stand_secret: Optional stand secret
 
     Returns:
         Tuple of (stand_uuid, stand_secret, tokens_dict)
@@ -43,8 +47,8 @@ def register_realm(
         bazooka_exc.BazookaError: If registration fails and org_token is provided
     """
     # Generate UUID and secret
-    stand_uuid = str(sys_uuid.uuid4())
-    stand_secret = secrets.token_hex(64)  # 128 characters
+    stand_uuid = stand_uuid or str(sys_uuid.uuid4())
+    stand_secret = stand_secret or secrets.token_hex(64)  # 128 characters
 
     # Prepare request data
     request_data = {

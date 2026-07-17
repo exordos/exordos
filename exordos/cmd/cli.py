@@ -318,6 +318,7 @@ exordos.add_command(version_commands.latest_cmd)
 exordos.add_command(version_commands.get_project_version_cmd)
 
 exordos.add_command(stand_commands.bootstrap_cmd)
+exordos.add_command(stand_commands.register_realm_cmd)
 exordos.add_command(stand_commands.backup_cmd)
 exordos.add_command(stand_commands.backup_decrypt_cmd)
 
