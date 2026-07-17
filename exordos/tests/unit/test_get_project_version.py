@@ -21,7 +21,7 @@ from unittest.mock import patch
 from git import Repo
 import pytest
 
-from exordos.utils import get_project_version
+from exordos.common.version import get_project_version
 
 
 def test_version_with_tag():

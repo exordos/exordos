@@ -25,6 +25,7 @@ import rich_click as click
 from exordos import utils
 from exordos.builder import builder as simple_builder
 from exordos.builder.packer import PackerBuilder
+from exordos.common.version import get_project_version
 import exordos.constants as c
 from exordos.logger import ClickLogger
 from exordos.spec import schema
@@ -149,7 +150,7 @@ def build_cmd(
         click.secho("No builds found in the configuration", fg="yellow")
         return
 
-    version = utils.get_project_version(project_dir)
+    version = get_project_version(project_dir)
 
     logger = ClickLogger()
     packer_image_builder = PackerBuilder(logger)
