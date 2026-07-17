@@ -252,7 +252,12 @@ def update_cmd(
     show_data(entity)
 
 
-def _install_packages() -> None:
+def is_root() -> bool:
+    # os.geteuid() returns 0 if running as root/sudo
+    return os.geteuid() == 0
+
+
+def _install_packages(add_sudo: bool = False) -> None:
     """Install required Debian packages."""
     packages = [
         "qemu-system-x86",
@@ -263,13 +268,13 @@ def _install_packages() -> None:
         "unzip",
     ]
     cmd = ["apt-get", "update"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     cmd = ["apt-get", "install", "-y"]
     cmd.extend(packages)
-    run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"))
+    run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
-def _add_user_to_groups(user: str | None) -> None:
+def _add_user_to_groups(user: str | None, add_sudo: bool = False) -> None:
     """Add current user to libvirt and kvm groups."""
     users = []
     if user:
@@ -281,15 +286,15 @@ def _add_user_to_groups(user: str | None) -> None:
     for username in users:
         click.echo(f"Adding user {username} to libvirt and kvm groups")
         cmd = ["usermod", "-a", "-G", "libvirt", username]
-        run_command(cmd)
+        run_command(cmd, sudo=add_sudo)
         cmd = ["usermod", "-a", "-G", "kvm", username]
-        run_command(cmd)
+        run_command(cmd, sudo=add_sudo)
 
 
-def _create_storage_pool(pool_name: str) -> None:
+def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
     """Create libvirt storage pool if it doesn't exist."""
     # Check if pool exists
-    result = runsh("virsh pool-list --all").raise_on_result()
+    result = runsh("virsh pool-list --all", sudo=add_sudo).raise_on_result()
     if pool_name not in result.output:
         # Create storage pool
         cmd = [
@@ -300,36 +305,36 @@ def _create_storage_pool(pool_name: str) -> None:
             "--target",
             "/var/lib/libvirt/images",
         ]
-        run_command(cmd)
+        run_command(cmd, sudo=add_sudo)
         cmd = ["virsh", "pool-build", pool_name]
-        run_command(cmd)
+        run_command(cmd, sudo=add_sudo)
         cmd = ["virsh", "pool-start", pool_name]
-        run_command(cmd)
+        run_command(cmd, sudo=add_sudo)
         cmd = ["virsh", "pool-autostart", pool_name]
-        run_command(cmd)
+        run_command(cmd, sudo=add_sudo)
 
 
-def _download_rom_file(version: str) -> None:
+def _download_rom_file(version: str, add_sudo: bool = False) -> None:
     """Download ROM file if it doesn't exist."""
     rom_filename = "1af41041.rom"
     rom_path = f"/usr/share/qemu/{rom_filename}"
     if not os.path.exists(rom_path):
         runsh(
-            f"wget -O {rom_path} --timeout=30 https://repo.exordos.com/seed_os/{version}/{rom_filename}"
+            f"wget -O {rom_path} --timeout=30 https://repo.exordos.com/seed_os/{version}/{rom_filename}",
+            sudo=add_sudo,
         ).raise_on_result()
 
     else:
         click.echo(f"ROM file {rom_path} already exists")
 
 
-def _configure_libvirt() -> None:
+def _configure_libvirt(add_sudo: bool = False) -> None:
     """Configure libvirt to enable TCP connection."""
     config_file = "/etc/libvirt/libvirtd.conf"
 
     # Read existing config
     try:
-        with open(config_file, "r") as f:
-            content = f.read()
+        content = run_command(["cat", config_file], sudo=add_sudo).stdout
     except FileNotFoundError:
         raise click.ClickException(f"Config file not found: {config_file}")
 
@@ -341,16 +346,15 @@ def _configure_libvirt() -> None:
             content += f"\n{line}"
 
     # Write back to file
-    with open(config_file, "w") as f:
-        f.write(content)
+    run_command(["tee", config_file], sudo=add_sudo, run_input=content)
 
     # Restart services
     cmd = ["systemctl", "stop", "libvirtd"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     cmd = ["systemctl", "enable", "--now", "libvirtd-tcp.socket"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     cmd = ["systemctl", "start", "libvirtd"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
 
 
 def _check_debian_like():
@@ -373,18 +377,18 @@ def _check_debian_like():
     return False
 
 
-def _install_packer() -> None:
+def _install_packer(add_sudo: bool = False) -> None:
     """Install packer."""
 
     try:
-        run_command(["which", "packer"])
+        run_command(["which", "packer"], sudo=add_sudo)
         click.echo("Packer is already installed")
         return None
     except Exception:
         pass
 
     cmd = ["mkdir", "-p", "/opt/packer"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     # Version 1.9.2 is the latest free
     cmd = [
         "wget",
@@ -392,13 +396,13 @@ def _install_packer() -> None:
         "-P",
         "/opt/packer",
     ]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     cmd = ["unzip", "/opt/packer/packer_1.9.2_linux_amd64.zip", "-d", "/opt/packer"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     cmd = ["mv", "/opt/packer/packer", "/usr/local/bin/"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     cmd = ["/usr/local/bin/packer", "-version"]
-    run_command(cmd)
+    run_command(cmd, sudo=add_sudo)
     return None
 
 
@@ -449,19 +453,22 @@ def init_cmd(
     log = ClickLogger()
 
     log.info("Installing required packages...")
-    _install_packages()
+
+    add_sudo = not is_root()
+
+    _install_packages(add_sudo)
 
     log.info("Adding user to required groups...")
-    _add_user_to_groups(user)
+    _add_user_to_groups(user, add_sudo)
 
     log.info("Setting up storage pool...")
-    _create_storage_pool(pool_name)
+    _create_storage_pool(pool_name, add_sudo)
 
     log.info("Checking ROM file...")
     _download_rom_file(romfile_version)
 
     log.info("Configuring libvirt...")
-    _configure_libvirt()
+    _configure_libvirt(add_sudo)
 
     if packer:
         log.info("Configuring packer...")
