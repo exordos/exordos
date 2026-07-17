@@ -40,6 +40,25 @@ def test_version_with_tag():
         assert version == "1.2.3"
 
 
+def test_version_multiple_tags_on_head_picks_highest_semver():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo = Repo.init(tmpdir)
+        with open(os.path.join(tmpdir, "test.txt"), "w") as f:
+            f.write("test")
+        repo.index.add([os.path.join(tmpdir, "test.txt")])
+        commit = repo.index.commit("Initial commit")
+
+        # Tags added out of semver order; "0.0.3" sorts before "0.1.0"
+        # lexicographically, which previously caused the wrong tag to win.
+        repo.create_tag("0.0.3", commit)
+        repo.create_tag("0.1.0", commit)
+
+        repo.head.commit = commit
+
+        version = get_project_version(tmpdir)
+        assert version == "0.1.0"
+
+
 def test_version_without_tag():
     with tempfile.TemporaryDirectory() as tmpdir:
         repo = Repo.init(tmpdir)
