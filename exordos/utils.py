@@ -37,7 +37,7 @@ import git
 import rich_click as click
 import ruamel.yaml
 
-from exordos.common.version import _semver_sort_key
+from exordos.common.version import get_project_version
 import exordos.constants as c
 
 yaml = ruamel.yaml.YAML()
@@ -140,77 +140,6 @@ def installation_name_from_bootstrap(bootstrap_name: str) -> str:
 def get_repo(path: str) -> git.Repo:
     repo = git.Repo(path)
     return repo
-
-
-def get_project_version(
-    path: str, rc_branches=c.RC_BRANCHES, start_version=(0, 0, 0)
-) -> str:
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"File {path} not found")
-
-    if not os.path.isdir(path):
-        raise ValueError(f"Path {path} is not a directory")
-
-    # Open the git repo
-    repo = git.Repo(path)
-
-    # If a tag is set, return the highest semver tag on this commit
-    head_tags = [tag.name for tag in repo.tags if tag.commit == repo.head.commit]
-    if head_tags:
-        return max(head_tags, key=_semver_sort_key)
-
-    # Find the nearest tag
-    nearest_tag = None
-    for commit in repo.iter_commits(max_count=100):
-        for tag in repo.tags:
-            if tag.commit == commit:
-                nearest_tag = tag
-                break
-
-        if nearest_tag:
-            break
-
-    # Get the current version
-    if nearest_tag:
-        try:
-            major, minor, patch = (int(i) for i in nearest_tag.name.split("."))
-        except ValueError:
-            raise ValueError(
-                f"Invalid format for tag {nearest_tag.name}, "
-                "expected major.minor.patch version format"
-            )
-    # Empty repo, start from 0.0.0
-    else:
-        major, minor, patch = start_version
-
-    # Increment the version
-    patch += 1
-
-    hexsha = repo.head.commit.hexsha
-
-    try:
-        branch = repo.active_branch.name
-    except Exception:
-        # Detached head
-        branch = None
-
-    date = repo.head.commit.committed_date
-    date_repr = "{}{:02}{:02}{:02}{:02}{:02}".format(
-        time.gmtime(date).tm_year,
-        time.gmtime(date).tm_mon,
-        time.gmtime(date).tm_mday,
-        time.gmtime(date).tm_hour,
-        time.gmtime(date).tm_min,
-        time.gmtime(date).tm_sec,
-    )
-
-    # Determine the prefix
-    if branch in rc_branches:
-        prefix = "rc"
-    else:
-        prefix = "dev"
-
-    return f"{major}.{minor}.{patch}-{prefix}+{date_repr}.{hexsha[:8]}"
 
 
 def wait_for(
