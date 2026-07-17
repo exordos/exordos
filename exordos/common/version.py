@@ -26,6 +26,13 @@ import exordos.constants as c
 VERSION_REGEXP = r"(?:\d+\.\d+\.\d+(?:-(?:rc|dev)\+\d{14}\.[a-f0-9]{8})?|latest)"
 
 
+def _semver_sort_key(tag_name: str):
+    try:
+        return (0, packaging_version.parse(tag_name))
+    except packaging_version.InvalidVersion:
+        return (-1, tag_name)
+
+
 def get_project_version(
     path: str, rc_branches=c.RC_BRANCHES, start_version=(0, 0, 0)
 ) -> str:
@@ -38,10 +45,10 @@ def get_project_version(
     # Open the git repo
     repo = git.Repo(path)
 
-    # If a tag is set, return it as version
-    for tag in repo.tags:
-        if tag.commit == repo.head.commit:
-            return tag.name
+    # If a tag is set, return the highest semver tag on this commit
+    head_tags = [tag.name for tag in repo.tags if tag.commit == repo.head.commit]
+    if head_tags:
+        return max(head_tags, key=_semver_sort_key)
 
     # Find the nearest tag
     nearest_tag = None

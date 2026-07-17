@@ -37,6 +37,7 @@ import git
 import rich_click as click
 import ruamel.yaml
 
+from exordos.common.version import _semver_sort_key
 import exordos.constants as c
 
 yaml = ruamel.yaml.YAML()
@@ -153,10 +154,10 @@ def get_project_version(
     # Open the git repo
     repo = git.Repo(path)
 
-    # If a tag is set, return it as version
-    for tag in repo.tags:
-        if tag.commit == repo.head.commit:
-            return tag.name
+    # If a tag is set, return the highest semver tag on this commit
+    head_tags = [tag.name for tag in repo.tags if tag.commit == repo.head.commit]
+    if head_tags:
+        return max(head_tags, key=_semver_sort_key)
 
     # Find the nearest tag
     nearest_tag = None
