@@ -116,7 +116,11 @@ sudo sync
 # Minify orphan space
 sudo fstrim -a
 
-# shutdown machine
-sudo poweroff
+# Stop update services; `systemctl stop` waits for an in-flight
+# apt transaction to finish instead of killing it.
+sudo systemctl stop unattended-upgrades.service apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+
+# Shutdown machine
+sudo systemctl poweroff
 EOF
 }
