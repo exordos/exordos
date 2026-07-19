@@ -901,9 +901,13 @@ def _resolve_hypervisor_placement(
 )
 @click.option(
     "--hyper-iface-rom-file",
-    default="/usr/share/qemu/1af41041.rom",
+    default=None,
     type=str,
-    help="A path to the custom ROM file of a network interface.",
+    help=(
+        "A path to the custom ROM file of a network interface. The "
+        "default (none) uses the stock ROM + undionly.kpxe chain, which "
+        "works with any guest RAM size."
+    ),
     show_default=True,
 )
 @click.option(

@@ -141,7 +141,10 @@ class Hypervisor:
     # stores the same key instead of generating a mismatched one.
     private_key: str | None = None
     machine_prefix: str = "vm-"
-    iface_rom_file: str = "/usr/share/qemu/1af41041.rom"
+    # None = default boot chain (stock ROM -> undionly.kpxe over the
+    # core's TFTP), which works with any guest RAM size. The custom Seed
+    # OS iPXE ROM hangs at "initialising devices" with >2048 MiB guests.
+    iface_rom_file: str | None = None
 
     @classmethod
     def from_spec(cls, spec: dict[str, tp.Any]) -> Hypervisor:
