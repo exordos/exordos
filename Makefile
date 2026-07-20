@@ -11,6 +11,9 @@ help:
 	@echo "build_core       - build exordos core"
 	@echo "bootstrap        - bootstrap exordos core"
 
+build_docker:
+	 docker build --no-cache --progress=plain -t exordos .
+
 mdlint:
 	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" "#!.tox" --fix
 

@@ -93,16 +93,26 @@ def runsh(command: str | list, sudo: bool = False) -> ShellCommandResult:
 
 
 def run_command(
-    cmd: str | list, check: bool = True, env: tp.Optional[tp.Dict[str, str]] = None
+    cmd: str | list,
+    check: bool = True,
+    env: tp.Optional[tp.Dict[str, str]] = None,
+    sudo: bool = False,
+    run_input: tp.Optional[str] = None,
 ) -> subprocess.CompletedProcess:
     """Run shell command and return result."""
     try:
+        if sudo:
+            if isinstance(cmd, str):
+                cmd = ["sudo", cmd]
+            else:
+                cmd = ["sudo", *cmd]
         result = subprocess.run(
             cmd,
             check=check,
             capture_output=True,
             text=True,
             env={**os.environ, **env} if env is not None else None,
+            input=run_input,
         )
         return result
     except subprocess.CalledProcessError as e:
