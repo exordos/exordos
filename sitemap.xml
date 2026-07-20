@@ -99,6 +99,62 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_add/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_delete/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_delete/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_forward-add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_forward-add/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_forward-add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_forward-del/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_forward-del/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_forward-del/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_list/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_list/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_show/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_show/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_snat-add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_snat-add/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_snat-add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/borders_snat-del/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_snat-del/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_snat-del/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/certificates_add/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -743,6 +799,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/iam_idps/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/iam_organization_members/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/iam_organization_members/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/iam_organization_members/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/iam_organizations/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -897,6 +960,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_backend_pools/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/network_borders/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_borders/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_borders/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/network_load_balancers/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -916,6 +986,34 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_vhosts/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_vhosts/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/organization_members_add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_add/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/organization_members_delete/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_delete/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/organization_members_list/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_list/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/organization_members_show/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_show/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_show/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/organizations_add/</loc>
@@ -1653,6 +1751,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/users_change_password/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/users_confirm_email/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/users_confirm_email/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/users_confirm_email/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/users_delete/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -1889,6 +1994,62 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/backend_pools_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/backend_pools_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_add/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_delete/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_delete/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_forward-add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_forward-add/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_forward-add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_forward-del/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_forward-del/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_forward-del/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_list/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_list/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_show/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_show/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_snat-add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_snat-add/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_snat-add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/borders_snat-del/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/borders_snat-del/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/borders_snat-del/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/certificates_add/</loc>
@@ -2535,6 +2696,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/iam_idps/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/iam_organization_members/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/iam_organization_members/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/iam_organization_members/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/iam_organizations/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -2689,6 +2857,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_backend_pools/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/network_borders/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_borders/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_borders/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/network_load_balancers/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -2708,6 +2883,34 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/network_vhosts/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/network_vhosts/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/organization_members_add/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_add/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_add/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/organization_members_delete/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_delete/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/organization_members_list/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_list/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/organization_members_show/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/organization_members_show/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/organization_members_show/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/organizations_add/</loc>
@@ -3443,6 +3646,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/users_change_password/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/users_change_password/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/users_confirm_email/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/users_confirm_email/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/users_confirm_email/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/users_delete/</loc>
