@@ -177,7 +177,7 @@ def add_cmd(
 @click.pass_context
 @click.argument(
     "user",
-    type=str,
+    type=click.UUID,
     required=True,
     help=f"{ENTITY} UUID or username",
 )
@@ -213,6 +213,39 @@ def change_password_cmd(
         client, ENTITY_COLLECTION, "change_password", uuid, **data
     )
     click.echo(f"Password changed for {ENTITY} {uuid}")
+
+
+@users_group.command("confirm_email", help=f"Confirm email of the {ENTITY}")
+@click.pass_context
+@click.argument(
+    "user",
+    type=click.UUID,
+    required=True,
+    help=f"{ENTITY} UUID",
+)
+@click.option(
+    "-f",
+    "--force",
+    show_default=True,
+    is_flag=True,
+)
+def confirm_email(
+    ctx: click.Context,
+    user: sys_uuid.UUID,
+    force: bool,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
+    data = {}
+
+    base_client.action_entity(
+        client,
+        ENTITY_COLLECTION,
+        "force_confirm_email" if force else "confirm_email",
+        user,
+        **data,
+    )
+    click.echo(f"Email {'force' if force else ''} confirmed for {ENTITY} {user}")
 
 
 users_group.add_command(add_cmd, aliases=["a"])

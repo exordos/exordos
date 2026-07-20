@@ -1,40 +1,17 @@
 
-# users_change_password
+# network_borders
 
-Change password of the user
+Manage borders in the Exordos installation
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users change_password [OPTIONS] USER                                                                                                                                                                                                                                                   
+ Usage: exordos network borders [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
-
-* `user` (REQUIRED):
-    * Type: uuid
-    * Default: `sentinel.unset`
-    * Usage: `user`
-
-  user UUID or username
-
-* `old_password` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-o
---old-password`
-
-  Old password of the user
-
-* `new_password`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-n
---new-password`
-
-  New password of the user. If not provided, will be asked interactively
 
 * `help`:
     * Type: boolean
@@ -47,6 +24,6 @@ Change password of the user
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users change_password [OPTIONS] USER                                                                                                                                                                                                                                                   
+ Usage: exordos network borders [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
