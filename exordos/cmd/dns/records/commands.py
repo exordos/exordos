@@ -103,6 +103,9 @@ def add_cmd(
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
+    record = utils.convert_input_multiply(record)
+    if "kind" not in record:
+        record["kind"] = record_type.upper()
     data = {
         "uuid": str(uuid),
         "project_id": str(project_id),
@@ -110,7 +113,7 @@ def add_cmd(
         "ttl": ttl,
         "prio": prio,
         "disabled": disabled,
-        "record": utils.convert_input_multiply(record),
+        "record": record,
     }
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(domain_uuid=domain_uuid), data
