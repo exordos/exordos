@@ -1,6 +1,6 @@
 # Exordos CLI
 
-Exordos CLI is the official command-line interface for the [Exordos platform](https://github.com/infraguys/exordos_core). It provides a unified toolset for managing the full lifecycle of Exordos projects — from building and provisioning elements to bootstrapping installations, managing backups, and interacting with a running Exordos environment.
+Exordos CLI is the official command-line interface for the [Exordos Core platform](https://github.com/exordos/exordos_core). It provides a unified toolset for managing the full lifecycle of Exordos projects — from building and provisioning elements to bootstrapping installations, managing backups, and interacting with a running Exordos Core environment.
 
 **📚 Platform Documentation:** [exordos.github.io/exordos_core](https://exordos.github.io/exordos_core/)
 
@@ -8,7 +8,7 @@ With a single binary you can:
 
 - **Build projects** — compile Exordos project images and artifacts from a declarative `exordos.yaml` configuration.
 - **Bootstrap installations** — spin up local virtual machine environments from built images for development and testing.
-- **Manage installations** — connect via SSH, list, and remove running Exordos instances.
+- **Manage installations** — connect via SSH, list, and remove running Exordos Core instances.
 - **Interact with the platform** — manage elements, IAM, secrets, compute nodes, realms, and more through a rich set of subcommands.
 - **Automate backups** — run periodic or one-shot backups of installations with compression, encryption, rotation, and disk-overflow protection.
 
@@ -36,7 +36,7 @@ pip install exordos
 
 ---
 
-For basic usage (managing a running Exordos platform) no further dependencies are needed.
+For basic usage (managing a running Exordos Core platform) no further dependencies are needed.
 
 If you want to **build elements locally** (compile images with Packer and QEMU) or **bootstrap a local platform deployment** (spin up a local Exordos installation for development and testing), install the additional dependencies below.
 
