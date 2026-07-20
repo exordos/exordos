@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import glob
 import gzip
 import itertools
 import json
@@ -22,6 +23,7 @@ import os
 import pathlib
 import shutil
 import subprocess
+import tarfile
 import tempfile
 import typing as tp
 import uuid as sys_uuid
@@ -82,6 +84,55 @@ class SimpleBuilder:
         shutil.copy(config_artifact.abs_path, dst_path)
 
         return pathlib.Path(dst_path.name)
+
+    def _archive_dir_zst(self, src_dir: pathlib.Path, dst_path: pathlib.Path) -> None:
+        """Archive a directory with tar and compress it with zstd."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tar_path = pathlib.Path(tmp_dir) / f"{src_dir.name}.tar"
+            with tarfile.open(tar_path, "w") as tar:
+                tar.add(src_dir, arcname=src_dir.name)
+
+            subprocess.run(
+                ["zstd", "-9", "-T0", "-f", "-o", dst_path, tar_path],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+    def _build_generated_artifact(
+        self,
+        generated: base.GeneratedArtifact,
+        output_dir: pathlib.Path,
+    ) -> list[pathlib.Path]:
+        """Run a script and collect the artifacts it produces."""
+        if not os.access(generated.script, os.X_OK):
+            raise ValueError(f"Artifact script is not executable: {generated.script}")
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        self._logger.info(f"Running artifact script: {generated.script}")
+        subprocess.run([generated.script], cwd=generated.work_dir, check=True)
+
+        result_paths: list[pathlib.Path] = []
+        for pattern in generated.patterns:
+            matches = sorted(glob.glob(pattern, root_dir=generated.work_dir))
+            if not matches:
+                raise ValueError(
+                    f"No files matched artifact pattern '{pattern}' in "
+                    f"{generated.work_dir}"
+                )
+
+            for match in matches:
+                src = pathlib.Path(generated.work_dir) / match
+                if src.is_dir():
+                    dst_name = f"{src.name}.tar.zst"
+                    self._archive_dir_zst(src, output_dir / dst_name)
+                    result_paths.append(pathlib.Path(dst_name))
+                else:
+                    shutil.copy(src, output_dir / src.name)
+                    result_paths.append(pathlib.Path(src.name))
+
+        return result_paths
 
     def _convert_image(
         self,
@@ -368,11 +419,20 @@ class SimpleBuilder:
                 )
 
         # Build artifacts and configs
+        seen_artifact_names: set[str] = set()
         for artifact in element.artifacts:
             artifact_dir = element_dir / "artifacts"
             artifact_dir.mkdir(parents=True, exist_ok=True)
-            _path = self._build_config_artifact(artifact, artifact_dir)
-            artifacts.append(_path)
+            if isinstance(artifact, base.GeneratedArtifact):
+                _paths = self._build_generated_artifact(artifact, artifact_dir)
+            else:
+                _paths = [self._build_config_artifact(artifact, artifact_dir)]
+
+            for _path in _paths:
+                if _path.name in seen_artifact_names:
+                    raise ValueError(f"Duplicate artifact name: {_path.name}")
+                seen_artifact_names.add(_path.name)
+            artifacts.extend(_paths)
         for config in element.configs:
             config_dir = element_dir / "configs"
             config_dir.mkdir(parents=True, exist_ok=True)

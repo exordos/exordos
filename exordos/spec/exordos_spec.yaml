@@ -98,3 +98,14 @@ properties:
                   path:
                     type: string
                     description: Artifact path
+                  script:
+                    type: string
+                    description: Script or executable to run to produce artifacts
+                  work_dir:
+                    type: string
+                    description: Directory to run the script in
+                  artifacts:
+                    type: array
+                    description: Glob patterns matching the script's output artifacts
+                    items:
+                      type: string

@@ -53,8 +53,27 @@ build:
       
       # List of artifacts in the element
       artifacts:
-        - configs/my-config.yaml
-        - templates/my-template.yaml
+        - path: configs/my-config.yaml
+        - path: templates/my-template.yaml
+```
+
+### Script-generated artifacts
+
+An artifact entry may also run a script (or any executable) instead of pointing
+directly at a file. The script is executed with its `work_dir` as the current
+directory, and once it finishes, its own nested `artifacts` list of glob
+patterns (relative to `work_dir`, `*` is supported) selects the resulting
+files. If a matched entry is a directory, it is archived with `tar` and
+compressed with `zstd` (e.g. a matched `dist/` directory becomes
+`dist.tar.zst`); files are copied as-is. All paths (`script`, `work_dir`) are
+resolved relative to the `exordos.yaml` file.
+
+```yaml
+      artifacts:
+        - script: images/docs_build.sh
+          work_dir: ../
+          artifacts:
+            - dist/
 ```
 
 ## Push configuration file

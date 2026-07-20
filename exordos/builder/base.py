@@ -147,12 +147,53 @@ class Artifact:
 
 
 @dataclasses.dataclass
+class GeneratedArtifact:
+    """Artifact produced by running a script/executable.
+
+    The script is executed in ``work_dir`` and its resulting files are
+    matched via glob ``patterns`` (also resolved against ``work_dir``).
+    """
+
+    script: str
+    work_dir: str
+    patterns: list[str]
+
+    @classmethod
+    def from_config(
+        cls, config: dict[str, tp.Any], work_dir: pathlib.Path
+    ) -> "GeneratedArtifact":
+        """Create a generated artifact from configuration."""
+        if "path" in config:
+            raise ValueError(
+                "Artifact configuration cannot have both 'path' and 'script'"
+            )
+
+        script = config["script"]
+        if not os.path.isabs(script):
+            script = os.path.join(work_dir, script)
+        script = os.path.abspath(script)
+
+        artifact_work_dir = config.get("work_dir", ".")
+        if not os.path.isabs(artifact_work_dir):
+            artifact_work_dir = os.path.join(work_dir, artifact_work_dir)
+        artifact_work_dir = os.path.abspath(artifact_work_dir)
+
+        patterns = config["artifacts"]
+        if not patterns:
+            raise ValueError("'artifacts' patterns are required for a script artifact")
+
+        return cls(script=script, work_dir=artifact_work_dir, patterns=patterns)
+
+
+@dataclasses.dataclass
 class Element:
     """Element representation in the exordos.yaml configuration."""
 
     manifest: pathlib.Path | None = None
     images: list[Image] = dataclasses.field(default_factory=list)
-    artifacts: list[Artifact] = dataclasses.field(default_factory=list)
+    artifacts: list[Artifact | GeneratedArtifact] = dataclasses.field(
+        default_factory=list
+    )
     configs: list[Config] = dataclasses.field(default_factory=list)
 
     def __str__(self):
@@ -183,7 +224,10 @@ class Element:
 
         artifacts_configs = element_config.pop("artifacts", [])
         artifacts = [
-            Artifact.from_config(artifact, work_dir) for artifact in artifacts_configs
+            GeneratedArtifact.from_config(artifact, work_dir)
+            if "script" in artifact
+            else Artifact.from_config(artifact, work_dir)
+            for artifact in artifacts_configs
         ]
 
         # Convert manifest to Path if present

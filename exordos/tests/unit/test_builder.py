@@ -15,9 +15,14 @@
 #    under the License.
 import json
 import pathlib
+import stat
+import subprocess
+import tarfile
 import typing as tp
 from unittest.mock import MagicMock
 import uuid as sys_uuid
+
+import pytest
 
 from exordos.builder import base
 from exordos.builder.builder import SimpleBuilder
@@ -533,3 +538,225 @@ class TestBuildImagesDict:
     def test_empty_images(self, tmp_path) -> None:
         builder = self._builder(tmp_path)
         assert builder._build_images_dict([], "elem", "1.0.0") == {}
+
+
+def _make_script(path: pathlib.Path, body: str) -> pathlib.Path:
+    path.write_text(f"#!/bin/sh\nset -e\n{body}\n")
+    path.chmod(path.stat().st_mode | stat.S_IEXEC)
+    return path
+
+
+class TestGeneratedArtifactFromConfig:
+    """Tests for base.GeneratedArtifact.from_config and Element dispatch."""
+
+    def test_from_config_resolves_paths_relative_to_work_dir(self, tmp_path) -> None:
+        artifact = base.GeneratedArtifact.from_config(
+            {"script": "images/build.sh", "work_dir": "..", "artifacts": ["dist/"]},
+            tmp_path,
+        )
+        assert artifact.script == str(tmp_path / "images/build.sh")
+        assert artifact.work_dir == str((tmp_path / "..").resolve())
+        assert artifact.patterns == ["dist/"]
+
+    def test_from_config_defaults_work_dir_to_config_dir(self, tmp_path) -> None:
+        artifact = base.GeneratedArtifact.from_config(
+            {"script": "build.sh", "artifacts": ["out/*"]}, tmp_path
+        )
+        assert pathlib.Path(artifact.work_dir) == tmp_path
+
+    def test_from_config_rejects_both_path_and_script(self, tmp_path) -> None:
+        with pytest.raises(ValueError):
+            base.GeneratedArtifact.from_config(
+                {"path": "a", "script": "b.sh", "artifacts": ["*"]}, tmp_path
+            )
+
+    def test_element_from_config_dispatches_by_script_key(self, tmp_path) -> None:
+        element = base.Element.from_config(
+            {
+                "artifacts": [
+                    {"path": "a.txt"},
+                    {"script": "b.sh", "artifacts": ["dist/"]},
+                ]
+            },
+            tmp_path,
+        )
+        assert isinstance(element.artifacts[0], base.Artifact)
+        assert isinstance(element.artifacts[1], base.GeneratedArtifact)
+
+
+class TestBuildGeneratedArtifact:
+    """Tests for SimpleBuilder._build_generated_artifact."""
+
+    def _builder(self, tmp_path) -> SimpleBuilder:
+        return SimpleBuilder(
+            exordos_dir=tmp_path,
+            deps=[],
+            elements=[],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=tmp_path / "out",
+        )
+
+    def test_file_artifact_is_copied_verbatim(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        _make_script(work_dir / "build.sh", "echo hi > out.txt")
+
+        generated = base.GeneratedArtifact(
+            script=str(work_dir / "build.sh"),
+            work_dir=str(work_dir),
+            patterns=["out.txt"],
+        )
+        builder = self._builder(tmp_path)
+        output_dir = tmp_path / "artifacts"
+        result = builder._build_generated_artifact(generated, output_dir)
+
+        assert result == [pathlib.Path("out.txt")]
+        assert (output_dir / "out.txt").read_text() == "hi\n"
+
+    def test_directory_artifact_is_tar_zst_archived(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        _make_script(work_dir / "build.sh", "mkdir -p dist && echo hi > dist/file.txt")
+
+        generated = base.GeneratedArtifact(
+            script=str(work_dir / "build.sh"),
+            work_dir=str(work_dir),
+            patterns=["dist/"],
+        )
+        builder = self._builder(tmp_path)
+        output_dir = tmp_path / "artifacts"
+        result = builder._build_generated_artifact(generated, output_dir)
+
+        assert result == [pathlib.Path("dist.tar.zst")]
+        archive = output_dir / "dist.tar.zst"
+        assert archive.exists()
+
+        extracted_tar = tmp_path / "extracted.tar"
+        subprocess.run(
+            ["zstd", "-d", "-f", "-o", str(extracted_tar), str(archive)], check=True
+        )
+        with tarfile.open(extracted_tar) as tar:
+            names = tar.getnames()
+        assert "dist" in names
+        assert "dist/file.txt" in names
+
+    def test_glob_pattern_matches_multiple_files(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        _make_script(
+            work_dir / "build.sh",
+            "mkdir -p out && touch out/a.txt out/b.txt",
+        )
+
+        generated = base.GeneratedArtifact(
+            script=str(work_dir / "build.sh"),
+            work_dir=str(work_dir),
+            patterns=["out/*.txt"],
+        )
+        builder = self._builder(tmp_path)
+        output_dir = tmp_path / "artifacts"
+        result = builder._build_generated_artifact(generated, output_dir)
+
+        assert sorted(str(p) for p in result) == ["a.txt", "b.txt"]
+
+    def test_empty_match_raises(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        _make_script(work_dir / "build.sh", "true")
+
+        generated = base.GeneratedArtifact(
+            script=str(work_dir / "build.sh"),
+            work_dir=str(work_dir),
+            patterns=["nothing_here/*"],
+        )
+        builder = self._builder(tmp_path)
+        with pytest.raises(ValueError):
+            builder._build_generated_artifact(generated, tmp_path / "artifacts")
+
+    def test_non_executable_script_raises(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        script = work_dir / "build.sh"
+        script.write_text("echo hi\n")
+
+        generated = base.GeneratedArtifact(
+            script=str(script), work_dir=str(work_dir), patterns=["*"]
+        )
+        builder = self._builder(tmp_path)
+        with pytest.raises(ValueError):
+            builder._build_generated_artifact(generated, tmp_path / "artifacts")
+
+
+class TestBuildElementArtifacts:
+    """Tests for mixed plain/generated artifacts in SimpleBuilder.build_element."""
+
+    def test_mixed_plain_and_generated_artifacts(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        out_dir = tmp_path / "out"
+        work_dir.mkdir()
+        out_dir.mkdir()
+
+        (work_dir / "app.yaml").write_text("name: myapp\nversion: 0\n")
+        (work_dir / "static.txt").write_text("static content\n")
+        _make_script(work_dir / "build.sh", "echo generated > generated.txt")
+
+        element = base.Element(
+            manifest=pathlib.Path("app.yaml"),
+            artifacts=[
+                base.Artifact(abs_path=str(work_dir / "static.txt"), path="static.txt"),
+                base.GeneratedArtifact(
+                    script=str(work_dir / "build.sh"),
+                    work_dir=str(work_dir),
+                    patterns=["generated.txt"],
+                ),
+            ],
+        )
+
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[element],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=out_dir,
+        )
+        builder.build(developer_keys=None, manifest_vars=None)
+
+        artifacts_dir = out_dir / "exordos-elements" / "myapp" / "0.0.0" / "artifacts"
+        assert (artifacts_dir / "static.txt").read_text() == "static content\n"
+        assert (artifacts_dir / "generated.txt").read_text() == "generated\n"
+
+    def test_duplicate_artifact_name_raises(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        out_dir = tmp_path / "out"
+        work_dir.mkdir()
+        out_dir.mkdir()
+
+        (work_dir / "app.yaml").write_text("name: myapp\nversion: 0\n")
+        (work_dir / "dup.txt").write_text("static\n")
+        _make_script(work_dir / "build.sh", "echo generated > dup.txt")
+
+        element = base.Element(
+            manifest=pathlib.Path("app.yaml"),
+            artifacts=[
+                base.Artifact(abs_path=str(work_dir / "dup.txt"), path="dup.txt"),
+                base.GeneratedArtifact(
+                    script=str(work_dir / "build.sh"),
+                    work_dir=str(work_dir),
+                    patterns=["dup.txt"],
+                ),
+            ],
+        )
+
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[element],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=out_dir,
+        )
+
+        with pytest.raises(ValueError):
+            builder.build_element(element, out_dir)
