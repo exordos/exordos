@@ -42,6 +42,7 @@ from exordos.builder import base as base_builder
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
+from exordos.common import ssh
 from exordos.common import status as status_lib
 from exordos.common import version as version_lib
 import exordos.constants as c
@@ -56,6 +57,8 @@ def _print_bootstrap_summary(
     installation_name: str,
     admin_password: str,
     core_ip: ipaddress.IPv4Address | None,
+    ssh_public_key_path: str,
+    ssh_private_key_path: str | None,
     realm_updated: bool = False,
 ) -> None:
     console = rich.console.Console()
@@ -69,6 +72,11 @@ def _print_bootstrap_summary(
 
     if core_ip is not None:
         table.add_row("Connection", f"[green]ssh ubuntu@{core_ip}[/green]")
+
+    if ssh_private_key_path is not None:
+        table.add_row("SSH private key", f"[green]{ssh_private_key_path}[/green]")
+
+    table.add_row("SSH public key", f"[green]{ssh_public_key_path}[/green]")
 
     if realm_updated:
         table.add_row(
@@ -893,11 +901,10 @@ def _update_realm_config(
 @click.option(
     "--ssh-public-key",
     multiple=True,
-    type=click.Path(exists=True),
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
     help=(
         "Path to a public SSH key file to inject into the VM "
-        "after bootstrap. Can be specified multiple times. "
-        "If not provided, no key will be injected."
+        "after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/."
     ),
 )
 @click.option(
@@ -982,7 +989,7 @@ def bootstrap_cmd(
             "Element inventories are downloaded and cached. Exiting (--download-only).",
             fg="green",
         )
-        return
+        return None
 
     realm_spec_data = None
     if realm_spec is not None:
@@ -1121,16 +1128,27 @@ def bootstrap_cmd(
                 org_token=org_token,
             )
 
-    ssh_public_key_content = None
     if ssh_public_key:
+        ssh_private_key_path = None
+        ssh_public_key_path = ", ".join([key_path for key_path in ssh_public_key])
         key_parts = []
         for key_path in ssh_public_key:
-            with open(key_path) as f:
+            with open(key_path, encoding="utf-8") as f:
                 key_content = f.read().strip()
                 key_parts.append(key_content + "\n")
         ssh_public_key_content = "".join(key_parts)
+    else:
+        with ssh.generate_keys(name.replace("-", "_"), permanent=True) as (
+            private_key_path,
+            public_key_path,
+        ):
+            ssh_private_key_path = private_key_path
+            ssh_public_key_path = public_key_path
+            with open(public_key_path, encoding="utf-8") as f:
+                ssh_public_key_content = f.read().strip()
 
-    if subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0:
+    sudo_check = ["sudo", "-n", "true"]
+    if subprocess.call(sudo_check, stderr=subprocess.DEVNULL) != 0:
         click.secho("Sudo privileges are required to proceed.", fg="yellow")
         if subprocess.call(["sudo", "-v"]) != 0:
             raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
@@ -1180,6 +1198,8 @@ def bootstrap_cmd(
         installation_name=name,
         admin_password=admin_password,
         core_ip=core_ip_result,
+        ssh_public_key_path=ssh_public_key_path,
+        ssh_private_key_path=ssh_private_key_path,
         realm_updated=realm_updated,
     )
 

@@ -226,7 +226,7 @@ Bootstrap exordos locally
     * Default: `sentinel.unset`
     * Usage: `--ssh-public-key`
 
-  Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.
+  Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/.
 
 * `elements`:
     * Type: text
@@ -290,7 +290,7 @@ Bootstrap exordos locally
 │                                                                      self-registration is skipped.                                                                                                                                                                                                      │
 │ --download-only                                                      Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.                                                                                                                   │
 │ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │
-│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.                                                                                    │
+│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/.                                                                                                          │
 │ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │
 │ --no-update-realm                                                    Do not update the realm configuration in exordosctl.yaml after bootstrap                                                                                                                                                           │
 │ --help                                                               Show this message and exit.                                                                                                                                                                                                        │

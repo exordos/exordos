@@ -14,6 +14,9 @@ help:
 build_docker:
 	 docker build --no-cache --progress=plain -t exordos .
 
+build_binary:
+	 tox -e bin
+
 mdlint:
 	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" "#!.tox" --fix
 
@@ -24,7 +27,7 @@ push_element:
 	./dist/exordos repo push -t my_push_name -f --latest ../$(ELEMENT_PATH) -e ../$(ELEMENT_PATH)/output
 
 bootstrap:
-	./dist/exordos bootstrap -i ../exordos_core/output -f -m core --admin-password admin --cidr 10.20.0.0/22 --settings
+	./dist/exordos bootstrap -i ../exordos_core/output -f -m core --admin-password admin --cidr 10.20.0.0/22 --ssh-public-key $(SSH_KEY)
 
 find_ascii:
 	grep -rnP "#.*[^\x00-\x7f]" ./exordos

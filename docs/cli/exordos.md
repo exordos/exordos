@@ -128,6 +128,13 @@ Provides all the necessary tools for work with Exordos Platform
 
   Time to live for the refresh token
 
+* `check_updates`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--check-updates`
+
+  Check for updates
+
 * `help`:
     * Type: boolean
     * Default: `false`
