@@ -222,8 +222,6 @@ install_success() {
   # if exordos cmd did not exist before the launch of this script, this is installing, not updating
   if [ "$OLD_BINARY_EXISTS" -eq 0 ]; then
       "$BINDIR"/exordos introduction
-  else
-    status "exordos was successfully updated"
   fi
 
   # if command is not available, print instructions to run exordos
@@ -233,6 +231,10 @@ install_success() {
     status ""
     status "    $BINDIR/exordos"
   fi
+
+  version=$("$BINDIR"/exordos --no-check-updates version)
+  status ""
+  status "exordos $version was successfully installed"
 }
 trap install_success EXIT
 

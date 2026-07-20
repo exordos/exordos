@@ -175,6 +175,11 @@ def _get_otp_prompt(otp_code: str | None) -> str:
     help="Time to live for the refresh token",
     default=None,
 )
+@click.option(
+    "--check-updates/--no-check-updates",
+    default=False,
+    help="Check for updates",
+)
 @click.pass_context
 def exordos(
     ctx: click.Context,
@@ -193,6 +198,7 @@ def exordos(
     otp_code: str | None,
     ttl: float | None,
     refresh_ttl: float | None,
+    check_updates: bool | None,
 ) -> None:
     if not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
@@ -226,7 +232,9 @@ def exordos(
         return direct_conf.get(param_name, base_conf.get(param_name, cli_value))
 
     final_endpoint = _get_final_value("endpoint", endpoint, cfg, realm_conf)
-    final_check_updates = _get_final_value("check_updates", False, cfg, realm_conf)
+    final_check_updates = _get_final_value(
+        "check_updates", check_updates, cfg, realm_conf
+    )
     final_user = _get_final_value("user", user, cfg, context_conf)
     final_password = _get_final_value("password", password, cfg, context_conf)
     final_access_token = _get_final_value(
