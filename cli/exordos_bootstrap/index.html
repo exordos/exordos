@@ -4460,7 +4460,7 @@
 </ul>
 </li>
 </ul>
-<p>Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.</p>
+<p>Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/.</p>
 <ul>
 <li><code>elements</code>:<ul>
 <li>Type: text</li>
@@ -4527,7 +4527,7 @@
 <span class="go">│                                                                      self-registration is skipped.                                                                                                                                                                                                      │</span>
 <span class="go">│ --download-only                                                      Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.                                                                                                                   │</span>
 <span class="go">│ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │</span>
-<span class="go">│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, no key will be injected.                                                                                    │</span>
+<span class="go">│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/.                                                                                                          │</span>
 <span class="go">│ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │</span>
 <span class="go">│ --no-update-realm                                                    Do not update the realm configuration in exordosctl.yaml after bootstrap                                                                                                                                                           │</span>
 <span class="go">│ --help                                                               Show this message and exit.                                                                                                                                                                                                        │</span>

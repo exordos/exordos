@@ -4263,6 +4263,16 @@
 </ul>
 <p>Name of the element to deploy from the build inventory. If omitted and multiple elements are available, an interactive prompt is shown. If only one element exists, it is selected automatically.</p>
 <ul>
+<li><code>realm</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-r
+--realm</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of the realm to deploy to. If omitted, the current realm from the configuration is used.</p>
+<ul>
 <li><code>exordosctl_cfg_file</code>:<ul>
 <li>Type: text</li>
 <li>Default: <code>/home/user/.exordos/exordosctl.yaml</code></li>
@@ -4296,6 +4306,7 @@
 <span class="go">│ --force                -f           Force push even if the element already exists (push mode only)                                                                                                                                                                                                      │</span>
 <span class="go">│ --timeout                  FLOAT    Seconds to wait for repository sync and element install to complete [default: 600.0]                                                                                                                                                                                │</span>
 <span class="go">│ --element                  TEXT     Name of the element to deploy from the build inventory. If omitted and multiple elements are available, an interactive prompt is shown. If only one element exists, it is selected automatically.                                                                   │</span>
+<span class="go">│ --realm                -r  TEXT     Name of the realm to deploy to. If omitted, the current realm from the configuration is used.                                                                                                                                                                       │</span>
 <span class="go">│ --exordosctl-cfg-file  -c  TEXT     Name of the exordosctl configuration file                                                                                                                                                                                                                           │</span>
 <span class="go">│ --help                              Show this message and exit.                                                                                                                                                                                                                                         │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
