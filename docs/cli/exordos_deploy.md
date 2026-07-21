@@ -73,6 +73,14 @@ Deploy a built element to a realm. The element must already be built (`exordos b
 
   Name of the element to deploy from the build inventory. If omitted and multiple elements are available, an interactive prompt is shown. If only one element exists, it is selected automatically.
 
+* `realm`:
+    * Type: text
+    * Default: `none`
+    * Usage: `-r
+--realm`
+
+  Name of the realm to deploy to. If omitted, the current realm from the configuration is used.
+
 * `exordosctl_cfg_file`:
     * Type: text
     * Default: `/home/user/.exordos/exordosctl.yaml`
@@ -105,6 +113,7 @@ Deploy a built element to a realm. The element must already be built (`exordos b
 │ --force                -f           Force push even if the element already exists (push mode only)                                                                                                                                                                                                      │
 │ --timeout                  FLOAT    Seconds to wait for repository sync and element install to complete [default: 600.0]                                                                                                                                                                                │
 │ --element                  TEXT     Name of the element to deploy from the build inventory. If omitted and multiple elements are available, an interactive prompt is shown. If only one element exists, it is selected automatically.                                                                   │
+│ --realm                -r  TEXT     Name of the realm to deploy to. If omitted, the current realm from the configuration is used.                                                                                                                                                                       │
 │ --exordosctl-cfg-file  -c  TEXT     Name of the exordosctl configuration file                                                                                                                                                                                                                           │
 │ --help                              Show this message and exit.                                                                                                                                                                                                                                         │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
