@@ -62,3 +62,36 @@ class TestRegisterAgentAndWriteKey:
             )
 
         write_key_mock.assert_called_once_with("s3cr3t-key==", key_path)
+
+    def test_uses_a_distinct_agent_uuid_and_capabilities_when_given(
+        self, tmp_path
+    ) -> None:
+        key_path = str(tmp_path / "private_key")
+        fake_client = MagicMock()
+        fake_client.do_action.return_value = {"key": "s3cr3t-key=="}
+
+        with patch.object(base_client, "write_agent_private_key"):
+            base_client.register_agent_and_write_key(
+                fake_client,
+                "node-uuid",
+                key_path,
+                agent_uuid="8d10a674-agent-uuid",
+                capabilities=["pool"],
+            )
+
+        fake_client.create.assert_called_once_with(
+            base_client.c.AGENT_COLLECTION,
+            data={
+                "uuid": "8d10a674-agent-uuid",
+                "name": "universal_agent_8d10a674",
+                "node": "node-uuid",
+                "capabilities": {"capabilities": ["pool"]},
+                "facts": {"facts": []},
+            },
+        )
+        fake_client.do_action.assert_called_once_with(
+            base_client.c.AGENT_COLLECTION,
+            "issue_key",
+            "8d10a674-agent-uuid",
+            invoke=True,
+        )

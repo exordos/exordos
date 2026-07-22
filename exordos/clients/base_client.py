@@ -161,6 +161,8 @@ def register_agent_and_write_key(
     client: http_client.CollectionBaseClient,
     node_uuid: str,
     key_path: str,
+    agent_uuid: str | None = None,
+    capabilities: list[str] | None = None,
 ) -> None:
     """Register this node's universal agent with Core (if not already)
     and write its node encryption key to disk.
@@ -169,15 +171,22 @@ def register_agent_and_write_key(
     key via the `issue_key` action right after - the agent daemon's own
     self-registration later just updates this same record instead of
     conflicting with it.
+
+    `agent_uuid` defaults to `node_uuid`, matching the standard universal
+    agent's own default (`UniversalAgent.from_system_uuid()`), which is
+    also a node itself. A custom agent_uuid is only needed for an agent
+    that isn't the node's own standard agent.
     """
+    agent_uuid = agent_uuid or node_uuid
+
     try:
         client.create(
             c.AGENT_COLLECTION,
             data={
-                "uuid": node_uuid,
-                "name": f"universal_agent_{node_uuid[:8]}",
+                "uuid": agent_uuid,
+                "name": f"universal_agent_{agent_uuid[:8]}",
                 "node": node_uuid,
-                "capabilities": {"capabilities": []},
+                "capabilities": {"capabilities": capabilities or []},
                 "facts": {"facts": []},
             },
         )
@@ -185,7 +194,7 @@ def register_agent_and_write_key(
         pass
 
     private_key_base64 = client.do_action(
-        c.AGENT_COLLECTION, "issue_key", node_uuid, invoke=True
+        c.AGENT_COLLECTION, "issue_key", agent_uuid, invoke=True
     )["key"]
     write_agent_private_key(private_key_base64, key_path)
 
