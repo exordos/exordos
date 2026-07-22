@@ -222,7 +222,7 @@ Bootstrap exordos locally
   Interactively create a exordos settings file
 
 * `ssh_public_key`:
-    * Type: path
+    * Type: file
     * Default: `sentinel.unset`
     * Usage: `--ssh-public-key`
 
@@ -290,7 +290,7 @@ Bootstrap exordos locally
 │                                                                      self-registration is skipped.                                                                                                                                                                                                      │
 │ --download-only                                                      Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.                                                                                                                   │
 │ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │
-│ --ssh-public-key                PATH                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/.                                                                                                          │
+│ --ssh-public-key                FILE                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/.                                                                         │
 │ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │
 │ --no-update-realm                                                    Do not update the realm configuration in exordosctl.yaml after bootstrap                                                                                                                                                           │
 │ --help                                                               Show this message and exit.                                                                                                                                                                                                        │

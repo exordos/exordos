@@ -32,6 +32,7 @@ from exordos.common import crypto
 from exordos.token_cache import TokenCache
 
 GRANT_TYPE_PASSWORD = "password"
+GRANT_TYPE_LOGIN_PASSWORD = "login+password"
 GRANT_TYPE_REFRESH_TOKEN = "refresh_token"
 ENCRYPTED_JSON_CONTENT_TYPE = "application/x-genesis-agent-chacha20-poly1305-encrypted"
 DEFAULT_CLIENT_SLUG = "default"
@@ -126,6 +127,7 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         self,
         base_url: str,
         username: str | None = None,
+        login: str | None = None,
         password: str | None = None,
         access_token: str | None = None,
         refresh_token: str | None = None,
@@ -167,13 +169,17 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         self._refresh_ttl = refresh_ttl or DEFAULT_REFRESH_TTL
 
         self._data = {
-            "grant_type": GRANT_TYPE_PASSWORD,
-            "username": username,
             "password": password,
             "scope": scope or self.empty_scope(),
             "ttl": str(self._ttl),
             "refresh_ttl": str(self._refresh_ttl),
         }
+        if login:
+            self._data["login"] = login
+            self._data["grant_type"] = GRANT_TYPE_LOGIN_PASSWORD
+        else:
+            self._data["username"] = username
+            self._data["grant_type"] = GRANT_TYPE_PASSWORD
 
         self._access_token = access_token
         self._refresh_token = refresh_token

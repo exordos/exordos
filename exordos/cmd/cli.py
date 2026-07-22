@@ -97,6 +97,11 @@ def _get_otp_prompt(otp_code: str | None) -> str:
     help="Exordos API endpoint",
 )
 @click.option(
+    "--ecosystem-endpoint",
+    required=False,
+    help="Exordos ecosystem API endpoint",
+)
+@click.option(
     "-u",
     "--user",
     default=None,
@@ -185,6 +190,7 @@ def exordos(
     ctx: click.Context,
     config: str,
     endpoint: str,
+    ecosystem_endpoint: str | None,
     user: str | None,
     password: str | None,
     access_token: str | None,
@@ -232,6 +238,9 @@ def exordos(
         return direct_conf.get(param_name, base_conf.get(param_name, cli_value))
 
     final_endpoint = _get_final_value("endpoint", endpoint, cfg, realm_conf)
+    final_ecosystem_endpoint = _get_final_value(
+        "ecosystem_endpoint", ecosystem_endpoint, cfg, realm_conf
+    )
     final_check_updates = _get_final_value(
         "check_updates", check_updates, cfg, realm_conf
     )
@@ -268,6 +277,7 @@ def exordos(
 
     auth_data = dict(
         endpoint=final_endpoint,
+        ecosystem_endpoint=final_ecosystem_endpoint,
         username=final_user,
         password=final_password,
         access_token=final_access_token,

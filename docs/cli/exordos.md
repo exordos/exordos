@@ -28,6 +28,13 @@ Provides all the necessary tools for work with Exordos Platform
 
   Exordos API endpoint
 
+* `ecosystem_endpoint`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--ecosystem-endpoint`
+
+  Exordos ecosystem API endpoint
+
 * `user`:
     * Type: text
     * Default: `none`

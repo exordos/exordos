@@ -35,11 +35,14 @@ def get_user_api_client(
     auth_data: dict,
     timeout: tp.Tuple[int, int] | None = None,
 ) -> http_client.CollectionBaseClient:
-    bazooka_client = Client(default_timeout=timeout or (CONNECT_TIMEOUT, READ_TIMEOUT))
+    bazooka_client = Client(
+        default_timeout=timeout or (CONNECT_TIMEOUT, READ_TIMEOUT),
+    )
     # Use provided realm or extract from auth_data
     auth = http_client.CoreIamAuthenticator(
         base_url=auth_data["endpoint"],
         username=auth_data.get("username", auth_data.get("user")),
+        login=auth_data.get("login"),
         password=auth_data.get("password"),
         access_token=auth_data.get("access_token"),
         refresh_token=auth_data.get("refresh_token"),
