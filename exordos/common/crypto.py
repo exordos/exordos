@@ -17,9 +17,13 @@
 from __future__ import annotations
 
 import base64
+import os
 import secrets
+import tempfile
 
 from cryptography.hazmat.primitives.ciphers import aead
+
+from exordos.common.run import run_command
 
 KEY_SIZE = 32
 NONCE_SIZE = 12
@@ -73,3 +77,31 @@ def decrypt_chacha20_poly1305(
 
     cipher = aead.ChaCha20Poly1305(key)
     return cipher.decrypt(nonce, ciphertext, associated_data)
+
+
+def write_root_owned_file(content: str, dest_path: str, mode: str | None = None) -> None:
+    """Write `content` to `dest_path`, a system path this (non-root, but
+    sudo-capable) process can't write to directly.
+
+    The file itself is written as the current user to a private temp file
+    (matching how infra/libvirt writes domain XML: only the final `virsh
+    define <path>` needs elevation, not the write itself), then moved into
+    place with `sudo`.
+    """
+    run_command(["sudo", "mkdir", "-p", os.path.dirname(dest_path)])
+    fd, tmp_path = tempfile.mkstemp()
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+        run_command(["sudo", "install", "-m", mode or "600", tmp_path, dest_path])
+    finally:
+        os.remove(tmp_path)
+
+
+def write_agent_private_key(private_key_base64: str, key_path: str) -> None:
+    """Write a universal agent's node encryption key.
+
+    Must match the key the core stored for this node, so restrict it
+    to the owner.
+    """
+    write_root_owned_file(private_key_base64, key_path, mode="600")

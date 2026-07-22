@@ -23,8 +23,10 @@ from bazooka import exceptions as bazooka_exc
 import certifi
 import rich_click as click
 
+from exordos import constants as c
 from exordos import utils
 from exordos.clients import base as http_client
+from exordos.common.crypto import write_agent_private_key
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
 CONNECT_TIMEOUT = 5
@@ -153,6 +155,39 @@ def action_entity(
         client.do_action(collection, uuid=uuid, name=action, invoke=invoke, **kwargs)
     except bazooka_exc.NotFoundError:
         raise click.ClickException(f"UUID {uuid} not found")
+
+
+def register_agent_and_write_key(
+    client: http_client.CollectionBaseClient,
+    node_uuid: str,
+    key_path: str,
+) -> None:
+    """Register this node's universal agent with Core (if not already)
+    and write its node encryption key to disk.
+
+    Registering ahead of the agent's own first run lets this fetch the
+    key via the `issue_key` action right after - the agent daemon's own
+    self-registration later just updates this same record instead of
+    conflicting with it.
+    """
+    try:
+        client.create(
+            c.AGENT_COLLECTION,
+            data={
+                "uuid": node_uuid,
+                "name": f"universal_agent_{node_uuid[:8]}",
+                "node": node_uuid,
+                "capabilities": {"capabilities": []},
+                "facts": {"facts": []},
+            },
+        )
+    except bazooka_exc.ConflictError:
+        pass
+
+    private_key_base64 = client.do_action(
+        c.AGENT_COLLECTION, "issue_key", node_uuid, invoke=True
+    )["key"]
+    write_agent_private_key(private_key_base64, key_path)
 
 
 def add_fields_to_url(
