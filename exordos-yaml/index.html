@@ -4111,6 +4111,19 @@
     Build configuration example
   </a>
   
+    <nav class="md-nav" aria-label="Build configuration example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-generated-artifacts" class="md-nav__link">
+    Script-generated artifacts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4243,8 +4256,23 @@
 <span class="w">      </span>
 <span class="w">      </span><span class="c1"># List of artifacts in the element</span>
 <span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/my-config.yaml</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/my-template.yaml</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/my-config.yaml</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/my-template.yaml</span>
+</code></pre></div>
+<h3 id="script-generated-artifacts">Script-generated artifacts<a class="headerlink" href="#script-generated-artifacts" title="Permanent link">#</a></h3>
+<p>An artifact entry may also run a script (or any executable) instead of pointing
+directly at a file. The script is executed with its <code>work_dir</code> as the current
+directory, and once it finishes, its own nested <code>artifacts</code> list of glob
+patterns (relative to <code>work_dir</code>, <code>*</code> is supported) selects the resulting
+files. If a matched entry is a directory, it is archived with <code>tar</code> and
+compressed with <code>zstd</code> (e.g. a matched <code>dist/</code> directory becomes
+<code>dist.tar.zst</code>); files are copied as-is. All paths (<code>script</code>, <code>work_dir</code>) are
+resolved relative to the <code>exordos.yaml</code> file.</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images/docs_build.sh</span>
+<span class="w">          </span><span class="nt">work_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../</span>
+<span class="w">          </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist/</span>
 </code></pre></div>
 <h2 id="push-configuration-file">Push configuration file<a class="headerlink" href="#push-configuration-file" title="Permanent link">#</a></h2>
 <p>The push configuration is kept in a separate file — <code>exordos.push.yaml</code> — placed alongside <code>exordos.yaml</code> in the <code>exordos</code> directory. It defines one or more named push targets, each specifying a driver and a destination path.</p>

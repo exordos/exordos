@@ -4111,6 +4111,19 @@
     Пример конфигурации сборки
   </a>
   
+    <nav class="md-nav" aria-label="Пример конфигурации сборки">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#артефакты-полученные-скриптом" class="md-nav__link">
+    Артефакты, полученные скриптом
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4243,8 +4256,23 @@
 <span class="w">      </span>
 <span class="w">      </span><span class="c1"># Список артефактов в элементе</span>
 <span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/my-config.yaml</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/my-template.yaml</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/my-config.yaml</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/my-template.yaml</span>
+</code></pre></div>
+<h3 id="артефакты-полученные-скриптом">Артефакты, полученные скриптом<a class="headerlink" href="#артефакты-полученные-скриптом" title="Permanent link">#</a></h3>
+<p>Вместо прямого указания на файл артефакт может запускать скрипт (или любой
+исполняемый файл). Скрипт выполняется с текущим каталогом <code>work_dir</code>, а после
+его завершения вложенный список <code>artifacts</code> (шаблоны glob, относительно
+<code>work_dir</code>; поддерживается как минимум символ <code>*</code>) отбирает полученные файлы.
+Если найденный элемент — каталог, он архивируется через <code>tar</code> и сжимается
+через <code>zstd</code> (например, найденный каталог <code>dist/</code> станет <code>dist.tar.zst</code>);
+файлы копируются как есть. Все пути (<code>script</code>, <code>work_dir</code>) указываются
+относительно файла <code>exordos.yaml</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images/docs_build.sh</span>
+<span class="w">          </span><span class="nt">work_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../</span>
+<span class="w">          </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist/</span>
 </code></pre></div>
 <h2 id="файл-конфигурации-push">Файл конфигурации push<a class="headerlink" href="#файл-конфигурации-push" title="Permanent link">#</a></h2>
 <p>Конфигурация push хранится в отдельном файле — <code>exordos.push.yaml</code> — расположенном рядом с <code>exordos.yaml</code> в каталоге <code>exordos</code>. Она определяет один или более именованных целевых объектов push, каждый из которых указывает драйвер и целевой путь.</p>
