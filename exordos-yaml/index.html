@@ -4189,6 +4189,19 @@
     Script-generated artifacts
   </a>
   
+    <nav class="md-nav" aria-label="Script-generated artifacts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flatten-option" class="md-nav__link">
+    Flatten option
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -4344,6 +4357,22 @@ resolved relative to the <code>exordos.yaml</code> file.</p>
 <span class="w">          </span><span class="nt">artifacts</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist/</span>
 </code></pre></div>
+<h4 id="flatten-option">Flatten option<a class="headerlink" href="#flatten-option" title="Permanent link">#</a></h4>
+<p>When a matched pattern is a directory, the archive preserves the top-level
+directory name as a wrapper inside the archive by default. Set <code>flatten: true</code>
+to place the directory contents at the root of the archive without the wrapper
+directory. This is useful when the archive is extracted into a directory served
+directly by nginx (e.g. via <code>alias</code>), where an extra wrapper directory would
+cause files to be one level too deep.</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images/docs_build.sh</span>
+<span class="w">          </span><span class="nt">work_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../</span>
+<span class="w">          </span><span class="nt">flatten</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">          </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist/</span>
+</code></pre></div>
+<p>The example above produces <code>dist.tar.zst</code> containing the contents of <code>dist/</code>
+(e.g. <code>index.html</code>, <code>assets/</code>, ...) without a <code>dist/</code> wrapper.</p>
 <h2 id="push-configuration-file">Push configuration file<a class="headerlink" href="#push-configuration-file" title="Permanent link">#</a></h2>
 <p>The push configuration is kept in a separate file — <code>exordos.push.yaml</code> — placed alongside <code>exordos.yaml</code> in the <code>exordos</code> directory. It defines one or more named push targets, each specifying a driver and a destination path.</p>
 <h3 id="format">Format<a class="headerlink" href="#format" title="Permanent link">#</a></h3>
