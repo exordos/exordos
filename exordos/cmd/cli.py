@@ -41,6 +41,7 @@ from exordos.cmd.network import network_group
 from exordos.cmd.realms.commands import realms_group
 from exordos.cmd.repo import commands as repo_commands
 from exordos.cmd.secret import secret_group
+from exordos.cmd.security.commands import rules_group
 from exordos.cmd.settings import commands as settings_commands
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand import commands as stand_commands
@@ -303,6 +304,8 @@ exordos.add_command(vars_commands.vv_group)
 
 exordos.add_command(dns_group)
 exordos.add_command(network_group)
+
+exordos.add_command(rules_group)
 
 exordos.add_command(compute_group, aliases=["c"])
 exordos.add_command(nodes_commands.cn_group)
