@@ -29,19 +29,16 @@ import exordos.constants as c
 
 
 class TokenCache:
-    """Manages token cache for a username.
+    """Manages token cache for a username and realm.
 
     Tokens are stored in a JSON file at ~/.exordos/tokens.json with the
     following structure:
     {
-        "<username>": {
+        "<realm>_<username>": {
             "access_token": "<token>",
             "refresh_token": "<token>",
         }
     }
-
-    The cache belongs to one username. It is removed when another username
-    attempts to use it.
     """
 
     def __init__(self, cache_dir: str | None = None):
@@ -57,15 +54,21 @@ class TokenCache:
         """Create cache directory if it doesn't exist."""
         os.makedirs(self.cache_dir, exist_ok=True)
 
-    def load_tokens(self, username: str) -> dict[str, tp.Any] | None:
-        """Load cached tokens for a username.
+    @staticmethod
+    def _cache_key(username: str, realm: str) -> str:
+        """Build the cache key for a username and realm."""
+        return f"{realm}_{username}"
+
+    def load_tokens(self, username: str, realm: str) -> dict[str, tp.Any] | None:
+        """Load cached tokens for a username and realm.
 
         Args:
             username: Username to load tokens for.
+            realm: Realm to load tokens for.
 
         Returns:
             Dictionary with access_token and refresh_token if available,
-            None if no cached tokens exist for the username.
+            None if no cached tokens exist for the username and realm.
         """
         if not os.path.exists(self.cache_file):
             return None
@@ -77,23 +80,25 @@ class TokenCache:
             if not isinstance(data, dict):
                 return None
 
-            user_tokens = data.get(username)
-            if not isinstance(user_tokens, dict):
-                os.unlink(self.cache_file)
+            tokens = data.get(self._cache_key(username, realm))
+            if not isinstance(tokens, dict):
                 return None
 
             return {
-                "access_token": user_tokens.get("access_token"),
-                "refresh_token": user_tokens.get("refresh_token"),
+                "access_token": tokens.get("access_token"),
+                "refresh_token": tokens.get("refresh_token"),
             }
         except (json.JSONDecodeError, IOError):
             return None
 
-    def save_tokens(self, username: str, access_token: str, refresh_token: str) -> None:
-        """Save tokens to cache for a username.
+    def save_tokens(
+        self, username: str, realm: str, access_token: str, refresh_token: str
+    ) -> None:
+        """Save tokens to cache for a username and realm.
 
         Args:
             username: Username to save tokens for.
+            realm: Realm to save tokens for.
             access_token: Access token to cache.
             refresh_token: Refresh token to cache.
         """
@@ -110,12 +115,8 @@ class TokenCache:
             else:
                 data = {}
 
-            if data and username not in data:
-                os.unlink(self.cache_file)
-                data = {}
-
-            # Update tokens for the username
-            data[username] = {
+            # Update tokens for the username and realm.
+            data[self._cache_key(username, realm)] = {
                 "access_token": access_token,
                 "refresh_token": refresh_token,
             }
@@ -133,11 +134,12 @@ class TokenCache:
             # Token caching is best-effort; do not crash the application if it fails
             pass
 
-    def clear_tokens(self, username: str) -> None:
-        """Clear cached tokens for a username.
+    def clear_tokens(self, username: str, realm: str) -> None:
+        """Clear cached tokens for a username and realm.
 
         Args:
             username: Username whose cached tokens should be cleared.
+            realm: Realm whose cached tokens should be cleared.
         """
         if not os.path.exists(self.cache_file):
             return
@@ -145,7 +147,19 @@ class TokenCache:
         try:
             with open(self.cache_file, "r") as f:
                 data = json.load(f)
-            if username in data:
-                os.unlink(self.cache_file)
+            cache_key = self._cache_key(username, realm)
+            if cache_key in data:
+                del data[cache_key]
+                if not data:
+                    os.unlink(self.cache_file)
+                    return
+
+                tmp_file = self.cache_file + ".tmp"
+                fd = os.open(tmp_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+                with open(fd, "w") as f:
+                    json.dump(data, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tmp_file, self.cache_file)
         except Exception:
             pass

@@ -39,41 +39,46 @@ class TestTokenCache(unittest.TestCase):
         os.rmdir(self.temp_dir)
 
     def test_save_and_load_tokens(self):
-        """Test saving and loading tokens for a username."""
+        """Test saving and loading tokens for a username and realm."""
         username = "testuser"
+        realm = "test-realm"
         access_token = "test_access_token_123"
         refresh_token = "test_refresh_token_456"
 
-        self.cache.save_tokens(username, access_token, refresh_token)
+        self.cache.save_tokens(username, realm, access_token, refresh_token)
 
         self.assertTrue(os.path.exists(self.cache.cache_file))
-        loaded_tokens = self.cache.load_tokens(username)
+        loaded_tokens = self.cache.load_tokens(username, realm)
 
         self.assertIsNotNone(loaded_tokens)
         self.assertEqual(loaded_tokens["access_token"], access_token)
         self.assertEqual(loaded_tokens["refresh_token"], refresh_token)
 
-    def test_load_for_changed_username_deletes_cache_file(self):
-        """Test that loading tokens for another username invalidates the cache."""
-        self.cache.save_tokens("first-user", "access", "refresh")
+    def test_load_for_changed_username_returns_no_tokens(self):
+        """Test that a username has no tokens for another username's key."""
+        self.cache.save_tokens("first-user", "test-realm", "access", "refresh")
 
-        loaded_tokens = self.cache.load_tokens("second-user")
+        loaded_tokens = self.cache.load_tokens("second-user", "test-realm")
 
         self.assertIsNone(loaded_tokens)
-        self.assertFalse(os.path.exists(self.cache.cache_file))
+        self.assertTrue(os.path.exists(self.cache.cache_file))
 
     def test_load_from_empty_file(self):
         """Test loading tokens when cache file is empty."""
         with open(self.cache.cache_file, "w") as f:
             json.dump({}, f)
 
-        loaded_tokens = self.cache.load_tokens("testuser")
+        loaded_tokens = self.cache.load_tokens("testuser", "test-realm")
         self.assertIsNone(loaded_tokens)
 
     def test_save_for_changed_username_replaces_cached_tokens(self):
         """Test that saving tokens for another username replaces the cache."""
-        self.cache.save_tokens("first-user", "first-access", "first-refresh")
-        self.cache.save_tokens("second-user", "second-access", "second-refresh")
+        self.cache.save_tokens(
+            "first-user", "test-realm", "first-access", "first-refresh"
+        )
+        self.cache.save_tokens(
+            "second-user", "test-realm", "second-access", "second-refresh"
+        )
 
         with open(self.cache.cache_file, "r") as f:
             data = json.load(f)
@@ -81,21 +86,51 @@ class TestTokenCache(unittest.TestCase):
         self.assertEqual(
             data,
             {
-                "second-user": {
+                "test-realm_first-user": {
+                    "access_token": "first-access",
+                    "refresh_token": "first-refresh",
+                },
+                "test-realm_second-user": {
                     "access_token": "second-access",
                     "refresh_token": "second-refresh",
-                }
+                },
             },
         )
 
-    def test_clear_tokens(self):
-        """Test clearing tokens for a username."""
-        username = "testuser"
-        self.cache.save_tokens(username, "test_access", "test_refresh")
+    def test_save_multiple_realm_username_keys(self):
+        """Test saving tokens for multiple realm and username keys."""
+        self.cache.save_tokens(
+            "testuser", "first-realm", "first-access", "first-refresh"
+        )
+        self.cache.save_tokens(
+            "testuser", "second-realm", "second-access", "second-refresh"
+        )
 
-        self.cache.clear_tokens(username)
+        self.assertEqual(
+            self.cache.load_tokens("testuser", "first-realm"),
+            {"access_token": "first-access", "refresh_token": "first-refresh"},
+        )
+        self.assertEqual(
+            self.cache.load_tokens("testuser", "second-realm"),
+            {"access_token": "second-access", "refresh_token": "second-refresh"},
+        )
 
-        self.assertFalse(os.path.exists(self.cache.cache_file))
+    def test_clear_tokens_removes_only_realm_tokens(self):
+        """Test clearing tokens for one realm preserves the other realm."""
+        self.cache.save_tokens(
+            "testuser", "first-realm", "first-access", "first-refresh"
+        )
+        self.cache.save_tokens(
+            "testuser", "second-realm", "second-access", "second-refresh"
+        )
+
+        self.cache.clear_tokens("testuser", "first-realm")
+
+        self.assertIsNone(self.cache.load_tokens("testuser", "first-realm"))
+        self.assertEqual(
+            self.cache.load_tokens("testuser", "second-realm"),
+            {"access_token": "second-access", "refresh_token": "second-refresh"},
+        )
 
     def test_cache_file_permissions(self):
         """Test that cache file has correct permissions."""
@@ -104,7 +139,7 @@ class TestTokenCache(unittest.TestCase):
         refresh_token = "test_refresh"
 
         # Save tokens
-        self.cache.save_tokens(username, access_token, refresh_token)
+        self.cache.save_tokens(username, "test-realm", access_token, refresh_token)
 
         # Verify file permissions (should be 0o600)
         file_mode = os.stat(self.cache.cache_file).st_mode & 0o777
