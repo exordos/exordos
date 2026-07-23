@@ -23,8 +23,10 @@ from bazooka import exceptions as bazooka_exc
 import certifi
 import rich_click as click
 
+from exordos import constants as c
 from exordos import utils
 from exordos.clients import base as http_client
+from exordos.common.crypto import write_agent_private_key
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
 CONNECT_TIMEOUT = 5
@@ -153,6 +155,48 @@ def action_entity(
         client.do_action(collection, uuid=uuid, name=action, invoke=invoke, **kwargs)
     except bazooka_exc.NotFoundError:
         raise click.ClickException(f"UUID {uuid} not found")
+
+
+def register_agent_and_write_key(
+    client: http_client.CollectionBaseClient,
+    node_uuid: str,
+    key_path: str,
+    agent_uuid: str | None = None,
+    capabilities: list[str] | None = None,
+) -> None:
+    """Register this node's universal agent with Core (if not already)
+    and write its node encryption key to disk.
+
+    Registering ahead of the agent's own first run lets this fetch the
+    key via the `issue_key` action right after - the agent daemon's own
+    self-registration later just updates this same record instead of
+    conflicting with it.
+
+    `agent_uuid` defaults to `node_uuid`, matching the standard universal
+    agent's own default (`UniversalAgent.from_system_uuid()`), which is
+    also a node itself. A custom agent_uuid is only needed for an agent
+    that isn't the node's own standard agent.
+    """
+    agent_uuid = agent_uuid or node_uuid
+
+    try:
+        client.create(
+            c.AGENT_COLLECTION,
+            data={
+                "uuid": agent_uuid,
+                "name": f"universal_agent_{agent_uuid[:8]}",
+                "node": node_uuid,
+                "capabilities": {"capabilities": capabilities or []},
+                "facts": {"facts": []},
+            },
+        )
+    except bazooka_exc.ConflictError:
+        pass
+
+    private_key_base64 = client.do_action(
+        c.AGENT_COLLECTION, "issue_key", agent_uuid, invoke=True
+    )["key"]
+    write_agent_private_key(private_key_base64, key_path)
 
 
 def add_fields_to_url(
