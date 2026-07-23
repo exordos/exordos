@@ -76,6 +76,27 @@ resolved relative to the `exordos.yaml` file.
             - dist/
 ```
 
+#### Flatten option
+
+When a matched pattern is a directory, the archive preserves the top-level
+directory name as a wrapper inside the archive by default. Set `flatten: true`
+to place the directory contents at the root of the archive without the wrapper
+directory. This is useful when the archive is extracted into a directory served
+directly by nginx (e.g. via `alias`), where an extra wrapper directory would
+cause files to be one level too deep.
+
+```yaml
+      artifacts:
+        - script: images/docs_build.sh
+          work_dir: ../
+          flatten: true
+          artifacts:
+            - dist/
+```
+
+The example above produces `dist.tar.zst` containing the contents of `dist/`
+(e.g. `index.html`, `assets/`, ...) without a `dist/` wrapper.
+
 ## Push configuration file
 
 The push configuration is kept in a separate file — `exordos.push.yaml` — placed alongside `exordos.yaml` in the `exordos` directory. It defines one or more named push targets, each specifying a driver and a destination path.

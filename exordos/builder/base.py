@@ -157,6 +157,7 @@ class GeneratedArtifact:
     script: str
     work_dir: str
     patterns: list[str]
+    flatten: bool = False
 
     @classmethod
     def from_config(
@@ -167,6 +168,8 @@ class GeneratedArtifact:
             raise ValueError(
                 "Artifact configuration cannot have both 'path' and 'script'"
             )
+
+        flatten = config.get("flatten", False)
 
         script = config["script"]
         if not os.path.isabs(script):
@@ -182,7 +185,12 @@ class GeneratedArtifact:
         if not patterns:
             raise ValueError("'artifacts' patterns are required for a script artifact")
 
-        return cls(script=script, work_dir=artifact_work_dir, patterns=patterns)
+        return cls(
+            script=script,
+            work_dir=artifact_work_dir,
+            patterns=patterns,
+            flatten=flatten,
+        )
 
 
 @dataclasses.dataclass
@@ -223,12 +231,14 @@ class Element:
         configs = [Config.from_config(config, work_dir) for config in config_configs]
 
         artifacts_configs = element_config.pop("artifacts", [])
-        artifacts = [
-            GeneratedArtifact.from_config(artifact, work_dir)
-            if "script" in artifact
-            else Artifact.from_config(artifact, work_dir)
-            for artifact in artifacts_configs
-        ]
+        artifacts = []
+        for artifact in artifacts_configs:
+            if isinstance(artifact, str):
+                artifact = {"path": artifact}
+            if "script" in artifact:
+                artifacts.append(GeneratedArtifact.from_config(artifact, work_dir))
+            else:
+                artifacts.append(Artifact.from_config(artifact, work_dir))
 
         # Convert manifest to Path if present
         manifest = element_config.pop("manifest", None)

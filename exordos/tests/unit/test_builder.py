@@ -760,3 +760,106 @@ class TestBuildElementArtifacts:
 
         with pytest.raises(ValueError):
             builder.build_element(element, out_dir)
+
+
+class TestGeneratedArtifactFlatten:
+    """Tests for the flatten option on GeneratedArtifact."""
+
+    def test_from_config_defaults_flatten_false(self, tmp_path) -> None:
+        artifact = base.GeneratedArtifact.from_config(
+            {"script": "build.sh", "artifacts": ["dist/"]}, tmp_path
+        )
+        assert artifact.flatten is False
+
+    def test_from_config_flatten_true(self, tmp_path) -> None:
+        artifact = base.GeneratedArtifact.from_config(
+            {"script": "build.sh", "artifacts": ["dist/"], "flatten": True},
+            tmp_path,
+        )
+        assert artifact.flatten is True
+
+    def test_directory_artifact_archived_without_flatten(self, tmp_path) -> None:
+        """Directory matched by generated artifact is archived with wrapper."""
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        _make_script(
+            work_dir / "build.sh",
+            "mkdir -p dist && echo hi > dist/index.html "
+            "&& mkdir -p dist/assets && echo css > dist/assets/style.css",
+        )
+
+        generated = base.GeneratedArtifact(
+            script=str(work_dir / "build.sh"),
+            work_dir=str(work_dir),
+            patterns=["dist/"],
+            flatten=False,
+        )
+        builder = SimpleBuilder(
+            exordos_dir=tmp_path,
+            deps=[],
+            elements=[],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=tmp_path / "out",
+        )
+        output_dir = tmp_path / "artifacts"
+        result = builder._build_generated_artifact(generated, output_dir)
+
+        assert result == [pathlib.Path("dist.tar.zst")]
+        archive = output_dir / "dist.tar.zst"
+        assert archive.exists()
+
+        extracted_tar = tmp_path / "extracted.tar"
+        subprocess.run(
+            ["zstd", "-d", "-f", "-o", str(extracted_tar), str(archive)],
+            check=True,
+        )
+        with tarfile.open(extracted_tar) as tar:
+            names = tar.getnames()
+        assert "dist" in names
+        assert "dist/index.html" in names
+        assert "dist/assets" in names
+        assert "dist/assets/style.css" in names
+
+    def test_directory_artifact_archived_with_flatten(self, tmp_path) -> None:
+        """Directory matched by generated artifact with flatten has no wrapper."""
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        _make_script(
+            work_dir / "build.sh",
+            "mkdir -p dist && echo hi > dist/index.html "
+            "&& mkdir -p dist/assets && echo css > dist/assets/style.css",
+        )
+
+        generated = base.GeneratedArtifact(
+            script=str(work_dir / "build.sh"),
+            work_dir=str(work_dir),
+            patterns=["dist/"],
+            flatten=True,
+        )
+        builder = SimpleBuilder(
+            exordos_dir=tmp_path,
+            deps=[],
+            elements=[],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=tmp_path / "out",
+        )
+        output_dir = tmp_path / "artifacts"
+        result = builder._build_generated_artifact(generated, output_dir)
+
+        assert result == [pathlib.Path("dist.tar.zst")]
+        archive = output_dir / "dist.tar.zst"
+        assert archive.exists()
+
+        extracted_tar = tmp_path / "extracted.tar"
+        subprocess.run(
+            ["zstd", "-d", "-f", "-o", str(extracted_tar), str(archive)],
+            check=True,
+        )
+        with tarfile.open(extracted_tar) as tar:
+            names = tar.getnames()
+        assert "dist" not in names
+        assert "index.html" in names
+        assert "assets" in names
+        assert "assets/style.css" in names
