@@ -143,16 +143,18 @@ class TestCoreIamAuthenticator:
         mock_client.post.return_value = mock_response
         password_prompt = mock.MagicMock(return_value="testpass")
 
-        auth = base.CoreIamAuthenticator(
-            base_url="https://example.com/api/core",
-            username="testuser",
-            password_prompt=password_prompt,
-            http_client=mock_client,
-        )
+        with mock.patch("exordos.clients.base.TokenCache") as mock_token_cache:
+            mock_token_cache.return_value.load_tokens.return_value = None
+            auth = base.CoreIamAuthenticator(
+                base_url="https://example.com/api/core",
+                username="testuser",
+                password_prompt=password_prompt,
+                http_client=mock_client,
+            )
 
-        password_prompt.assert_not_called()
+            password_prompt.assert_not_called()
 
-        auth.authenticate()
+            auth.authenticate()
 
         password_prompt.assert_called_once()
         _, kwargs = mock_client.post.call_args
@@ -339,7 +341,7 @@ class TestCoreIamAuthenticatorTokenCache(unittest.TestCase):
 
             # Verify save_tokens was called with correct arguments
             mock_cache.save_tokens.assert_called_once_with(
-                realm,
+                "testuser",
                 "cached_access_token",
                 "cached_refresh_token",
             )
@@ -382,8 +384,8 @@ class TestCoreIamAuthenticatorTokenCache(unittest.TestCase):
                 realm=realm,
             )
 
-            # Verify load_tokens was called (may be called multiple times in the __init__)
-            self.assertTrue(mock_cache.load_tokens.called)
+            # Verify load_tokens uses the configured username
+            mock_cache.load_tokens.assert_called_once_with("testuser")
 
             # After all initialization, the final values should be from cache
             self.assertEqual(auth._access_token, cached_access)

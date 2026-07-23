@@ -142,10 +142,10 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         password_prompt: tp.Callable[[], str] | None = None,
         realm: str | None = None,
     ):
-        # Try to load from cache if realm is provided and no explicit tokens
-        if realm and not access_token and not refresh_token:
+        # Try to load from cache if username is provided and no explicit tokens
+        if username and not access_token and not refresh_token:
             cache = TokenCache()
-            cached_tokens = cache.load_tokens(realm)
+            cached_tokens = cache.load_tokens(username)
             if cached_tokens:
                 access_token = cached_tokens["access_token"]
                 refresh_token = cached_tokens["refresh_token"]
@@ -222,19 +222,19 @@ class CoreIamAuthenticator(AbstractAuthenticator):
                 otp = self._otp_prompt()
                 data = self._do_authenticate(otp=otp)
             else:
-                if self._realm:
+                if username := self._data.get("username"):
                     cache = TokenCache()
-                    cache.clear_tokens(self._realm)
+                    cache.clear_tokens(username)
                 raise
         except bazooka_exc.BadRequestError as e:
             error_data = e.cause.response.json()
             if (
                 error_data.get("error") == "invalid_grant"
                 and "expire" in error_data.get("error_description", "").lower()
-                and self._realm
+                and self._data.get("username")
             ):
                 cache = TokenCache()
-                cache.clear_tokens(self._realm)
+                cache.clear_tokens(self._data["username"])
                 self._refresh_token = None
                 data = self._do_authenticate()
             else:
@@ -243,11 +243,11 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         self._access_token = data["access_token"]
         self._refresh_token = data["refresh_token"]
 
-        # Save tokens to cache if realm is provided
-        if self._realm:
+        # Save tokens to cache if username is provided
+        if self._data.get("username"):
             cache = TokenCache()
             cache.save_tokens(
-                self._realm,
+                self._data["username"],
                 self._access_token,
                 self._refresh_token,
             )
