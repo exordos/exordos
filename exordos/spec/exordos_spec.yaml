@@ -104,6 +104,13 @@ properties:
                   work_dir:
                     type: string
                     description: Directory to run the script in
+                  flatten:
+                    type: boolean
+                    description: >
+                      When true and a matched pattern is a directory, place
+                      the directory contents at the root of the archive
+                      without the wrapper directory. Only supported for
+                      script-generated artifacts.
                   artifacts:
                     type: array
                     description: Glob patterns matching the script's output artifacts

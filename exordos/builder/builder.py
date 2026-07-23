@@ -85,12 +85,25 @@ class SimpleBuilder:
 
         return pathlib.Path(dst_path.name)
 
-    def _archive_dir_zst(self, src_dir: pathlib.Path, dst_path: pathlib.Path) -> None:
-        """Archive a directory with tar and compress it with zstd."""
+    def _archive_dir_zst(
+        self,
+        src_dir: pathlib.Path,
+        dst_path: pathlib.Path,
+        flatten: bool = False,
+    ) -> None:
+        """Archive a directory with tar and compress it with zstd.
+
+        When ``flatten`` is True, the directory contents are placed at the
+        root of the archive without the wrapper directory.
+        """
         with tempfile.TemporaryDirectory() as tmp_dir:
             tar_path = pathlib.Path(tmp_dir) / f"{src_dir.name}.tar"
             with tarfile.open(tar_path, "w") as tar:
-                tar.add(src_dir, arcname=src_dir.name)
+                if flatten:
+                    for child in sorted(src_dir.iterdir()):
+                        tar.add(child, arcname=child.name)
+                else:
+                    tar.add(src_dir, arcname=src_dir.name)
 
             subprocess.run(
                 ["zstd", "-9", "-T0", "-f", "-o", dst_path, tar_path],
@@ -126,7 +139,9 @@ class SimpleBuilder:
                 src = pathlib.Path(generated.work_dir) / match
                 if src.is_dir():
                     dst_name = f"{src.name}.tar.zst"
-                    self._archive_dir_zst(src, output_dir / dst_name)
+                    self._archive_dir_zst(
+                        src, output_dir / dst_name, flatten=generated.flatten
+                    )
                     result_paths.append(pathlib.Path(dst_name))
                 else:
                     shutil.copy(src, output_dir / src.name)
