@@ -87,6 +87,8 @@ ORGANIZATION_MEMBER_COLLECTION = "/v1/iam/organizations/{organization_uuid}/memb
 
 CONFIG_COLLECTION = "/v1/config/configs/"
 
+SECURITY_RULES_COLLECTION = "/v1/security/rules/"
+
 DOMAIN_COLLECTION = "/v1/dns/domains/"
 RECORD_COLLECTION = "/v1/dns/domains/{domain_uuid}/records/"
 
