@@ -261,6 +261,12 @@ def _install_packages(add_sudo: bool = False) -> None:
     """Install required Debian packages."""
     packages = [
         "qemu-system-x86",
+        # qemu-system-x86 alone doesn't pull this in, but LibvirtPoolDriver's
+        # generated domain XML uses spice graphics + qxl video - without
+        # it libvirt rejects domain creation outright ("unsupported
+        # configuration: domain configuration does not support video
+        # model 'qxl'"), since QEMU itself doesn't report the device.
+        "qemu-system-modules-spice",
         "qemu-utils",
         "libvirt-daemon-system",
         "libvirt-dev",
