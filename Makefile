@@ -17,6 +17,9 @@ build_docker:
 build_binary:
 	 tox -e bin
 
+cli_docs:
+	tox -e cli_docs
+
 mdlint:
 	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" "#!.tox" --fix
 
@@ -46,3 +49,12 @@ add_ssh_keys_element:
 
 clear_ssh_keys:
 	./dist/exordos secret ssh_keys clear -y
+
+create_ecosystem_realm:
+	./dist/exordos -u jdoe@corp.com -p 12345678 realms a -n example --admin-password 12345678 --core-version 0.2.5
+
+list_ecosystem_realms:
+	./dist/exordos -u jdoe@corp.com -p 12345678 realms l
+
+delete_ecosystem_realm:
+	./dist/exordos -u jdoe@corp.com -p 12345678 realms d example --ecosystem

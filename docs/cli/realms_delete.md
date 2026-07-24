@@ -1,22 +1,22 @@
 
 # realms_delete
 
-Delete local realm
+Delete realm
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos realms delete [OPTIONS] NAME                                                                                                                                                                                                                                                               
+ Usage: exordos realms delete [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `name` (REQUIRED):
+* `name_uuid` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `name`
+    * Usage: `name_uuid`
 
 * `help`:
     * Type: boolean
@@ -29,9 +29,9 @@ Delete local realm
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos realms delete [OPTIONS] NAME                                                                                                                                                                                                                                                               
+ Usage: exordos realms delete [OPTIONS] NAME_UUID                                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
- Delete local realm                                                                                                                                                                                                                                                                                        
+ Delete realm                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │

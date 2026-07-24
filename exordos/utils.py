@@ -478,6 +478,12 @@ def get_ip_from_url(url: str) -> str:
         raise RuntimeError(f"Failed to resolve hostname {hostname}: {e}")
 
 
+def get_base_url(url: str) -> str:
+    """Return the scheme + netloc from a URL (e.g. 'https://example.com:8080')."""
+    parsed = urllib.parse.urlparse(url)
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
 def is_debugging() -> bool:
     if sys.gettrace() is not None:
         return True
