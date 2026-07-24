@@ -79,7 +79,9 @@ def decrypt_chacha20_poly1305(
     return cipher.decrypt(nonce, ciphertext, associated_data)
 
 
-def write_root_owned_file(content: str, dest_path: str, mode: str | None = None) -> None:
+def write_root_owned_file(
+    content: str, dest_path: str, mode: str | None = None
+) -> None:
     """Write `content` to `dest_path`, a system path this (non-root, but
     sudo-capable) process can't write to directly.
 

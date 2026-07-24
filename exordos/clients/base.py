@@ -142,10 +142,12 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         password_prompt: tp.Callable[[], str] | None = None,
         realm: str | None = None,
     ):
-        # Try to load from cache if realm is provided and no explicit tokens
-        if realm and not access_token and not refresh_token:
+        cache_identity = username or login
+
+        # Try to load from cache if username or login and realm are provided.
+        if cache_identity and realm and not access_token and not refresh_token:
             cache = TokenCache()
-            cached_tokens = cache.load_tokens(realm)
+            cached_tokens = cache.load_tokens(cache_identity, realm)
             if cached_tokens:
                 access_token = cached_tokens["access_token"]
                 refresh_token = cached_tokens["refresh_token"]
@@ -153,7 +155,7 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         if not (
             access_token
             or refresh_token
-            or (username and (password or password_prompt))
+            or (cache_identity and (password or password_prompt))
         ):
             raise ValueError(
                 "Insufficient authentication credentials. Provide 'access_token', 'refresh_token', or both 'username' and 'password'."
@@ -222,19 +224,25 @@ class CoreIamAuthenticator(AbstractAuthenticator):
                 otp = self._otp_prompt()
                 data = self._do_authenticate(otp=otp)
             else:
-                if self._realm:
-                    cache = TokenCache()
-                    cache.clear_tokens(self._realm)
+                if cache_identity := self._data.get("username") or self._data.get(
+                    "login"
+                ):
+                    if self._realm:
+                        cache = TokenCache()
+                        cache.clear_tokens(cache_identity, self._realm)
                 raise
         except bazooka_exc.BadRequestError as e:
             error_data = e.cause.response.json()
             if (
                 error_data.get("error") == "invalid_grant"
                 and "expire" in error_data.get("error_description", "").lower()
+                and (self._data.get("username") or self._data.get("login"))
                 and self._realm
             ):
                 cache = TokenCache()
-                cache.clear_tokens(self._realm)
+                cache.clear_tokens(
+                    self._data.get("username") or self._data["login"], self._realm
+                )
                 self._refresh_token = None
                 data = self._do_authenticate()
             else:
@@ -243,14 +251,16 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         self._access_token = data["access_token"]
         self._refresh_token = data["refresh_token"]
 
-        # Save tokens to cache if realm is provided
-        if self._realm:
-            cache = TokenCache()
-            cache.save_tokens(
-                self._realm,
-                self._access_token,
-                self._refresh_token,
-            )
+        # Save tokens to cache if username or login and realm are provided.
+        if cache_identity := self._data.get("username") or self._data.get("login"):
+            if self._realm:
+                cache = TokenCache()
+                cache.save_tokens(
+                    cache_identity,
+                    self._realm,
+                    self._access_token,
+                    self._refresh_token,
+                )
 
     def get_auth_header(self) -> dict[str, str]:
         if not self._access_token:

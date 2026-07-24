@@ -57,9 +57,7 @@ class TestRegisterAgentAndWriteKey:
         fake_client.do_action.return_value = {"key": "s3cr3t-key=="}
 
         with patch.object(base_client, "write_agent_private_key") as write_key_mock:
-            base_client.register_agent_and_write_key(
-                fake_client, "node-uuid", key_path
-            )
+            base_client.register_agent_and_write_key(fake_client, "node-uuid", key_path)
 
         write_key_mock.assert_called_once_with("s3cr3t-key==", key_path)
 
