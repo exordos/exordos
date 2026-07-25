@@ -900,6 +900,7 @@ def _update_realm_config(
 )
 @click.option(
     "--ssh-public-key",
+    envvar="SSH_PUBLIC_KEY",
     multiple=True,
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
     help=(
