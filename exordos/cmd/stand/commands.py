@@ -667,6 +667,7 @@ def _update_realm_config(
 @click.option(
     "-i",
     "--inventory",
+    envvar="INVENTORY",
     help=(
         "Path to the inventory directory containing inventory.json, "
         "or an HTTP(S) URL pointing to an Nginx-served directory. "
@@ -1138,6 +1139,9 @@ def bootstrap_cmd(
                 key_content = f.read().strip()
                 key_parts.append(key_content + "\n")
         ssh_public_key_content = "".join(key_parts)
+    elif realm_spec_data is not None and realm_spec_data.get("ssh_public_key"):
+        ssh_public_key_content = ssh_public_key_path = realm_spec_data["ssh_public_key"]
+        ssh_private_key_path = None
     else:
         with ssh.generate_keys(name.replace("-", "_"), permanent=True) as (
             private_key_path,

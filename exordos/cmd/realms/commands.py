@@ -256,6 +256,13 @@ def list_cmd(ctx: click.Context) -> None:
     type=str,
     required=False,
 )
+@click.option(
+    "--ssh-public-key",
+    envvar="SSH_PUBLIC_KEY",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    required=False,
+    help="Path to the ssh public key",
+)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -266,6 +273,7 @@ def add_cmd(
     node_root_disk_size: int | None,
     node_image: str | None,
     core_version: str | None,
+    ssh_public_key: str | None,
 ) -> None:
     ecosystem_client = get_ecosystem_client(ctx)
     if uuid is None:
@@ -287,6 +295,10 @@ def add_cmd(
         data["node_image"] = node_image
     if core_version is not None:
         data["core_version"] = core_version
+    if ssh_public_key is not None:
+        with open(ssh_public_key, "r") as f:
+            ssh_public_key = f.read()
+        data["ssh_public_key"] = ssh_public_key
     data = base_client.add_entity(ecosystem_client, ENTITY_COLLECTION, data)
     show_data(data)
 
