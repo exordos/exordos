@@ -113,6 +113,8 @@ tox -e docs
 tox -e bin
 ```
 
+Exordos core openapi specification: `https://github.com/exordos/exordos_core/blob/master/docs/openapi/openapi_user.yaml`
+
 ## Code Style and Naming Conventions
 
 ### Style Guidelines
@@ -176,6 +178,7 @@ When verifying changes, follow these rules:
 - **Linting**: Run `tox -e ruff`. Do not invoke `ruff` directly — always go through tox.
 - **Type checking**: Do NOT run `tox -e mypy` (or mypy in any form). Skip type checking entirely.
 - **Tests**: Prefer `tox -e py312` or `pytest exordos/tests/unit/` for the relevant test scope.
+- **Make Binary**: Run `tox -e bin`. Do not invoke `pyinstaller` directly — always go through tox.
 
 ## Additional Guidelines
 
