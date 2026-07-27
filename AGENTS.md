@@ -113,7 +113,7 @@ tox -e docs
 tox -e bin
 ```
 
-Exordos core openapi specification: `https://github.com/exordos/exordos_core/blob/master/docs/openapi/openapi_user.yaml`
+Exordos core OpenAPI specification: `https://github.com/exordos/exordos_core/blob/master/docs/openapi/openapi_user.yaml`
 
 ## Code Style and Naming Conventions
 
