@@ -7,7 +7,7 @@ Delete backend_pool
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network backend_pools delete [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos network backend_pools delete [OPTIONS] UUID...                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -42,7 +42,7 @@ Delete backend_pool
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network backend_pools delete [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos network backend_pools delete [OPTIONS] UUID...                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  Delete backend_pool                                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            

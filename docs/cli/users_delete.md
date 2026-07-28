@@ -7,7 +7,7 @@ Delete user
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam users delete [OPTIONS] UUID...                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete user
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam users delete [OPTIONS] UUID                                                                                                                                                                                                                                                            
+ Usage: exordos iam users delete [OPTIONS] UUID...                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
  Delete user                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

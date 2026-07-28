@@ -7,7 +7,7 @@ Delete node
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos cn delete [OPTIONS] UUID                                                                                                                                                                                                                                                                   
+ Usage: exordos cn delete [OPTIONS] UUID...                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete node
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos cn delete [OPTIONS] UUID                                                                                                                                                                                                                                                                   
+ Usage: exordos cn delete [OPTIONS] UUID...                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  Delete node                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

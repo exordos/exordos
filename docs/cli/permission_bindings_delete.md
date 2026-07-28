@@ -7,7 +7,7 @@ Delete permission_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam permission_bindings delete [OPTIONS] UUID                                                                                                                                                                                                                                              
+ Usage: exordos iam permission_bindings delete [OPTIONS] UUID...                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete permission_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam permission_bindings delete [OPTIONS] UUID                                                                                                                                                                                                                                              
+ Usage: exordos iam permission_bindings delete [OPTIONS] UUID...                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
  Delete permission_binding                                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            

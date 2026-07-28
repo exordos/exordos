@@ -7,7 +7,7 @@ Delete domain
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos dns domains delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos dns domains delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete domain
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos dns domains delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos dns domains delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
  Delete domain                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

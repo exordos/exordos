@@ -7,7 +7,7 @@ Delete ssh_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos secret ssh_keys delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret ssh_keys delete [OPTIONS] UUID...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete ssh_key
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos secret ssh_keys delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos secret ssh_keys delete [OPTIONS] UUID...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  Delete ssh_key                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

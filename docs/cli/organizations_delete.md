@@ -7,7 +7,7 @@ Delete organization
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam organizations delete [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos iam organizations delete [OPTIONS] UUID...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete organization
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam organizations delete [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos iam organizations delete [OPTIONS] UUID...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
  Delete organization                                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            

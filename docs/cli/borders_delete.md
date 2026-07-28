@@ -7,7 +7,7 @@ Delete border
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network borders delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos network borders delete [OPTIONS] UUID...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete border
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network borders delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos network borders delete [OPTIONS] UUID...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  Delete border                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

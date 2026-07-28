@@ -7,7 +7,7 @@ Delete organization_member
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam organization_members delete [OPTIONS] UUID                                                                                                                                                                                                                                             
+ Usage: exordos iam organization_members delete [OPTIONS] UUID...                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -42,7 +42,7 @@ Delete organization_member
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam organization_members delete [OPTIONS] UUID                                                                                                                                                                                                                                             
+ Usage: exordos iam organization_members delete [OPTIONS] UUID...                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
  Delete organization_member                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

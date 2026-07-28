@@ -189,6 +189,9 @@ def add_cmd(
                 }
         targets = list(targets_dict.values())
 
+    if not targets:
+        raise click.ClickException("No nodes and node_sets found")
+
     if project_id is None:
         project_id = targets[0]["project_id"]
     data["project_id"] = str(project_id)

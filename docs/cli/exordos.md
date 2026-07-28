@@ -43,6 +43,14 @@ Provides all the necessary tools for work with Exordos Platform
 
   Client user name
 
+* `login`:
+    * Type: text
+    * Default: `none`
+    * Usage: `-l
+--login`
+
+  Client login
+
 * `password`:
     * Type: text
     * Default: `none`

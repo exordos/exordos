@@ -7,7 +7,7 @@ Delete vhost
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network vhosts delete [OPTIONS] UUID                                                                                                                                                                                                                                                       
+ Usage: exordos network vhosts delete [OPTIONS] UUID...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -42,7 +42,7 @@ Delete vhost
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network vhosts delete [OPTIONS] UUID                                                                                                                                                                                                                                                       
+ Usage: exordos network vhosts delete [OPTIONS] UUID...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
  Delete vhost                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

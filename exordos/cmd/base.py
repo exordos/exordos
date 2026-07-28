@@ -207,6 +207,7 @@ def create_entity_group(
         @click.command("delete", help=f"Delete {entity_name}")
         @click.argument(
             "uuid",
+            nargs=-1,
             type=str,
             required=True,
         )
@@ -221,16 +222,20 @@ def create_entity_group(
         @click.pass_context
         def delete_cmd(
             ctx: click.Context,
-            uuid: str,
+            uuid: tuple[str, ...],
             y: bool,
             **kwargs,
         ) -> None:
-            if y or questionary.confirm(f"Delete {entity_name} {uuid}?").ask():
-                client = base_client.get_user_api_client(ctx.obj.auth_data)
-                base_client.delete_entity(
-                    client, entity_collection.format(**kwargs), uuid
-                )
-                click.echo(f"{entity_name} {uuid} deleted")
+            client = base_client.get_user_api_client(ctx.obj.auth_data)
+            for entity_uuid in uuid:
+                if (
+                    y
+                    or questionary.confirm(f"Delete {entity_name} {entity_uuid}?").ask()
+                ):
+                    base_client.delete_entity(
+                        client, entity_collection.format(**kwargs), entity_uuid
+                    )
+                    click.echo(f"{entity_name} {entity_uuid} deleted")
 
         entity_group.add_command(delete_cmd, aliases=["d"])
 

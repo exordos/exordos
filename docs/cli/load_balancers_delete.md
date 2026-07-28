@@ -7,7 +7,7 @@ Delete load_balancer
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network load_balancers delete [OPTIONS] UUID                                                                                                                                                                                                                                               
+ Usage: exordos network load_balancers delete [OPTIONS] UUID...                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete load_balancer
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network load_balancers delete [OPTIONS] UUID                                                                                                                                                                                                                                               
+ Usage: exordos network load_balancers delete [OPTIONS] UUID...                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
  Delete load_balancer                                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            

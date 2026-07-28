@@ -7,7 +7,7 @@ Delete service
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em services delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos em services delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete service
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em services delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos em services delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
  Delete service                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            

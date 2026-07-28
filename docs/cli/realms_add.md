@@ -63,6 +63,13 @@ Add a new ecosystem realm
     * Default: `sentinel.unset`
     * Usage: `--core-version`
 
+* `ssh_public_key`:
+    * Type: file
+    * Default: `sentinel.unset`
+    * Usage: `--ssh-public-key`
+
+  Path to the ssh public key
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -87,6 +94,7 @@ Add a new ecosystem realm
 │ --node-root-disk-size      INTEGER                                                                                                                                                                                                                                                                      │
 │ --node-image               TEXT     Url of the realm image                                                                                                                                                                                                                                              │
 │ --core-version             TEXT                                                                                                                                                                                                                                                                         │
+│ --ssh-public-key           FILE     Path to the ssh public key                                                                                                                                                                                                                                          │
 │ --help                              Show this message and exit.                                                                                                                                                                                                                                         │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

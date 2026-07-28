@@ -7,7 +7,7 @@ Delete profile
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos vs profiles delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos vs profiles delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete profile
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos vs profiles delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos vs profiles delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
  Delete profile                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
