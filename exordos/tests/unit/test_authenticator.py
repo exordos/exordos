@@ -343,6 +343,7 @@ class TestCoreIamAuthenticatorTokenCache(unittest.TestCase):
             mock_cache.save_tokens.assert_called_once_with(
                 "testuser",
                 realm,
+                "",
                 "cached_access_token",
                 "cached_refresh_token",
             )
@@ -385,8 +386,8 @@ class TestCoreIamAuthenticatorTokenCache(unittest.TestCase):
                 realm=realm,
             )
 
-            # Verify load_tokens uses the configured username and realm
-            mock_cache.load_tokens.assert_called_once_with("testuser", realm)
+            # Verify load_tokens uses the configured username, realm, and scope
+            mock_cache.load_tokens.assert_called_once_with("testuser", realm, "")
 
             # After all initialization, the final values should be from cache
             self.assertEqual(auth._access_token, cached_access)
@@ -419,10 +420,11 @@ class TestCoreIamAuthenticatorTokenCache(unittest.TestCase):
 
             auth.authenticate()
 
-        mock_cache.load_tokens.assert_called_once_with("test-login", "test-realm")
+        mock_cache.load_tokens.assert_called_once_with("test-login", "test-realm", "")
         mock_cache.save_tokens.assert_called_once_with(
             "test-login",
             "test-realm",
+            "",
             "cached_access_token",
             "cached_refresh_token",
         )

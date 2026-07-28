@@ -29,12 +29,12 @@ import exordos.constants as c
 
 
 class TokenCache:
-    """Manages token cache for a username and realm.
+    """Manages token cache for a username, realm, and scope.
 
     Tokens are stored in a JSON file at ~/.exordos/tokens.json with the
     following structure:
     {
-        "<realm>_<username>": {
+        "<realm>_<username>_<scope>": {
             "access_token": "<token>",
             "refresh_token": "<token>",
         }
@@ -55,20 +55,23 @@ class TokenCache:
         os.makedirs(self.cache_dir, exist_ok=True)
 
     @staticmethod
-    def _cache_key(username: str, realm: str) -> str:
-        """Build the cache key for a username and realm."""
-        return f"{realm}_{username}"
+    def _cache_key(username: str, realm: str, scope: str) -> str:
+        """Build the cache key for a username, realm, and scope."""
+        return f"{realm}_{username}_{scope}"
 
-    def load_tokens(self, username: str, realm: str) -> dict[str, tp.Any] | None:
-        """Load cached tokens for a username and realm.
+    def load_tokens(
+        self, username: str, realm: str, scope: str
+    ) -> dict[str, tp.Any] | None:
+        """Load cached tokens for a username, realm, and scope.
 
         Args:
             username: Username to load tokens for.
             realm: Realm to load tokens for.
+            scope: Scope to load tokens for.
 
         Returns:
             Dictionary with access_token and refresh_token if available,
-            None if no cached tokens exist for the username and realm.
+            None if no cached tokens exist for the username, realm, and scope.
         """
         if not os.path.exists(self.cache_file):
             return None
@@ -80,7 +83,7 @@ class TokenCache:
             if not isinstance(data, dict):
                 return None
 
-            tokens = data.get(self._cache_key(username, realm))
+            tokens = data.get(self._cache_key(username, realm, scope))
             if not isinstance(tokens, dict):
                 return None
 
@@ -92,13 +95,19 @@ class TokenCache:
             return None
 
     def save_tokens(
-        self, username: str, realm: str, access_token: str, refresh_token: str
+        self,
+        username: str,
+        realm: str,
+        scope: str,
+        access_token: str,
+        refresh_token: str,
     ) -> None:
-        """Save tokens to cache for a username and realm.
+        """Save tokens to cache for a username, realm, and scope.
 
         Args:
             username: Username to save tokens for.
             realm: Realm to save tokens for.
+            scope: Scope to save tokens for.
             access_token: Access token to cache.
             refresh_token: Refresh token to cache.
         """
@@ -115,8 +124,8 @@ class TokenCache:
             else:
                 data = {}
 
-            # Update tokens for the username and realm.
-            data[self._cache_key(username, realm)] = {
+            # Update tokens for the username, realm, and scope.
+            data[self._cache_key(username, realm, scope)] = {
                 "access_token": access_token,
                 "refresh_token": refresh_token,
             }
@@ -134,12 +143,13 @@ class TokenCache:
             # Token caching is best-effort; do not crash the application if it fails
             pass
 
-    def clear_tokens(self, username: str, realm: str) -> None:
-        """Clear cached tokens for a username and realm.
+    def clear_tokens(self, username: str, realm: str, scope: str) -> None:
+        """Clear cached tokens for a username, realm, and scope.
 
         Args:
             username: Username whose cached tokens should be cleared.
             realm: Realm whose cached tokens should be cleared.
+            scope: Scope whose cached tokens should be cleared.
         """
         if not os.path.exists(self.cache_file):
             return
@@ -147,7 +157,7 @@ class TokenCache:
         try:
             with open(self.cache_file, "r") as f:
                 data = json.load(f)
-            cache_key = self._cache_key(username, realm)
+            cache_key = self._cache_key(username, realm, scope)
             if cache_key in data:
                 del data[cache_key]
                 if not data:

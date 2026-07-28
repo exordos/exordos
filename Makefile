@@ -57,4 +57,4 @@ list_ecosystem_realms:
 	./dist/exordos -u jdoe@corp.com -p 12345678 realms l
 
 delete_ecosystem_realm:
-	./dist/exordos -u jdoe@corp.com -p 12345678 realms d example --ecosystem
+	./dist/exordos -u jdoe@corp.com -p 12345678 realms d example
