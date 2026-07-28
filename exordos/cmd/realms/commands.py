@@ -19,6 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 import dataclasses
 import ipaddress
 import os
+import subprocess
 from urllib.parse import urljoin
 import uuid as sys_uuid
 
@@ -165,11 +166,14 @@ def list_cmd(ctx: click.Context) -> None:
     def get_local_realms() -> dict[str, Realm]:
         # Get the list of local realms by libvirt
         infra = libvirt_infra.LibvirtInfraDriver()
-        return {
-            str(ip): Realm(stand.name, str(ip), "local", "ACTIVE")
-            for stand in infra.list_stands()
-            if (ip := get_stand_core_ip(stand))
-        }
+        try:
+            return {
+                str(ip): Realm(stand.name, str(ip), "local", "ACTIVE")
+                for stand in infra.list_stands()
+                if (ip := get_stand_core_ip(stand))
+            }
+        except subprocess.CalledProcessError:
+            return {}
 
     def get_config_realms() -> dict[str, Realm]:
         # Get the list of remote realms by config
