@@ -7,7 +7,7 @@ Delete manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em manifests delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos em manifests delete [OPTIONS] UUID...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete manifest
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em manifests delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos em manifests delete [OPTIONS] UUID...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Delete manifest                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

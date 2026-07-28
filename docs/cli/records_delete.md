@@ -7,7 +7,7 @@ Delete record
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos dns records delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos dns records delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -42,7 +42,7 @@ Delete record
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos dns records delete [OPTIONS] UUID                                                                                                                                                                                                                                                          
+ Usage: exordos dns records delete [OPTIONS] UUID...                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            
  Delete record                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            

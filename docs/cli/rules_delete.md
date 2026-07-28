@@ -7,7 +7,7 @@ Delete rule
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos rules delete [OPTIONS] UUID                                                                                                                                                                                                                                                                
+ Usage: exordos rules delete [OPTIONS] UUID...                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete rule
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos rules delete [OPTIONS] UUID                                                                                                                                                                                                                                                                
+ Usage: exordos rules delete [OPTIONS] UUID...                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
  Delete rule                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            

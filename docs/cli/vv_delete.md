@@ -7,7 +7,7 @@ Delete variable
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos vv delete [OPTIONS] UUID                                                                                                                                                                                                                                                                   
+ Usage: exordos vv delete [OPTIONS] UUID...                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete variable
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos vv delete [OPTIONS] UUID                                                                                                                                                                                                                                                                   
+ Usage: exordos vv delete [OPTIONS] UUID...                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            
  Delete variable                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

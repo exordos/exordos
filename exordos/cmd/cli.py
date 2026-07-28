@@ -109,6 +109,12 @@ def _get_otp_prompt(otp_code: str | None) -> str:
     help="Client user name",
 )
 @click.option(
+    "-l",
+    "--login",
+    default=None,
+    help="Client login",
+)
+@click.option(
     "-p",
     "--password",
     default=None,
@@ -193,6 +199,7 @@ def exordos(
     endpoint: str,
     ecosystem_endpoint: str | None,
     user: str | None,
+    login: str | None,
     password: str | None,
     access_token: str | None,
     refresh_token: str | None,
@@ -246,6 +253,7 @@ def exordos(
         "check_updates", check_updates, cfg, realm_conf
     )
     final_user = _get_final_value("user", user, cfg, context_conf)
+    final_login = _get_final_value("login", login, cfg, context_conf)
     final_password = _get_final_value("password", password, cfg, context_conf)
     final_access_token = _get_final_value(
         "access_token", access_token, cfg, context_conf
@@ -280,6 +288,7 @@ def exordos(
         endpoint=final_endpoint,
         ecosystem_endpoint=final_ecosystem_endpoint,
         username=final_user,
+        login=final_login,
         password=final_password,
         access_token=final_access_token,
         refresh_token=final_refresh_token,

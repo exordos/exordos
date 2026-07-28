@@ -7,7 +7,7 @@ Delete set
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos compute sets delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos compute sets delete [OPTIONS] UUID...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete set
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos compute sets delete [OPTIONS] UUID                                                                                                                                                                                                                                                         
+ Usage: exordos compute sets delete [OPTIONS] UUID...                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Delete set                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                            

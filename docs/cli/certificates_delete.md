@@ -7,7 +7,7 @@ Delete certificate
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos secret certificates delete [OPTIONS] UUID                                                                                                                                                                                                                                                  
+ Usage: exordos secret certificates delete [OPTIONS] UUID...                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete certificate
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos secret certificates delete [OPTIONS] UUID                                                                                                                                                                                                                                                  
+ Usage: exordos secret certificates delete [OPTIONS] UUID...                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
  Delete certificate                                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            

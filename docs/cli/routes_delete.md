@@ -7,7 +7,7 @@ Delete route
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network routes delete [OPTIONS] UUID                                                                                                                                                                                                                                                       
+ Usage: exordos network routes delete [OPTIONS] UUID...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -47,7 +47,7 @@ Delete route
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos network routes delete [OPTIONS] UUID                                                                                                                                                                                                                                                       
+ Usage: exordos network routes delete [OPTIONS] UUID...                                                                                                                                                                                                                                                    
                                                                                                                                                                                                                                                                                                            
  Delete route                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            

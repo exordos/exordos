@@ -7,7 +7,7 @@ Delete repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo delete [OPTIONS] UUID                                                                                                                                                                                                                                                                 
+ Usage: exordos repo delete [OPTIONS] UUID...                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo delete [OPTIONS] UUID                                                                                                                                                                                                                                                                 
+ Usage: exordos repo delete [OPTIONS] UUID...                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Delete repository                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            

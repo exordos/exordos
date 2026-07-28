@@ -7,7 +7,7 @@ Delete role_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam role_bindings delete [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos iam role_bindings delete [OPTIONS] UUID...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete role_binding
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam role_bindings delete [OPTIONS] UUID                                                                                                                                                                                                                                                    
+ Usage: exordos iam role_bindings delete [OPTIONS] UUID...                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
  Delete role_binding                                                                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                                                                                            

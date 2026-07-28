@@ -6,9 +6,9 @@ Show detailed information about the user
 ## Usage
 
 ```console
-                                                                                
- Usage: exordos iam users info [OPTIONS] USER                                   
-                                                                                
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos iam users info [OPTIONS] USER                                                                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -38,7 +38,7 @@ Show detailed information about the user
 ## CLI Help
 
 ```console
-                                                                                
- Usage: exordos iam users info [OPTIONS] USER                                   
-                                                                                
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos iam users info [OPTIONS] USER                                                                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                           
 ```

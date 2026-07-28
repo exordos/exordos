@@ -7,7 +7,7 @@ Delete permission
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam permissions delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos iam permissions delete [OPTIONS] UUID...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete permission
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam permissions delete [OPTIONS] UUID                                                                                                                                                                                                                                                      
+ Usage: exordos iam permissions delete [OPTIONS] UUID...                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
  Delete permission                                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            

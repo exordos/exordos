@@ -7,7 +7,7 @@ Delete password
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos secret passwords delete [OPTIONS] UUID                                                                                                                                                                                                                                                     
+ Usage: exordos secret passwords delete [OPTIONS] UUID...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,7 +37,7 @@ Delete password
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos secret passwords delete [OPTIONS] UUID                                                                                                                                                                                                                                                     
+ Usage: exordos secret passwords delete [OPTIONS] UUID...                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
  Delete password                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            
