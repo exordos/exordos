@@ -215,6 +215,89 @@ def change_password_cmd(
     click.echo(f"Password changed for {ENTITY} {uuid}")
 
 
+@users_group.command("info", help=f"Show detailed information about the {ENTITY}")
+@click.pass_context
+@click.argument(
+    "user",
+    type=str,
+    required=True,
+    help=f"{ENTITY} UUID or username",
+)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+def info_cmd(ctx: click.Context, user: str, output: str) -> None:
+    user_fields = ["uuid", "username", "email", "first_name", "last_name", "status"]
+    project_fields = ["uuid", "name", "organization"]
+    role_binding_fields = ["uuid", "role", "project", "user"]
+    organization_fields = ["uuid", "name"]
+    org_member_fields = ["uuid", "user", "organization", "role"]
+
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    user_data = base_client.get_entity(client, ENTITY_COLLECTION, user)
+    user_uuid = user_data["uuid"]
+    role_bindings = base_client.list_entities(
+        client, c.ROLE_BINDING_COLLECTION, user=user_uuid
+    )
+
+    organizations = base_client.list_entities(client, c.ORGANIZATION_COLLECTION)
+    org_members = []
+    user_organizations = []
+
+    for organization in organizations:
+        members = base_client.list_entities(
+            client,
+            c.ORGANIZATION_MEMBER_COLLECTION.format(
+                organization_uuid=organization["uuid"]
+            ),
+            user=user_uuid,
+        )
+        if members:
+            user_organizations.append(organization)
+            org_members.extend(members)
+
+    projects = []
+    for organization in user_organizations:
+        projects.extend(
+            base_client.list_entities(
+                client,
+                c.PROJECT_COLLECTION,
+                organization=organization["uuid"],
+            )
+        )
+    projects = [
+        {k: v for k, v in project.items() if k in project_fields}
+        for project in projects
+    ]
+    role_bindings = [
+        {k: v for k, v in role_binding.items() if k in role_binding_fields}
+        for role_binding in role_bindings
+    ]
+    org_members = [
+        {k: v for k, v in org_member.items() if k in org_member_fields}
+        for org_member in org_members
+    ]
+    user_organizations = [
+        {k: v for k, v in organization.items() if k in organization_fields}
+        for organization in user_organizations
+    ]
+
+    show_data(
+        {
+            "user": {k: v for k, v in user_data.items() if k in user_fields},
+            "orgs": user_organizations,
+            "projects": projects,
+            "role_bindings": role_bindings,
+            "org_members": org_members,
+        },
+        output,
+    )
+
+
 @users_group.command("confirm_email", help=f"Confirm email of the {ENTITY}")
 @click.pass_context
 @click.argument(
