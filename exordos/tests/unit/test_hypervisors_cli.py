@@ -606,6 +606,51 @@ class TestInitCmdRegistration:
         for call in get_client_mock.call_args_list:
             assert call.args[0] == auth_data
 
+    def test_with_rawstor_installs_hypervisor_package_set(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "is_root", return_value=False),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--with-rawstor"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        rawstor_mock.assert_called_once_with(["librawstor", "rawstor-ost"], True)
+
+    def test_without_with_rawstor_skips_rawstor_install(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                [],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        rawstor_mock.assert_not_called()
+
 
 class TestAgentConfigContent:
     """Tests for the pure content-building helpers:
@@ -936,6 +981,51 @@ class TestAgentSetup:
                 ["sudo", "systemctl", "restart", "exordos-universal-agent.service"]
             ),
         ]
+
+
+class TestInstallRawstorPackages:
+    """Tests for install_rawstor_packages: downloads and installs the
+    given rawstor .deb packages via dpkg + apt-get -f."""
+
+    def test_downloads_and_installs_each_package(self) -> None:
+        version = hv_commands.RAWSTOR_VERSION
+        base_url = f"{hv_commands.RAWSTOR_RELEASES_URL}/v{version}"
+        deb_dir = "/tmp/rawstor-packages"
+
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"])
+
+        assert run_mock.call_args_list == [
+            mock_call(["mkdir", "-p", deb_dir], sudo=False),
+            mock_call(
+                ["wget", f"{base_url}/librawstor_{version}_amd64.deb", "-P", deb_dir],
+                sudo=False,
+            ),
+            mock_call(
+                ["wget", f"{base_url}/rawstor-ost_{version}_amd64.deb", "-P", deb_dir],
+                sudo=False,
+            ),
+            mock_call(
+                [
+                    "dpkg",
+                    "-i",
+                    f"{deb_dir}/librawstor_{version}_amd64.deb",
+                    f"{deb_dir}/rawstor-ost_{version}_amd64.deb",
+                ],
+                sudo=False,
+            ),
+            mock_call(
+                ["apt-get", "install", "-f", "-y"],
+                env=dict(DEBIAN_FRONTEND="noninteractive"),
+                sudo=False,
+            ),
+        ]
+
+    def test_passes_sudo_through(self) -> None:
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.install_rawstor_packages(["librawstor"], add_sudo=True)
+
+        assert all(c.kwargs.get("sudo") is True for c in run_mock.call_args_list)
 
 
 class TestReadExistingConfig:

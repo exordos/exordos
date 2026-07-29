@@ -172,6 +172,13 @@ Bootstrap exordos locally
 
   A path to the custom ROM file of a network interface.
 
+* `with_rawstor`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--with-rawstor`
+
+  Install rawstor packages. With --pool-agent-placement=core, installs librawstor + the rawstor python bindings package inside the core VM. With --pool-agent-placement=local, installs librawstor + rawstor-ost on this host (matching `exordos compute hypervisors init --with-rawstor`).
+
 * `no_start`:
     * Type: boolean
     * Default: `false`

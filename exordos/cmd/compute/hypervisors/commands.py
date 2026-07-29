@@ -355,6 +355,29 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
+RAWSTOR_VERSION = "0.2.2"
+RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
+
+
+def install_rawstor_packages(
+    packages: tp.Sequence[str], add_sudo: bool = False
+) -> None:
+    """Download and install the given rawstor .deb packages."""
+    deb_dir = "/tmp/rawstor-packages"
+    run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
+
+    deb_paths = []
+    for package in packages:
+        deb_name = f"{package}_{RAWSTOR_VERSION}_amd64.deb"
+        url = f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/{deb_name}"
+        run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
+        deb_paths.append(os.path.join(deb_dir, deb_name))
+
+    run_command(["dpkg", "-i", *deb_paths], sudo=add_sudo)
+    cmd = ["apt-get", "install", "-f", "-y"]
+    run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
+
+
 def generate_node_private_key_base64() -> str:
     """Generate a node encryption key for the local agent.
 
@@ -906,6 +929,13 @@ def local_agent_node_uuid(
     help="Install packer",
 )
 @click.option(
+    "--with-rawstor",
+    show_default=True,
+    is_flag=True,
+    default=False,
+    help="Install rawstor packages (librawstor + rawstor-ost) on this hypervisor",
+)
+@click.option(
     "--user",
     type=str,
     required=False,
@@ -1092,6 +1122,7 @@ def init_cmd(
     romfile_version: str,
     pool_name: str,
     packer: bool,
+    with_rawstor: bool,
     user: str | None,
     add: bool,
     uuid: sys_uuid.UUID | None,
@@ -1169,6 +1200,10 @@ def init_cmd(
     if packer:
         log.info("Configuring packer...")
         _install_packer()
+
+    if with_rawstor:
+        log.info("Installing rawstor packages...")
+        install_rawstor_packages(["librawstor", "rawstor-ost"], add_sudo)
 
     if add:
         log.info("Registering hypervisor...")
