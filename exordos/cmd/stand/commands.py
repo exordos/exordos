@@ -533,6 +533,7 @@ def _bootstrap_core(
     elements: list[str] | None = None,
     cors_allowed_origins: list[str] | None = None,
     repo_url: str | None = None,
+    with_rawstor: bool = False,
 ) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
@@ -628,6 +629,8 @@ def _bootstrap_core(
             elements=elements,
             cors_allowed_origins=cors_allowed_origins,
             repo_url=repo_url,
+            with_rawstor=with_rawstor,
+            rawstor_version=hv_commands.RAWSTOR_VERSION,
         )
         logger.info(f"Launched Exordos installation in `{profile.value}` profile")
 
@@ -912,6 +915,19 @@ def _resolve_hypervisor_placement(
     show_default=True,
 )
 @click.option(
+    "--with-rawstor",
+    show_default=True,
+    is_flag=True,
+    default=False,
+    help=(
+        "Install rawstor packages. With --pool-agent-placement=core, "
+        "installs librawstor + the rawstor python bindings package inside "
+        "the core VM. With --pool-agent-placement=local, installs "
+        "librawstor + rawstor-ost on this host (matching `exordos compute "
+        "hypervisors init --with-rawstor`)."
+    ),
+)
+@click.option(
     "--no-start",
     show_default=True,
     is_flag=True,
@@ -1036,6 +1052,7 @@ def bootstrap_cmd(
     hyper_storage_pool: str,
     hyper_machine_prefix: str,
     hyper_iface_rom_file: str,
+    with_rawstor: bool,
     no_start: bool,
     no_registration: bool,
     disable_telemetry: bool,
@@ -1191,6 +1208,8 @@ def bootstrap_cmd(
         if subprocess.call(["sudo", "-v"]) != 0:
             raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
 
+    add_sudo = not hv_commands.is_root()
+
     hypervisors = []
 
     hyper_connection_uri, hyper_kind = _resolve_hypervisor_placement(
@@ -1302,9 +1321,16 @@ def bootstrap_cmd(
             elements=list(elements) if elements else None,
             cors_allowed_origins=cors_allowed_origins,
             repo_url=repo_url,
+            with_rawstor=with_rawstor and hyper_kind == "libvirt",
         )
 
     if hyper_kind == "exordos_local_hyper":
+        if with_rawstor:
+            with status_lib.status_done("Installing rawstor packages..."):
+                hv_commands.install_rawstor_packages(
+                    ["librawstor", "rawstor-ost"], add_sudo
+                )
+
         # The local agent must be configured regardless of --no-start: the
         # core's IP is fixed at network-creation time (not discovered once
         # it boots), and the core needs to find the agent already
