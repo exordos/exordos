@@ -35,6 +35,13 @@ Initialize hypervisor
 
   Install packer
 
+* `with_rawstor`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--with-rawstor`
+
+  Install rawstor packages (librawstor + rawstor-ost) on this hypervisor
+
 * `user`:
     * Type: text
     * Default: `sentinel.unset`
