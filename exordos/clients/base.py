@@ -143,11 +143,12 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         realm: str | None = None,
     ):
         cache_identity = username or login
+        cache_scope = scope or self.empty_scope()
 
-        # Try to load from cache if username or login and realm are provided.
+        # Try to load from cache if identity and realm are provided.
         if cache_identity and realm and not access_token and not refresh_token:
             cache = TokenCache()
-            cached_tokens = cache.load_tokens(cache_identity, realm)
+            cached_tokens = cache.load_tokens(cache_identity, realm, cache_scope)
             if cached_tokens:
                 access_token = cached_tokens["access_token"]
                 refresh_token = cached_tokens["refresh_token"]
@@ -172,7 +173,7 @@ class CoreIamAuthenticator(AbstractAuthenticator):
 
         self._data = {
             "password": password,
-            "scope": scope or self.empty_scope(),
+            "scope": cache_scope,
             "ttl": str(self._ttl),
             "refresh_ttl": str(self._refresh_ttl),
         }
@@ -229,7 +230,9 @@ class CoreIamAuthenticator(AbstractAuthenticator):
                 ):
                     if self._realm:
                         cache = TokenCache()
-                        cache.clear_tokens(cache_identity, self._realm)
+                        cache.clear_tokens(
+                            cache_identity, self._realm, self._data["scope"]
+                        )
                 raise
         except bazooka_exc.BadRequestError as e:
             error_data = e.cause.response.json()
@@ -241,7 +244,9 @@ class CoreIamAuthenticator(AbstractAuthenticator):
             ):
                 cache = TokenCache()
                 cache.clear_tokens(
-                    self._data.get("username") or self._data["login"], self._realm
+                    self._data.get("username") or self._data["login"],
+                    self._realm,
+                    self._data["scope"],
                 )
                 self._refresh_token = None
                 data = self._do_authenticate()
@@ -258,6 +263,7 @@ class CoreIamAuthenticator(AbstractAuthenticator):
                 cache.save_tokens(
                     cache_identity,
                     self._realm,
+                    self._data["scope"],
                     self._access_token,
                     self._refresh_token,
                 )
