@@ -26,7 +26,7 @@ FIELDS_MAP = {
     "Name": "name",
     "Protocol": "protocol",
     "Port": "port",
-    "Domains": "domains",
+    "Domains": lambda x: str(x.get("domains", "")),
     "Enabled": "enabled",
     "External Sources": "external_sources",
     "Status": "status",
