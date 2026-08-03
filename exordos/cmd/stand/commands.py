@@ -891,11 +891,12 @@ def _resolve_hypervisor_placement(
     is_flag=True,
     default=False,
     help=(
-        "Install rawstor packages. With --pool-agent-placement=core, "
-        "installs librawstor + the rawstor python bindings package inside "
-        "the core VM. With --pool-agent-placement=local, installs "
-        "librawstor + rawstor-ost on this host (matching `exordos compute "
-        "hypervisors init --with-rawstor`)."
+        "Install rawstor packages. Always installs librawstor + rawstor-ost "
+        "on this host (matching `exordos compute hypervisors init "
+        "--with-rawstor`), since it runs the core VM itself via the local "
+        "libvirt socket. With --pool-agent-placement=core (the default), "
+        "also installs librawstor + the rawstor python bindings package "
+        "inside the core VM."
     ),
 )
 @click.option(
@@ -1281,13 +1282,16 @@ def bootstrap_cmd(
             with_rawstor=with_rawstor and hyper_kind == "libvirt",
         )
 
-    if hyper_kind == "exordos_local_hyper":
-        if with_rawstor:
-            with status_lib.status_done("Installing rawstor packages..."):
-                hv_commands.install_rawstor_packages(
-                    ["librawstor", "rawstor-ost"], add_sudo
-                )
+    if with_rawstor and not no_start:
+        # This machine always runs the core VM itself via the local libvirt
+        # socket, regardless of --pool-agent-placement, so it needs the
+        # rawstor client library too.
+        with status_lib.status_done("Installing rawstor packages..."):
+            hv_commands.install_rawstor_packages(
+                ["librawstor", "rawstor-ost"], add_sudo
+            )
 
+    if hyper_kind == "exordos_local_hyper":
         # The local agent must be configured regardless of --no-start: the
         # core's IP is fixed at network-creation time (not discovered once
         # it boots), and the core needs to find the agent already
