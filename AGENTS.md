@@ -61,83 +61,12 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## Project Structure and Module Organization
-
-```text
-exordos/
-├── cmd/               # CLI entry point (cli.py)
-├── builder/           # Build system modules
-├── repo/              # Repository drivers (nginx.py, etc.)
-├── packer/            # Image packaging logic
-├── templates/         # Jinja2 templates for provisioning
-├── tests/
-│   ├── unit/         # Unit tests
-│   └── functional/   # Functional tests
-└── spec/              # OpenAPI specifications
-```
-
-**Key paths:**
-
-- Source code: `exordos/`
-- Tests: `exordos/tests/`
-- Configuration: `pyproject.toml`, `tox.ini`, `Makefile`
-
-## Build, Test, and Development Commands
-
-### Testing
-
-```bash
-# Run all tests with coverage
-tox
-
-# Run specific test environment
-tox -e py312          # Run tests on Python 3.12
-tox -e ruff           # Run linter
-tox -e mypy           # Run type checking
-
-# Run pytest directly
-pytest exordos/tests/unit/
-pytest exordos/tests/functional/
-```
-
-### Development
-
-```bash
-# Install in development mode
-pip install -e ".[dev,test]"
-
-# Run documentation server
-tox -e docs
-
-# Build standalone binary
-tox -e bin
-```
-
 Exordos core OpenAPI specification: `https://github.com/exordos/exordos_core/blob/master/docs/openapi/openapi_user.yaml`
 
 ## Code Style and Naming Conventions
 
-### Style Guidelines
-
-- **Indentation**: 4 spaces (Python standard)
-- **Line length**: 88 characters (Ruff default)
-- **Imports**: Grouped and sorted via Ruff (I rule)
-- **Type hints**: Required for all function signatures
-
-### Naming Conventions
-
-- **Classes**: `PascalCase` (e.g., `NginxRepoDriver`)
-- **Functions/variables**: `snake_case` (e.g., `root_dir`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `PACKAGE_NAME`)
-- **Private members**: Leading underscore (e.g., `_internal_method`)
 - **Comments for code**: write on english
-
-### Testing Requirements
-
-- **Unit tests**: Located in `exordos/tests/unit/`
-- **Functional tests**: Located in `exordos/tests/functional/`
 - **Test naming**: `test_<method_name>_<scenario>`
-- **Coverage**: Measured via `coverage.py`, HTML report in `cover/`
 
 ## VCS Recommendations
 
