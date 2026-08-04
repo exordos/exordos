@@ -331,6 +331,9 @@ class TestInitCmdRegistration:
                 return_value=_FAKE_AGENT_TARGET,
             ),
             patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(
+                hv_commands, "local_python_version", return_value="3.14"
+            ),
             patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
             patch.object(hv_commands, "_detect_local_cores", return_value=8),
             patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
@@ -657,6 +660,9 @@ class TestInitCmdRegistration:
             ),
             patch.object(hv_commands, "_configure_libvirt"),
             patch.object(hv_commands, "is_root", return_value=False),
+            patch.object(
+                hv_commands, "local_python_version", return_value="3.14"
+            ),
             patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
         ):
             result = runner.invoke(
@@ -667,7 +673,7 @@ class TestInitCmdRegistration:
 
         assert result.exit_code == 0, result.output
         rawstor_mock.assert_called_once_with(
-            ["librawstor", "rawstor-ost", "python-rawstor"], True
+            ["librawstor", "rawstor-ost", "python3.14-rawstor"], True
         )
 
     def test_without_with_rawstor_skips_rawstor_install(self) -> None:
@@ -1068,35 +1074,21 @@ class TestInstallRawstorPackages:
 
         assert all(c.kwargs.get("sudo") is True for c in run_mock.call_args_list)
 
-    def test_resolves_python_rawstor_to_the_local_python_version(self) -> None:
-        """rawstor's python bindings are published as one .deb per
-        interpreter version (python3.X-rawstor), not a single
-        version-agnostic "python-rawstor" package."""
-        version = hv_commands.RAWSTOR_VERSION
-        base_url = f"{hv_commands.RAWSTOR_RELEASES_URL}/v{version}"
 
-        def fake_run_command(cmd, *args, **kwargs):
-            if cmd[:2] == ["python3", "-c"]:
-                return MagicMock(stdout="3.14\n")
-            return MagicMock()
+class TestLocalPythonVersion:
+    """Tests for local_python_version: used by callers to resolve
+    rawstor's per-interpreter python3.X-rawstor package name."""
 
+    def test_returns_the_interpreter_s_own_stdout(self) -> None:
         with patch.object(
-            hv_commands, "run_command", side_effect=fake_run_command
+            hv_commands, "run_command", return_value=MagicMock(stdout="3.14\n")
         ) as run_mock:
-            hv_commands.install_rawstor_packages(["python-rawstor"])
+            result = hv_commands.local_python_version()
 
-        wget_calls = [c for c in run_mock.call_args_list if c.args[0][0] == "wget"]
-        assert wget_calls == [
-            mock_call(
-                [
-                    "wget",
-                    f"{base_url}/python3.14-rawstor_{version}_amd64.deb",
-                    "-P",
-                    "/tmp/rawstor-packages",
-                ],
-                sudo=False,
-            )
-        ]
+        assert result == "3.14"
+        run_mock.assert_called_once_with(
+            ["python3", "-c", "import sys; print('%d.%d' % sys.version_info[:2])"]
+        )
 
 
 class TestReadExistingConfig:

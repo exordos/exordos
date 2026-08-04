@@ -363,7 +363,7 @@ RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 RAWSTOR_LOCATION = "ost://127.0.0.1:7777"
 
 
-def _local_python_version() -> str:
+def local_python_version() -> str:
     """Return the local `python3` command's version as "X.Y".
 
     Matches whichever interpreter `python3 -m venv` (install_agent_venv)
@@ -380,18 +380,12 @@ def _local_python_version() -> str:
 def install_rawstor_packages(
     packages: tp.Sequence[str], add_sudo: bool = False
 ) -> None:
-    """Download and install the given rawstor .deb packages.
-
-    "python-rawstor" is resolved to the package actually published for
-    it, python3.X-rawstor matching the local python3.
-    """
+    """Download and install the given rawstor .deb packages."""
     deb_dir = "/tmp/rawstor-packages"
     run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
 
     deb_paths = []
     for package in packages:
-        if package == "python-rawstor":
-            package = f"python{_local_python_version()}-rawstor"
         deb_name = f"{package}_{RAWSTOR_VERSION}_amd64.deb"
         url = f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/{deb_name}"
         run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
@@ -1234,7 +1228,8 @@ def init_cmd(
     if with_rawstor:
         log.info("Installing rawstor packages...")
         install_rawstor_packages(
-            ["librawstor", "rawstor-ost", "python-rawstor"], add_sudo
+            ["librawstor", "rawstor-ost", f"python{local_python_version()}-rawstor"],
+            add_sudo,
         )
 
     if add:
