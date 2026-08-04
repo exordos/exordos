@@ -523,7 +523,6 @@ def _bootstrap_core(
     realm_tokens: dict,
     ssh_public_key: str | None = None,
     elements: list[str] | None = None,
-    with_rawstor: bool = False,
 ) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
@@ -605,8 +604,6 @@ def _bootstrap_core(
             developer_keys=ssh_public_key,
             iam=iam,
             elements=elements,
-            with_rawstor=with_rawstor,
-            rawstor_version=hv_commands.RAWSTOR_VERSION,
         )
         logger.info(f"Launched Exordos installation in `{profile.value}` profile")
 
@@ -1288,7 +1285,6 @@ def bootstrap_cmd(
             realm_tokens=realm_tokens,
             ssh_public_key=ssh_public_key_content,
             elements=list(elements) if elements else None,
-            with_rawstor=with_rawstor and hyper_kind == "libvirt",
         )
 
     if with_rawstor and not no_start:
