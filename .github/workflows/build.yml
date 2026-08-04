@@ -2,9 +2,19 @@ name: build binary
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/build.yml'
+      - '.github/workflows/publish-to-pypi.yml'
+      - 'etc/install.sh'
+      - 'etc/package-macos.sh'
+      - 'exordos/**'
+      - 'pyproject.toml'
+      - 'tox.ini'
 
 jobs:
   build_binaries:
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
         include:
@@ -13,9 +23,6 @@ jobs:
             python-version: "3.14"
           - os: ubuntu-latest
             artifact-suffix: linux
-            python-version: "3.14"
-          - os: macos-latest
-            artifact-suffix: macos-arm
             python-version: "3.14"
           - os: windows-latest
             artifact-suffix: windows
@@ -52,3 +59,129 @@ jobs:
         with:
           name: exordos-${{ matrix.artifact-suffix }}
           path: dist/*
+
+  build_macos_binaries:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            machine-arch: arm64
+            target-arch: arm64
+            artifact-suffix: macos-arm64
+            python-version: "3.14"
+          - os: macos-15-intel
+            machine-arch: x86_64
+            target-arch: x86_64
+            artifact-suffix: macos-x86_64
+            python-version: "3.14"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 30
+      - name: Verify runner architecture
+        run: test "$(uname -m)" = "${{ matrix.machine-arch }}"
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install tox-uv
+        run: uv tool install tox --with tox-uv
+      - name: Build macOS onedir bundle
+        run: >-
+          tox -e bin --
+          --onedir
+          --target-arch "${{ matrix.target-arch }}"
+      - name: Verify bundle and signatures
+        run: |
+          set -euo pipefail
+          lipo dist/exordos/exordos -verify_arch "${{ matrix.target-arch }}"
+          dist/exordos/exordos --silent --no-check-updates version
+          while IFS= read -r -d '' candidate; do
+            if file "$candidate" | grep -q 'Mach-O'; then
+              case "$candidate" in
+                *.framework/*)
+                  codesign --verify --strict --ignore-resources --verbose=2 "$candidate"
+                  ;;
+                *)
+                  codesign --verify --strict --verbose=2 "$candidate"
+                  ;;
+              esac
+            fi
+          done < <(find dist/exordos -type f -print0)
+      - name: Archive bundle and create checksum
+        run: >-
+          sh etc/package-macos.sh
+          dist/exordos
+          dist/exordos-${{ matrix.artifact-suffix }}.zip
+      - name: Smoke-test installer
+        env:
+          ARTIFACT: exordos-${{ matrix.artifact-suffix }}.zip
+        run: |
+          set -euo pipefail
+          VERSION=$(dist/exordos/exordos --silent --no-check-updates version)
+          REPO_ROOT="$RUNNER_TEMP/exordos-repo"
+          INSTALL_PREFIX="$RUNNER_TEMP/exordos-install"
+          mkdir -p "$REPO_ROOT/latest" "$REPO_ROOT/$VERSION"
+          cp "dist/$ARTIFACT" "dist/$ARTIFACT.sha256" "$REPO_ROOT/$VERSION/"
+          printf '%s\n' "$VERSION" > "$REPO_ROOT/latest/VERSION"
+          EXORDOS_INSTALL_PREFIX="$INSTALL_PREFIX" \
+          EXORDOS_REPO_URL="file://$REPO_ROOT" \
+          EXORDOS_INSTALL_ALLOW_ADHOC=1 \
+            sh etc/install.sh
+          "$INSTALL_PREFIX/bin/exordos" --silent --no-check-updates version
+          "$INSTALL_PREFIX/bin/exordos" --help >/dev/null
+      - name: Check startup performance
+        env:
+          EXORDOS_BINARY: ${{ runner.temp }}/exordos-install/bin/exordos
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import statistics
+          import subprocess
+          import tempfile
+          import time
+
+          binary = os.environ["EXORDOS_BINARY"]
+          with tempfile.TemporaryDirectory() as directory:
+              root = Path(directory)
+              environment = os.environ | {
+                  "HOME": str(root / "home"),
+                  "TMPDIR": str(root / "tmp"),
+              }
+              Path(environment["HOME"]).mkdir()
+              Path(environment["TMPDIR"]).mkdir()
+              command = [
+                  binary,
+                  "--config",
+                  str(root / "missing.yaml"),
+                  "--no-check-updates",
+                  "--silent",
+                  "version",
+              ]
+              subprocess.run(command, check=True, env=environment, capture_output=True)
+              durations = []
+              for _ in range(7):
+                  started = time.perf_counter()
+                  subprocess.run(command, check=True, env=environment, capture_output=True)
+                  durations.append(time.perf_counter() - started)
+              median = statistics.median(durations)
+              maximum = max(durations)
+              print(f"startup median={median:.3f}s max={maximum:.3f}s")
+              if median >= 2.0 or maximum >= 5.0:
+                  raise SystemExit("macOS startup performance regression")
+              if list(Path(environment["TMPDIR"]).glob("_MEI*")):
+                  raise SystemExit("onedir launch unexpectedly created a _MEI directory")
+          PY
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: exordos-${{ matrix.artifact-suffix }}
+          path: |
+            dist/exordos-${{ matrix.artifact-suffix }}.zip
+            dist/exordos-${{ matrix.artifact-suffix }}.zip.sha256

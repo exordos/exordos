@@ -8,7 +8,6 @@ on:
       - '.markdownlint.yaml'
       - '*.md'
   pull_request:
-    types: [opened]
     paths-ignore:
       - 'docs/**'
       - 'mkdocs.yml'
@@ -35,6 +34,20 @@ jobs:
       - name: ruff
         run: |
           tox -e ruff-check
+  Installer:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install tox-uv
+        run: uv tool install tox --with tox-uv
+      - name: Shell lint and installer tests
+        run: tox -e installer
   Tests:
     runs-on: ubuntu-24.04
     strategy:
