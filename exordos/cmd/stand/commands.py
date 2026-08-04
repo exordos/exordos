@@ -674,6 +674,7 @@ def _resolve_hypervisor_placement(
     pool_agent_placement: str,
     hyper_connection_uri: str,
     cidr: ipaddress.IPv4Network,
+    with_rawstor: bool = False,
 ) -> tp.Tuple[str, str]:
     """Resolve the hypervisor's connection URI and driver kind.
 
@@ -690,6 +691,14 @@ def _resolve_hypervisor_placement(
                 "talks to the local libvirt socket directly."
             )
         return hv_commands.DEFAULT_LOCAL_CONNECTION_URI, "exordos_local_hyper"
+
+    if with_rawstor:
+        raise click.UsageError(
+            "--with-rawstor is not supported together with "
+            "--pool-agent-placement=core; only the exordos_local_hyper "
+            "driver (--pool-agent-placement=local) backs volumes with "
+            "rawstor."
+        )
 
     return hyper_connection_uri or f"qemu+tcp://{cidr[1]}/system", "libvirt"
 
@@ -894,9 +903,9 @@ def _resolve_hypervisor_placement(
         "Install rawstor packages. Always installs librawstor + rawstor-ost "
         "on this host (matching `exordos compute hypervisors init "
         "--with-rawstor`), since it runs the core VM itself via the local "
-        "libvirt socket. With --pool-agent-placement=core (the default), "
-        "also installs librawstor + the rawstor python bindings package "
-        "inside the core VM."
+        "libvirt socket. Requires --pool-agent-placement=local: only the "
+        "exordos_local_hyper driver backs volumes with rawstor, so it's "
+        "not supported with the default --pool-agent-placement=core."
     ),
 )
 @click.option(
@@ -1183,7 +1192,7 @@ def bootstrap_cmd(
     hypervisors = []
 
     hyper_connection_uri, hyper_kind = _resolve_hypervisor_placement(
-        pool_agent_placement, hyper_connection_uri, cidr
+        pool_agent_placement, hyper_connection_uri, cidr, with_rawstor
     )
 
     hyper_node = None
