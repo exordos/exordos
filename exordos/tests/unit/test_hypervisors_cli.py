@@ -1068,6 +1068,36 @@ class TestInstallRawstorPackages:
 
         assert all(c.kwargs.get("sudo") is True for c in run_mock.call_args_list)
 
+    def test_resolves_python_rawstor_to_the_local_python_version(self) -> None:
+        """rawstor's python bindings are published as one .deb per
+        interpreter version (python3.X-rawstor), not a single
+        version-agnostic "python-rawstor" package."""
+        version = hv_commands.RAWSTOR_VERSION
+        base_url = f"{hv_commands.RAWSTOR_RELEASES_URL}/v{version}"
+
+        def fake_run_command(cmd, *args, **kwargs):
+            if cmd[:2] == ["python3", "-c"]:
+                return MagicMock(stdout="3.14\n")
+            return MagicMock()
+
+        with patch.object(
+            hv_commands, "run_command", side_effect=fake_run_command
+        ) as run_mock:
+            hv_commands.install_rawstor_packages(["python-rawstor"])
+
+        wget_calls = [c for c in run_mock.call_args_list if c.args[0][0] == "wget"]
+        assert wget_calls == [
+            mock_call(
+                [
+                    "wget",
+                    f"{base_url}/python3.14-rawstor_{version}_amd64.deb",
+                    "-P",
+                    "/tmp/rawstor-packages",
+                ],
+                sudo=False,
+            )
+        ]
+
 
 class TestReadExistingConfig:
     """Tests for _read_existing_config: missing vs present vs root-only

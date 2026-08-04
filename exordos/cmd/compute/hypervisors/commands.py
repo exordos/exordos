@@ -363,15 +363,35 @@ RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 RAWSTOR_LOCATION = "ost://127.0.0.1:7777"
 
 
+def _local_python_version() -> str:
+    """Return the local `python3` command's version as "X.Y".
+
+    Matches whichever interpreter `python3 -m venv` (install_agent_venv)
+    uses, since rawstor's python bindings are published as one .deb per
+    interpreter version (python3.X-rawstor) rather than a single
+    version-agnostic package.
+    """
+    result = run_command(
+        ["python3", "-c", "import sys; print('%d.%d' % sys.version_info[:2])"]
+    )
+    return result.stdout.strip()
+
+
 def install_rawstor_packages(
     packages: tp.Sequence[str], add_sudo: bool = False
 ) -> None:
-    """Download and install the given rawstor .deb packages."""
+    """Download and install the given rawstor .deb packages.
+
+    "python-rawstor" is resolved to the package actually published for
+    it, python3.X-rawstor matching the local python3.
+    """
     deb_dir = "/tmp/rawstor-packages"
     run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
 
     deb_paths = []
     for package in packages:
+        if package == "python-rawstor":
+            package = f"python{_local_python_version()}-rawstor"
         deb_name = f"{package}_{RAWSTOR_VERSION}_amd64.deb"
         url = f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/{deb_name}"
         run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
