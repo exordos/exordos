@@ -317,9 +317,8 @@ class TestInitCmdRegistration:
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
 
     def test_add_with_rawstor_includes_rawstor_driver_spec_fields(self) -> None:
-        """ExordosLocalHyperDriverSpec requires rawstor_location and
-        rawstor_capacity_gb (rawstor has no capacity/stats API), so
-        --with-rawstor must supply them - otherwise the pool fails to
+        """ExordosLocalHyperDriverSpec requires rawstor_location, so
+        --with-rawstor must supply it - otherwise the pool fails to
         validate once it reaches core.
         """
         runner = CliRunner()
@@ -355,10 +354,6 @@ class TestInitCmdRegistration:
         rawstor_mock.assert_called_once()
         kwargs = add_cmd_mock.call_args.kwargs
         assert f"rawstor_location={hv_commands.RAWSTOR_LOCATION}" in kwargs["driver_spec"]
-        assert (
-            f"rawstor_capacity_gb={hv_commands.RAWSTOR_CAPACITY_GB}"
-            in kwargs["driver_spec"]
-        )
 
     def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
         """A local hypervisor's `init --add` must register this host's

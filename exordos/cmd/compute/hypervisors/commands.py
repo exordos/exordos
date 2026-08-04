@@ -361,9 +361,6 @@ RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 # always runs on the same host as the local hypervisor agent that --with-rawstor
 # installs it on.
 RAWSTOR_LOCATION = "ost://127.0.0.1:7777"
-# rawstor has no capacity/stats API, so the pool's usable capacity is a
-# fixed value rather than something queried dynamically.
-RAWSTOR_CAPACITY_GB = 100
 
 
 def install_rawstor_packages(
@@ -1230,10 +1227,7 @@ def init_cmd(
                 f"node={local_agent_node_uuid()}",
             )
             if with_rawstor:
-                kind_fields += (
-                    f"rawstor_location={RAWSTOR_LOCATION}",
-                    f"rawstor_capacity_gb={RAWSTOR_CAPACITY_GB}",
-                )
+                kind_fields += (f"rawstor_location={RAWSTOR_LOCATION}",)
         else:
             kind_fields = ("kind=libvirt",)
         driver_spec = kind_fields + (
