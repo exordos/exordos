@@ -558,7 +558,6 @@ def _bootstrap_core(
     cors_allowed_origins: list[str] | None = None,
     repo_url: str | None = None,
     idps: list[dict] | None = None,
-    with_rawstor: bool = False,
 ) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
@@ -655,8 +654,6 @@ def _bootstrap_core(
             idps=idps,
             cors_allowed_origins=cors_allowed_origins,
             repo_url=repo_url,
-            with_rawstor=with_rawstor,
-            rawstor_version=hv_commands.RAWSTOR_VERSION,
         )
         logger.info(f"Launched Exordos installation in `{profile.value}` profile")
 
@@ -1371,7 +1368,6 @@ def bootstrap_cmd(
             idps=idps,
             cors_allowed_origins=cors_allowed_origins,
             repo_url=repo_url,
-            with_rawstor=with_rawstor and hyper_kind == "libvirt",
         )
 
     if with_rawstor and not no_start:
