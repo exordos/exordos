@@ -699,7 +699,9 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
-        rawstor_mock.assert_called_once_with(["librawstor", "rawstor-ost"], True)
+        rawstor_mock.assert_called_once_with(
+            ["librawstor", "rawstor-ost", "python-rawstor"], True
+        )
 
     def test_without_with_rawstor_skips_rawstor_install(self) -> None:
         runner = CliRunner()
@@ -942,7 +944,7 @@ class TestAgentSetup:
             mock_call(
                 ["sudo", "chown", getpass.getuser(), str(tmp_path / "agent-home")]
             ),
-            mock_call(["python3", "-m", "venv", venv_path]),
+            mock_call(["python3", "-m", "venv", "--system-site-packages", venv_path]),
             mock_call([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"]),
             mock_call(
                 [
@@ -973,7 +975,7 @@ class TestAgentSetup:
             mock_call(
                 ["sudo", "chown", getpass.getuser(), str(tmp_path / "agent-home")]
             ),
-            mock_call(["python3", "-m", "venv", venv_path]),
+            mock_call(["python3", "-m", "venv", "--system-site-packages", venv_path]),
             mock_call([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"]),
         ]
 
