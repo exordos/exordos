@@ -1213,6 +1213,8 @@ def bootstrap_cmd(
         kind=hyper_kind,
         node=hyper_node,
         private_key=hyper_private_key,
+        rawstor_location=hv_commands.RAWSTOR_LOCATION if with_rawstor else None,
+        rawstor_capacity_gb=hv_commands.RAWSTOR_CAPACITY_GB if with_rawstor else None,
         machine_prefix=hyper_machine_prefix,
         iface_rom_file=hyper_iface_rom_file,
     )

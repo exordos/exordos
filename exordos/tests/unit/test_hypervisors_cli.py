@@ -316,6 +316,50 @@ class TestInitCmdRegistration:
         assert kwargs["avail_ram"] == 16384
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
 
+    def test_add_with_rawstor_includes_rawstor_driver_spec_fields(self) -> None:
+        """ExordosLocalHyperDriverSpec requires rawstor_location and
+        rawstor_capacity_gb (rawstor has no capacity/stats API), so
+        --with-rawstor must supply them - otherwise the pool fails to
+        validate once it reaches core.
+        """
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+            patch.object(hv_commands, "_detect_local_cores", return_value=8),
+            patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(hv_commands, "add_cmd") as add_cmd_mock,
+            patch.object(hv_commands.base_client, "get_user_api_client"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add", "--with-rawstor"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        rawstor_mock.assert_called_once()
+        kwargs = add_cmd_mock.call_args.kwargs
+        assert f"rawstor_location={hv_commands.RAWSTOR_LOCATION}" in kwargs["driver_spec"]
+        assert (
+            f"rawstor_capacity_gb={hv_commands.RAWSTOR_CAPACITY_GB}"
+            in kwargs["driver_spec"]
+        )
+
     def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
         """A local hypervisor's `init --add` must register this host's
         universal agent and deploy its node's encryption key to the
