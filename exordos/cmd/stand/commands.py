@@ -1289,12 +1289,14 @@ def bootstrap_cmd(
         )
 
     if with_rawstor and not no_start:
-        # This machine always runs the core VM itself via the local libvirt
-        # socket, regardless of --pool-agent-placement, so it needs the
-        # rawstor client library too.
+        # This machine always runs the core VM itself via the local
+        # libvirt socket, so it needs the rawstor client library too.
+        # --with-rawstor requires --pool-agent-placement=local, so it's
+        # also the rawstor-backed hypervisor - hence python-rawstor too,
+        # for the exordos_local_hyper driver's local agent to import.
         with status_lib.status_done("Installing rawstor packages..."):
             hv_commands.install_rawstor_packages(
-                ["librawstor", "rawstor-ost"], add_sudo
+                ["librawstor", "rawstor-ost", "python-rawstor"], add_sudo
             )
 
     if hyper_kind == "exordos_local_hyper":

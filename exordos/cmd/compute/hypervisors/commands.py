@@ -573,6 +573,12 @@ def install_agent_venv(venv_path: str = STANDARD_AGENT_VENV_PATH) -> None:
     The /usr/bin symlink is only (re)pointed at it when installing to
     the standard path - an isolated install must not hijack it, since
     it may belong to an agent this code isn't managing.
+
+    Created with --system-site-packages so the exordos_local_hyper
+    driver can `import rawstor`: rawstor's python bindings ship as a
+    system deb (python-rawstor, installed by --with-rawstor) built
+    against the system's own python3, not something pip-installable
+    into an isolated venv.
     """
     if os.path.isdir(venv_path):
         run_command(["sudo", f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
@@ -581,7 +587,7 @@ def install_agent_venv(venv_path: str = STANDARD_AGENT_VENV_PATH) -> None:
     agent_home = os.path.dirname(venv_path)
     run_command(["sudo", "mkdir", "-p", agent_home])
     run_command(["sudo", "chown", getpass.getuser(), agent_home])
-    run_command(["python3", "-m", "venv", venv_path])
+    run_command(["python3", "-m", "venv", "--system-site-packages", venv_path])
     run_command([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
     if venv_path == STANDARD_AGENT_VENV_PATH:
         run_command(
@@ -1207,7 +1213,9 @@ def init_cmd(
 
     if with_rawstor:
         log.info("Installing rawstor packages...")
-        install_rawstor_packages(["librawstor", "rawstor-ost"], add_sudo)
+        install_rawstor_packages(
+            ["librawstor", "rawstor-ost", "python-rawstor"], add_sudo
+        )
 
     if add:
         log.info("Registering hypervisor...")
