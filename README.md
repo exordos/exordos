@@ -29,7 +29,7 @@ curl -fsSL https://repo.exordos.com/install.sh | sh
 
 ## What Exordos CLI does
 
-Exordos CLI bridges the gap between your local development environment and the Exordos Core platform. With a single binary you can:
+Exordos CLI bridges the gap between your local development environment and the Exordos Core platform. With a self-contained installation you can:
 
 - **Build projects** — compile Exordos project images and artifacts from a declarative `exordos.yaml` configuration.
 - **Bootstrap installations** — spin up local virtual machine environments from built images for development and testing.

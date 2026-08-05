@@ -4,7 +4,7 @@ Exordos CLI — это интерфейс командной строки для
 
 **📚 Документация платформы:** [exordos.github.io/exordos_core](https://exordos.github.io/exordos_core/)
 
-С помощью одного бинарного файла вы можете:
+С помощью автономной установки CLI вы можете:
 
 - **Собирать проекты** — компилировать образы и артефакты проектов Exordos из декларативной конфигурации `exordos.yaml`.
 - **Инициализировать установки** — запускать локальные виртуальные машины из собранных образов для разработки и тестирования.
@@ -19,7 +19,17 @@ Exordos CLI — это интерфейс командной строки для
 Установите CLI одной командой:
 
 ```bash
-curl -fsSL https://repo.exordos.com/install.sh | sudo sh
+curl -fsSL https://repo.exordos.com/install.sh | sh
+```
+
+В macOS установщик выбирает нативный архив для Apple Silicon или Intel,
+проверяет его контрольную сумму SHA-256 и хранит версии в
+`/usr/local/lib/exordos`. Активная ссылка `/usr/local/bin/exordos`
+переключается атомарно. Чтобы активировать уже установленную версию или
+установить конкретную опубликованную версию, задайте `EXORDOS_VERSION`:
+
+```bash
+curl -fsSL https://repo.exordos.com/install.sh | EXORDOS_VERSION=3.1.15 sh
 ```
 
 ### Через uv
