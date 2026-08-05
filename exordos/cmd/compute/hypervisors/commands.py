@@ -721,6 +721,29 @@ def add_libvirt_qemu_to_rawstor_group(add_sudo: bool = False) -> None:
     run_command(cmd, sudo=add_sudo)
 
 
+APPARMOR_RAWSTOR_DROPIN_PATH = "/etc/apparmor.d/abstractions/libvirt-qemu.d/rawstor"
+APPARMOR_RAWSTOR_SOCKET_RULE = "/run/rawstor/*.sock rw,\n"
+
+
+def allow_apparmor_access_to_rawstor_sockets(add_sudo: bool = False) -> None:
+    """Let libvirt's per-domain AppArmor profile reach rawstor-vhost's sockets.
+
+    libvirt derives each domain's AppArmor profile from its disk XML, but has
+    no rule generator for a vhostuser disk's arbitrary unix socket path - so
+    QEMU's connect() to it is silently denied regardless of the socket's own
+    file permissions, and the guest never leaves "paused (starting up)".
+    `abstractions/libvirt-qemu.d/` is the drop-in directory libvirt's own
+    shipped profile (`include if exists <abstractions/libvirt-qemu.d>`) is
+    written to include, meant for exactly this kind of local addition -
+    unlike the older `local/abstractions/libvirt-qemu` override, which the
+    shipped profile only keeps around deprecated for backward compatibility.
+    """
+    write_root_owned_file(
+        APPARMOR_RAWSTOR_SOCKET_RULE, APPARMOR_RAWSTOR_DROPIN_PATH, mode="644"
+    )
+    run_command(["systemctl", "reload", "apparmor"], sudo=add_sudo)
+
+
 def install_and_configure_rawstor(add_sudo: bool = False) -> None:
     """Install rawstor's hypervisor-side packages and let QEMU use them.
 
@@ -737,6 +760,7 @@ def install_and_configure_rawstor(add_sudo: bool = False) -> None:
         add_sudo,
     )
     add_libvirt_qemu_to_rawstor_group(add_sudo)
+    allow_apparmor_access_to_rawstor_sockets(add_sudo)
 
 
 def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:

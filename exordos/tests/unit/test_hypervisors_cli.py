@@ -336,6 +336,7 @@ class TestInitCmdRegistration:
             ),
             patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
             patch.object(hv_commands, "add_libvirt_qemu_to_rawstor_group"),
+            patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
             patch.object(hv_commands, "_detect_local_cores", return_value=8),
             patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
             patch.object(
@@ -668,6 +669,7 @@ class TestInitCmdRegistration:
             patch.object(
                 hv_commands, "add_libvirt_qemu_to_rawstor_group"
             ) as group_mock,
+            patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
         ):
             result = runner.invoke(
                 hv_commands.init_cmd,
@@ -1108,7 +1110,7 @@ class TestInstallAndConfigureRawstor:
     call, so the two provisioning paths install the same packages and
     grant QEMU access to them the same way."""
 
-    def test_installs_packages_then_grants_qemu_group_access(self) -> None:
+    def test_installs_packages_then_grants_qemu_access(self) -> None:
         with (
             patch.object(
                 hv_commands, "local_python_version", return_value="3.14"
@@ -1117,6 +1119,9 @@ class TestInstallAndConfigureRawstor:
             patch.object(
                 hv_commands, "add_libvirt_qemu_to_rawstor_group"
             ) as group_mock,
+            patch.object(
+                hv_commands, "allow_apparmor_access_to_rawstor_sockets"
+            ) as apparmor_mock,
         ):
             hv_commands.install_and_configure_rawstor(add_sudo=True)
 
@@ -1124,6 +1129,41 @@ class TestInstallAndConfigureRawstor:
             ["librawstor", "rawstor-ost", "rawstor-vhost", "python3.14-rawstor"], True
         )
         group_mock.assert_called_once_with(True)
+        apparmor_mock.assert_called_once_with(True)
+
+
+class TestAllowApparmorAccessToRawstorSockets:
+    """Tests for allow_apparmor_access_to_rawstor_sockets: libvirt's
+    per-domain AppArmor profile has no rule for a vhostuser disk's unix
+    socket, so QEMU's connect() to it is denied unless this drop-in
+    grants it explicitly."""
+
+    def test_writes_the_dropin_and_reloads_apparmor(self) -> None:
+        with (
+            patch.object(hv_commands, "write_root_owned_file") as write_mock,
+            patch.object(hv_commands, "run_command") as run_mock,
+        ):
+            hv_commands.allow_apparmor_access_to_rawstor_sockets()
+
+        write_mock.assert_called_once_with(
+            "/run/rawstor/*.sock rw,\n",
+            hv_commands.APPARMOR_RAWSTOR_DROPIN_PATH,
+            mode="644",
+        )
+        run_mock.assert_called_once_with(
+            ["systemctl", "reload", "apparmor"], sudo=False
+        )
+
+    def test_passes_sudo_through(self) -> None:
+        with (
+            patch.object(hv_commands, "write_root_owned_file"),
+            patch.object(hv_commands, "run_command") as run_mock,
+        ):
+            hv_commands.allow_apparmor_access_to_rawstor_sockets(add_sudo=True)
+
+        run_mock.assert_called_once_with(
+            ["systemctl", "reload", "apparmor"], sudo=True
+        )
 
 
 class TestLocalPythonVersion:
