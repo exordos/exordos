@@ -196,6 +196,20 @@ jobs:
           --onedir
           --target-arch "${{ matrix.target-arch }}"
           --codesign-identity "$MACOS_SIGNING_IDENTITY"
+      - name: Sign macOS framework bundles
+        run: |
+          set -euo pipefail
+          FRAMEWORK_COUNT=0
+          while IFS= read -r -d '' framework; do
+            /usr/bin/codesign \
+              --force \
+              --timestamp \
+              --options runtime \
+              --sign "$MACOS_SIGNING_IDENTITY" \
+              "$framework"
+            FRAMEWORK_COUNT=$((FRAMEWORK_COUNT + 1))
+          done < <(find dist/exordos -depth -type d -name '*.framework' -print0)
+          test "$FRAMEWORK_COUNT" -gt 0
       - name: Verify architecture and Developer ID signatures
         run: |
           set -euo pipefail
@@ -212,6 +226,8 @@ jobs:
             signature=$(codesign -dvvv "$candidate" 2>&1)
             ! grep -q '^Signature=adhoc$' <<< "$signature"
             grep -q '^Authority=Developer ID Application:' <<< "$signature"
+            grep -Eq '(^|[[:space:]])flags=.*runtime' <<< "$signature"
+            grep -q '^Timestamp=' <<< "$signature"
             local team
             team=$(awk -F= '/^TeamIdentifier=/ {print $2; exit}' <<< "$signature")
             test -n "$team"
@@ -225,16 +241,18 @@ jobs:
           }
 
           SIGNED_CODE_COUNT=0
+          while IFS= read -r -d '' framework; do
+            verify_developer_id "$framework" --deep
+          done < <(find dist/exordos -depth -type d -name '*.framework' -print0)
+
           while IFS= read -r -d '' candidate; do
+            case "$candidate" in
+              *.framework/*)
+                continue
+                ;;
+            esac
             if file "$candidate" | grep -q 'Mach-O'; then
-              case "$candidate" in
-                *.framework/*)
-                  verify_developer_id "$candidate" --ignore-resources
-                  ;;
-                *)
-                  verify_developer_id "$candidate"
-                  ;;
-              esac
+              verify_developer_id "$candidate"
             fi
           done < <(find dist/exordos -type f -print0)
           test "$SIGNED_CODE_COUNT" -gt 0
@@ -251,16 +269,59 @@ jobs:
         run: |
           set -euo pipefail
           API_KEY_PATH="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY_ID}.p8"
+          NOTARY_RESULT="$RUNNER_TEMP/notary-result-${{ matrix.artifact-suffix }}.json"
           printf '%s' "$APPLE_API_PRIVATE_KEY_P8_BASE64" \
             | /usr/bin/base64 -D > "$API_KEY_PATH"
           chmod 600 "$API_KEY_PATH"
+
+          print_notary_log() {
+            local submission_id=$1
+            xcrun notarytool log "$submission_id" \
+              --key "$API_KEY_PATH" \
+              --key-id "$APPLE_API_KEY_ID" \
+              --issuer "$APPLE_API_ISSUER_ID" \
+              --output-format json \
+              | /usr/bin/jq '{
+                  status,
+                  statusSummary,
+                  issues: [
+                    .issues[]? | {
+                      severity,
+                      code,
+                      path,
+                      message,
+                      architecture
+                    }
+                  ]
+                }'
+          }
+
+          set +e
           xcrun notarytool submit \
             "dist/exordos-${{ matrix.artifact-suffix }}.zip" \
             --key "$API_KEY_PATH" \
             --key-id "$APPLE_API_KEY_ID" \
             --issuer "$APPLE_API_ISSUER_ID" \
-            --wait
-          spctl --assess --type execute --verbose=4 dist/exordos/exordos
+            --wait \
+            --output-format json > "$NOTARY_RESULT"
+          NOTARY_EXIT=$?
+          set -e
+
+          NOTARY_STATUS=''
+          SUBMISSION_ID=''
+          if /usr/bin/jq -e . "$NOTARY_RESULT" >/dev/null 2>&1; then
+            /usr/bin/jq '{id, status, message}' "$NOTARY_RESULT"
+            NOTARY_STATUS=$(/usr/bin/jq -r '.status // empty' "$NOTARY_RESULT")
+            SUBMISSION_ID=$(/usr/bin/jq -r '.id // empty' "$NOTARY_RESULT")
+          fi
+
+          if [[ -n "$SUBMISSION_ID" ]]; then
+            print_notary_log "$SUBMISSION_ID"
+          fi
+
+          if [[ "$NOTARY_EXIT" -ne 0 || "$NOTARY_STATUS" != 'Accepted' ]]; then
+            exit 1
+          fi
       - name: Smoke-test installer
         env:
           ARTIFACT: exordos-${{ matrix.artifact-suffix }}.zip
@@ -325,7 +386,8 @@ jobs:
           security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db"
           rm -f \
             "$RUNNER_TEMP/developer-id.p12" \
-            "$RUNNER_TEMP"/AuthKey_*.p8
+            "$RUNNER_TEMP"/AuthKey_*.p8 \
+            "$RUNNER_TEMP/notary-result-${{ matrix.artifact-suffix }}.json"
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
@@ -339,7 +401,8 @@ jobs:
           security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db" 2>/dev/null || true
           rm -f \
             "$RUNNER_TEMP/developer-id.p12" \
-            "$RUNNER_TEMP"/AuthKey_*.p8
+            "$RUNNER_TEMP"/AuthKey_*.p8 \
+            "$RUNNER_TEMP/notary-result-${{ matrix.artifact-suffix }}.json"
 
   github-release:
     name: Create GitHub Release with artifacts
