@@ -355,7 +355,7 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
-RAWSTOR_VERSION = "0.2.3"
+RAWSTOR_VERSION = "0.2.4"
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 # Matches rawstor-vhost@.service's own RAWSTOR_LOCATION default: rawstor-ost
 # always runs on the same host as the local hypervisor agent that --with-rawstor
@@ -709,6 +709,18 @@ def _add_user_to_groups(user: str | None, add_sudo: bool = False) -> None:
         run_command(cmd, sudo=add_sudo)
 
 
+def _add_libvirt_qemu_to_rawstor_group(add_sudo: bool = False) -> None:
+    """Let QEMU (which libvirt always runs as the libvirt-qemu user) connect
+    to rawstor-vhost's vhost-user sockets.
+
+    rawstor-vhost chmod()s each socket to 0660, owned by the rawstor
+    user/group, so anything outside that group gets a silent connect()
+    EACCES (the guest just retries via reconnect-ms and never boots).
+    """
+    cmd = ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"]
+    run_command(cmd, sudo=add_sudo)
+
+
 def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
     """Create libvirt storage pool if it doesn't exist."""
     # Check if pool exists
@@ -957,7 +969,10 @@ def local_agent_node_uuid(
     show_default=True,
     is_flag=True,
     default=False,
-    help="Install rawstor packages (librawstor + rawstor-ost) on this hypervisor",
+    help=(
+        "Install rawstor packages (librawstor + rawstor-ost + rawstor-vhost) "
+        "on this hypervisor"
+    ),
 )
 @click.option(
     "--user",
@@ -1228,9 +1243,16 @@ def init_cmd(
     if with_rawstor:
         log.info("Installing rawstor packages...")
         install_rawstor_packages(
-            ["librawstor", "rawstor-ost", f"python{local_python_version()}-rawstor"],
+            [
+                "librawstor",
+                "rawstor-ost",
+                "rawstor-vhost",
+                f"python{local_python_version()}-rawstor",
+            ],
             add_sudo,
         )
+        log.info("Adding libvirt-qemu to the rawstor group...")
+        _add_libvirt_qemu_to_rawstor_group(add_sudo)
 
     if add:
         log.info("Registering hypervisor...")
