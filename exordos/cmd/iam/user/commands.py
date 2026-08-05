@@ -285,6 +285,11 @@ def info_cmd(ctx: click.Context, user: str, output: str) -> None:
         {k: v for k, v in organization.items() if k in organization_fields}
         for organization in user_organizations
     ]
+    roles_uuids = [
+        role_binding["role"].split("/")[-1] for role_binding in role_bindings
+    ]
+    roles = base_client.list_entities(client, c.ROLE_COLLECTION)
+    roles = [role for role in roles if role["uuid"] in roles_uuids]
 
     show_data(
         {
@@ -292,6 +297,7 @@ def info_cmd(ctx: click.Context, user: str, output: str) -> None:
             "orgs": user_organizations,
             "projects": projects,
             "role_bindings": role_bindings,
+            "roles": roles,
             "org_members": org_members,
         },
         output,

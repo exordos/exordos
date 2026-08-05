@@ -1,30 +1,17 @@
 
-# limits_delete
+# iam_introspect
 
-Delete limit
+Print introspect information
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos limits delete [OPTIONS] UUID...                                                                                                                                                                                                                                                            
+ Usage: exordos iam introspect [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
-
-* `uuid` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `uuid`
-
-* `y`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `--yes
--y`
-
-  Automatically answer yes for all questions
 
 * `help`:
     * Type: boolean
@@ -37,12 +24,11 @@ Delete limit
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos limits delete [OPTIONS] UUID...                                                                                                                                                                                                                                                            
+ Usage: exordos iam introspect [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
- Delete limit                                                                                                                                                                                                                                                                                              
+ Print introspect information                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │
-│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │
+│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

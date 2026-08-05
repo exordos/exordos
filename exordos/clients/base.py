@@ -464,6 +464,14 @@ class CollectionBaseClient:
         resp = self._request("GET", url)
         return resp.json()
 
+    def introspect(
+        self, client_uuid: sys_uuid.UUID | str = DEFAULT_CLIENT_SLUG
+    ) -> dict[str, tp.Any]:
+        base = self._base_url.rstrip("/")
+        url = f"{base}/v1/iam/clients/{client_uuid}/actions/introspect"
+        resp = self._request("GET", url)
+        return resp.json()
+
     def do_action(
         self,
         collection: str,

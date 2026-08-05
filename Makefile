@@ -21,7 +21,7 @@ cli_docs:
 	tox -e cli_docs
 
 mdlint:
-	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" "#!.tox" --fix
+	markdownlint-cli2 --config .markdownlint.yaml "**/*.md" "#node_modules" "#!.venv" "#!.tox" "#!.opencode" "#!.claude" --fix
 
 build_element:
 	./dist/exordos build -i $(SSH_KEY) -f ../$(ELEMENT_PATH) -o ../$(ELEMENT_PATH)/output
@@ -76,3 +76,12 @@ add_limit_field:
 
 clear_limits:
 	./dist/exordos limits clear -y
+
+user_info:
+	./dist/exordos iam users info jdoe
+
+introspect:
+	./dist/exordos iam introspect
+
+role_permissions:
+	./dist/exordos iam permissions role newcomer
