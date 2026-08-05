@@ -4455,7 +4455,7 @@
 <h1 id="exordos-cli">Exordos CLI<a class="headerlink" href="#exordos-cli" title="Permanent link">#</a></h1>
 <p>Exordos CLI is the official command-line interface for the <a href="https://github.com/exordos/exordos_core">Exordos Core platform</a>. It provides a unified toolset for managing the full lifecycle of Exordos projects — from building and provisioning elements to bootstrapping installations, managing backups, and interacting with a running Exordos Core environment.</p>
 <p><strong>📚 Platform Documentation:</strong> <a href="https://exordos.github.io/exordos_core/">exordos.github.io/exordos_core</a></p>
-<p>With a single binary you can:</p>
+<p>With a self-contained CLI installation you can:</p>
 <ul>
 <li><strong>Build projects</strong> — compile Exordos project images and artifacts from a declarative <code>exordos.yaml</code> configuration.</li>
 <li><strong>Bootstrap installations</strong> — spin up local virtual machine environments from built images for development and testing.</li>
@@ -4467,6 +4467,13 @@
 <h3 id="binary-recommended">Binary (recommended)<a class="headerlink" href="#binary-recommended" title="Permanent link">#</a></h3>
 <p>Install the CLI with a single command:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://repo.exordos.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+<p>On macOS, the installer selects the native Apple Silicon or Intel archive,
+verifies its SHA-256 checksum, and keeps versioned installations under
+<code>/usr/local/lib/exordos</code>. The active <code>/usr/local/bin/exordos</code> launcher is
+switched atomically. To reactivate an already installed version or install a
+specific published version, set <code>EXORDOS_VERSION</code>:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://repo.exordos.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nv">EXORDOS_VERSION</span><span class="o">=</span><span class="m">3</span>.1.15<span class="w"> </span>sh
 </code></pre></div>
 <h3 id="via-uv">Via uv<a class="headerlink" href="#via-uv" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>exordos

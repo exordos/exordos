@@ -4455,7 +4455,7 @@
 <h1 id="exordos-cli">Exordos CLI<a class="headerlink" href="#exordos-cli" title="Permanent link">#</a></h1>
 <p>Exordos CLI — это интерфейс командной строки для <a href="https://github.com/exordos/exordos_core">платформы Exordos Core</a>. Он предоставляет унифицированный набор инструментов для управления полным жизненным циклом проектов Exordos — от сборки и выделения элементов до инициализации установок, управления резервными копиями и взаимодействия с работающей средой Exordos Core.</p>
 <p><strong>📚 Документация платформы:</strong> <a href="https://exordos.github.io/exordos_core/">exordos.github.io/exordos_core</a></p>
-<p>С помощью одного бинарного файла вы можете:</p>
+<p>С помощью автономной установки CLI вы можете:</p>
 <ul>
 <li><strong>Собирать проекты</strong> — компилировать образы и артефакты проектов Exordos из декларативной конфигурации <code>exordos.yaml</code>.</li>
 <li><strong>Инициализировать установки</strong> — запускать локальные виртуальные машины из собранных образов для разработки и тестирования.</li>
@@ -4466,7 +4466,14 @@
 <h2 id="установка">Установка<a class="headerlink" href="#установка" title="Permanent link">#</a></h2>
 <h3 id="бинарный-файл-рекомендуется">Бинарный файл (рекомендуется)<a class="headerlink" href="#бинарный-файл-рекомендуется" title="Permanent link">#</a></h3>
 <p>Установите CLI одной командой:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://repo.exordos.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>sh
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://repo.exordos.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+<p>В macOS установщик выбирает нативный архив для Apple Silicon или Intel,
+проверяет его контрольную сумму SHA-256 и хранит версии в
+<code>/usr/local/lib/exordos</code>. Активная ссылка <code>/usr/local/bin/exordos</code>
+переключается атомарно. Чтобы активировать уже установленную версию или
+установить конкретную опубликованную версию, задайте <code>EXORDOS_VERSION</code>:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://repo.exordos.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nv">EXORDOS_VERSION</span><span class="o">=</span><span class="m">3</span>.1.15<span class="w"> </span>sh
 </code></pre></div>
 <h3 id="через-uv">Через uv<a class="headerlink" href="#через-uv" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>exordos
