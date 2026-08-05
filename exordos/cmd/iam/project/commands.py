@@ -86,3 +86,46 @@ def add_cmd(
 
     entity = base_client.add_entity(client, c.PROJECT_COLLECTION, data)
     show_data(entity)
+
+
+@projects_group.command(
+    "add_user", help=f"Add a user to a {ENTITY} (by UUID, email, or name)"
+)
+@click.pass_context
+@click.option(
+    "-p",
+    "--project-id",
+    type=click.UUID,
+    required=True,
+    help=f"UUID of the {ENTITY}",
+)
+@click.option(
+    "-u",
+    "--user",
+    type=str,
+    required=True,
+    help="UUID, email, or name of the user to add",
+)
+@click.option(
+    "-r",
+    "--role",
+    type=str,
+    required=True,
+    help="Role to assign (e.g. 'owner')",
+)
+def add_user_cmd(
+    ctx: click.Context,
+    project_id: sys_uuid.UUID,
+    user: str,
+    role: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    base_client.action_entity(
+        client,
+        c.PROJECT_COLLECTION,
+        "add_user",
+        project_id,
+        user=user,
+        role=role,
+    )
+    click.echo(f"User {user} added to {ENTITY} {project_id} as {role}")
