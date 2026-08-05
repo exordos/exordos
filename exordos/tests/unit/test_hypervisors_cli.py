@@ -335,7 +335,7 @@ class TestInitCmdRegistration:
                 hv_commands, "local_python_version", return_value="3.14"
             ),
             patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
-            patch.object(hv_commands, "_add_libvirt_qemu_to_rawstor_group"),
+            patch.object(hv_commands, "add_libvirt_qemu_to_rawstor_group"),
             patch.object(hv_commands, "_detect_local_cores", return_value=8),
             patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
             patch.object(
@@ -666,7 +666,7 @@ class TestInitCmdRegistration:
             ),
             patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
             patch.object(
-                hv_commands, "_add_libvirt_qemu_to_rawstor_group"
+                hv_commands, "add_libvirt_qemu_to_rawstor_group"
             ) as group_mock,
         ):
             result = runner.invoke(
@@ -1081,13 +1081,13 @@ class TestInstallRawstorPackages:
 
 
 class TestAddLibvirtQemuToRawstorGroup:
-    """Tests for _add_libvirt_qemu_to_rawstor_group: lets QEMU (always run
+    """Tests for add_libvirt_qemu_to_rawstor_group: lets QEMU (always run
     by libvirt as the libvirt-qemu user) connect to rawstor-vhost's
     group-owned, mode-0660 vhost-user sockets."""
 
     def test_adds_libvirt_qemu_to_the_rawstor_group(self) -> None:
         with patch.object(hv_commands, "run_command") as run_mock:
-            hv_commands._add_libvirt_qemu_to_rawstor_group()
+            hv_commands.add_libvirt_qemu_to_rawstor_group()
 
         run_mock.assert_called_once_with(
             ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"], sudo=False
@@ -1095,11 +1095,35 @@ class TestAddLibvirtQemuToRawstorGroup:
 
     def test_passes_sudo_through(self) -> None:
         with patch.object(hv_commands, "run_command") as run_mock:
-            hv_commands._add_libvirt_qemu_to_rawstor_group(add_sudo=True)
+            hv_commands.add_libvirt_qemu_to_rawstor_group(add_sudo=True)
 
         run_mock.assert_called_once_with(
             ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"], sudo=True
         )
+
+
+class TestInstallAndConfigureRawstor:
+    """Tests for install_and_configure_rawstor: the single entry point
+    both `hypervisors init --with-rawstor` and `bootstrap --with-rawstor`
+    call, so the two provisioning paths install the same packages and
+    grant QEMU access to them the same way."""
+
+    def test_installs_packages_then_grants_qemu_group_access(self) -> None:
+        with (
+            patch.object(
+                hv_commands, "local_python_version", return_value="3.14"
+            ),
+            patch.object(hv_commands, "install_rawstor_packages") as install_mock,
+            patch.object(
+                hv_commands, "add_libvirt_qemu_to_rawstor_group"
+            ) as group_mock,
+        ):
+            hv_commands.install_and_configure_rawstor(add_sudo=True)
+
+        install_mock.assert_called_once_with(
+            ["librawstor", "rawstor-ost", "rawstor-vhost", "python3.14-rawstor"], True
+        )
+        group_mock.assert_called_once_with(True)
 
 
 class TestLocalPythonVersion:

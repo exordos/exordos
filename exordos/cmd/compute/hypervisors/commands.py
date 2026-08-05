@@ -709,7 +709,7 @@ def _add_user_to_groups(user: str | None, add_sudo: bool = False) -> None:
         run_command(cmd, sudo=add_sudo)
 
 
-def _add_libvirt_qemu_to_rawstor_group(add_sudo: bool = False) -> None:
+def add_libvirt_qemu_to_rawstor_group(add_sudo: bool = False) -> None:
     """Let QEMU (which libvirt always runs as the libvirt-qemu user) connect
     to rawstor-vhost's vhost-user sockets.
 
@@ -719,6 +719,24 @@ def _add_libvirt_qemu_to_rawstor_group(add_sudo: bool = False) -> None:
     """
     cmd = ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"]
     run_command(cmd, sudo=add_sudo)
+
+
+def install_and_configure_rawstor(add_sudo: bool = False) -> None:
+    """Install rawstor's hypervisor-side packages and let QEMU use them.
+
+    Shared by `hypervisors init --with-rawstor` and `bootstrap --with-rawstor`
+    so the two provisioning paths can't drift out of sync with each other.
+    """
+    install_rawstor_packages(
+        [
+            "librawstor",
+            "rawstor-ost",
+            "rawstor-vhost",
+            f"python{local_python_version()}-rawstor",
+        ],
+        add_sudo,
+    )
+    add_libvirt_qemu_to_rawstor_group(add_sudo)
 
 
 def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
@@ -1242,17 +1260,7 @@ def init_cmd(
 
     if with_rawstor:
         log.info("Installing rawstor packages...")
-        install_rawstor_packages(
-            [
-                "librawstor",
-                "rawstor-ost",
-                "rawstor-vhost",
-                f"python{local_python_version()}-rawstor",
-            ],
-            add_sudo,
-        )
-        log.info("Adding libvirt-qemu to the rawstor group...")
-        _add_libvirt_qemu_to_rawstor_group(add_sudo)
+        install_and_configure_rawstor(add_sudo)
 
     if add:
         log.info("Registering hypervisor...")
