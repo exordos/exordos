@@ -22,6 +22,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.common.table import fill_table
+from exordos.common.table import print_table
 from exordos.common.table import show_data
 
 ENTITY = "permission"
@@ -79,4 +81,37 @@ def add_cmd(
     show_data(entity)
 
 
+@click.command("role", help="List permissions bound to a role")
+@click.pass_context
+@click.argument(
+    "role",
+    type=str,
+    required=True,
+    help="role name or uuid",
+)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+def by_role_cmd(ctx: click.Context, role: str, output: str) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    role = base_client.get_entity(client, c.ROLE_COLLECTION, role)
+    bindings = base_client.list_entities(
+        client, c.PERMISSION_BINDING_COLLECTION, role=role["uuid"]
+    )
+    permissions = []
+    for binding in bindings:
+        permissions.append(
+            base_client.get_entity(
+                client, c.PERMISSION_COLLECTION, binding["permission"].split("/")[-1]
+            )
+        )
+    permissions.sort(key=lambda x: x["name"])
+    print_table(fill_table(permissions, FIELDS_MAP), output)
+
+
 permissions_group.add_command(add_cmd, aliases=["a"])
+permissions_group.add_command(by_role_cmd, aliases=["r"])

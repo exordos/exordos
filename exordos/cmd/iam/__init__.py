@@ -12,6 +12,7 @@
 
 import rich_click as click
 
+from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.iam.client import commands as client_commands
 from exordos.cmd.iam.idp import commands as idp_commands
@@ -28,6 +29,16 @@ from exordos.cmd.iam.user import commands as user_commands
 @click.group("iam", cls=ClickAliasedGroup, help="iam group in the Exordos installation")
 def iam_group():
     pass
+
+
+@click.command("introspect", help="Print introspect information")
+@click.pass_context
+def introspect(ctx: click.Context) -> None:
+    cl = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = cl.introspect()
+    click.echo(f"Project: {data['project_id']}")
+    for i, p in enumerate(data["permissions"]):
+        click.echo(f"{i + 1}: {p}")
 
 
 # 1
@@ -51,3 +62,5 @@ iam_group.add_command(
 # 4
 iam_group.add_command(user_commands.users_group, aliases=["u"])  # noqa
 iam_group.add_command(role_binding_commands.role_bindings_group, aliases=["rb"])  # noqa
+
+iam_group.add_command(introspect, aliases=["intro"])
