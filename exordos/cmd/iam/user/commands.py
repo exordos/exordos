@@ -304,6 +304,88 @@ def info_cmd(ctx: click.Context, user: str, output: str) -> None:
     )
 
 
+@click.command("update", help=f"Update {ENTITY}")
+@click.pass_context
+@click.argument(
+    "uuid",
+    type=str,
+    required=True,
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default=None,
+    help=f"Username of the {ENTITY}",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default=None,
+    help=f"Description of the {ENTITY}",
+)
+@click.option(
+    "--first-name",
+    type=str,
+    default=None,
+)
+@click.option(
+    "--last-name",
+    type=str,
+    default=None,
+)
+@click.option(
+    "--surname",
+    type=str,
+    default=None,
+)
+@click.option(
+    "--phone",
+    type=str,
+    default=None,
+)
+@click.option(
+    "--email",
+    type=str,
+    default=None,
+)
+def update_cmd(
+    ctx: click.Context,
+    uuid: str,
+    name: str | None,
+    description: str | None,
+    first_name: str | None,
+    last_name: str | None,
+    surname: str | None,
+    phone: str | None,
+    email: str | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {}
+    if name is not None:
+        data["username"] = name
+    if description is not None:
+        data["description"] = description
+    if first_name is not None:
+        data["first_name"] = first_name
+    if last_name is not None:
+        data["last_name"] = last_name
+    if surname is not None:
+        data["surname"] = surname
+    if phone is not None:
+        data["phone"] = phone
+    if email is not None:
+        data["email"] = email
+
+    if not data:
+        click.echo("No data to update")
+        return
+
+    entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
+    show_data(entity)
+
+
 @users_group.command("confirm_email", help=f"Confirm email of the {ENTITY}")
 @click.pass_context
 @click.argument(
@@ -338,3 +420,4 @@ def confirm_email(
 
 
 users_group.add_command(add_cmd, aliases=["a"])
+users_group.add_command(update_cmd, aliases=["u"])
