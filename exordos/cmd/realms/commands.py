@@ -27,6 +27,7 @@ import questionary
 import requests
 import rich_click as click
 
+from exordos import constants as c
 from exordos import utils as exordos_utils
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
@@ -140,8 +141,15 @@ def check_api(url: str) -> bool:
 
 
 @click.command("list", help="List of realms")
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
 @click.pass_context
-def list_cmd(ctx: click.Context) -> None:
+def list_cmd(ctx: click.Context, output: str) -> None:
     def get_ecosystem_realms() -> dict[str, Realm]:
         # Get the list of realms from the ecosystem
         from yretry import defaults
@@ -208,7 +216,7 @@ def list_cmd(ctx: click.Context) -> None:
     for realm in realms.values():
         table.add_row(realm.name, realm.ip, realm.provider, realm.status)
 
-    print_table(table)
+    print_table(table, output)
 
 
 @click.command("add", help=f"Add a new ecosystem {ENTITY}")
@@ -385,6 +393,58 @@ def delete_cmd(ctx: click.Context, name_uuid: str) -> None:
     raise click.ClickException(f"Local realm {name_uuid} not found")
 
 
+@click.command("show", help="Show realm details")
+@click.argument("name_uuid", type=str)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+@click.pass_context
+def show_cmd(ctx: click.Context, name_uuid: str, output: str) -> None:
+    from yretry import defaults
+
+    defaults.HTTP_RETRY_ATTEMPTS = 1
+    ecosystem_client = get_ecosystem_client(ctx)
+    try:
+        data = base_client.get_entity(ecosystem_client, ENTITY_COLLECTION, name_uuid)
+        show_data(data, output)
+    except Exception:
+        raise click.ClickException(f"{ENTITY} {name_uuid} not found")
+
+
+@click.command("ssh_connection", help="Show realm ssh connection info")
+@click.argument("name_uuid", type=str)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+@click.pass_context
+def ssh_connection_cmd(ctx: click.Context, name_uuid: str, output: str) -> None:
+    from yretry import defaults
+
+    defaults.HTTP_RETRY_ATTEMPTS = 1
+    ecosystem_client = get_ecosystem_client(ctx)
+    try:
+        data = base_client.action_entity(
+            ecosystem_client,
+            ENTITY_COLLECTION,
+            "ssh_connection",
+            name_uuid,
+            False,
+        )
+        show_data(data, output)
+    except Exception:
+        raise click.ClickException(f"{ENTITY} {name_uuid} not found")
+
+
 realms_group.add_command(list_cmd, aliases=["l"])
 realms_group.add_command(delete_cmd, aliases=["d"])
 realms_group.add_command(add_cmd, aliases=["a"])
+realms_group.add_command(show_cmd, aliases=["get", "g"])
+realms_group.add_command(ssh_connection_cmd)
