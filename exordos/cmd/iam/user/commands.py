@@ -173,6 +173,55 @@ def add_cmd(
     show_data(entity)
 
 
+@users_group.command("reset_password", help=f"Reset password of the {ENTITY}")
+@click.pass_context
+@click.argument(
+    "user",
+    type=click.UUID,
+    required=True,
+    help=f"{ENTITY} UUID",
+)
+@click.option(
+    "-c",
+    "--code",
+    type=str,
+    required=False,
+    help=f"Verification code for the {ENTITY}",
+)
+@click.option(
+    "-n",
+    "--new-password",
+    type=str,
+    required=False,
+    help=f"New password of the {ENTITY}. If not provided, will be asked interactively",
+    hide_input=True,
+)
+def reset_password_cmd(
+    ctx: click.Context,
+    user: sys_uuid.UUID,
+    code: str | None,
+    new_password: str | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
+    new_password = (
+        new_password
+        or questionary.password(f"Enter new password for {ENTITY} {user}:").ask()
+    )
+    if new_password is None:
+        click.echo("Password not provided")
+        return
+    data = {
+        "new_password": new_password,
+    }
+
+    if code is not None:
+        data["code"] = code
+
+    base_client.action_entity(client, ENTITY_COLLECTION, "reset_password", user, **data)
+    click.echo(f"Password reset for {ENTITY} {user}")
+
+
 @users_group.command("change_password", help=f"Change password of the {ENTITY}")
 @click.pass_context
 @click.argument(

@@ -85,3 +85,6 @@ introspect:
 
 role_permissions:
 	./dist/exordos iam permissions role newcomer
+
+reset_password:
+	./dist/exordos iam u reset_password dae92b97-ee63-4376-9743-f735120ea7db --new-password 123456789
