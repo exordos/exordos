@@ -1289,11 +1289,25 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/realms_list/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/realms_show/</loc>
+        <lastmod>2026-08-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/realms_show/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/realms_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/realms_ssh/</loc>
         <lastmod>2026-08-11</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/realms_ssh/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/realms_ssh/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/realms_ssh_connection/</loc>
+        <lastmod>2026-08-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/realms_ssh_connection/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/realms_ssh_connection/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/records_add/</loc>
@@ -3312,11 +3326,25 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/realms_list/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/realms_show/</loc>
+        <lastmod>2026-08-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/realms_show/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/realms_show/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/realms_ssh/</loc>
         <lastmod>2026-08-11</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/realms_ssh/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/realms_ssh/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/realms_ssh_connection/</loc>
+        <lastmod>2026-08-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/realms_ssh_connection/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/realms_ssh_connection/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/records_add/</loc>
