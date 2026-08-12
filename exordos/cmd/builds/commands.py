@@ -31,6 +31,22 @@ from exordos.logger import ClickLogger
 from exordos.spec import schema
 
 
+def _prepare_output_dir(output_dir: pathlib.Path, force: bool) -> bool:
+    if not os.path.exists(output_dir):
+        return True
+
+    if not force:
+        click.secho(
+            f"The '{output_dir}' directory already exists. Use '--force' "
+            "flag to remove current artifacts and new build.",
+            fg="yellow",
+        )
+        return False
+
+    shutil.rmtree(output_dir)
+    return True
+
+
 @click.command(
     "build",
     help=(
@@ -83,6 +99,11 @@ from exordos.spec import schema
     help="Rebuild if the output already exists",
 )
 @click.option(
+    "-e",
+    "--element",
+    help="Name of the element to build. Builds all elements when omitted",
+)
+@click.option(
     "--manifest-var",
     multiple=True,
     help=(
@@ -107,21 +128,16 @@ def build_cmd(
     output_dir: pathlib.Path,
     ssh_public_key: tuple[pathlib.Path, ...],
     force: bool,
+    element: str | None,
     manifest_var: tuple[str, ...],
     validate: bool,
     project_dir: str,
 ) -> None:
     manifest_vars = utils.convert_input_multiply(manifest_var)
+    output_dir_existed = os.path.exists(output_dir)
 
-    if os.path.exists(output_dir) and not force:
-        click.secho(
-            f"The '{output_dir}' directory already exists. Use '--force' "
-            "flag to remove current artifacts and new build.",
-            fg="yellow",
-        )
+    if element is None and not _prepare_output_dir(output_dir, force):
         return
-    elif os.path.exists(output_dir) and force:
-        shutil.rmtree(output_dir)
 
     # Load SSH keys
     developer_keys = ""
@@ -158,10 +174,29 @@ def build_cmd(
     # Path where exordos.yaml configuration file is located
     exordos_dir = pathlib.Path(gen_config_path).parent
 
+    builders = []
     for _, build_cfg in builds.items():
         builder = simple_builder.SimpleBuilder.from_config(
             exordos_dir, build_cfg, packer_image_builder, output_dir, version, logger
         )
+        if element and not builder.select_element(element, manifest_vars):
+            continue
+
+        builders.append(builder)
+
+    if element and not builders:
+        raise click.ClickException(
+            f"Element '{element}' not found in the configuration"
+        )
+
+    if (
+        element is not None
+        and output_dir_existed
+        and not _prepare_output_dir(output_dir, force)
+    ):
+        return
+
+    for builder in builders:
         with tempfile.TemporaryDirectory() as temp_dir:
             builder.fetch_dependency(deps_dir or temp_dir)
             builder.build(developer_keys, manifest_vars, validate)

@@ -57,6 +57,45 @@ class TestBuilder:
         assert len(builder._elements) == 1
         assert builder._exordos_dir == work_dir
 
+    def test_select_element_filters_by_manifest_name(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        output_dir = tmp_path / "output"
+        work_dir.mkdir()
+        output_dir.mkdir()
+        (work_dir / "app1.yaml").write_text("name: app1\n")
+        (work_dir / "app2.yaml").write_text("name: app2\n")
+        app1 = base.Element(manifest=pathlib.Path("app1.yaml"))
+        app2 = base.Element(manifest=pathlib.Path("app2.yaml"))
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[app1, app2],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=output_dir,
+        )
+
+        assert builder.select_element("app2") is True
+        assert builder._elements == [app2]
+
+    def test_select_element_returns_false_for_unknown_name(self, tmp_path) -> None:
+        work_dir = tmp_path / "work"
+        output_dir = tmp_path / "output"
+        work_dir.mkdir()
+        output_dir.mkdir()
+        (work_dir / "app.yaml").write_text("name: app\n")
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[base.Element(manifest=pathlib.Path("app.yaml"))],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=output_dir,
+        )
+
+        assert builder.select_element("missing") is False
+        assert builder._elements == []
+
     def test_manifest_rendering_jinja2_variables(self, tmp_path) -> None:
         """Ensure Jinja2 variables render correctly."""
         # Arrange: temp work dir and output dir

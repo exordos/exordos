@@ -60,6 +60,14 @@ Additional variables can be passed using the --manifest-var options.
 
   Rebuild if the output already exists
 
+- `element`:
+    - Type: text
+    - Default: `sentinel.unset`
+    - Usage: `-e
+--element`
+
+  Name of the element to build. Builds all elements when omitted
+
 - `manifest_var`:
     - Type: text
     - Default: `sentinel.unset`
@@ -105,6 +113,7 @@ Additional variables can be passed using the --manifest-var options.
 │ --output-dir              -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                     │
 │ --ssh-public-key          -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                     │
 │ --force                   -f        Rebuild if the output already exists                                                                                                                                                                                                                                │
+│ --element                 -e  TEXT  Name of the element to build. Builds all elements when omitted                                                                                                                                                                                                      │
 │ --manifest-var                TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                │
 │ --validate/--no-validate            Validate the manifest after building [default: validate]                                                                                                                                                                                                            │
 │ --help                              Show this message and exit.                                                                                                                                                                                                                                         │
