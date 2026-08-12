@@ -4528,6 +4528,16 @@
 </ul>
 <p>Rebuild if the output already exists</p>
 <ul>
+<li><code>element</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>-e
+--element</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of the element to build. Builds all elements when omitted</p>
+<ul>
 <li><code>manifest_var</code>:<ul>
 <li>Type: text</li>
 <li>Default: <code>sentinel.unset</code></li>
@@ -4581,6 +4591,7 @@
 <span class="go">│ --output-dir              -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                     │</span>
 <span class="go">│ --ssh-public-key          -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                     │</span>
 <span class="go">│ --force                   -f        Rebuild if the output already exists                                                                                                                                                                                                                                │</span>
+<span class="go">│ --element                 -e  TEXT  Name of the element to build. Builds all elements when omitted                                                                                                                                                                                                      │</span>
 <span class="go">│ --manifest-var                TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                │</span>
 <span class="go">│ --validate/--no-validate            Validate the manifest after building [default: validate]                                                                                                                                                                                                            │</span>
 <span class="go">│ --help                              Show this message and exit.                                                                                                                                                                                                                                         │</span>
