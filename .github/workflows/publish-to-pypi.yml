@@ -489,7 +489,7 @@ jobs:
         # Upload latest release
         upload ./dist/exordos-linux \
           "${PROJECT_NAME}/latest/exordos-linux"
-        upload ./dist/exordos-linux \
+        upload ./dist/exordos-linux-ubuntu-resolute \
           "${PROJECT_NAME}/latest/exordos-linux-ubuntu-resolute"
         upload ./dist/exordos-macos-arm64.zip \
           "${PROJECT_NAME}/latest/exordos-macos-arm64.zip"
