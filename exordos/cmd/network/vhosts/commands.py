@@ -33,5 +33,5 @@ FIELDS_MAP = {
 }
 
 vhosts_group = create_entity_group(
-    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, parents=["lb"]
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_clear_command=True, parents=["lb"]
 )

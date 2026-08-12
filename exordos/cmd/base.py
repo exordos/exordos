@@ -245,10 +245,13 @@ def create_entity_group(
         @click.option(
             "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
         )
+        @add_dynamic_parents(parents)
         @click.pass_context
-        def clear_cmd(ctx: click.Context, y: bool) -> None:
+        def clear_cmd(ctx: click.Context, y: bool, **kwargs) -> None:
             client = base_client.get_user_api_client(ctx.obj.auth_data)
-            entities = base_client.list_entities(client, entity_collection)
+            entities = base_client.list_entities(
+                client, entity_collection.format(**kwargs)
+            )
             for entity in entities:
                 if (
                     y
@@ -256,7 +259,9 @@ def create_entity_group(
                         f"Delete {entity_name} {entity['uuid']} ({entity.get('name', '')})?"
                     ).ask()
                 ):
-                    base_client.delete_entity(client, entity_collection, entity["uuid"])
+                    base_client.delete_entity(
+                        client, entity_collection.format(**kwargs), entity["uuid"]
+                    )
                     click.echo(f"{entity_name} {entity['uuid']} deleted")
 
         entity_group.add_command(clear_cmd, aliases=["c"])
