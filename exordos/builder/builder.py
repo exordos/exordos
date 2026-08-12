@@ -382,6 +382,26 @@ class SimpleBuilder:
             self._logger.info(f"Fetching dependency: {dep}")
             dep.fetch(deps_dir)
 
+    def select_element(
+        self,
+        name: str,
+        manifest_vars: dict[str, tp.Any] | None = None,
+    ) -> bool:
+        """Restrict this builder to elements with the requested name."""
+        manifest_vars = manifest_vars or {}
+        selected = []
+
+        for element in self._elements:
+            if not element.manifest:
+                continue
+
+            element_name = manifest_vars.get("name") or element.name(self._exordos_dir)
+            if element_name and element_name.strip() == name:
+                selected.append(element)
+
+        self._elements = selected
+        return bool(selected)
+
     def build_element(
         self,
         element: base.Element,
