@@ -99,13 +99,14 @@ def version_cmd() -> None:
 @click.command(name="latest", help="Check for the latest version on GitHub")
 @click.pass_context
 def latest_cmd(ctx: click.Context) -> None:
-    if ctx.obj.need_update is False:
-        from exordos import version as exordos_version
+    if ctx.obj.need_update is not None:
+        if ctx.obj.need_update is False:
+            from exordos import version as exordos_version
 
-        click.secho(
-            f"You are using the latest version: {exordos_version.version_info}",
-            fg="green",
-        )
+            click.secho(
+                f"You are using the latest version: {exordos_version.version_info}",
+                fg="green",
+            )
         return
     check_latest_version(echo_on_latest=True)
 
