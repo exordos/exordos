@@ -355,7 +355,7 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
-RAWSTOR_VERSION = "0.2.6"
+RAWSTOR_VERSION = "0.2.7"
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 # Matches rawstor-vhost@.service's own RAWSTOR_LOCATION default: rawstor-ost
 # always runs on the same host as the local hypervisor agent that --with-rawstor
