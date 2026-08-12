@@ -252,7 +252,9 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
-        venv_mock.assert_called_once_with(_FAKE_AGENT_TARGET.venv_path)
+        venv_mock.assert_called_once_with(
+            _FAKE_AGENT_TARGET.venv_path, with_rawstor=False
+        )
 
     def test_without_add_skips_registration_and_libvirt_config(self) -> None:
         runner = CliRunner()
@@ -331,9 +333,6 @@ class TestInitCmdRegistration:
                 return_value=_FAKE_AGENT_TARGET,
             ),
             patch.object(hv_commands, "_configure_libvirt"),
-            patch.object(
-                hv_commands, "local_python_version", return_value="3.14"
-            ),
             patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
             patch.object(hv_commands, "add_libvirt_qemu_to_rawstor_group"),
             patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
@@ -654,7 +653,7 @@ class TestInitCmdRegistration:
         runner = CliRunner()
         with (
             _patch_common_init_deps(),
-            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(hv_commands, "install_agent_venv") as venv_mock,
             patch.object(
                 hv_commands,
                 "resolve_agent_install_target",
@@ -662,9 +661,6 @@ class TestInitCmdRegistration:
             ),
             patch.object(hv_commands, "_configure_libvirt"),
             patch.object(hv_commands, "is_root", return_value=False),
-            patch.object(
-                hv_commands, "local_python_version", return_value="3.14"
-            ),
             patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
             patch.object(
                 hv_commands, "add_libvirt_qemu_to_rawstor_group"
@@ -678,8 +674,11 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
+        venv_mock.assert_called_once_with(
+            _FAKE_AGENT_TARGET.venv_path, with_rawstor=True
+        )
         rawstor_mock.assert_called_once_with(
-            ["librawstor", "rawstor-ost", "rawstor-vhost", "python3.14-rawstor"], True
+            ["librawstor", "rawstor-ost", "rawstor-vhost"], True
         )
         group_mock.assert_called_once_with(True)
 
@@ -924,7 +923,7 @@ class TestAgentSetup:
             mock_call(
                 ["sudo", "chown", getpass.getuser(), str(tmp_path / "agent-home")]
             ),
-            mock_call(["python3", "-m", "venv", "--system-site-packages", venv_path]),
+            mock_call(["python3", "-m", "venv", venv_path]),
             mock_call([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"]),
             mock_call(
                 [
@@ -955,7 +954,7 @@ class TestAgentSetup:
             mock_call(
                 ["sudo", "chown", getpass.getuser(), str(tmp_path / "agent-home")]
             ),
-            mock_call(["python3", "-m", "venv", "--system-site-packages", venv_path]),
+            mock_call(["python3", "-m", "venv", venv_path]),
             mock_call([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"]),
         ]
 
@@ -973,6 +972,28 @@ class TestAgentSetup:
 
         run_mock.assert_called_once_with(
             ["sudo", f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"]
+        )
+
+    def test_install_agent_venv_adds_rawstor_wheel_when_with_rawstor(
+        self, tmp_path
+    ) -> None:
+        """--with-rawstor pulls in rawstor's abi3 wheel alongside
+        gcl_sdk[libvirt], so the exordos_local_hyper driver can
+        `import rawstor` straight out of the venv."""
+        venv_path = tmp_path / "agent-home" / "venv"
+        venv_path.mkdir(parents=True)
+
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.install_agent_venv(str(venv_path), with_rawstor=True)
+
+        run_mock.assert_called_once_with(
+            [
+                "sudo",
+                f"{venv_path}/bin/pip",
+                "install",
+                "gcl_sdk[libvirt]",
+                hv_commands.RAWSTOR_WHEEL_URL,
+            ]
         )
 
     def test_install_agent_systemd_unit_writes_enables_and_restarts(
@@ -1112,9 +1133,6 @@ class TestInstallAndConfigureRawstor:
 
     def test_installs_packages_then_grants_qemu_access(self) -> None:
         with (
-            patch.object(
-                hv_commands, "local_python_version", return_value="3.14"
-            ),
             patch.object(hv_commands, "install_rawstor_packages") as install_mock,
             patch.object(
                 hv_commands, "add_libvirt_qemu_to_rawstor_group"
@@ -1126,7 +1144,7 @@ class TestInstallAndConfigureRawstor:
             hv_commands.install_and_configure_rawstor(add_sudo=True)
 
         install_mock.assert_called_once_with(
-            ["librawstor", "rawstor-ost", "rawstor-vhost", "python3.14-rawstor"], True
+            ["librawstor", "rawstor-ost", "rawstor-vhost"], True
         )
         group_mock.assert_called_once_with(True)
         apparmor_mock.assert_called_once_with(True)
@@ -1163,22 +1181,6 @@ class TestAllowApparmorAccessToRawstorSockets:
 
         run_mock.assert_called_once_with(
             ["systemctl", "reload", "apparmor"], sudo=True
-        )
-
-
-class TestLocalPythonVersion:
-    """Tests for local_python_version: used by callers to resolve
-    rawstor's per-interpreter python3.X-rawstor package name."""
-
-    def test_returns_the_interpreter_s_own_stdout(self) -> None:
-        with patch.object(
-            hv_commands, "run_command", return_value=MagicMock(stdout="3.14\n")
-        ) as run_mock:
-            result = hv_commands.local_python_version()
-
-        assert result == "3.14"
-        run_mock.assert_called_once_with(
-            ["python3", "-c", "import sys; print('%d.%d' % sys.version_info[:2])"]
         )
 
 

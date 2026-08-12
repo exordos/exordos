@@ -1316,7 +1316,9 @@ def bootstrap_cmd(
                 orch_endpoint=orch_endpoint,
                 status_endpoint=status_endpoint,
             )
-            hv_commands.install_agent_venv(agent_target.venv_path)
+            hv_commands.install_agent_venv(
+                agent_target.venv_path, with_rawstor=with_rawstor
+            )
             hv_commands.reset_agent_meta_file(agent_target.meta_file)
             private_key_path = hv_commands.write_agent_config(
                 orch_endpoint=orch_endpoint,

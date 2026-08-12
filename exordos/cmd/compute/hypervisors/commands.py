@@ -357,24 +357,17 @@ def _install_packages(add_sudo: bool = False) -> None:
 
 RAWSTOR_VERSION = "0.2.7"
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
+# The bindings' abi3 wheel works unmodified across interpreter versions
+# (unlike the per-interpreter python3.X-rawstor system packages), so one
+# URL covers whichever version `python3 -m venv` (install_agent_venv) uses.
+RAWSTOR_WHEEL_URL = (
+    f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/rawstor-{RAWSTOR_VERSION}"
+    "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+)
 # Matches rawstor-vhost@.service's own RAWSTOR_LOCATION default: rawstor-ost
 # always runs on the same host as the local hypervisor agent that --with-rawstor
 # installs it on.
 RAWSTOR_LOCATION = "ost://127.0.0.1:7777"
-
-
-def local_python_version() -> str:
-    """Return the local `python3` command's version as "X.Y".
-
-    Matches whichever interpreter `python3 -m venv` (install_agent_venv)
-    uses, since rawstor's python bindings are published as one .deb per
-    interpreter version (python3.X-rawstor) rather than a single
-    version-agnostic package.
-    """
-    result = run_command(
-        ["python3", "-c", "import sys; print('%d.%d' % sys.version_info[:2])"]
-    )
-    return result.stdout.strip()
 
 
 def install_rawstor_packages(
@@ -575,34 +568,42 @@ def resolve_agent_install_target(
     )
 
 
-def install_agent_venv(venv_path: str = STANDARD_AGENT_VENV_PATH) -> None:
-    """Install (or extend) the universal agent's venv with gcl_sdk[libvirt].
+def install_agent_venv(
+    venv_path: str = STANDARD_AGENT_VENV_PATH, with_rawstor: bool = False
+) -> None:
+    """Install (or extend) the universal agent's venv with gcl_sdk[libvirt],
+    plus rawstor's python bindings when with_rawstor is set.
 
     A venv may already exist at this path - either the standard agent's
     (this host is also a registered compute node, provisioned from the
     exordos-base image) or a previous isolated install - in which case
-    libvirt-python just needs adding, via sudo since the standard venv
+    the packages just need adding, via sudo since the standard venv
     is root-owned. Otherwise a fresh one is created, owned by the
     current (non-root) user so future pip runs don't need elevation.
     The /usr/bin symlink is only (re)pointed at it when installing to
     the standard path - an isolated install must not hijack it, since
     it may belong to an agent this code isn't managing.
 
-    Created with --system-site-packages so the exordos_local_hyper
-    driver can `import rawstor`: rawstor's python bindings ship as a
-    system deb (python-rawstor, installed by --with-rawstor) built
-    against the system's own python3, not something pip-installable
-    into an isolated venv.
+    rawstor's python bindings are installed from their own abi3 wheel
+    (RAWSTOR_WHEEL_URL) rather than PyPI, since rawstor isn't published
+    there - the exordos_local_hyper driver can then `import rawstor`
+    straight out of the venv. librawstor itself, which the bindings
+    dynamically link against, still comes from
+    install_and_configure_rawstor's system packages.
     """
+    packages = ["gcl_sdk[libvirt]"]
+    if with_rawstor:
+        packages.append(RAWSTOR_WHEEL_URL)
+
     if os.path.isdir(venv_path):
-        run_command(["sudo", f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
+        run_command(["sudo", f"{venv_path}/bin/pip", "install", *packages])
         return
 
     agent_home = os.path.dirname(venv_path)
     run_command(["sudo", "mkdir", "-p", agent_home])
     run_command(["sudo", "chown", getpass.getuser(), agent_home])
-    run_command(["python3", "-m", "venv", "--system-site-packages", venv_path])
-    run_command([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
+    run_command(["python3", "-m", "venv", venv_path])
+    run_command([f"{venv_path}/bin/pip", "install", *packages])
     if venv_path == STANDARD_AGENT_VENV_PATH:
         run_command(
             [
@@ -751,12 +752,7 @@ def install_and_configure_rawstor(add_sudo: bool = False) -> None:
     so the two provisioning paths can't drift out of sync with each other.
     """
     install_rawstor_packages(
-        [
-            "librawstor",
-            "rawstor-ost",
-            "rawstor-vhost",
-            f"python{local_python_version()}-rawstor",
-        ],
+        ["librawstor", "rawstor-ost", "rawstor-vhost"],
         add_sudo,
     )
     add_libvirt_qemu_to_rawstor_group(add_sudo)
@@ -1256,7 +1252,7 @@ def init_cmd(
     )
 
     log.info("Setting up the local universal agent's virtualenv...")
-    install_agent_venv(agent_target.venv_path)
+    install_agent_venv(agent_target.venv_path, with_rawstor=with_rawstor)
 
     log.info("Adding user to required groups...")
     _add_user_to_groups(user, add_sudo)
