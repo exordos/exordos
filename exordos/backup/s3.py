@@ -19,12 +19,15 @@ import io
 import os
 import typing as tp
 
-import boto3
+from light_s3_client import Client
 
 from exordos import logger as logger_base
 from exordos import utils
 from exordos.backup import base
 from exordos.backup import qcow
+
+_MIN_MULTIPART_PART_SIZE = 5 * 1024 * 1024
+_MAX_MULTIPART_PARTS = 9_999
 
 
 class S3QcowBackuper(qcow.AbstractQcowBackuper):
@@ -35,6 +38,7 @@ class S3QcowBackuper(qcow.AbstractQcowBackuper):
         secret_key: str,
         host: str,
         bucket_name: str,
+        region: str = "us-east-1",
         snapshot_name: str = "backup_snap",
         logger: logger_base.AbstractLogger | None = None,
     ):
@@ -43,6 +47,7 @@ class S3QcowBackuper(qcow.AbstractQcowBackuper):
         self._host = host
         self._bucket_name = bucket_name
         self._endpoint_url = endpoint_url
+        self._region = region
         self._logger = logger or logger_base.ClickLogger()
         self._snapshot_name = snapshot_name
 
@@ -53,17 +58,37 @@ class S3QcowBackuper(qcow.AbstractQcowBackuper):
         encryption: base.EncryptionCreds | None = None,
     ) -> None:
         """Upload a stream to S3."""
-        s3_client = boto3.client(
-            "s3",
-            endpoint_url=self._endpoint_url,
-            aws_access_key_id=self._access_key,
-            aws_secret_access_key=self._secret_key,
+        s3_client = Client(
+            access_key=self._access_key,
+            secret_key=self._secret_key,
+            region=self._region,
+            server=self._endpoint_url,
         )
 
         if encryption:
             stream = utils.ReaderEncryptorIO(stream, encryption.key, encryption.iv)
             s3_path += self.ENCRYPTED_SUFFIX
-        s3_client.upload_fileobj(stream, self._bucket_name, s3_path)
+
+        stream.seek(0, os.SEEK_END)
+        stream_size = stream.tell()
+        stream.seek(0)
+        part_size = max(
+            _MIN_MULTIPART_PART_SIZE,
+            (stream_size + _MAX_MULTIPART_PARTS - 1) // _MAX_MULTIPART_PARTS,
+        )
+        response = s3_client.upload_file_multipart(
+            stream,
+            self._bucket_name,
+            s3_path,
+            part_size=part_size,
+        )
+        if response is None or not 200 <= response.status_code < 300:
+            status_code = (
+                response.status_code if response is not None else "no response"
+            )
+            raise RuntimeError(
+                f"Failed to upload {s3_path} to S3 (status: {status_code})"
+            )
 
     def _upload_file(
         self,
