@@ -420,30 +420,11 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
-    - name: Download Linux binary
+    - name: Download binary artifacts
       uses: actions/download-artifact@v8
       with:
-        name: exordos-linux
-        path: dist/
-    - name: Download Linux ubuntu-resolute binary
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-linux-ubuntu-resolute
-        path: dist/
-    - name: Download macOS arm64 bundle
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-macos-arm64
-        path: dist/
-    - name: Download macOS x86_64 bundle
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-macos-x86_64
-        path: dist/
-    - name: Download Windows binary
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-windows
+        pattern: exordos-*
+        merge-multiple: true
         path: dist/
     - name: Create GitHub Release
       env:
@@ -470,30 +451,11 @@ jobs:
       uses: actions/checkout@v7
       with:
         persist-credentials: false
-    - name: Download Linux binary
+    - name: Download binary artifacts
       uses: actions/download-artifact@v8
       with:
-        name: exordos-linux
-        path: dist/
-    - name: Download Linux ubuntu-resolute binary
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-linux-ubuntu-resolute
-        path: dist/
-    - name: Download macOS arm64 bundle
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-macos-arm64
-        path: dist/
-    - name: Download macOS x86_64 bundle
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-macos-x86_64
-        path: dist/
-    - name: Download Windows binary
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-windows
+        pattern: exordos-*
+        merge-multiple: true
         path: dist/
     - name: Push artifacts to repository
       run: |
