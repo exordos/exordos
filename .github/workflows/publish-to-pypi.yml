@@ -2,8 +2,8 @@ name: Publish Python 🐍 distribution 📦 and binaries
 
 on:
   push:
-    tags:
-      - '*'
+    #tags:
+    #  - '*'
 
 env:
   PROJECT_NAME: exordos
@@ -420,31 +420,12 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
-    - name: Download Linux binary
+    - name: Download binaries
       uses: actions/download-artifact@v8
       with:
-        name: exordos-linux
+        pattern: exordos-*
         path: dist/
-    - name: Download Linux ubuntu-resolute binary
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-linux-ubuntu-resolute
-        path: dist/
-    - name: Download macOS arm64 bundle
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-macos-arm64
-        path: dist/
-    - name: Download macOS x86_64 bundle
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-macos-x86_64
-        path: dist/
-    - name: Download Windows binary
-      uses: actions/download-artifact@v8
-      with:
-        name: exordos-windows
-        path: dist/
+        merge-multiple: true
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
