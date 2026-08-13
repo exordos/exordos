@@ -416,7 +416,7 @@ class TestDeployCmdLocalMode:
 
         @contextlib.contextmanager
         def fake_serve_directory(path, host, port=0):
-            yield f"http://{host}:9999/"
+            yield f"http://{host}:{port}/"
 
         runner = CliRunner()
         with (
@@ -429,11 +429,12 @@ class TestDeployCmdLocalMode:
             patch.object(
                 deploy_commands, "_get_local_host_bind", return_value="192.168.1.5"
             ),
+            patch.object(deploy_commands, "_check_port_available") as port_check_mock,
             patch.object(
                 deploy_commands.local_server,
                 "serve_directory",
                 side_effect=fake_serve_directory,
-            ),
+            ) as serve_mock,
             patch.object(
                 deploy_commands.repo_utils,
                 "ensure_repository",
@@ -448,10 +449,113 @@ class TestDeployCmdLocalMode:
             )
 
         assert result.exit_code == 0, result.output
+        port_check_mock.assert_called_once_with(
+            "192.168.1.5", deploy_commands.DEFAULT_PORT
+        )
+        serve_mock.assert_called_once_with(
+            output_dir, "192.168.1.5", port=deploy_commands.DEFAULT_PORT
+        )
         find_repo_mock.assert_called_once()
         assert find_repo_mock.call_args[0][2] == {
             "kind": "nginx",
-            "url": "http://192.168.1.5:9999/exordos-elements/",
+            "url": f"http://192.168.1.5:{deploy_commands.DEFAULT_PORT}/exordos-elements/",
         }
         assert find_repo_mock.call_args[1]["sync_mode"] == "copy"
         deploy_elements_mock.assert_called_once()
+
+    def test_busy_port_aborts(self, tmp_path: pathlib.Path) -> None:
+        output_dir = _make_build_output(tmp_path)
+        port = deploy_commands.DEFAULT_PORT
+
+        runner = CliRunner()
+        with (
+            patch.object(
+                deploy_commands.base_client,
+                "get_user_api_client",
+                return_value=MagicMock(),
+            ),
+            patch.object(deploy_commands, "_is_local_realm", return_value=True),
+            patch.object(
+                deploy_commands, "_get_local_host_bind", return_value="192.168.1.5"
+            ),
+            patch.object(
+                deploy_commands,
+                "_check_port_available",
+                side_effect=click.ClickException(
+                    f"Port {port} is already in use on 192.168.1.5 "
+                    "([Errno 98] Address already in use). "
+                    "Stop the process holding it or rerun `exordos deploy` "
+                    "with a different port via the `--port` option."
+                ),
+            ),
+            patch.object(deploy_commands.local_server, "serve_directory") as serve_mock,
+        ):
+            result = runner.invoke(
+                deploy_commands.deploy_cmd,
+                ["-e", str(output_dir), "--port", str(port)],
+                obj=_obj(),
+            )
+
+        assert result.exit_code != 0
+        assert f"Port {port} is already in use" in result.output
+        serve_mock.assert_not_called()
+
+    def test_local_deploy_uses_custom_port(self, tmp_path: pathlib.Path) -> None:
+        output_dir = _make_build_output(tmp_path)
+        custom_port = 8080
+
+        @contextlib.contextmanager
+        def fake_serve_directory(path, host, port=0):
+            yield f"http://{host}:{port}/"
+
+        runner = CliRunner()
+        with (
+            patch.object(
+                deploy_commands.base_client,
+                "get_user_api_client",
+                return_value=MagicMock(),
+            ),
+            patch.object(deploy_commands, "_is_local_realm", return_value=True),
+            patch.object(
+                deploy_commands, "_get_local_host_bind", return_value="192.168.1.5"
+            ),
+            patch.object(deploy_commands, "_check_port_available") as port_check_mock,
+            patch.object(
+                deploy_commands.local_server,
+                "serve_directory",
+                side_effect=fake_serve_directory,
+            ) as serve_mock,
+            patch.object(
+                deploy_commands.repo_utils,
+                "ensure_repository",
+                return_value={"uuid": "repo-uuid"},
+            ) as find_repo_mock,
+            patch.object(deploy_commands, "_deploy_element"),
+        ):
+            result = runner.invoke(
+                deploy_commands.deploy_cmd,
+                ["-e", str(output_dir), "--port", str(custom_port)],
+                obj=_obj(),
+            )
+
+        assert result.exit_code == 0, result.output
+        port_check_mock.assert_called_once_with("192.168.1.5", custom_port)
+        serve_mock.assert_called_once_with(output_dir, "192.168.1.5", port=custom_port)
+        find_repo_mock.assert_called_once()
+        assert find_repo_mock.call_args[0][2] == {
+            "kind": "nginx",
+            "url": f"http://192.168.1.5:{custom_port}/exordos-elements/",
+        }
+
+    def test_invalid_port_rejected(self, tmp_path: pathlib.Path) -> None:
+        output_dir = _make_build_output(tmp_path)
+
+        runner = CliRunner()
+        result = runner.invoke(
+            deploy_commands.deploy_cmd,
+            ["-e", str(output_dir), "--port", "70000"],
+            obj=_obj(),
+        )
+
+        assert result.exit_code != 0
+        assert "70000" in result.output
