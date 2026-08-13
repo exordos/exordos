@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import errno
 import ipaddress
 import json
 import pathlib
@@ -38,6 +39,7 @@ if tp.TYPE_CHECKING:
 DEFAULT_REPO_NAME = "exordos-dev-repo"
 DEFAULT_PRIORITY = 4096
 DEFAULT_TIMEOUT = 600.0
+DEFAULT_PORT = 33101
 
 
 def _load_build_inventory(element_dir: pathlib.Path) -> dict[str, dict]:
@@ -125,6 +127,24 @@ def _get_local_host_bind(config: dict[str, tp.Any], realm: str | None = None) ->
         "Ensure the current realm has a valid 'meta.cidr' set and this "
         "machine has an interface in that network."
     )
+
+
+def _check_port_available(host: str, port: int) -> None:
+    """Raise ``click.ClickException`` if *port* cannot be bound on *host*."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((host, port))
+    except OSError as exc:
+        if exc.errno == errno.EADDRINUSE:
+            raise click.ClickException(
+                f"Port {port} is already in use on {host} ({exc}). "
+                "Stop the process holding it or rerun `exordos deploy` with "
+                "a different port via the `--port` option."
+            ) from exc
+        raise click.ClickException(
+            f"Failed to bind to {host}:{port} ({exc}). "
+            "Please check the host and port configuration and try again."
+        ) from exc
 
 
 def _cleanup_existing_repo_elements(
@@ -352,6 +372,16 @@ def _deploy_element(
     default=c.CONFIG_FILE,
     help="Name of the exordosctl configuration file",
 )
+@click.option(
+    "--port",
+    type=click.IntRange(1, 65535),
+    default=DEFAULT_PORT,
+    show_default=True,
+    help=(
+        "TCP port used by the in-process HTTP server in local mode. "
+        "If the port is already in use, the command aborts with an error."
+    ),
+)
 @click.pass_obj
 def deploy_cmd(
     obj: "ContextObject",
@@ -365,6 +395,7 @@ def deploy_cmd(
     element: str | None,
     exordosctl_cfg_file: str,
     realm: str | None,
+    port: int,
 ) -> None:
     inventory_elements = _load_build_inventory(element_dir)
     if realm:
@@ -404,8 +435,11 @@ def deploy_cmd(
     # host and the realm's Core VM.
     if not repository and _is_local_realm(obj.cfg, realm):
         bind_host = _get_local_host_bind(obj.cfg, realm)
+        _check_port_available(bind_host, port)
 
-        with local_server.serve_directory(element_dir, bind_host) as base_url:
+        with local_server.serve_directory(
+            element_dir, bind_host, port=port
+        ) as base_url:
             url = f"{base_url}{c.ELEMENT_REPO_PATH}/"
             driver_spec = {"kind": "nginx", "url": url}
             repository_spec = repo_utils.ensure_repository(
