@@ -333,29 +333,35 @@ class ReaderEncryptorIO(io.BytesIO):
         )
 
         self._encryptor = self._cipher.encryptor()
+        self._finalized = False
         self._chunk_size = chunk_size_kb << 10
 
     def tell(self) -> int:
         return self._file.tell()
 
     def read(self, size: int = -1) -> bytes:
-        if size == 0:
+        if size == 0 or self._finalized:
             return b""
 
         if size < 0:
-            return (
+            encrypted = (
                 self._encryptor.update(self._file.read()) + self._encryptor.finalize()
             )
+            self._finalized = True
+            return encrypted
 
         data = self._file.read(size)
         if len(data) < size:
-            return self._encryptor.update(data) + self._encryptor.finalize()
+            encrypted = self._encryptor.update(data) + self._encryptor.finalize()
+            self._finalized = True
+            return encrypted
 
         return self._encryptor.update(data)
 
     def seek(self, offset: int, whence: int = 0) -> int:
         if offset == 0 and whence == 0:
             self._encryptor = self._cipher.encryptor()
+            self._finalized = False
 
         return self._file.seek(offset, whence)
 

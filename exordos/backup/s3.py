@@ -15,16 +15,40 @@
 #    under the License.
 from __future__ import annotations
 
+import configparser
 import io
 import os
 import typing as tp
-
-import boto3
 
 from exordos import logger as logger_base
 from exordos import utils
 from exordos.backup import base
 from exordos.backup import qcow
+from exordos.backup import s3_client
+
+
+def _resolve_region(region: str | None) -> str:
+    if region:
+        return region
+
+    environment_region = os.environ.get("AWS_DEFAULT_REGION") or os.environ.get(
+        "AWS_REGION"
+    )
+    if environment_region:
+        return environment_region
+
+    profile = os.environ.get("AWS_PROFILE") or os.environ.get(
+        "AWS_DEFAULT_PROFILE", "default"
+    )
+    section = "default" if profile == "default" else f"profile {profile}"
+    config_path = os.path.expanduser(os.environ.get("AWS_CONFIG_FILE", "~/.aws/config"))
+    config = configparser.ConfigParser()
+    try:
+        config.read(config_path)
+        configured_region = config.get(section, "region", fallback=None)
+    except configparser.Error:
+        configured_region = None
+    return configured_region or "us-east-1"
 
 
 class S3QcowBackuper(qcow.AbstractQcowBackuper):
@@ -37,12 +61,14 @@ class S3QcowBackuper(qcow.AbstractQcowBackuper):
         bucket_name: str,
         snapshot_name: str = "backup_snap",
         logger: logger_base.AbstractLogger | None = None,
+        region: str | None = None,
     ):
         self._access_key = access_key
         self._secret_key = secret_key
         self._host = host
         self._bucket_name = bucket_name
         self._endpoint_url = endpoint_url
+        self._region = _resolve_region(region)
         self._logger = logger or logger_base.ClickLogger()
         self._snapshot_name = snapshot_name
 
@@ -53,17 +79,20 @@ class S3QcowBackuper(qcow.AbstractQcowBackuper):
         encryption: base.EncryptionCreds | None = None,
     ) -> None:
         """Upload a stream to S3."""
-        s3_client = boto3.client(
-            "s3",
+        client = s3_client.S3BackupClient(
             endpoint_url=self._endpoint_url,
-            aws_access_key_id=self._access_key,
-            aws_secret_access_key=self._secret_key,
+            access_key=self._access_key,
+            secret_key=self._secret_key,
+            region=self._region,
         )
 
         if encryption:
             stream = utils.ReaderEncryptorIO(stream, encryption.key, encryption.iv)
             s3_path += self.ENCRYPTED_SUFFIX
-        s3_client.upload_fileobj(stream, self._bucket_name, s3_path)
+
+        stream.seek(0, os.SEEK_END)
+        stream_size = stream.tell()
+        client.upload(stream, self._bucket_name, s3_path, stream_size)
 
     def _upload_file(
         self,

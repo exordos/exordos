@@ -27,7 +27,7 @@ dependencies = [
     "GitPython>=3.1.50,<4.0.0",  # BSD
     "bazooka>=1.0.0,<2.0.0",  # Apache-2.0
     "cryptography>=49.0.0",  # BSD-3
-    "boto3>=1.37.0,<2.0.0",  # Apache-2.0
+    "requests>=2.31.0,<3.0.0",  # Apache-2.0
     "Jinja2>=3.1.5,<4.0.0",  # BSD License (BSD-3-Clause)
     "packaging==26.0",  # Apache-2.0 or BSD
     "simple-term-menu>=1.6.6,<2.0.0",  # MIT License (MIT)

@@ -95,3 +95,51 @@ jobs:
       - name: check ascii
         run: |
           ! grep -rnPq "#.*[^\\x00-\\x7f]" ./exordos
+  MinIO:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build test MinIO image
+        run: docker build -t exordos-test-minio -f etc/tests/minio/Dockerfile .
+      - name: Generate test credentials
+        run: |
+          access_key=$(openssl rand -hex 10)
+          secret_key=$(openssl rand -hex 24)
+          echo "::add-mask::$access_key"
+          echo "::add-mask::$secret_key"
+          printf 'MINIO_ROOT_USER=%s\n' "$access_key" >> "$GITHUB_ENV"
+          printf 'MINIO_ROOT_PASSWORD=%s\n' "$secret_key" >> "$GITHUB_ENV"
+      - name: Start MinIO
+        run: |
+          docker run --detach --name exordos-test-minio \
+            --publish 9000:9000 \
+            --env MINIO_ROOT_USER \
+            --env MINIO_ROOT_PASSWORD \
+            exordos-test-minio
+          for attempt in $(seq 1 30); do
+            if [ "$(docker inspect --format='{{.State.Health.Status}}' exordos-test-minio)" = healthy ]; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs exordos-test-minio
+          exit 1
+      - name: Test S3 upload
+        run: |
+          docker exec exordos-test-minio mkdir /data/backups
+          python -m pip install requests
+          python - <<'PY'
+          import io
+          import os
+
+          from exordos.backup.s3_client import S3BackupClient
+
+          payload = b"exordos MinIO test"
+          client = S3BackupClient(
+              endpoint_url="http://127.0.0.1:9000",
+              access_key=os.environ["MINIO_ROOT_USER"],
+              secret_key=os.environ["MINIO_ROOT_PASSWORD"],
+              region="us-east-1",
+          )
+          client.upload(io.BytesIO(payload), "backups", "test/backup", len(payload))
+          PY
