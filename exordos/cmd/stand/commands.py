@@ -870,7 +870,7 @@ def _update_realm_config(
 )
 @click.option(
     "--ecosystem-endpoint",
-    default="https://console.genesis-core.tech",
+    default=c.ECOSYSTEM_ENDPOINT,
     type=str,
     envvar="ECOSYSTEM_ENDPOINT",
     help="Ecosystem's endpoint to connect to",
