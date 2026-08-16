@@ -19,6 +19,8 @@ import pathlib
 import stat
 from unittest import mock
 
+import rich.console
+
 from exordos.cmd.stand import commands
 
 
@@ -36,3 +38,18 @@ def test_save_admin_password_file_uses_owner_only_permissions(
 
     assert password_path.read_text(encoding="utf-8") == "test-password"
     assert stat.S_IMODE(password_path.stat().st_mode) == 0o600
+
+
+def test_print_bootstrap_summary_includes_core_version_in_realm() -> None:
+    console = rich.console.Console(record=True)
+    with mock.patch("rich.console.Console", return_value=console):
+        commands._print_bootstrap_summary(
+            installation_name="test-realm",
+            core_version="1.2.3",
+            admin_password="test-password",
+            core_ip=None,
+            ssh_public_key_path="~/.ssh/test.pub",
+            ssh_private_key_path=None,
+        )
+
+    assert "1.2.3" in console.export_text()

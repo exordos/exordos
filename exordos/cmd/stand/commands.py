@@ -55,6 +55,7 @@ from exordos.stand import models as stand_models
 
 def _print_bootstrap_summary(
     installation_name: str,
+    core_version: str,
     admin_password: str,
     core_ip: ipaddress.IPv4Address | None,
     ssh_public_key_path: str,
@@ -67,6 +68,7 @@ def _print_bootstrap_summary(
     table.add_column()
 
     table.add_row("Realm", installation_name)
+    table.add_row("Version", core_version)
     table.add_row("Username", "admin")
     table.add_row("Password", admin_password)
 
@@ -1201,6 +1203,7 @@ def bootstrap_cmd(
 
     _print_bootstrap_summary(
         installation_name=name,
+        core_version=inventory_instance.version,
         admin_password=admin_password,
         core_ip=core_ip_result,
         ssh_public_key_path=ssh_public_key_path,
