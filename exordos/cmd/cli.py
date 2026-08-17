@@ -378,6 +378,8 @@ if __name__ == "__main__":
             error_message = f"Error: {e}"
     except (ValueError, FileNotFoundError, exordos_exc.ExordosException) as e:
         error_message = f"Error: {e}"
+    except KeyboardInterrupt:
+        error_message = "Error: Interrupted by user"
     finally:
         if error_message:
             click.secho(error_message, fg="red")
