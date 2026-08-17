@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import pathlib
@@ -36,6 +37,13 @@ from exordos.repo import fs as repo_fs
 
 POLL_INTERVAL = 2.0
 STABLE_CHECKS = 10
+
+
+def get_published() -> str:
+    """Return the current UTC timestamp in ISO format with trailing Z."""
+    return datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%S.%fZ"
+    )
 
 
 def load_repo_driver_from_settings(

@@ -26,6 +26,7 @@ from exordos import constants as c
 from exordos import logger as logger_base
 from exordos.builder import base as builder_base
 from exordos.repo import base
+from exordos.repo.utils import get_published
 
 
 class FSRepoDriver(base.AbstractRepoDriver):
@@ -122,6 +123,8 @@ class FSRepoDriver(base.AbstractRepoDriver):
             spec[category] = [
                 os.path.basename(artifact) for artifact in getattr(element, category)
             ]
+
+        spec["published"] = get_published()
 
         with open(self.elements_inventory_path(element), "w") as f:
             json.dump(spec, f, indent=2)

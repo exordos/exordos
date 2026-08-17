@@ -27,6 +27,7 @@ from exordos import constants as c
 from exordos import logger as logger_base
 from exordos.builder import base as builder_base
 from exordos.repo import base
+from exordos.repo.utils import get_published
 
 
 class NginxRepoDriver(base.AbstractRepoDriver):
@@ -214,6 +215,8 @@ class NginxRepoDriver(base.AbstractRepoDriver):
             spec[category] = [
                 os.path.basename(artifact) for artifact in getattr(element, category)
             ]
+
+        spec["published"] = get_published()
 
         # Upload the inventory file
         response = self._session.put(
