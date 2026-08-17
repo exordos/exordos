@@ -108,8 +108,8 @@ def print_table(
         rprint(table)
 
 
-def show_data(data: dict, output: str = "table") -> None:
+def show_data(data: dict, output: str = "table", msg: tp.Optional[str] = None) -> None:
     table = get_table(*SHOW_FIELDS)
     for key, value in data.items():
         table.add_row(key, str(value))
-    print_table(table, output)
+    print_table(table, output, msg)
