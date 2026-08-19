@@ -23,6 +23,6 @@ def vs_group():
     pass
 
 
-vs_group.add_command(profiles_commands.profiles_group)
+vs_group.add_command(profiles_commands.profiles_group, aliases=["p", "pr"])
 vs_group.add_command(values_commands.values_group)
 vs_group.add_command(vars_commands.vv_group, aliases=["v", "variables", "vars"])
