@@ -39,12 +39,24 @@ from exordos import utils
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
+from exordos.cmd.compute.hypervisors.commands import DEFAULT_AGENT_NAME
+from exordos.cmd.compute.hypervisors.commands import DEFAULT_LOCAL_CONNECTION_URI
+from exordos.cmd.compute.hypervisors.commands import ORCH_API_PORT
+from exordos.cmd.compute.hypervisors.commands import STATUS_API_PORT
+from exordos.cmd.compute.hypervisors.commands import generate_node_private_key_base64
+from exordos.cmd.compute.hypervisors.commands import install_agent_systemd_unit
+from exordos.cmd.compute.hypervisors.commands import install_agent_venv
+from exordos.cmd.compute.hypervisors.commands import local_agent_node_uuid
+from exordos.cmd.compute.hypervisors.commands import reset_agent_meta_file
+from exordos.cmd.compute.hypervisors.commands import resolve_agent_install_target
+from exordos.cmd.compute.hypervisors.commands import write_agent_config
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
 from exordos.common import ssh
 from exordos.common import status as status_lib
 from exordos.common import version as version_lib
+from exordos.common.crypto import write_agent_private_key
 import exordos.constants as c
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
@@ -665,6 +677,30 @@ def _update_realm_config(
     logger.info(f"Realm '{realm_name}' configuration updated in {cfg_path}")
 
 
+def _resolve_hypervisor_placement(
+    pool_agent_placement: str,
+    hyper_connection_uri: str,
+    cidr: ipaddress.IPv4Network,
+) -> tp.Tuple[str, str]:
+    """Resolve the hypervisor's connection URI and driver kind.
+
+    Returns (connection_uri, driver_kind). Kind "libvirt" means the pool
+    agent lives in core and reaches libvirt over the network; kind
+    "exordos_local_hyper" means a dedicated local agent on this host
+    talks to the local libvirt socket directly.
+    """
+    if pool_agent_placement == "local":
+        if hyper_connection_uri:
+            raise click.UsageError(
+                "--hyper-connection-uri is not supported together with "
+                "--pool-agent-placement=local; the local agent always "
+                "talks to the local libvirt socket directly."
+            )
+        return DEFAULT_LOCAL_CONNECTION_URI, "exordos_local_hyper"
+
+    return hyper_connection_uri or f"qemu+tcp://{cidr[1]}/system", "libvirt"
+
+
 @click.command("bootstrap", help="Bootstrap exordos locally")
 @click.option(
     "-i",
@@ -810,14 +846,29 @@ def _update_realm_config(
     show_default=True,
 )
 @click.option(
+    "--pool-agent-placement",
+    type=click.Choice(["core", "local"]),
+    default="core",
+    show_default=True,
+    help=(
+        "Where the pool agent that drives the hypervisor's libvirt runs. "
+        "'core' runs it inside core's own services, reaching libvirt over "
+        "the network (see --hyper-connection-uri). 'local' installs a "
+        "dedicated universal agent on this host that talks to the local "
+        "libvirt socket directly (matching `exordos compute hypervisors "
+        "init`); --hyper-connection-uri is not supported in this mode."
+    ),
+)
+@click.option(
     "--hyper-connection-uri",
     default="",
     type=str,
     help=(
         "Connection URI for the hypervisor, "
         "e.g. 'qemu+tcp://10.0.0.1/system' or "
-        "'qemu+ssh://user@10.0.0.1/system'. If not set, "
-        "the first address of the network(--cidr option) will be used. "
+        "'qemu+ssh://user@10.0.0.1/system'. Only used with "
+        "--pool-agent-placement=core; if not set there, the main "
+        "network's first address is used (qemu+tcp)."
     ),
 )
 @click.option(
@@ -926,6 +977,21 @@ def _update_realm_config(
     default=False,
     help="Do not update the realm configuration in exordosctl.yaml after bootstrap",
 )
+@click.option(
+    "--pool-agent-name",
+    "agent_name",
+    type=str,
+    default=DEFAULT_AGENT_NAME,
+    show_default=True,
+    help=(
+        "Name of the universal agent to run LocalPoolAgentDriver under on "
+        "this host. The default targets the standard agent (merging in "
+        "if this host is also a registered compute node). Use a different "
+        "name to run a separate, dedicated agent instead - required if "
+        "the standard agent here is already configured for a different "
+        "core."
+    ),
+)
 @click.pass_context
 def bootstrap_cmd(
     ctx: click.Context,
@@ -946,6 +1012,7 @@ def bootstrap_cmd(
     repository: tp.Tuple[str, ...],
     admin_password: str | None,
     save_admin_password_file: str | None,
+    pool_agent_placement: str,
     hyper_connection_uri: str,
     hyper_storage_pool: str,
     hyper_machine_prefix: str,
@@ -961,6 +1028,7 @@ def bootstrap_cmd(
     ssh_public_key: tp.Tuple[str, ...],
     elements: tp.Tuple[str, ...],
     no_update_realm: bool,
+    agent_name: str,
 ) -> None:
     if not inventory:
         raise click.UsageError("No inventory specified")
@@ -1099,8 +1167,21 @@ def bootstrap_cmd(
 
     hypervisors = []
 
-    if not hyper_connection_uri:
-        hyper_connection_uri = f"qemu+tcp://{cidr[1]}/system"
+    hyper_connection_uri, hyper_kind = _resolve_hypervisor_placement(
+        pool_agent_placement, hyper_connection_uri, cidr
+    )
+
+    hyper_node = None
+    hyper_private_key = None
+    if hyper_kind == "exordos_local_hyper":
+        # This machine is the hypervisor, reachable over the local
+        # libvirt socket by the local universal agent (LocalPoolAgentDriver)
+        # only, matched by node uuid.
+        hyper_node = local_agent_node_uuid()
+        # Generated here (rather than left for the core to generate) so
+        # the same key can be written to the agent below, right after
+        # the core seeds its matching NodeEncryptionKey at bootstrap.
+        hyper_private_key = generate_node_private_key_base64()
 
     # Single hypervisor at bootstrap time is supported at the moment
     hypervisor = stand_models.Hypervisor(
@@ -1108,6 +1189,9 @@ def bootstrap_cmd(
         network_type="bridge" if bridge else "network",
         connection_uri=hyper_connection_uri,
         storage_pool=hyper_storage_pool,
+        kind=hyper_kind,
+        node=hyper_node,
+        private_key=hyper_private_key,
         machine_prefix=hyper_machine_prefix,
         iface_rom_file=hyper_iface_rom_file,
     )
@@ -1154,8 +1238,7 @@ def bootstrap_cmd(
             with open(public_key_path, encoding="utf-8") as f:
                 ssh_public_key_content = f.read().strip()
 
-    sudo_check = ["sudo", "-n", "true"]
-    if subprocess.call(sudo_check, stderr=subprocess.DEVNULL) != 0:
+    if subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0:
         click.secho("Sudo privileges are required to proceed.", fg="yellow")
         if subprocess.call(["sudo", "-v"]) != 0:
             raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
@@ -1187,6 +1270,34 @@ def bootstrap_cmd(
             ssh_public_key=ssh_public_key_content,
             elements=list(elements) if elements else None,
         )
+
+    if hyper_kind == "exordos_local_hyper" and not no_start:
+        agent_ip = core_ip_result if core_ip_result is not None else core_ip
+        if agent_ip is not None:
+            with status_lib.status_done("Setting up the local universal agent..."):
+                orch_endpoint = f"http://{agent_ip}:{ORCH_API_PORT}"
+                status_endpoint = f"http://{agent_ip}:{STATUS_API_PORT}"
+                agent_target = resolve_agent_install_target(
+                    agent_name=agent_name,
+                    orch_endpoint=orch_endpoint,
+                    status_endpoint=status_endpoint,
+                )
+                install_agent_venv(agent_target.venv_path)
+                reset_agent_meta_file(agent_target.meta_file)
+                private_key_path = write_agent_config(
+                    orch_endpoint=orch_endpoint,
+                    status_endpoint=status_endpoint,
+                    config_path=agent_target.config_path,
+                    meta_file=agent_target.meta_file,
+                    default_private_key_path=agent_target.default_private_key_path,
+                )
+                write_agent_private_key(hyper_private_key, key_path=private_key_path)
+                install_agent_systemd_unit(
+                    exec_path=agent_target.exec_path,
+                    config_path=agent_target.config_path,
+                    unit_path=agent_target.unit_path,
+                    unit_name=agent_target.unit_name,
+                )
 
     realm_updated = False
     if not no_update_realm:

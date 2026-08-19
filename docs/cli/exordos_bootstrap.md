@@ -137,12 +137,19 @@ Bootstrap exordos locally
 
   If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.
 
+* `pool_agent_placement`:
+    * Type: choice
+    * Default: `core`
+    * Usage: `--pool-agent-placement`
+
+  Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' installs a dedicated universal agent on this host that talks to the local libvirt socket directly (matching `exordos compute hypervisors init`); --hyper-connection-uri is not supported in this mode.
+
 * `hyper_connection_uri`:
     * Type: text
     * Default: ``
     * Usage: `--hyper-connection-uri`
 
-  Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. If not set, the first address of the network(--cidr option) will be used.
+  Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. Only used with --pool-agent-placement=core; if not set there, the main network's first address is used (qemu+tcp).
 
 * `hyper_storage_pool`:
     * Type: text
@@ -242,6 +249,13 @@ Bootstrap exordos locally
 
   Do not update the realm configuration in exordosctl.yaml after bootstrap
 
+* `agent_name`:
+    * Type: text
+    * Default: `universal_agent`
+    * Usage: `--pool-agent-name`
+
+  Name of the universal agent to run LocalPoolAgentDriver under on this host. The default targets the standard agent (merging in if this host is also a registered compute node). Use a different name to run a separate, dedicated agent instead - required if the standard agent here is already configured for a different core.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -277,7 +291,9 @@ Bootstrap exordos locally
 │ --repository                -r  TEXT                                 Default element repository (can be specified multiple times) [default: https://repo.exordos.com/exordos-elements/]                                                                                                                 │
 │ --admin-password                TEXT                                 A password for the admin user in. If not provided, the password will be generated.                                                                                                                                                 │
 │ --save-admin-password-file      TEXT                                 If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.                                                                                                                         │
-│ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. If not set, the first address of the network(--cidr option) will be used.                                               │
+│ --pool-agent-placement          [core|local]                         Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' installs a dedicated universal agent on this    │
+│                                                                      host that talks to the local libvirt socket directly (matching `exordos compute hypervisors init`); --hyper-connection-uri is not supported in this mode. [default: core]                                                          │
+│ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. Only used with --pool-agent-placement=core; if not set there, the main network's first address is used (qemu+tcp).      │
 │ --hyper-storage-pool            TEXT                                 Storage pool for the hypervisor. [default: default]                                                                                                                                                                                │
 │ --hyper-machine-prefix          TEXT                                 A prefix for new VMs. [default: vm-]                                                                                                                                                                                               │
 │ --hyper-iface-rom-file          TEXT                                 A path to the custom ROM file of a network interface. [default: /usr/share/qemu/1af41041.rom]                                                                                                                                      │

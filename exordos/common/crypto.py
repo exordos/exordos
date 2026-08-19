@@ -97,6 +97,13 @@ def write_root_owned_file(
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(content)
+        # `install -m` sets the destination's mode atomically as it
+        # creates it - unlike `cp` followed by a separate `chmod`, which
+        # leaves a brief window where a freshly-created file (e.g. a
+        # private key) is readable at whatever mode `cp`/root's umask
+        # happens to produce. Default to a restrictive 600 rather than
+        # whatever that would be when the caller doesn't ask for a
+        # specific mode.
         run_command(["sudo", "install", "-m", mode or "600", tmp_path, dest_path])
     finally:
         os.remove(tmp_path)
