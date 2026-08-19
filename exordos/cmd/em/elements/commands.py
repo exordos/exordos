@@ -243,7 +243,19 @@ def _select_element_by_name(
 def _select_current_element_by_name(
     client: "CollectionBaseClient", name: str
 ) -> dict[str, tp.Any]:
-    """Select current installed element by name (ACTIVE or IN_PROGRESS status).
+    """Select current installed element by name.
+
+    The canonical signal that an element is the "current" one is
+    ``installation_state == "INSTALLED"``. This is what the server uses to
+    decide whether ``uninstall``/``upgrade`` are allowed, so selecting by it
+    keeps the CLI in sync with the server even during an in-flight update,
+    where the freshly-installed element is ``INSTALLED`` but its ``status`` is
+    still ``NEW``/``IN_PROGRESS`` and the stale element being replaced is
+    ``UNINSTALLED`` but still ``ACTIVE``.
+
+    Falls back to ``status in (ACTIVE, IN_PROGRESS)`` when no element reports
+    ``installation_state`` (e.g. an older server that does not expose the
+    field), preserving the previous behavior.
 
     Args:
         client: API client for making requests.
@@ -253,17 +265,26 @@ def _select_current_element_by_name(
         Dictionary representing the current element.
 
     Raises:
-        click.ClickException: If no active or in-progress elements found.
+        click.ClickException: If no installed element is found, or if several
+            elements are installed at once (ambiguous, user must give a UUID).
     """
     elements = base_client.list_entities(
         client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
     )
 
+    installed = [e for e in elements if e.get("installation_state") == "INSTALLED"]
+    if len(installed) > 1:
+        raise click.ClickException(
+            f"Multiple installed elements found with name '{name}'. "
+            "Please specify the UUID of the element to update."
+        )
+    if installed:
+        return installed[0]
+
+    # Fallback for servers that do not expose installation_state: pick by
+    # status, matching the historical behavior.
     active_elements = [
-        e
-        for e in elements
-        if e.get("status") in ("ACTIVE", "IN_PROGRESS")
-        or e.get("installation_state") == "INSTALLED"
+        e for e in elements if e.get("status") in ("ACTIVE", "IN_PROGRESS")
     ]
 
     if not active_elements:
