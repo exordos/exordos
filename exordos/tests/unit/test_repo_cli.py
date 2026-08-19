@@ -346,3 +346,74 @@ class TestSelectCurrentElementByName:
         )
         with pytest.raises(click.ClickException, match="Multiple installed"):
             em_elements._select_current_element_by_name(client, "foo")
+
+    def test_prefers_installed_over_active_status(self) -> None:
+        # Reproduces #589 Window 1: right after `ee update`, the freshly
+        # installed element is INSTALLED but status=NEW, while the stale
+        # element being replaced is UNINSTALLED but still status=ACTIVE.
+        client = self._client(
+            [
+                {
+                    "name": "foo",
+                    "version": "0.0.12",
+                    "uuid": "u_old",
+                    "status": "ACTIVE",
+                    "installation_state": "UNINSTALLED",
+                },
+                {
+                    "name": "foo",
+                    "version": "0.0.11",
+                    "uuid": "u_new",
+                    "status": "NEW",
+                    "installation_state": "INSTALLED",
+                },
+            ]
+        )
+        selected = em_elements._select_current_element_by_name(client, "foo")
+        assert selected["uuid"] == "u_new"
+
+    def test_prefers_installed_in_progress_over_active(self) -> None:
+        # Reproduces #589 Window 2: new element is now IN_PROGRESS, old one
+        # is still ACTIVE but UNINSTALLED.
+        client = self._client(
+            [
+                {
+                    "name": "foo",
+                    "version": "0.0.12",
+                    "uuid": "u_old",
+                    "status": "ACTIVE",
+                    "installation_state": "UNINSTALLED",
+                },
+                {
+                    "name": "foo",
+                    "version": "0.0.11",
+                    "uuid": "u_new",
+                    "status": "IN_PROGRESS",
+                    "installation_state": "INSTALLED",
+                },
+            ]
+        )
+        selected = em_elements._select_current_element_by_name(client, "foo")
+        assert selected["uuid"] == "u_new"
+
+    def test_multiple_installed_by_state_raises(self) -> None:
+        client = self._client(
+            [
+                {
+                    "name": "foo",
+                    "version": "1.0.0",
+                    "uuid": "u1",
+                    "status": "ACTIVE",
+                    "installation_state": "INSTALLED",
+                },
+                {
+                    "name": "foo",
+                    "version": "2.0.0",
+                    "uuid": "u2",
+                    "status": "ACTIVE",
+                    "installation_state": "INSTALLED",
+                },
+            ]
+        )
+        with pytest.raises(click.ClickException, match="Multiple installed"):
+            em_elements._select_current_element_by_name(client, "foo")
