@@ -21,7 +21,9 @@ import getpass
 import io
 import os
 import secrets
+import socket
 import typing as tp
+from urllib.parse import urlparse
 import uuid as sys_uuid
 
 import rich_click as click
@@ -453,6 +455,27 @@ class AgentInstallTarget(tp.NamedTuple):
     unit_name: str
 
 
+def _endpoint_identity(url: str) -> tuple[str, int | None]:
+    """Resolve a URL's host to an IP, paired with its port.
+
+    Lets an endpoint given as a DNS name (the exordos-base image's own
+    convention, e.g. core.local.genesis-core.tech) and one given as a
+    literal IP compare equal when they're actually the same core,
+    instead of comparing the raw strings. Falls back to the raw
+    hostname if resolution fails - erring towards "different core"
+    (the safer default) rather than silently treating an unresolvable
+    host as a match.
+    """
+    parsed = urlparse(url)
+    host = parsed.hostname or ""
+    if host:
+        try:
+            host = socket.gethostbyname(host)
+        except OSError:
+            pass
+    return host, parsed.port
+
+
 def resolve_agent_install_target(
     agent_name: str, orch_endpoint: str, status_endpoint: str
 ) -> AgentInstallTarget:
@@ -476,7 +499,9 @@ def resolve_agent_install_target(
         existing_status = _config_value(
             existing, "universal_agent", "status_endpoint", ""
         )
-        if existing_orch != orch_endpoint or existing_status != status_endpoint:
+        if _endpoint_identity(existing_orch) != _endpoint_identity(
+            orch_endpoint
+        ) or _endpoint_identity(existing_status) != _endpoint_identity(status_endpoint):
             raise click.ClickException(
                 f"Agent '{agent_name}' ({config_path}) is already configured "
                 f"for a different core (orch_endpoint={existing_orch!r}, "

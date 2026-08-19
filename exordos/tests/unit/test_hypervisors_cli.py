@@ -412,6 +412,38 @@ class TestAgentNamingHelpers:
         )
 
 
+class TestEndpointIdentity:
+    """Tests for _endpoint_identity: resolving a URL's host to an IP so
+    a DNS name and the literal IP it resolves to compare equal.
+    """
+
+    def test_resolves_hostname_to_ip(self) -> None:
+        with patch.object(
+            hv_commands.socket, "gethostbyname", return_value="10.100.0.2"
+        ):
+            assert hv_commands._endpoint_identity(
+                "http://core.local.genesis-core.tech:11011"
+            ) == ("10.100.0.2", 11011)
+
+    def test_falls_back_to_raw_hostname_when_resolution_fails(self) -> None:
+        with patch.object(hv_commands.socket, "gethostbyname", side_effect=OSError):
+            assert hv_commands._endpoint_identity("http://unresolvable:11011") == (
+                "unresolvable",
+                11011,
+            )
+
+    def test_empty_host_is_not_resolved(self) -> None:
+        # socket.gethostbyname("") resolves to "0.0.0.0" instead of
+        # raising - resolving it would make two differently-broken
+        # (hostless) endpoints compare equal, defeating the "erring
+        # towards different core" default.
+        with patch.object(hv_commands.socket, "gethostbyname") as gethostbyname_mock:
+            identity = hv_commands._endpoint_identity("http:///no-host-here")
+
+        gethostbyname_mock.assert_not_called()
+        assert identity == ("", None)
+
+
 class TestResolveAgentInstallTarget:
     """Tests for resolve_agent_install_target: fresh/matching vs a
     foreign agent already configured for a different core.
@@ -446,6 +478,34 @@ class TestResolveAgentInstallTarget:
 
         assert target.config_path == str(config_path)
 
+    def test_dns_name_and_literal_ip_for_the_same_core_are_accepted(
+        self, tmp_path
+    ) -> None:
+        """The exordos-base image's own agent config points at a DNS
+        name (e.g. core.local.genesis-core.tech); this code computes a
+        literal IP from --endpoint. Both must be recognized as the same
+        core when the name resolves to that IP, not rejected as a
+        string mismatch."""
+        config_path = tmp_path / "exordos_universal_agent.conf"
+        config_path.write_text(
+            "[universal_agent]\n"
+            "orch_endpoint = http://core.local.genesis-core.tech:11011\n"
+            "status_endpoint = http://core.local.genesis-core.tech:11012\n"
+        )
+        with (
+            patch.object(hv_commands, "AGENT_CONFIG_DIR", str(tmp_path)),
+            patch.object(
+                hv_commands.socket, "gethostbyname", return_value="10.100.0.2"
+            ),
+        ):
+            target = hv_commands.resolve_agent_install_target(
+                agent_name=hv_commands.DEFAULT_AGENT_NAME,
+                orch_endpoint="http://10.100.0.2:11011",
+                status_endpoint="http://10.100.0.2:11012",
+            )
+
+        assert target.config_path == str(config_path)
+
     def test_existing_config_for_a_different_core_raises(self, tmp_path) -> None:
         """A machine that's also a compute node of some other, unrelated
         exordos deployment must not have its agent silently
@@ -453,11 +513,12 @@ class TestResolveAgentInstallTarget:
         config_path = tmp_path / "exordos_universal_agent.conf"
         config_path.write_text(
             "[universal_agent]\n"
-            "orch_endpoint = http://10.30.0.2:11011\n"
-            "status_endpoint = http://10.30.0.2:11012\n"
+            "orch_endpoint = http://core.local.genesis-core.tech:11011\n"
+            "status_endpoint = http://core.local.genesis-core.tech:11012\n"
         )
         with (
             patch.object(hv_commands, "AGENT_CONFIG_DIR", str(tmp_path)),
+            patch.object(hv_commands.socket, "gethostbyname", side_effect=OSError),
             pytest.raises(click.ClickException, match="different core"),
         ):
             hv_commands.resolve_agent_install_target(
