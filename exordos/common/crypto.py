@@ -21,8 +21,6 @@ import os
 import secrets
 import tempfile
 
-from cryptography.hazmat.primitives.ciphers import aead
-
 from exordos.common.run import run_command
 
 KEY_SIZE = 32
@@ -63,6 +61,8 @@ def encrypt_chacha20_poly1305(
 ) -> bytes:
     _validate_key_and_nonce(key, nonce)
 
+    from cryptography.hazmat.primitives.ciphers import aead
+
     cipher = aead.ChaCha20Poly1305(key)
     return cipher.encrypt(nonce, plaintext, associated_data)
 
@@ -74,6 +74,8 @@ def decrypt_chacha20_poly1305(
     associated_data: bytes | None = None,
 ) -> bytes:
     _validate_key_and_nonce(key, nonce)
+
+    from cryptography.hazmat.primitives.ciphers import aead
 
     cipher = aead.ChaCha20Poly1305(key)
     return cipher.decrypt(nonce, ciphertext, associated_data)

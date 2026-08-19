@@ -18,8 +18,6 @@ from __future__ import annotations
 from collections.abc import Callable
 import time
 
-import questionary
-from rich.live import Live
 import rich_click as click
 
 from exordos import constants as c
@@ -142,6 +140,8 @@ def create_entity_group(
             url = entity_collection.format(**kwargs)
             url = base_client.add_fields_to_url(url, fields)
             if watch:
+                from rich.live import Live
+
                 with Live(refresh_per_second=4) as live:
                     while True:
                         entities = base_client.list_entities(
@@ -226,6 +226,8 @@ def create_entity_group(
             y: bool,
             **kwargs,
         ) -> None:
+            import questionary
+
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             for entity_uuid in uuid:
                 if (
@@ -248,6 +250,8 @@ def create_entity_group(
         @add_dynamic_parents(parents)
         @click.pass_context
         def clear_cmd(ctx: click.Context, y: bool, **kwargs) -> None:
+            import questionary
+
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             entities = base_client.list_entities(
                 client, entity_collection.format(**kwargs)

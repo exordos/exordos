@@ -19,7 +19,6 @@ import readline
 import sys
 
 from rich import console as rich_console
-from rich import markdown as rich_markdown
 from rich import panel as rich_panel
 from rich import text as rich_text
 import rich.align
@@ -51,6 +50,8 @@ def markdown_message(
     length_ratio: float = 0.5,
 ) -> None:
     """Render Markdown text for wizard intro/outro style messages."""
+    from rich import markdown as rich_markdown
+
     markdown = rich_markdown.Markdown(text, style=text_color)
     console = get_console()
     content_width = max(20, int(console.size.width * length_ratio))
@@ -159,6 +160,8 @@ def framed_prompt(
         # Render Markdown with a constrained width so that the right border is
         # always preserved. Then wrap each rendered line with frame borders.
         content_width = max(0, width - 6)
+        from rich import markdown as rich_markdown
+
         md = rich_markdown.Markdown(description)
         options = console.options.update(width=content_width)
         rendered = console.render_lines(md, options)

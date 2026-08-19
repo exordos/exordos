@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import uuid as sys_uuid
 
-import questionary
 import rich_click as click
 
 from exordos import constants as c
@@ -139,6 +138,8 @@ def add_cmd(
     otp_secret: str | None,
     otp_enabled: bool,
 ) -> None:
+    import questionary
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -202,6 +203,8 @@ def reset_password_cmd(
     code: str | None,
     new_password: str | None,
 ) -> None:
+    import questionary
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     new_password = (
@@ -250,6 +253,8 @@ def change_password_cmd(
     old_password: str,
     new_password: str | None,
 ) -> None:
+    import questionary
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     data = {

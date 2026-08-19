@@ -24,7 +24,6 @@ import time
 import typing as tp
 import uuid as sys_uuid
 
-import rich.status as rich_status
 import rich_click as click
 import yaml
 
@@ -144,6 +143,8 @@ def do_push(
     Shared by `push_cmd` and `deploy_cmd` so both go through the exact same
     push logic.
     """
+    import rich.status as rich_status
+
     # Every build creates a local repo with built elements into it.
     build_repo = repo_fs.FSRepoDriver(element_dir)
     build_repo_dir = pathlib.Path(build_repo.elements_path)

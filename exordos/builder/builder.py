@@ -28,7 +28,6 @@ import tempfile
 import typing as tp
 import uuid as sys_uuid
 
-import jinja2
 import rich_click as click
 import yaml
 
@@ -353,6 +352,8 @@ class SimpleBuilder:
         if str(element.manifest).endswith(jinja2_extensions):
             # Render Jinja2 manifest
             with open(orig_manifest_path) as f:
+                import jinja2
+
                 template = jinja2.Template(f.read())
             rendered_manifest = template.render(
                 manifests=[element.manifest.name],

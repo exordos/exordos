@@ -22,7 +22,6 @@ from rich import print_json as rprint_json
 from rich.console import Console
 from rich.table import Table
 import rich_click as click
-import ruamel.yaml
 
 SHOW_FIELDS = [
     "Field",
@@ -31,6 +30,8 @@ SHOW_FIELDS = [
 
 
 def dump_yaml_ruamel_to_str(data: tp.Union[dict, list]) -> str:
+    import ruamel.yaml
+
     loader = ruamel.yaml.YAML()
     loader.indent(sequence=4, offset=2)
     string_stream = StringIO()
