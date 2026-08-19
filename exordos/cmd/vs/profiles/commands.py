@@ -20,9 +20,10 @@ import uuid as sys_uuid
 import rich_click as click
 
 from exordos import constants as c
-from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.common.table import fill_table
+from exordos.common.table import print_table
 from exordos.common.table import show_data
 
 ENTITY = "profile"
@@ -35,9 +36,65 @@ FIELDS_MAP = {
     "Active": "active",
     "Status": "status",
 }
+VARIABLE_FIELDS_MAP = {
+    "UUID": "uuid",
+    "Name": "name",
+    "Value": "value",
+    "Status": "status",
+}
 
 
 profiles_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+
+
+@profiles_group.command(
+    "info", help="Show profile and variables which take their value from it"
+)
+@click.argument(
+    "uuid",
+    type=str,
+    required=True,
+)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+@click.pass_context
+def info_cmd(
+    ctx: click.Context,
+    uuid: str,
+    output: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    profile = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
+    show_data(profile, output, "Profile")
+
+    # Find variables with the profile setter bound to this profile
+    variables = []
+    for variable in base_client.list_entities(client, c.VARIABLE_COLLECTION):
+        setter = variable.get("setter") or {}
+        if setter.get("kind") != "profile":
+            continue
+        for item in setter.get("profiles", []):
+            if str(item["profile"]) == str(profile["uuid"]):
+                variables.append(
+                    {
+                        "uuid": variable["uuid"],
+                        "name": variable["name"],
+                        "value": item["value"],
+                        "status": variable.get("status", ""),
+                    }
+                )
+                break
+
+    print_table(
+        fill_table(variables, VARIABLE_FIELDS_MAP),
+        output,
+        "Variables in this profile",
+    )
 
 
 @profiles_group.command("activate", help="Activate profile")
@@ -51,13 +108,10 @@ def activate_profile_cmd(
     uuid: sys_uuid.UUID | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    if not utils.is_valid_uuid(uuid):
-        entities = base_client.list_entities(client, ENTITY_COLLECTION, name=uuid)
-        if entities:
-            uuid = entities[0]["uuid"]
-        else:
-            raise click.ClickException(f"Profile with name {uuid} not found")
+    data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
+    uuid = data["uuid"]
     base_client.action_entity(client, ENTITY_COLLECTION, "activate", uuid)
+    click.echo(f"Profile with name {data['name']} was activated")
 
 
 @click.command("add", help="Add a new profile to the Exordos installation")
