@@ -18,8 +18,6 @@ from __future__ import annotations
 import os
 import pathlib
 
-import jinja2
-
 from exordos.wizards import constants as c
 from exordos.wizards.engines import base
 from exordos.wizards.engines.templaters import settings
@@ -69,6 +67,8 @@ class JinjaTemplateEngine(base.AbstractEngine):
         template_files: list[str],
         all_settings: dict,
     ) -> list[str]:
+        import jinja2
+
         target_files = [
             jinja2.Template(template_file).render(**all_settings)
             for template_file in template_files

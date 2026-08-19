@@ -24,7 +24,6 @@ import typing as tp
 import uuid as sys_uuid
 
 from packaging import version as packaging_version
-import questionary
 from rich.prompt import Confirm
 from rich.text import Text
 import rich_click as click
@@ -313,6 +312,8 @@ def install_cmd(
     uuid_or_name_or_path: str | None,
 ) -> None:
     """Install element from repository API by UUID, name, or manifest path"""
+    import questionary
+
     if not uuid_or_name_or_path:
         all_elements = base_client.list_entities(
             base_client.get_user_api_client(ctx.obj.auth_data),
@@ -414,6 +415,8 @@ def update_cmd(
     uuid_or_name_or_path: str | None,
 ) -> None:
     """Update element from repository API by UUID, name, or manifest path"""
+    import questionary
+
     if not uuid_or_name_or_path:
         all_elements = base_client.list_entities(
             base_client.get_user_api_client(ctx.obj.auth_data),
@@ -525,6 +528,8 @@ def update_cmd(
 @click.pass_context
 def uninstall_cmd(ctx: click.Context, uuid_or_name: str, y: bool) -> None:
     """Uninstall element by UUID or name"""
+    import questionary
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if not (y or questionary.confirm(f"Delete {ENTITY} {uuid_or_name}?").ask()):
@@ -642,6 +647,8 @@ def define(
     resource_name: str,
 ) -> None:
     # Get Openapi schema
+    import questionary
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     schema = client.filter(f"{c.MANIFEST_COLLECTION}schema/")
 
@@ -832,6 +839,8 @@ def ssh_cmd(
     y: bool,
     name: str,
 ) -> None:
+    import questionary
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     element_data = base_client.get_entity(client, c.ELEMENT_COLLECTION, name)

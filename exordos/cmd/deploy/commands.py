@@ -23,7 +23,6 @@ import socket
 import typing as tp
 import uuid as sys_uuid
 
-import questionary
 import rich_click as click
 
 from exordos import constants as c
@@ -397,6 +396,8 @@ def deploy_cmd(
     realm: str | None,
     port: int,
 ) -> None:
+    import questionary
+
     inventory_elements = _load_build_inventory(element_dir)
     if realm:
         if realm not in (obj.cfg.get("realms") or {}):

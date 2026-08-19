@@ -21,9 +21,6 @@ import pathlib
 import shutil
 import typing as tp
 
-import bazooka
-import git
-
 from exordos.builder import base
 
 
@@ -197,6 +194,8 @@ class HttpDependency(base.AbstractDependency):
         filename = os.path.basename(self._endpoint)
         output_path = os.path.join(output_dir, filename)
 
+        import bazooka
+
         with bazooka.get(self._endpoint, stream=True) as r:
             r.raise_for_status()
             with open(output_path, "wb") as f:
@@ -248,6 +247,8 @@ class GitDependency(base.AbstractDependency):
         if repo_dir.endswith(".git"):
             repo_dir = repo_dir[:-4]
         repo_dir = os.path.join(output_dir, repo_dir)
+
+        import git
 
         if self._branch is not None:
             git.Repo.clone_from(self._repo_url, repo_dir, branch=self._branch)

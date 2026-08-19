@@ -29,28 +29,49 @@ import typing as tp
 import urllib.parse
 import uuid
 
-from cryptography.hazmat import backends as crypto_back
-from cryptography.hazmat.primitives import ciphers
-from cryptography.hazmat.primitives.ciphers import algorithms
-from cryptography.hazmat.primitives.ciphers import modes as cipher_models
-import git
 import rich_click as click
-import ruamel.yaml
 
 from exordos.common.version import get_project_version
 import exordos.constants as c
 
-yaml = ruamel.yaml.YAML()
+if tp.TYPE_CHECKING:
+    import git
+
+_yaml = None
+
+
+def _get_yaml():
+    """Return the shared ruamel YAML instance, importing it on first use."""
+    global _yaml
+    if _yaml is None:
+        import ruamel.yaml
+
+        _yaml = ruamel.yaml.YAML()
+    return _yaml
+
+
+def _aes_cfb_cipher(key: bytes, iv: bytes):
+    """Build an AES-CFB cipher, importing cryptography on first use."""
+    from cryptography.hazmat import backends as crypto_back
+    from cryptography.hazmat.primitives import ciphers
+    from cryptography.hazmat.primitives.ciphers import algorithms
+    from cryptography.hazmat.primitives.ciphers import modes as cipher_models
+
+    return ciphers.Cipher(
+        algorithms.AES(key),
+        cipher_models.CFB(iv),
+        backend=crypto_back.default_backend(),
+    )
 
 
 def load_yaml(file_path: str) -> tp.Any:
     """Load YAML file."""
     with open(file_path, "r") as f:
-        return yaml.load(f)
+        return _get_yaml().load(f)
 
 
 def dump_yaml(data, tf) -> tp.Any:
-    yaml.dump(data, tf)
+    _get_yaml().dump(data, tf)
 
 
 def load_from_entry_point(group: str, name: str) -> tp.Any:
@@ -137,7 +158,9 @@ def installation_name_from_bootstrap(bootstrap_name: str) -> str:
     return bootstrap_name.replace("-bootstrap", "")
 
 
-def get_repo(path: str) -> git.Repo:
+def get_repo(path: str) -> "git.Repo":
+    import git
+
     repo = git.Repo(path)
     return repo
 
@@ -239,11 +262,7 @@ def encrypt_file(
         raise ValueError("Key and IV must be 16 bytes long")
 
     # Create a cipher object
-    cipher = ciphers.Cipher(
-        algorithms.AES(key),
-        cipher_models.CFB(iv),
-        backend=crypto_back.default_backend(),
-    )
+    cipher = _aes_cfb_cipher(key, iv)
     chunk_size = chunk_size_kb << 10
     encrypted_path = path + extension
 
@@ -279,11 +298,7 @@ def decrypt_file(
         raise ValueError("Key and IV must be 16 bytes long")
 
     # Create a cipher object
-    cipher = ciphers.Cipher(
-        algorithms.AES(key),
-        cipher_models.CFB(iv),
-        backend=crypto_back.default_backend(),
-    )
+    cipher = _aes_cfb_cipher(key, iv)
     chunk_size = chunk_size_kb << 10
     plain_path = path[: -len(extension)] if path.endswith(extension) else path
     tmp_path = plain_path + ".tmp"
@@ -326,11 +341,7 @@ class ReaderEncryptorIO(io.BytesIO):
             raise ValueError("Key and IV must be 16 bytes long")
 
         self._file = file
-        self._cipher = ciphers.Cipher(
-            algorithms.AES(key),
-            cipher_models.CFB(iv),
-            backend=crypto_back.default_backend(),
-        )
+        self._cipher = _aes_cfb_cipher(key, iv)
 
         self._encryptor = self._cipher.encryptor()
         self._finalized = False

@@ -20,7 +20,6 @@ import uuid as sys_uuid
 
 import requests
 from rich.console import Console
-from rich.markdown import Markdown
 from rich.prompt import Confirm
 from rich.text import Text
 import rich_click as click
@@ -330,6 +329,8 @@ Use `exordos --help` to see all available commands.
 @click.command("introduction", help="Display introduction guide")
 def introduction() -> None:
     console = Console()
+    from rich.markdown import Markdown
+
     md = Markdown(INTRODUCTION_TEXT)
     console.print(md)
 

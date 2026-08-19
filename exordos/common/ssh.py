@@ -21,9 +21,6 @@ import tempfile
 import time
 import typing as tp
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
 import rich_click as click
 
 from exordos.clients import base_client
@@ -78,6 +75,10 @@ def generate_keys(
     keys_exist = os.path.exists(private_key_path) and os.path.exists(public_key_path)
 
     if not keys_exist:
+        from cryptography.hazmat.backends import default_backend
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+
         # Generate new keys
         private_key = rsa.generate_private_key(
             public_exponent=65537, key_size=2048, backend=default_backend()

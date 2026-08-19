@@ -18,7 +18,6 @@ import os
 import re
 import time
 
-import git
 from packaging import version as packaging_version
 
 import exordos.constants as c
@@ -43,6 +42,8 @@ def get_project_version(
         raise ValueError(f"Path {path} is not a directory")
 
     # Open the git repo
+    import git
+
     repo = git.Repo(path)
 
     # If a tag is set, return the highest semver tag on this commit

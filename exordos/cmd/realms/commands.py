@@ -23,7 +23,6 @@ import subprocess
 from urllib.parse import urljoin
 import uuid as sys_uuid
 
-import questionary
 import requests
 import rich_click as click
 
@@ -287,6 +286,8 @@ def add_cmd(
     core_version: str | None,
     ssh_public_key: str | None,
 ) -> None:
+    import questionary
+
     ecosystem_client = get_ecosystem_client(ctx)
     if uuid is None:
         uuid = sys_uuid.uuid4()
