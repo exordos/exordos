@@ -777,6 +777,10 @@ def local_agent_node_uuid(
     try:
         with open(path) as f:
             return f.read().strip()
+    except PermissionError:
+        # product_uuid is typically root-only readable; this command is
+        # expected to run as a regular sudo-capable user, not as root.
+        return run_command(["sudo", "cat", path]).stdout.strip()
     except FileNotFoundError:
         raise click.ClickException(
             f"Unable to determine this machine's node uuid: neither "

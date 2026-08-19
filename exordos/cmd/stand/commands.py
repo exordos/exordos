@@ -1165,6 +1165,11 @@ def bootstrap_cmd(
         managed_network=False if boot_bridge else True,
     )
 
+    if subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0:
+        click.secho("Sudo privileges are required to proceed.", fg="yellow")
+        if subprocess.call(["sudo", "-v"]) != 0:
+            raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
+
     hypervisors = []
 
     hyper_connection_uri, hyper_kind = _resolve_hypervisor_placement(
@@ -1237,11 +1242,6 @@ def bootstrap_cmd(
             ssh_public_key_path = public_key_path
             with open(public_key_path, encoding="utf-8") as f:
                 ssh_public_key_content = f.read().strip()
-
-    if subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0:
-        click.secho("Sudo privileges are required to proceed.", fg="yellow")
-        if subprocess.call(["sudo", "-v"]) != 0:
-            raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
 
     with status_lib.status_done(f"Launching Exordos installation '{name}'... "):
         core_ip_result = _bootstrap_core(
