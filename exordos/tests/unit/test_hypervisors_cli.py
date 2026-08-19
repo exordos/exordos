@@ -203,7 +203,7 @@ class TestAgentSetup:
 
         write_call = write_mock.call_args[0]
         assert write_call[1] == unit_path
-        assert write_mock.call_args.kwargs == {}
+        assert write_mock.call_args.kwargs == {"mode": "644"}
         assert run_mock.call_args_list == [
             mock_call(["sudo", "systemctl", "daemon-reload"]),
             mock_call(
@@ -237,7 +237,7 @@ class TestAgentSetup:
 
         write_call = write_mock.call_args[0]
         assert write_call[1] == str(unit_path)
-        assert write_mock.call_args.kwargs == {}
+        assert write_mock.call_args.kwargs == {"mode": "644"}
         assert run_mock.call_args_list == [
             mock_call(["sudo", "systemctl", "daemon-reload"]),
             mock_call(

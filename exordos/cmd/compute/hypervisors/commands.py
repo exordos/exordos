@@ -560,7 +560,13 @@ def write_agent_config(
         )
         content = _merge_local_pool_into_config(existing, meta_file)
 
-    write_root_owned_file(content, config_path)
+    # Explicit mode, not left to `sudo cp`'s default: a brand-new
+    # destination inherits the source tempfile's mode (mkstemp -> 0600,
+    # root-only - unreadable by this non-root process on the next run),
+    # while an already-existing one keeps its own mode unchanged either
+    # way. Relying on either makes the outcome depend on whether this
+    # is the first write, so set it explicitly every time instead.
+    write_root_owned_file(content, config_path, mode="644")
     return private_key_path
 
 
@@ -592,7 +598,9 @@ def install_agent_systemd_unit(
     from an earlier run of this same code is already in place would
     leave it stuck on outdated content instead of picking up fixes.
     """
-    write_root_owned_file(_agent_systemd_unit_content(exec_path, config_path), unit_path)
+    write_root_owned_file(
+        _agent_systemd_unit_content(exec_path, config_path), unit_path, mode="644"
+    )
     run_command(["sudo", "systemctl", "daemon-reload"])
     run_command(["sudo", "systemctl", "enable", unit_name])
     run_command(["sudo", "systemctl", "restart", unit_name])
