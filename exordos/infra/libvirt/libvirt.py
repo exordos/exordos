@@ -138,6 +138,15 @@ isolated_network_no_dhcp_template = """
 """
 
 
+bridge_forward_network_template = """
+<network>
+  <name>{name}</name>
+  <forward mode="bridge"/>
+  <bridge name="{bridge}"/>
+</network>
+"""
+
+
 network_iface_template = """
     <interface type="network">
       <source network="{network}"/>
@@ -286,6 +295,20 @@ def create_nat_network(
 def create_isolated_network(name: str):
     net_params = {"name": name}
     network = isolated_network_no_dhcp_template.format(**net_params)
+    define_network(name, network)
+
+
+def create_bridge_forward_network(name: str, bridge: str):
+    """Define a libvirt network that forwards onto an existing host bridge.
+
+    Lets interfaces reference `name` (type='network') while actually
+    riding on `bridge` - used for the boot network on bridge-type
+    hypervisors, where DHCP (with the PXE next-server option) is served
+    centrally over the same shared L2 the main network's bridge extends
+    to, not by anything local to this host.
+    """
+    net_params = {"name": name, "bridge": bridge}
+    network = bridge_forward_network_template.format(**net_params)
     define_network(name, network)
 
 
