@@ -82,7 +82,7 @@ def decrypt_chacha20_poly1305(
 
 
 def write_root_owned_file(
-    content: str, dest_path: str, mode: str | int | None = None
+    content: str, dest_path: str, mode: str | None = None
 ) -> None:
     """Write `content` to `dest_path`, a system path this (non-root, but
     sudo-capable) process can't write to directly.
@@ -104,8 +104,7 @@ def write_root_owned_file(
         # happens to produce. Default to a restrictive 600 rather than
         # whatever that would be when the caller doesn't ask for a
         # specific mode.
-        mode_str = f"{mode:o}" if isinstance(mode, int) else mode or "600"
-        run_command(["sudo", "install", "-m", mode_str, tmp_path, dest_path])
+        run_command(["sudo", "install", "-m", mode or "600", tmp_path, dest_path])
     finally:
         os.remove(tmp_path)
 
