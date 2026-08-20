@@ -38,8 +38,6 @@ from exordos.common.run import runsh
 from exordos.common.table import show_data
 from exordos.logger import ClickLogger
 
-ENTITY = "hypervisor"
-ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION
 DEFAULT_LOCAL_CONNECTION_URI = "qemu:///system"
 
 # The universal agent that runs LocalPoolAgentDriver so this hypervisor's

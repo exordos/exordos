@@ -54,6 +54,27 @@ class TestLocalAgentNodeUuid:
 
         assert result == "some-product-uuid"
 
+    def test_falls_back_to_sudo_cat_on_permission_error(self, tmp_path) -> None:
+        # product_uuid is typically root-only readable; this command runs
+        # as a regular sudo-capable user, not root.
+        product_uuid_path = tmp_path / "product_uuid"
+        product_uuid_path.write_text("some-product-uuid\n")
+
+        fake_result = MagicMock(stdout="some-product-uuid\n")
+        with (
+            patch.object(hv_commands, "open", side_effect=PermissionError, create=True),
+            patch.object(
+                hv_commands, "run_command", return_value=fake_result
+            ) as run_mock,
+        ):
+            result = hv_commands.local_agent_node_uuid(
+                node_id_path=str(tmp_path / "node-id"),
+                product_uuid_path=str(product_uuid_path),
+            )
+
+        assert result == "some-product-uuid"
+        run_mock.assert_called_once_with(["sudo", "cat", str(product_uuid_path)])
+
     def test_raises_a_clean_error_when_neither_path_exists(self, tmp_path) -> None:
         with pytest.raises(click.ClickException, match="Unable to determine"):
             hv_commands.local_agent_node_uuid(
