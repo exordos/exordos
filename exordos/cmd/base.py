@@ -72,6 +72,7 @@ def create_entity_group(
     parents: list[str] | None = None,
     post_fetch_handler: Callable[[list[dict], dict], list[dict]] | None = None,
     extra_options: list[click.Option] | None = None,
+    lookup_field: str | None = None,
 ) -> ClickAliasedGroup:
     """Create a universal click group for entity management."""
 
@@ -194,10 +195,20 @@ def create_entity_group(
             **kwargs,
         ) -> None:
             client = base_client.get_user_api_client(ctx.obj.auth_data)
-            data = base_client.get_entity(
-                client, entity_collection.format(**kwargs), uuid
-            )
-            show_data(data, output)
+            url = entity_collection.format(**kwargs)
+            if lookup_field is not None:
+                entities = base_client.list_entities(
+                    client, url, **{lookup_field: uuid}
+                )
+                if not entities:
+                    raise click.ClickException(
+                        f"{entity_name} with {lookup_field} {uuid} not found"
+                    )
+                for entity in entities:
+                    show_data(entity, output)
+            else:
+                data = base_client.get_entity(client, url, uuid)
+                show_data(data, output)
 
         entity_group.add_command(show_cmd, aliases=["get", "g"])
 

@@ -32,5 +32,9 @@ FIELDS_MAP = {
 
 
 resources_group = create_entity_group(
-    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_delete_command=False
+    ENTITY,
+    ENTITY_COLLECTION,
+    FIELDS_MAP,
+    add_delete_command=False,
+    lookup_field="uuid",
 )
