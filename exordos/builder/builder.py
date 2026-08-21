@@ -43,6 +43,10 @@ def _urn_image(uuid: str | sys_uuid.UUID) -> str:
     return f"urn:images:{uuid}"
 
 
+def _urn_artifact(uuid: str | sys_uuid.UUID) -> str:
+    return f"urn:artifacts:{uuid}"
+
+
 class SimpleBuilder:
     """Simple element builder."""
 
@@ -330,21 +334,65 @@ class SimpleBuilder:
 
         return images
 
+    def _build_artifacts_dict(
+        self,
+        artifact_name_paths: list[tuple[str | None, list[pathlib.Path]]],
+        element_name: str,
+        element_version: str,
+    ) -> dict[str, str]:
+        """Build artifacts dictionary with URI mappings for manifest templates.
+
+        Creates a mapping from artifact name to URN that can be used in
+        Jinja2 manifest templates, e.g. ``{{ artifacts.pip_package }}``
+        renders to ``urn:artifacts:<uuid>``.
+
+        Only artifacts that have a ``name`` set in the configuration are
+        included. A named artifact must produce exactly one file; otherwise
+        a ``ValueError`` is raised because the name-to-URN mapping would be
+        ambiguous.
+
+        Args:
+            artifact_name_paths: List of ``(name, paths)`` tuples, one per
+                artifact config entry, where ``name`` is the optional
+                reference name and ``paths`` are the actual built file paths.
+            element_name: Name of the element.
+            element_version: Version of the element.
+
+        Returns:
+            Dictionary mapping artifact names to ``urn:artifacts:<uuid>``.
+        """
+        artifacts: dict[str, str] = {}
+        for name, paths in artifact_name_paths:
+            if name is None:
+                continue
+            if len(paths) != 1:
+                found = [p.name for p in paths[:5]]
+                if len(paths) > 5:
+                    found.append("...")
+                raise ValueError(
+                    f"Artifact '{name}' must produce exactly one file to be "
+                    f"referenceable in manifest templates, but produced "
+                    f"{len(paths)} files: {', '.join(found)}"
+                )
+            idx = base.ElementInventory.compute_index_entry(
+                "artifacts",
+                element_name,
+                element_version,
+                paths[0],
+            )
+            artifacts[name] = _urn_artifact(idx)
+        return artifacts
+
     def _build_manifest(
         self,
         element: base.Element,
         manifests_dir: pathlib.Path,
         manifest_vars: dict[str, tp.Any] | None = None,
+        images: dict[str, str] | None = None,
+        artifacts: dict[str, str] | None = None,
     ) -> list[pathlib.Path]:
         """Build manifests for the element."""
         orig_manifest_path = self._exordos_dir / element.manifest
-
-        # Compute images indexes
-        images = self._build_images_dict(
-            element.images,
-            manifest_vars["name"],
-            manifest_vars["version"],
-        )
 
         # Render templated manifests
         jinja2_extensions = (".jinja2", ".j2")
@@ -357,7 +405,8 @@ class SimpleBuilder:
                 template = jinja2.Template(f.read())
             rendered_manifest = template.render(
                 manifests=[element.manifest.name],
-                images=images,
+                images=images or {},
+                artifacts=artifacts or {},
                 **manifest_vars,
             )
 
@@ -441,21 +490,11 @@ class SimpleBuilder:
         element_dir = repo_dir / name / self._version
         element_dir.mkdir(parents=True, exist_ok=True)
 
-        # Render manifest
-        manifests_dir = element_dir / "manifests"
-        manifests = self._build_manifest(element, manifests_dir, manifest_vars)
-
-        if validate:
-            for manifest in manifests:
-                path = self._repo_dir / name / self._version / "manifests" / manifest
-                with open(path, "r") as f:
-                    manifest = yaml.safe_load(f)
-                schema.validate_manifest(
-                    manifest, manifest_vars.get("repository", c.ELEMENT_REPO_URL)
-                )
-
-        # Build artifacts and configs
+        # Build artifacts and configs first, so that artifact URIs can be
+        # referenced in manifest templates via {{ artifacts.<name> }}.
         seen_artifact_names: set[str] = set()
+        # Track (name, paths) per artifact config entry for URI mapping.
+        artifact_name_paths: list[tuple[str | None, list[pathlib.Path]]] = []
         for artifact in element.artifacts:
             artifact_dir = element_dir / "artifacts"
             artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -469,11 +508,33 @@ class SimpleBuilder:
                     raise ValueError(f"Duplicate artifact name: {_path.name}")
                 seen_artifact_names.add(_path.name)
             artifacts.extend(_paths)
+            artifact_name_paths.append((artifact.name, _paths))
         for config in element.configs:
             config_dir = element_dir / "configs"
             config_dir.mkdir(parents=True, exist_ok=True)
             _path = self._build_config_artifact(config, config_dir)
             configs.append(_path)
+
+        # Compute images and artifacts dictionaries for manifest templates
+        images_dict = self._build_images_dict(element.images, name, self._version)
+        artifacts_dict = self._build_artifacts_dict(
+            artifact_name_paths, name, self._version
+        )
+
+        # Render manifest
+        manifests_dir = element_dir / "manifests"
+        manifests = self._build_manifest(
+            element, manifests_dir, manifest_vars, images_dict, artifacts_dict
+        )
+
+        if validate:
+            for manifest in manifests:
+                path = self._repo_dir / name / self._version / "manifests" / manifest
+                with open(path, "r") as f:
+                    manifest = yaml.safe_load(f)
+                schema.validate_manifest(
+                    manifest, manifest_vars.get("repository", c.ELEMENT_REPO_URL)
+                )
 
         # Build images
         images_dir = element_dir / "images"

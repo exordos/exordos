@@ -97,6 +97,48 @@ cause files to be one level too deep.
 The example above produces `dist.tar.zst` containing the contents of `dist/`
 (e.g. `index.html`, `assets/`, ...) without a `dist/` wrapper.
 
+### Referencing artifacts in manifest templates
+
+Both static and script-generated artifacts can be assigned a `name`. A named
+artifact is referenceable in Jinja2 manifest templates via
+`{{ artifacts.<name> }}`, which renders to the artifact's URN
+(`urn:artifacts:<uuid>`):
+
+```yaml
+      artifacts:
+        - path: packages/my_package.whl
+          name: pip_package
+```
+
+```yaml
+      artifacts:
+        - script: images/build.sh
+          work_dir: ../
+          artifacts:
+            - dist/my_package.whl
+          name: pip_package
+```
+
+In a manifest template:
+
+```jinja
+  $metapaas.types:
+    victoria:
+      package: "{{ artifacts.pip_package }}"
+```
+
+After rendering:
+
+```yaml
+  $metapaas.types:
+    victoria:
+      package: "urn:artifacts:<uuid>"
+```
+
+A named artifact must produce exactly one file. If the script's glob patterns
+match multiple files, a build error is raised because the name-to-URN mapping
+would be ambiguous.
+
 ## Push configuration file
 
 The push configuration is kept in a separate file — `exordos.push.yaml` — placed alongside `exordos.yaml` in the `exordos` directory. It defines one or more named push targets, each specifying a driver and a destination path.
