@@ -68,6 +68,14 @@ Push the element to the repository
 
   Push the element too as the latest version (if stable version)
 
+* `project`:
+    * Type: text
+    * Default: `none`
+    * Usage: `-p
+--project`
+
+  Project UUID or name to store in the element inventory
+
 * `project_dir`:
     * Type: path
     * Default: `.`
@@ -96,6 +104,7 @@ Push the element to the repository
 │ --element-dir       -e  PATH  Directory where element artifacts are stored                                                                                                                                                                                                                              │
 │ --force             -f        Force push even if the element already exists                                                                                                                                                                                                                             │
 │ --latest            -l        Push the element too as the latest version (if stable version)                                                                                                                                                                                                            │
+│ --project           -p  TEXT  Project UUID or name to store in the element inventory                                                                                                                                                                                                                    │
 │ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -73,7 +73,10 @@ class AbstractRepoDriver(abc.ABC):
 
     @abc.abstractmethod
     def push(
-        self, element: builder_base.ElementInventory, latest: bool = False
+        self,
+        element: builder_base.ElementInventory,
+        latest: bool = False,
+        project: str | None = None,
     ) -> None:
         """Push the element to the repo."""
 

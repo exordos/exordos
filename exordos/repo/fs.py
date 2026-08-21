@@ -102,7 +102,10 @@ class FSRepoDriver(base.AbstractRepoDriver):
             os.remove(meta_path)
 
     def push(
-        self, element: builder_base.ElementInventory, latest: bool = False
+        self,
+        element: builder_base.ElementInventory,
+        latest: bool = False,
+        project: str | None = None,
     ) -> None:
         """Push the element to the repo."""
         element_path = os.path.join(self.elements_path, element.name, element.version)
@@ -125,6 +128,8 @@ class FSRepoDriver(base.AbstractRepoDriver):
             ]
 
         spec["published"] = get_published()
+        if project:
+            spec["project"] = project
 
         with open(self.elements_inventory_path(element), "w") as f:
             json.dump(spec, f, indent=2)

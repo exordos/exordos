@@ -186,7 +186,10 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         self._logger.info(f"Deleted repo at {self._base_url}")
 
     def push(
-        self, element: builder_base.ElementInventory, latest: bool = False
+        self,
+        element: builder_base.ElementInventory,
+        latest: bool = False,
+        project: str | None = None,
     ) -> None:
         """Push the element to the repo."""
         element_url = f"{self.elements_path}/{element.name}/{element.version}"
@@ -217,6 +220,8 @@ class NginxRepoDriver(base.AbstractRepoDriver):
             ]
 
         spec["published"] = get_published()
+        if project:
+            spec["project"] = project
 
         # Upload the inventory file
         response = self._session.put(

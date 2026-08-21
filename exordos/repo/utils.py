@@ -137,6 +137,7 @@ def do_push(
     element_dir: pathlib.Path,
     force: bool,
     latest: bool,
+    project: str | None = None,
 ) -> None:
     """Push every element found in a local build output dir to a repo driver.
 
@@ -164,14 +165,14 @@ def do_push(
 
         try:
             with rich_status.Status("Push the element to the repo...", spinner="dots"):
-                repo_driver.push(e_inventory, latest=latest)
+                repo_driver.push(e_inventory, latest=latest, project=project)
         except base_repo.ElementAlreadyExistsError:
             if force:
                 repo_driver.remove(e_inventory)
                 with rich_status.Status(
                     "Push the element to the repo...", spinner="dots"
                 ):
-                    repo_driver.push(e_inventory, latest=latest)
+                    repo_driver.push(e_inventory, latest=latest, project=project)
                     continue
 
             click.secho(

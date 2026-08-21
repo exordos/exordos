@@ -396,6 +396,12 @@ repository_group.add_command(elements_commands.elements_group, aliases=["e"])
     is_flag=True,
     help="Push the element too as the latest version (if stable version)",
 )
+@click.option(
+    "-p",
+    "--project",
+    default=None,
+    help="Project UUID or name to store in the element inventory",
+)
 @click.argument("project_dir", type=click.Path(), default=".")
 @click.pass_obj
 def push_cmd(
@@ -407,9 +413,10 @@ def push_cmd(
     element_dir: pathlib.Path,
     force: bool,
     latest: bool,
+    project: str | None,
     project_dir: pathlib.Path,
 ) -> None:
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
     )
-    repo_utils.do_push(repo_driver, element_dir, force, latest)
+    repo_utils.do_push(repo_driver, element_dir, force, latest, project)
