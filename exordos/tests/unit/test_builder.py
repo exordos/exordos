@@ -26,6 +26,7 @@ import pytest
 
 from exordos.builder import base
 from exordos.builder.builder import SimpleBuilder
+from exordos.builder.builder import _urn_artifact
 from exordos.builder.builder import _urn_image
 from exordos.logger import DummyLogger
 
@@ -902,3 +903,240 @@ class TestGeneratedArtifactFlatten:
         assert "index.html" in names
         assert "assets" in names
         assert "assets/style.css" in names
+
+
+class TestArtifactName:
+    """Tests for the name field on Artifact and GeneratedArtifact."""
+
+    def test_artifact_from_config_with_name(self, tmp_path) -> None:
+        artifact = base.Artifact.from_config(
+            {"path": "my.whl", "name": "pip_package"}, tmp_path
+        )
+        assert artifact.name == "pip_package"
+        assert artifact.path == "my.whl"
+
+    def test_artifact_from_config_without_name(self, tmp_path) -> None:
+        artifact = base.Artifact.from_config({"path": "my.whl"}, tmp_path)
+        assert artifact.name is None
+
+    def test_generated_artifact_from_config_with_name(self, tmp_path) -> None:
+        artifact = base.GeneratedArtifact.from_config(
+            {"script": "build.sh", "artifacts": ["dist/"], "name": "pip_package"},
+            tmp_path,
+        )
+        assert artifact.name == "pip_package"
+
+    def test_generated_artifact_from_config_without_name(self, tmp_path) -> None:
+        artifact = base.GeneratedArtifact.from_config(
+            {"script": "build.sh", "artifacts": ["dist/"]}, tmp_path
+        )
+        assert artifact.name is None
+
+
+class TestBuildArtifactsDict:
+    """Tests for SimpleBuilder._build_artifacts_dict and _urn_artifact."""
+
+    def _builder(self, tmp_path) -> SimpleBuilder:
+        return SimpleBuilder(
+            exordos_dir=tmp_path,
+            deps=[],
+            elements=[],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=tmp_path / "out",
+        )
+
+    def test_urn_artifact_format(self) -> None:
+        assert _urn_artifact("abc-123") == "urn:artifacts:abc-123"
+        assert _urn_artifact(sys_uuid.UUID(int=0)) == (
+            f"urn:artifacts:{sys_uuid.UUID(int=0)}"
+        )
+
+    def test_named_artifact_maps_to_urn(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        path = pathlib.Path("my.whl")
+        result = builder._build_artifacts_dict(
+            [("pip_package", [path])], "elem", "1.0.0"
+        )
+        assert "pip_package" in result
+        expected_uuid = base.ElementInventory.compute_index_entry(
+            "artifacts", "elem", "1.0.0", path
+        )
+        assert result["pip_package"] == _urn_artifact(expected_uuid)
+
+    def test_unnamed_artifacts_excluded(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        result = builder._build_artifacts_dict(
+            [(None, [pathlib.Path("a.txt")])], "elem", "1.0.0"
+        )
+        assert result == {}
+
+    def test_multiple_files_with_name_raises(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        with pytest.raises(ValueError) as exc_info:
+            builder._build_artifacts_dict(
+                [("multi", [pathlib.Path("a.txt"), pathlib.Path("b.txt")])],
+                "elem",
+                "1.0.0",
+            )
+        msg = str(exc_info.value)
+        assert "must produce exactly one file" in msg
+        assert "a.txt" in msg
+        assert "b.txt" in msg
+
+    def test_multiple_files_truncates_after_five(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        paths = [pathlib.Path(f"f{i}.txt") for i in range(7)]
+        with pytest.raises(ValueError) as exc_info:
+            builder._build_artifacts_dict(
+                [("multi", paths)],
+                "elem",
+                "1.0.0",
+            )
+        msg = str(exc_info.value)
+        assert "..." in msg
+        # Only the first 5 file names are listed
+        assert "f0.txt" in msg
+        assert "f4.txt" in msg
+        assert "f5.txt" not in msg
+        assert "f6.txt" not in msg
+
+    def test_empty_artifacts(self, tmp_path) -> None:
+        builder = self._builder(tmp_path)
+        assert builder._build_artifacts_dict([], "elem", "1.0.0") == {}
+
+
+class TestManifestArtifactRendering:
+    """End-to-end tests for artifact URN rendering in manifest templates."""
+
+    def test_static_artifact_urn_in_manifest(self, tmp_path) -> None:
+        """A named static artifact is rendered as urn:artifacts:<uuid>."""
+        work_dir = tmp_path / "work"
+        out_dir = tmp_path / "out"
+        work_dir.mkdir()
+        out_dir.mkdir()
+
+        (work_dir / "my.whl").write_text("fake wheel\n")
+        manifest_rel = "app.yaml.j2"
+        (work_dir / manifest_rel).write_text(
+            "name: myapp\n"
+            'version: "{{ version }}"\n'
+            'package: "{{ artifacts.pip_package }}"\n'
+        )
+
+        element = base.Element(
+            manifest=pathlib.Path(manifest_rel),
+            artifacts=[
+                base.Artifact(
+                    abs_path=str(work_dir / "my.whl"),
+                    path="my.whl",
+                    name="pip_package",
+                ),
+            ],
+        )
+
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[element],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=out_dir,
+            version="1.0.0",
+        )
+        builder.build(developer_keys=None, manifest_vars=None)
+
+        rendered = (
+            out_dir / "exordos-elements" / "myapp" / "1.0.0" / "manifests" / "app.yaml"
+        )
+        content = rendered.read_text()
+        expected_uuid = base.ElementInventory.compute_index_entry(
+            "artifacts", "myapp", "1.0.0", pathlib.Path("my.whl")
+        )
+        assert f'package: "urn:artifacts:{expected_uuid}"' in content
+
+    def test_generated_artifact_urn_in_manifest(self, tmp_path) -> None:
+        """A named generated artifact is rendered as urn:artifacts:<uuid>."""
+        work_dir = tmp_path / "work"
+        out_dir = tmp_path / "out"
+        work_dir.mkdir()
+        out_dir.mkdir()
+
+        _make_script(work_dir / "build.sh", "echo built > package.tar.zst")
+        manifest_rel = "app.yaml.j2"
+        (work_dir / manifest_rel).write_text(
+            "name: myapp\n"
+            'version: "{{ version }}"\n'
+            'package: "{{ artifacts.pip_package }}"\n'
+        )
+
+        element = base.Element(
+            manifest=pathlib.Path(manifest_rel),
+            artifacts=[
+                base.GeneratedArtifact(
+                    script=str(work_dir / "build.sh"),
+                    work_dir=str(work_dir),
+                    patterns=["package.tar.zst"],
+                    name="pip_package",
+                ),
+            ],
+        )
+
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[element],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=out_dir,
+            version="1.0.0",
+        )
+        builder.build(developer_keys=None, manifest_vars=None)
+
+        rendered = (
+            out_dir / "exordos-elements" / "myapp" / "1.0.0" / "manifests" / "app.yaml"
+        )
+        content = rendered.read_text()
+        expected_uuid = base.ElementInventory.compute_index_entry(
+            "artifacts", "myapp", "1.0.0", pathlib.Path("package.tar.zst")
+        )
+        assert f'package: "urn:artifacts:{expected_uuid}"' in content
+
+    def test_unnamed_artifact_not_in_template(self, tmp_path) -> None:
+        """Artifacts without a name are not referenceable (empty dict)."""
+        work_dir = tmp_path / "work"
+        out_dir = tmp_path / "out"
+        work_dir.mkdir()
+        out_dir.mkdir()
+
+        (work_dir / "data.txt").write_text("data\n")
+        manifest_rel = "app.yaml.j2"
+        (work_dir / manifest_rel).write_text(
+            "name: myapp\n"
+            'version: "{{ version }}"\n'
+            'artifacts_count: "{{ artifacts | length }}"\n'
+        )
+
+        element = base.Element(
+            manifest=pathlib.Path(manifest_rel),
+            artifacts=[
+                base.Artifact(abs_path=str(work_dir / "data.txt"), path="data.txt"),
+            ],
+        )
+
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[element],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=out_dir,
+            version="1.0.0",
+        )
+        builder.build(developer_keys=None, manifest_vars=None)
+
+        rendered = (
+            out_dir / "exordos-elements" / "myapp" / "1.0.0" / "manifests" / "app.yaml"
+        )
+        content = rendered.read_text()
+        assert 'artifacts_count: "0"' in content

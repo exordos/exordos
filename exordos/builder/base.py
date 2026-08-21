@@ -136,6 +136,7 @@ class Artifact:
 
     abs_path: str
     path: str
+    name: str | None = None
 
     @classmethod
     def from_config(
@@ -143,7 +144,11 @@ class Artifact:
     ) -> "Artifact":
         """Create an artifact from configuration."""
         abs_path = os.path.join(work_dir, config["path"])
-        return cls(abs_path=abs_path, path=config["path"])
+        return cls(
+            abs_path=abs_path,
+            path=config["path"],
+            name=config.get("name"),
+        )
 
 
 @dataclasses.dataclass
@@ -158,6 +163,7 @@ class GeneratedArtifact:
     work_dir: str
     patterns: list[str]
     flatten: bool = False
+    name: str | None = None
 
     @classmethod
     def from_config(
@@ -170,6 +176,7 @@ class GeneratedArtifact:
             )
 
         flatten = config.get("flatten", False)
+        name = config.get("name")
 
         script = config["script"]
         if not os.path.isabs(script):
@@ -190,6 +197,7 @@ class GeneratedArtifact:
             work_dir=artifact_work_dir,
             patterns=patterns,
             flatten=flatten,
+            name=name,
         )
 
 

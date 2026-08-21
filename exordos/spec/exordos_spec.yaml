@@ -98,6 +98,12 @@ properties:
                   path:
                     type: string
                     description: Artifact path
+                  name:
+                    type: string
+                    description: >
+                      Optional name to reference this artifact in manifest
+                      templates via {{ artifacts.<name> }}. When set, the
+                      artifact must produce exactly one file.
                   script:
                     type: string
                     description: Script or executable to run to produce artifacts
