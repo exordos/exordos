@@ -4456,6 +4456,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#referencing-artifacts-in-manifest-templates" class="md-nav__link">
+    Referencing artifacts in manifest templates
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4625,6 +4632,35 @@ cause files to be one level too deep.</p>
 </code></pre></div>
 <p>The example above produces <code>dist.tar.zst</code> containing the contents of <code>dist/</code>
 (e.g. <code>index.html</code>, <code>assets/</code>, ...) without a <code>dist/</code> wrapper.</p>
+<h3 id="referencing-artifacts-in-manifest-templates">Referencing artifacts in manifest templates<a class="headerlink" href="#referencing-artifacts-in-manifest-templates" title="Permanent link">#</a></h3>
+<p>Both static and script-generated artifacts can be assigned a <code>name</code>. A named
+artifact is referenceable in Jinja2 manifest templates via
+<code>{{ artifacts.&lt;name&gt; }}</code>, which renders to the artifact's URN
+(<code>urn:artifacts:&lt;uuid&gt;</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">packages/my_package.whl</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip_package</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images/build.sh</span>
+<span class="w">          </span><span class="nt">work_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../</span>
+<span class="w">          </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist/my_package.whl</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip_package</span>
+</code></pre></div>
+<p>In a manifest template:</p>
+<div class="highlight"><pre><span></span><code><span class="x">  $metapaas.types:</span>
+<span class="x">    victoria:</span>
+<span class="x">      package: "</span><span class="cp">{{</span> <span class="nv">artifacts.pip_package</span> <span class="cp">}}</span><span class="x">"</span>
+</code></pre></div>
+<p>After rendering:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">$metapaas.types</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">victoria</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">package</span><span class="p">:</span><span class="w"> </span><span class="s">"urn:artifacts:&lt;uuid&gt;"</span>
+</code></pre></div>
+<p>A named artifact must produce exactly one file. If the script's glob patterns
+match multiple files, a build error is raised because the name-to-URN mapping
+would be ambiguous.</p>
 <h2 id="push-configuration-file">Push configuration file<a class="headerlink" href="#push-configuration-file" title="Permanent link">#</a></h2>
 <p>The push configuration is kept in a separate file — <code>exordos.push.yaml</code> — placed alongside <code>exordos.yaml</code> in the <code>exordos</code> directory. It defines one or more named push targets, each specifying a driver and a destination path.</p>
 <h3 id="format">Format<a class="headerlink" href="#format" title="Permanent link">#</a></h3>

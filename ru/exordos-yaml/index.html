@@ -4443,6 +4443,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#ссылки-на-артефакты-в-шаблонах-манифестов" class="md-nav__link">
+    Ссылки на артефакты в шаблонах манифестов
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4596,6 +4603,28 @@
 <span class="w">          </span><span class="nt">artifacts</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist/</span>
 </code></pre></div>
+<h3 id="ссылки-на-артефакты-в-шаблонах-манифестов">Ссылки на артефакты в шаблонах манифестов<a class="headerlink" href="#ссылки-на-артефакты-в-шаблонах-манифестов" title="Permanent link">#</a></h3>
+<p>Статическим и скриптовым артефактам можно задать имя через поле <code>name</code>.
+Именованный артефакт доступен в шаблонах манифестов Jinja2 через
+<code>{{ artifacts.&lt;name&gt; }}</code> и рендерится в URN артефакта
+(<code>urn:artifacts:&lt;uuid&gt;</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">packages/my_package.whl</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip_package</span>
+</code></pre></div>
+<p>В шаблоне манифеста:</p>
+<div class="highlight"><pre><span></span><code><span class="x">  $metapaas.types:</span>
+<span class="x">    victoria:</span>
+<span class="x">      package: "</span><span class="cp">{{</span> <span class="nv">artifacts.pip_package</span> <span class="cp">}}</span><span class="x">"</span>
+</code></pre></div>
+<p>После рендеринга:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">$metapaas.types</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">victoria</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">package</span><span class="p">:</span><span class="w"> </span><span class="s">"urn:artifacts:&lt;uuid&gt;"</span>
+</code></pre></div>
+<p>Именованный артефакт должен давать ровно один файл. Если шаблоны glob
+скрипта совпадают с несколькими файлами, возникает ошибка сборки, так как
+соответствие имени и URN становится неоднозначным.</p>
 <h2 id="файл-конфигурации-push">Файл конфигурации push<a class="headerlink" href="#файл-конфигурации-push" title="Permanent link">#</a></h2>
 <p>Конфигурация push хранится в отдельном файле — <code>exordos.push.yaml</code> — расположенном рядом с <code>exordos.yaml</code> в каталоге <code>exordos</code>. Она определяет один или более именованных целевых объектов push, каждый из которых указывает драйвер и целевой путь.</p>
 <h3 id="формат">Формат<a class="headerlink" href="#формат" title="Permanent link">#</a></h3>
