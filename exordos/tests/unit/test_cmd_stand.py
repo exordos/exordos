@@ -24,6 +24,7 @@ import click
 import pytest
 import rich.console
 
+from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.cmd.stand import commands
 
 
@@ -78,7 +79,7 @@ class TestResolveHypervisorPlacement:
     def test_local_without_explicit_uri_uses_the_local_socket(self):
         uri, kind = commands._resolve_hypervisor_placement("local", "", self._CIDR)
 
-        assert uri == commands.DEFAULT_LOCAL_CONNECTION_URI
+        assert uri == hv_commands.DEFAULT_LOCAL_CONNECTION_URI
         assert kind == "exordos_local_hyper"
 
     def test_local_with_explicit_uri_is_rejected(self):

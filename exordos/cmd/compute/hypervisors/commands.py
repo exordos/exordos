@@ -375,18 +375,25 @@ meta_file = {meta_file}
 """
 
 
+def read_with_sudo(path: str) -> str:
+    """Read a file's content, falling back to `sudo cat` on PermissionError.
+
+    Some files this command reads (e.g. an agent config containing a
+    private_key_path, or product_uuid) may be root-only readable; this
+    command is expected to run as a regular sudo-capable user, not as root.
+    """
+    try:
+        with open(path) as f:
+            return f.read()
+    except PermissionError:
+        return run_command(["sudo", "cat", path]).stdout
+
+
 def _read_existing_config(config_path: str) -> str | None:
     """Return the agent config's content, or None if not installed yet."""
     if not os.path.exists(config_path):
         return None
-    try:
-        with open(config_path) as f:
-            return f.read()
-    except PermissionError:
-        # A config containing a private_key_path may be root-only
-        # readable; this command is expected to run as a regular
-        # sudo-capable user, not as root.
-        return run_command(["sudo", "cat", config_path]).stdout
+    return read_with_sudo(config_path)
 
 
 def _config_value(content: str, section: str, option: str, fallback: str) -> str:
@@ -429,7 +436,7 @@ def _agent_systemd_unit_content(exec_path: str, config_path: str) -> str:
     # checkout installed under /usr/local/bin, which typically precedes
     # /usr/bin in systemd's default PATH).
     return f"""[Unit]
-Description=Genesis Universal Agent Service
+Description=Exordos Universal Agent Service
 After=network-online.target
 
 [Service]
@@ -773,12 +780,7 @@ def local_agent_node_uuid(
     """
     path = node_id_path if os.path.exists(node_id_path) else product_uuid_path
     try:
-        with open(path) as f:
-            return f.read().strip()
-    except PermissionError:
-        # product_uuid is typically root-only readable; this command is
-        # expected to run as a regular sudo-capable user, not as root.
-        return run_command(["sudo", "cat", path]).stdout.strip()
+        return read_with_sudo(path).strip()
     except FileNotFoundError:
         raise click.ClickException(
             f"Unable to determine this machine's node uuid: neither "

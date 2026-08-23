@@ -39,17 +39,7 @@ from exordos import utils
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
-from exordos.cmd.compute.hypervisors.commands import DEFAULT_AGENT_NAME
-from exordos.cmd.compute.hypervisors.commands import DEFAULT_LOCAL_CONNECTION_URI
-from exordos.cmd.compute.hypervisors.commands import ORCH_API_PORT
-from exordos.cmd.compute.hypervisors.commands import STATUS_API_PORT
-from exordos.cmd.compute.hypervisors.commands import generate_node_private_key_base64
-from exordos.cmd.compute.hypervisors.commands import install_agent_systemd_unit
-from exordos.cmd.compute.hypervisors.commands import install_agent_venv
-from exordos.cmd.compute.hypervisors.commands import local_agent_node_uuid
-from exordos.cmd.compute.hypervisors.commands import reset_agent_meta_file
-from exordos.cmd.compute.hypervisors.commands import resolve_agent_install_target
-from exordos.cmd.compute.hypervisors.commands import write_agent_config
+from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
@@ -696,7 +686,7 @@ def _resolve_hypervisor_placement(
                 "--pool-agent-placement=local; the local agent always "
                 "talks to the local libvirt socket directly."
             )
-        return DEFAULT_LOCAL_CONNECTION_URI, "exordos_local_hyper"
+        return hv_commands.DEFAULT_LOCAL_CONNECTION_URI, "exordos_local_hyper"
 
     return hyper_connection_uri or f"qemu+tcp://{cidr[1]}/system", "libvirt"
 
@@ -981,7 +971,7 @@ def _resolve_hypervisor_placement(
     "--pool-agent-name",
     "agent_name",
     type=str,
-    default=DEFAULT_AGENT_NAME,
+    default=hv_commands.DEFAULT_AGENT_NAME,
     show_default=True,
     help=(
         "Name of the universal agent to run LocalPoolAgentDriver under on "
@@ -1182,11 +1172,11 @@ def bootstrap_cmd(
         # This machine is the hypervisor, reachable over the local
         # libvirt socket by the local universal agent (LocalPoolAgentDriver)
         # only, matched by node uuid.
-        hyper_node = local_agent_node_uuid()
+        hyper_node = hv_commands.local_agent_node_uuid()
         # Generated here (rather than left for the core to generate) so
         # the same key can be written to the agent below, right after
         # the core seeds its matching NodeEncryptionKey at bootstrap.
-        hyper_private_key = generate_node_private_key_base64()
+        hyper_private_key = hv_commands.generate_node_private_key_base64()
 
     # Single hypervisor at bootstrap time is supported at the moment
     hypervisor = stand_models.Hypervisor(
@@ -1271,33 +1261,41 @@ def bootstrap_cmd(
             elements=list(elements) if elements else None,
         )
 
-    if hyper_kind == "exordos_local_hyper" and not no_start:
-        agent_ip = core_ip_result if core_ip_result is not None else core_ip
-        if agent_ip is not None:
-            with status_lib.status_done("Setting up the local universal agent..."):
-                orch_endpoint = f"http://{agent_ip}:{ORCH_API_PORT}"
-                status_endpoint = f"http://{agent_ip}:{STATUS_API_PORT}"
-                agent_target = resolve_agent_install_target(
-                    agent_name=agent_name,
-                    orch_endpoint=orch_endpoint,
-                    status_endpoint=status_endpoint,
-                )
-                install_agent_venv(agent_target.venv_path)
-                reset_agent_meta_file(agent_target.meta_file)
-                private_key_path = write_agent_config(
-                    orch_endpoint=orch_endpoint,
-                    status_endpoint=status_endpoint,
-                    config_path=agent_target.config_path,
-                    meta_file=agent_target.meta_file,
-                    default_private_key_path=agent_target.default_private_key_path,
-                )
-                write_agent_private_key(hyper_private_key, key_path=private_key_path)
-                install_agent_systemd_unit(
-                    exec_path=agent_target.exec_path,
-                    config_path=agent_target.config_path,
-                    unit_path=agent_target.unit_path,
-                    unit_name=agent_target.unit_name,
-                )
+    if hyper_kind == "exordos_local_hyper":
+        # The local agent must be configured regardless of --no-start: the
+        # core's IP is fixed at network-creation time (not discovered once
+        # it boots), and the core needs to find the agent already
+        # configured the first time it does start.
+        if core_ip_result is not None:
+            agent_ip = core_ip_result
+        elif core_ip is not None:
+            agent_ip = core_ip
+        else:
+            agent_ip = cidr[2]
+        with status_lib.status_done("Setting up the local universal agent..."):
+            orch_endpoint = f"http://{agent_ip}:{hv_commands.ORCH_API_PORT}"
+            status_endpoint = f"http://{agent_ip}:{hv_commands.STATUS_API_PORT}"
+            agent_target = hv_commands.resolve_agent_install_target(
+                agent_name=agent_name,
+                orch_endpoint=orch_endpoint,
+                status_endpoint=status_endpoint,
+            )
+            hv_commands.install_agent_venv(agent_target.venv_path)
+            hv_commands.reset_agent_meta_file(agent_target.meta_file)
+            private_key_path = hv_commands.write_agent_config(
+                orch_endpoint=orch_endpoint,
+                status_endpoint=status_endpoint,
+                config_path=agent_target.config_path,
+                meta_file=agent_target.meta_file,
+                default_private_key_path=agent_target.default_private_key_path,
+            )
+            write_agent_private_key(hyper_private_key, key_path=private_key_path)
+            hv_commands.install_agent_systemd_unit(
+                exec_path=agent_target.exec_path,
+                config_path=agent_target.config_path,
+                unit_path=agent_target.unit_path,
+                unit_name=agent_target.unit_name,
+            )
 
     realm_updated = False
     if not no_update_realm:
