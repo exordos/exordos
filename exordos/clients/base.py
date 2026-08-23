@@ -28,6 +28,8 @@ import orjson
 from requests import models as req_models
 import rich_click as click
 
+from exordos import constants as c
+from exordos import version
 from exordos.common import crypto
 from exordos.token_cache import TokenCache
 
@@ -38,6 +40,7 @@ ENCRYPTED_JSON_CONTENT_TYPE = "application/x-genesis-agent-chacha20-poly1305-enc
 DEFAULT_CLIENT_SLUG = "default"
 DEFAULT_TTL = 3600 * 4
 DEFAULT_REFRESH_TTL = 3600 * 24
+USER_AGENT_HEADER = {"User-Agent": f"{c.PKG_NAME}/{version.version_info}"}
 
 
 class DumpToSimpleViewMixin:
@@ -166,7 +169,10 @@ class CoreIamAuthenticator(AbstractAuthenticator):
 
         self._url = f"{base_url}/v1/iam/clients/{client_uuid}/actions/get_token/invoke"
 
-        self._headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        self._headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            **USER_AGENT_HEADER,
+        }
 
         self._ttl = ttl or DEFAULT_TTL
         self._refresh_ttl = refresh_ttl or DEFAULT_REFRESH_TTL
@@ -347,6 +353,7 @@ class CollectionBaseClient:
 
         headers = headers or {}
         headers.update(encryption_headers)
+        headers.update(USER_AGENT_HEADER)
 
         resp = requester(
             url,
