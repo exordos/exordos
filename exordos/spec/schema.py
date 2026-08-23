@@ -48,6 +48,7 @@ class Parsed:
 def validate_yaml(data: dict, schema: tp.Optional[dict]) -> None:
     try:
         from jsonschema.exceptions import ValidationError
+        from jsonschema.exceptions import _WrappedReferencingError
         import openapi_schema_validator
 
         if data and schema:
@@ -57,6 +58,8 @@ def validate_yaml(data: dict, schema: tp.Optional[dict]) -> None:
                 )
             except ValidationError as err:
                 raise ValueError(f"{err.message} in {err.json_path}")
+            except _WrappedReferencingError as err:
+                raise ValueError(f"Not found {err.ref} in schema")
     except ModuleNotFoundError:
         pass
     return None
@@ -71,6 +74,9 @@ def load_base_manifest_schema() -> dict:
 
 
 def update_manifest_schema(base_manifest_schema: dict, user_api_spec: dict) -> dict:
+    base_manifest_schema["components"]["schemas"].update(
+        user_api_spec.get("components", {}).get("schemas", {})
+    )
     for path, path_obj in user_api_spec.get("paths", {}).items():
         path_parts = path.split("/")
         post_path = path_obj.get("post")
@@ -80,7 +86,13 @@ def update_manifest_schema(base_manifest_schema: dict, user_api_spec: dict) -> d
                 schema_ref = post_path["requestBody"]["content"]["application/json"][
                     "schema"
                 ]
-                model_name = schema_ref["$ref"].split("/")[-1]
+                ref = schema_ref.get("$ref")
+                if not ref:
+                    continue
+                refs = ref.split("/")
+                if not refs:
+                    continue
+                model_name = refs[-1]
                 api_parts = ".".join(
                     [
                         path_part
@@ -119,7 +131,11 @@ def search_parameter_example(
     model_name = ref.split("/")[-1]
     model = scheme["components"]["schemas"].get(model_name)
     if model:
-        example = model["properties"].get(parameter, {}).get("example")
+        model_ref = model.get("$ref")
+        if model_ref:
+            model_ref_name = model_ref.split("/")[-1]
+            model = scheme["components"]["schemas"].get(model_ref_name)
+        example = model.get("properties", {}).get(parameter, {}).get("example")
         if example is not None:
             return example
         for prop in model["properties"].values():
