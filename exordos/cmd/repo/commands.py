@@ -25,6 +25,7 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.repo.elements import commands as elements_commands
+from exordos.cmd.repo.store import commands as store_commands
 from exordos.common.table import show_data
 from exordos.repo import utils as repo_utils
 
@@ -345,6 +346,7 @@ repository_group.add_command(repository_upload_cmd)
 
 # Add elements subgroup
 repository_group.add_command(elements_commands.elements_group, aliases=["e"])
+repository_group.add_command(store_commands.store_group, aliases=["s"])
 
 
 @repository_group.command("push", help="Push the element to the repository")

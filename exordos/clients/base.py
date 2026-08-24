@@ -404,6 +404,8 @@ class CollectionBaseClient:
                 headers=headers,
             )
         except bazooka_exc.UnauthorizedError:
+            if self._auth is None:
+                raise
             # Perhaps we need to re-authenticate
             self._auth.authenticate()
             headers.update(self._auth.get_auth_header())

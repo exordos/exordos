@@ -73,6 +73,7 @@ def create_entity_group(
     post_fetch_handler: Callable[[list[dict], dict], list[dict]] | None = None,
     extra_options: list[click.Option] | None = None,
     lookup_field: str | None = None,
+    no_auth: bool = False,
 ) -> ClickAliasedGroup:
     """Create a universal click group for entity management."""
 
@@ -82,8 +83,10 @@ def create_entity_group(
         invoke_without_command=True,
         help=f"Manage {entity_name}s in the Exordos installation",
     )
-    def entity_group():
-        pass
+    @click.pass_context
+    def entity_group(ctx: click.Context):
+        if no_auth:
+            ctx.obj.auth_data["no_auth"] = True
 
     # List command
     if add_list_command:
