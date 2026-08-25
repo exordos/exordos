@@ -44,13 +44,27 @@ md_base_template = """
 """
 
 
+def command_path(ctx) -> str:
+    """Return the full command path, e.g. ``exordos_dbaas_users_add``.
+
+    The full path is used as the page name so that same-named commands
+    living in different groups (``iam users add`` and ``dbaas users add``)
+    do not overwrite each other.
+    """
+    parts = []
+    while ctx is not None:
+        parts.append(ctx.info_name)
+        ctx = ctx.parent
+    return "_".join(reversed(parts))
+
+
 def recursive_help(cmd, parent=None):
     ctx = RichContext(cmd, info_name=cmd.name, parent=parent)
 
     yield {
         "command": cmd,
         "help": cmd.get_help(ctx),
-        "parent": parent.info_name if parent else "",
+        "command_path": command_path(ctx),
         "usage": cmd.get_usage(ctx),
         "params": cmd.get_params(ctx),
         "options": cmd.collect_usage_pieces(ctx),
@@ -71,7 +85,6 @@ def dump_helper(base_command):
         command = helpdct.get("command")
         helptxt = helpdct.get("help")
         usage = helpdct.get("usage")
-        parent = helpdct.get("parent", "") or ""
         options = {}
         for opt in helpdct.get("params", []):
             default = getattr(opt, "default", None)
@@ -88,9 +101,7 @@ def dump_helper(base_command):
                 else "None",
             }
             options[opt.name] = prop
-        full_command = command.name
-        if parent:
-            full_command = f"{parent}_{full_command}"
+        full_command = helpdct.get("command_path")
         md_template = md_base_template.format(
             command_name=full_command,
             description=command.help,

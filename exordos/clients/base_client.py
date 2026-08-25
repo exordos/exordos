@@ -58,8 +58,10 @@ def get_user_api_client(
             otp_prompt=auth_data.get("otp_prompt"),
             realm=auth_data.get("realm"),
         )
+    # Elements deployed next to core (dbaas, ecosystem, ...) serve their own
+    # API, but are authenticated by core IAM at auth_data["endpoint"].
     client = http_client.CollectionBaseClient(
-        base_url=auth_data["endpoint"],
+        base_url=auth_data.get("service_endpoint") or auth_data["endpoint"],
         auth=auth,
         http_client=bazooka_client,
     )

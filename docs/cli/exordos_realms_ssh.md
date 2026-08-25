@@ -1,0 +1,45 @@
+
+# exordos_realms_ssh
+
+Connect to local realm
+
+## Usage
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos realms ssh [OPTIONS]                                                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                           
+```
+
+## Options
+
+* `realm`:
+    * Type: text
+    * Default: `none`
+    * Usage: `-r
+--realm`
+
+  Realm to connect to
+
+* `username`:
+    * Type: text
+    * Default: `ubuntu`
+    * Usage: `-u
+--username`
+
+  Default username
+
+* `help`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--help`
+
+  Show this message and exit.
+
+## CLI Help
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos realms ssh [OPTIONS]                                                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                           
+```

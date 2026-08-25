@@ -202,7 +202,7 @@ Bootstrap exordos locally
 
 * `ecosystem_endpoint`:
     * Type: text
-    * Default: `https://console.genesis-core.tech`
+    * Default: `https://exordos.com`
     * Usage: `--ecosystem-endpoint`
 
   Ecosystem's endpoint to connect to

@@ -97,6 +97,11 @@ SECURITY_RULES_COLLECTION = "/v1/security/rules/"
 DOMAIN_COLLECTION = "/v1/dns/domains/"
 RECORD_COLLECTION = "/v1/dns/domains/{domain_uuid}/records/"
 
+PG_VERSION_COLLECTION = "/v1/types/postgres/versions/"
+PG_INSTANCE_COLLECTION = "/v1/types/postgres/instances/"
+PG_DATABASE_COLLECTION = "/v1/types/postgres/instances/{instance_uuid}/databases/"
+PG_USER_COLLECTION = "/v1/types/postgres/instances/{instance_uuid}/users/"
+
 AGENT_COLLECTION = "/v1/ua/agents/"
 ACTUAL_RESOURCE_COLLECTION = "/v1/ua/resources/"
 TARGET_RESOURCE_COLLECTION = "/v1/ua/target_resources/"
