@@ -45,6 +45,7 @@ ELEMENT_FIELDS_MAP = {
     "Version": "version",
     "Repository": _extract_repository_uuid,
     "Status": "status",
+    "Installation State": "installation_state",
 }
 
 _STABLE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
