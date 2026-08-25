@@ -133,6 +133,13 @@ class Hypervisor:
     connection_uri: str
     storage_pool: str = "default"
     kind: str = "libvirt"
+    # Required by the "exordos_local_hyper" kind: the node uuid of the
+    # local universal agent (LocalPoolAgentDriver) this pool is pinned to.
+    node: str | None = None
+    # Required by the "exordos_local_hyper" kind: the node encryption key
+    # (base64) already written to the local agent's disk, so the core
+    # stores the same key instead of generating a mismatched one.
+    private_key: str | None = None
     machine_prefix: str = "vm-"
     iface_rom_file: str = "/usr/share/qemu/1af41041.rom"
 

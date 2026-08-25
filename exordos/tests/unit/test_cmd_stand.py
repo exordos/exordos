@@ -14,13 +14,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ipaddress
 import os
 import pathlib
 import stat
 from unittest import mock
 
+import click
+import pytest
 import rich.console
 
+from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.cmd.stand import commands
 
 
@@ -53,3 +57,33 @@ def test_print_bootstrap_summary_includes_core_version_in_realm() -> None:
         )
 
     assert "1.2.3" in console.export_text()
+
+
+class TestResolveHypervisorPlacement:
+    _CIDR = ipaddress.IPv4Network("10.20.0.0/22")
+
+    def test_core_without_explicit_uri_defaults_to_network_first_address(self):
+        uri, kind = commands._resolve_hypervisor_placement("core", "", self._CIDR)
+
+        assert uri == "qemu+tcp://10.20.0.1/system"
+        assert kind == "libvirt"
+
+    def test_core_with_explicit_uri_uses_it_unchanged(self):
+        uri, kind = commands._resolve_hypervisor_placement(
+            "core", "qemu+ssh://user@10.0.0.5/system", self._CIDR
+        )
+
+        assert uri == "qemu+ssh://user@10.0.0.5/system"
+        assert kind == "libvirt"
+
+    def test_local_without_explicit_uri_uses_the_local_socket(self):
+        uri, kind = commands._resolve_hypervisor_placement("local", "", self._CIDR)
+
+        assert uri == hv_commands.DEFAULT_LOCAL_CONNECTION_URI
+        assert kind == "exordos_local_hyper"
+
+    def test_local_with_explicit_uri_is_rejected(self):
+        with pytest.raises(click.UsageError, match="--pool-agent-placement=local"):
+            commands._resolve_hypervisor_placement(
+                "local", "qemu+tcp://10.0.0.5/system", self._CIDR
+            )
