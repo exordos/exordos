@@ -4681,6 +4681,15 @@
 </ul>
 <p>If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.</p>
 <ul>
+<li><code>pool_agent_placement</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>core</code></li>
+<li>Usage: <code>--pool-agent-placement</code></li>
+</ul>
+</li>
+</ul>
+<p>Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' installs a dedicated universal agent on this host that talks to the local libvirt socket directly (matching <code>exordos compute hypervisors init</code>); --hyper-connection-uri is not supported in this mode.</p>
+<ul>
 <li><code>hyper_connection_uri</code>:<ul>
 <li>Type: text</li>
 <li>Default: ``</li>
@@ -4688,7 +4697,7 @@
 </ul>
 </li>
 </ul>
-<p>Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. If not set, the first address of the network(--cidr option) will be used.</p>
+<p>Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. Only used with --pool-agent-placement=core; if not set there, the main network's first address is used (qemu+tcp).</p>
 <ul>
 <li><code>hyper_storage_pool</code>:<ul>
 <li>Type: text</li>
@@ -4816,6 +4825,15 @@
 </ul>
 <p>Do not update the realm configuration in exordosctl.yaml after bootstrap</p>
 <ul>
+<li><code>agent_name</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>universal_agent</code></li>
+<li>Usage: <code>--pool-agent-name</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of the universal agent to run LocalPoolAgentDriver under on this host. The default targets the standard agent (merging in if this host is also a registered compute node). Use a different name to run a separate, dedicated agent instead - required if the standard agent here is already configured for a different core.</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -4850,7 +4868,9 @@
 <span class="go">│ --repository                -r  TEXT                                 Default element repository (can be specified multiple times) [default: https://repo.exordos.com/exordos-elements/]                                                                                                                 │</span>
 <span class="go">│ --admin-password                TEXT                                 A password for the admin user in. If not provided, the password will be generated.                                                                                                                                                 │</span>
 <span class="go">│ --save-admin-password-file      TEXT                                 If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.                                                                                                                         │</span>
-<span class="go">│ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. If not set, the first address of the network(--cidr option) will be used.                                               │</span>
+<span class="go">│ --pool-agent-placement          [core|local]                         Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' installs a dedicated universal agent on this    │</span>
+<span class="go">│                                                                      host that talks to the local libvirt socket directly (matching `exordos compute hypervisors init`); --hyper-connection-uri is not supported in this mode. [default: core]                                                          │</span>
+<span class="go">│ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. Only used with --pool-agent-placement=core; if not set there, the main network's first address is used (qemu+tcp).      │</span>
 <span class="go">│ --hyper-storage-pool            TEXT                                 Storage pool for the hypervisor. [default: default]                                                                                                                                                                                │</span>
 <span class="go">│ --hyper-machine-prefix          TEXT                                 A prefix for new VMs. [default: vm-]                                                                                                                                                                                               │</span>
 <span class="go">│ --hyper-iface-rom-file          TEXT                                 A path to the custom ROM file of a network interface. [default: /usr/share/qemu/1af41041.rom]                                                                                                                                      │</span>
