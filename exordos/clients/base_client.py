@@ -40,22 +40,24 @@ def get_user_api_client(
     bazooka_client = Client(
         default_timeout=timeout or (CONNECT_TIMEOUT, READ_TIMEOUT),
     )
-    # Use provided realm or extract from auth_data
-    auth = http_client.CoreIamAuthenticator(
-        base_url=auth_data["endpoint"],
-        username=auth_data.get("username", auth_data.get("user")),
-        login=auth_data.get("login"),
-        password=auth_data.get("password"),
-        access_token=auth_data.get("access_token"),
-        refresh_token=auth_data.get("refresh_token"),
-        scope=auth_data.get("scope"),
-        ttl=auth_data.get("ttl"),
-        refresh_ttl=auth_data.get("refresh_ttl"),
-        http_client=bazooka_client,
-        password_prompt=auth_data.get("password_prompt"),
-        otp_prompt=auth_data.get("otp_prompt"),
-        realm=auth_data.get("realm"),
-    )
+    if auth_data.get("no_auth"):
+        auth = None
+    else:
+        auth = http_client.CoreIamAuthenticator(
+            base_url=auth_data["endpoint"],
+            username=auth_data.get("username", auth_data.get("user")),
+            login=auth_data.get("login"),
+            password=auth_data.get("password"),
+            access_token=auth_data.get("access_token"),
+            refresh_token=auth_data.get("refresh_token"),
+            scope=auth_data.get("scope"),
+            ttl=auth_data.get("ttl"),
+            refresh_ttl=auth_data.get("refresh_ttl"),
+            http_client=bazooka_client,
+            password_prompt=auth_data.get("password_prompt"),
+            otp_prompt=auth_data.get("otp_prompt"),
+            realm=auth_data.get("realm"),
+        )
     client = http_client.CollectionBaseClient(
         base_url=auth_data["endpoint"],
         auth=auth,

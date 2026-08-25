@@ -61,6 +61,8 @@ EXPORTS_COLLECTION = "/v1/em/exports/"
 
 REPOSITORY_COLLECTION = "/v1/repo/repositories/"
 REPOSITORY_ELEMENT_COLLECTION = "/v1/repo/elements/"
+REPOSITORY_STORE_COLLECTION = "/v1/repo/store/"
+REPOSITORY_STORE_ELEMENT_COLLECTION = "/v1/repo/store/elements/"
 
 PROFILE_COLLECTION = "/v1/vs/profiles/"
 VALUE_COLLECTION = "/v1/vs/values/"
