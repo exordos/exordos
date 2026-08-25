@@ -412,5 +412,31 @@ def add_or_update_node_cmd(
     return None
 
 
+@cn_group.command("info", help=f"Show detailed information about the {ENTITY}")
+@click.pass_context
+@click.argument(
+    "node",
+    type=str,
+    required=True,
+    help=f"{ENTITY} UUID or name",
+)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+def info_cmd(ctx: click.Context, node: str, output: str) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    entity = base_client.get_entity(client, ENTITY_COLLECTION, node)
+    show_data(entity, output=output)
+    details = base_client.action_entity(
+        client, ENTITY_COLLECTION, "details", entity["uuid"], invoke=False
+    )
+    if "hypervisor" in details:
+        show_data(details["hypervisor"], output=output, msg="Hypervisor")
+
+
 cn_group.add_command(add_cmd, aliases=["a"])
 cn_group.add_command(update_cmd, aliases=["u"])
