@@ -27,7 +27,7 @@ build_element:
 	./dist/exordos build -i $(SSH_KEY) -f ../$(ELEMENT_PATH) -o ../$(ELEMENT_PATH)/output
 
 push_element:
-	./dist/exordos repo push -t my_push_name -f --latest ../$(ELEMENT_PATH) -e ../$(ELEMENT_PATH)/output
+	./dist/exordos repo push -j 4 -t exordos_repo -f --latest ../$(ELEMENT_PATH) -e ../$(ELEMENT_PATH)/output
 
 install_element:
 	./dist/exordos e e install $(ELEMENT_NAME)

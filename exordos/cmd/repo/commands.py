@@ -398,6 +398,14 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     is_flag=True,
     help="Push the element too as the latest version (if stable version)",
 )
+@click.option(
+    "-j",
+    "--jobs",
+    default=1,
+    show_default=True,
+    type=click.IntRange(min=1),
+    help="Number of artifacts to upload in parallel",
+)
 @click.argument("project_dir", type=click.Path(), default=".")
 @click.pass_obj
 def push_cmd(
@@ -409,9 +417,10 @@ def push_cmd(
     element_dir: pathlib.Path,
     force: bool,
     latest: bool,
+    jobs: int,
     project_dir: pathlib.Path,
 ) -> None:
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
     )
-    repo_utils.do_push(repo_driver, element_dir, force, latest)
+    repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)

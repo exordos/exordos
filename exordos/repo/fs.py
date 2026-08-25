@@ -102,9 +102,15 @@ class FSRepoDriver(base.AbstractRepoDriver):
             os.remove(meta_path)
 
     def push(
-        self, element: builder_base.ElementInventory, latest: bool = False
+        self,
+        element: builder_base.ElementInventory,
+        latest: bool = False,
+        workers: int = 1,
     ) -> None:
-        """Push the element to the repo."""
+        """Push the element to the repo.
+
+        `workers` is ignored, artifacts are copied on the local filesystem.
+        """
         element_path = os.path.join(self.elements_path, element.name, element.version)
         if os.path.exists(element_path):
             raise base.ElementAlreadyExistsError(
