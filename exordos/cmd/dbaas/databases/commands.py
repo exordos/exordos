@@ -102,7 +102,7 @@ def add_cmd(
         "uuid": str(uuid),
         "project_id": str(project_id),
         "name": name,
-        "owner": owner_uuid,
+        "owner": f"{c.PG_INSTANCE_COLLECTION}{instance_uuid}/users/{owner_uuid}",
     }
     if description is not None:
         data["description"] = description
@@ -161,9 +161,10 @@ def update_cmd(
     if description is not None:
         data["description"] = description
     if owner is not None:
-        data["owner"] = base_client.get_entity(
+        owner_uuid = base_client.get_entity(
             client, c.PG_USER_COLLECTION.format(instance_uuid=instance_uuid), owner
         )["uuid"]
+        data["owner"] = f"{c.PG_INSTANCE_COLLECTION}{instance_uuid}/users/{owner_uuid}"
 
     entity = base_client.update_entity(
         client, ENTITY_COLLECTION.format(instance_uuid=instance_uuid), uuid, data
