@@ -355,7 +355,7 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
-RAWSTOR_VERSION = "0.2.8"
+RAWSTOR_VERSION = "0.2.9"
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 # The bindings' abi3 wheel works unmodified across interpreter versions
 # (unlike the per-interpreter python3.X-rawstor system packages), so one
