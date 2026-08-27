@@ -73,9 +73,16 @@ class AbstractRepoDriver(abc.ABC):
 
     @abc.abstractmethod
     def push(
-        self, element: builder_base.ElementInventory, latest: bool = False
+        self,
+        element: builder_base.ElementInventory,
+        latest: bool = False,
+        workers: int = 1,
     ) -> None:
-        """Push the element to the repo."""
+        """Push the element to the repo.
+
+        ``workers`` is the number of artifacts to upload in parallel. Drivers
+        that do not transfer artifacts over the network may ignore it.
+        """
 
     @abc.abstractmethod
     def pull(self, element: builder_base.ElementInventory, dst_path: str) -> None:

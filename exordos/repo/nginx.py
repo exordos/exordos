@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import concurrent.futures as futures
 import json
 import os
 import pathlib
@@ -93,6 +94,42 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         with open(local_path, "rb") as f:
             response = self._session.put(remote_path, data=f)
             response.raise_for_status()
+
+    def _upload_artifacts(
+        self,
+        element: builder_base.ElementInventory,
+        element_url: str,
+        dst_name: str,
+        workers: int,
+    ) -> None:
+        """Upload all element artifacts to `element_url`.
+
+        With `workers` greater than 1 the artifacts are uploaded in parallel.
+        """
+        uploads = [
+            (artifact, f"{element_url}/{category}/{os.path.basename(artifact)}")
+            for category in element.categories()
+            for artifact in getattr(element, category) or ()
+        ]
+
+        def upload(item: tuple[str, str]) -> str:
+            local_path, remote_path = item
+            self._upload_file(local_path, remote_path)
+            artifact_name = os.path.basename(local_path)
+            self._logger.info(f"Uploaded {artifact_name} to {dst_name}")
+            return artifact_name
+
+        if workers > 1:
+            # Every worker takes its own connection from the session pool.
+            adapter = requests.adapters.HTTPAdapter(
+                pool_connections=workers, pool_maxsize=workers
+            )
+            self._session.mount("http://", adapter)
+            self._session.mount("https://", adapter)
+            with futures.ThreadPoolExecutor(max_workers=workers) as executor:
+                list(executor.map(upload, uploads))
+        else:
+            [upload(item) for item in uploads]
 
     def _download_file(self, remote_path: str, local_path: str) -> None:
         """Download a file from the Nginx server.
@@ -186,7 +223,10 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         self._logger.info(f"Deleted repo at {self._base_url}")
 
     def push(
-        self, element: builder_base.ElementInventory, latest: bool = False
+        self,
+        element: builder_base.ElementInventory,
+        latest: bool = False,
+        workers: int = 1,
     ) -> None:
         """Push the element to the repo."""
         element_url = f"{self.elements_path}/{element.name}/{element.version}"
@@ -198,17 +238,12 @@ class NginxRepoDriver(base.AbstractRepoDriver):
                 f"Element {element.name} version {element.version} already exists."
             )
 
-        for category in element.categories():
-            if artifacts := getattr(element, category):
-                for artifact in artifacts:
-                    self._upload_file(
-                        artifact,
-                        f"{element_url}/{category}/{os.path.basename(artifact)}",
-                    )
-                    self._logger.info(
-                        f"Uploaded {os.path.basename(artifact)} to "
-                        f"{element.name}/{element.version}"
-                    )
+        self._upload_artifacts(
+            element,
+            element_url,
+            f"{element.name}/{element.version}",
+            workers,
+        )
 
         spec = element.to_dict()
         for category in element.categories():
@@ -230,17 +265,12 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         if latest and not version.parse(element.version).is_prerelease:
             element_url_latest = f"{self.elements_path}/{element.name}/latest"
 
-            for category in element.categories():
-                if artifacts := getattr(element, category):
-                    for artifact in artifacts:
-                        self._upload_file(
-                            artifact,
-                            f"{element_url_latest}/{category}/{os.path.basename(artifact)}",
-                        )
-                        self._logger.info(
-                            f"Uploaded {os.path.basename(artifact)} to "
-                            f"{element.name}/latest"
-                        )
+            self._upload_artifacts(
+                element,
+                element_url_latest,
+                f"{element.name}/latest",
+                workers,
+            )
 
             # Upload the inventory file
             response = self._session.put(

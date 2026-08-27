@@ -14,15 +14,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from unittest.mock import MagicMock
+from unittest.mock import patch
 import uuid as sys_uuid
 
 import click
+from click.testing import CliRunner
 import pytest
 
 from exordos import utils
 from exordos.cmd.em.elements import commands as em_elements
 from exordos.cmd.repo import commands as repo_commands
 from exordos.cmd.repo.elements import commands as repo_elements
+from exordos.common.cmd_context import ContextObject
 
 
 class TestUrn:
@@ -417,3 +420,43 @@ class TestSelectCurrentElementByName:
         )
         with pytest.raises(click.ClickException, match="Multiple installed"):
             em_elements._select_current_element_by_name(client, "foo")
+
+
+class TestPushCmd:
+    """Tests for exordos.cmd.repo.commands.push_cmd."""
+
+    def _obj(self) -> ContextObject:
+        return ContextObject(
+            auth_data={},
+            cfg_path=None,
+            developer_key_path=None,
+            cfg={},
+            need_update=None,
+        )
+
+    def _invoke(self, args: list[str]) -> MagicMock:
+        with (
+            patch.object(
+                repo_commands.repo_utils,
+                "load_repo_driver",
+                return_value=MagicMock(),
+            ),
+            patch.object(repo_commands.repo_utils, "do_push") as do_push_mock,
+        ):
+            result = CliRunner().invoke(repo_commands.push_cmd, args, obj=self._obj())
+        assert result.exit_code == 0, result.output
+        return do_push_mock
+
+    def test_push_cmd_default_jobs(self) -> None:
+        do_push_mock = self._invoke([])
+        assert do_push_mock.call_args.args[-1] == 1
+
+    def test_push_cmd_jobs_option(self) -> None:
+        do_push_mock = self._invoke(["-j", "4"])
+        assert do_push_mock.call_args.args[-1] == 4
+
+    def test_push_cmd_rejects_zero_jobs(self) -> None:
+        result = CliRunner().invoke(
+            repo_commands.push_cmd, ["-j", "0"], obj=self._obj()
+        )
+        assert result.exit_code != 0

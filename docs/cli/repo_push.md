@@ -68,6 +68,14 @@ Push the element to the repository
 
   Push the element too as the latest version (if stable version)
 
+* `jobs`:
+    * Type: integer range
+    * Default: `1`
+    * Usage: `-j
+--jobs`
+
+  Number of artifacts to upload in parallel
+
 * `project_dir`:
     * Type: path
     * Default: `.`
@@ -89,13 +97,14 @@ Push the element to the repository
  Push the element to the repository                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │
-│ --driver            -d  TEXT  Driver to use, nginx for example                                                                                                                                                                                                                                          │
-│ --driver-params         TEXT  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                                         │
-│ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │
-│ --element-dir       -e  PATH  Directory where element artifacts are stored                                                                                                                                                                                                                              │
-│ --force             -f        Force push even if the element already exists                                                                                                                                                                                                                             │
-│ --latest            -l        Push the element too as the latest version (if stable version)                                                                                                                                                                                                            │
-│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
+│ --exordos-cfg-file  -c  TEXT                  Name of the project configuration file                                                                                                                                                                                                                    │
+│ --driver            -d  TEXT                  Driver to use, nginx for example                                                                                                                                                                                                                          │
+│ --driver-params         TEXT                  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                         │
+│ --target            -t  TEXT                  Target repository to push to                                                                                                                                                                                                                              │
+│ --element-dir       -e  PATH                  Directory where element artifacts are stored                                                                                                                                                                                                              │
+│ --force             -f                        Force push even if the element already exists                                                                                                                                                                                                             │
+│ --latest            -l                        Push the element too as the latest version (if stable version)                                                                                                                                                                                            │
+│ --jobs              -j  INTEGER RANGE [x>=1]  Number of artifacts to upload in parallel [default: 1]                                                                                                                                                                                                    │
+│ --help                                        Show this message and exit.                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -137,6 +137,7 @@ def do_push(
     element_dir: pathlib.Path,
     force: bool,
     latest: bool,
+    workers: int = 1,
 ) -> None:
     """Push every element found in a local build output dir to a repo driver.
 
@@ -153,6 +154,18 @@ def do_push(
         repo_inventory = json.load(f)
         repo_elements = repo_inventory["elements"]
 
+    def push_element(
+        inventory: base_builder.ElementInventory,
+    ) -> None:
+        message = f"Push {inventory.name} to {repo_driver.name}..."
+        if workers > 1:
+            click.echo(message)
+            repo_driver.push(inventory, latest=latest, workers=workers)
+            return
+
+        with rich_status.Status(message, spinner="dots"):
+            repo_driver.push(inventory, latest=latest, workers=workers)
+
     for e_name in repo_elements:
         # FIXME(akremenetsky): In the build repo only single version is available
         e_version = tuple(repo_elements[e_name].keys())[0]
@@ -163,16 +176,12 @@ def do_push(
         e_inventory = e_inventory.replace_with_abspath(e_dir)
 
         try:
-            with rich_status.Status("Push the element to the repo...", spinner="dots"):
-                repo_driver.push(e_inventory, latest=latest)
+            push_element(e_inventory)
         except base_repo.ElementAlreadyExistsError:
             if force:
                 repo_driver.remove(e_inventory)
-                with rich_status.Status(
-                    "Push the element to the repo...", spinner="dots"
-                ):
-                    repo_driver.push(e_inventory, latest=latest)
-                    continue
+                push_element(e_inventory)
+                continue
 
             click.secho(
                 f"Element {e_inventory.name} version "
