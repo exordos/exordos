@@ -4592,6 +4592,16 @@
 </ul>
 <p>Push the element too as the latest version (if stable version)</p>
 <ul>
+<li><code>jobs</code>:<ul>
+<li>Type: integer range</li>
+<li>Default: <code>1</code></li>
+<li>Usage: <code>-j
+--jobs</code></li>
+</ul>
+</li>
+</ul>
+<p>Number of artifacts to upload in parallel</p>
+<ul>
 <li>
 <p><code>project_dir</code>:</p>
 <ul>
@@ -4617,14 +4627,15 @@
 <span class="go"> Push the element to the repository                                                                                                                                                                                                                                                                        </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --exordos-cfg-file  -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                                    │</span>
-<span class="go">│ --driver            -d  TEXT  Driver to use, nginx for example                                                                                                                                                                                                                                          │</span>
-<span class="go">│ --driver-params         TEXT  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                                         │</span>
-<span class="go">│ --target            -t  TEXT  Target repository to push to                                                                                                                                                                                                                                              │</span>
-<span class="go">│ --element-dir       -e  PATH  Directory where element artifacts are stored                                                                                                                                                                                                                              │</span>
-<span class="go">│ --force             -f        Force push even if the element already exists                                                                                                                                                                                                                             │</span>
-<span class="go">│ --latest            -l        Push the element too as the latest version (if stable version)                                                                                                                                                                                                            │</span>
-<span class="go">│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │</span>
+<span class="go">│ --exordos-cfg-file  -c  TEXT                  Name of the project configuration file                                                                                                                                                                                                                    │</span>
+<span class="go">│ --driver            -d  TEXT                  Driver to use, nginx for example                                                                                                                                                                                                                          │</span>
+<span class="go">│ --driver-params         TEXT                  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                         │</span>
+<span class="go">│ --target            -t  TEXT                  Target repository to push to                                                                                                                                                                                                                              │</span>
+<span class="go">│ --element-dir       -e  PATH                  Directory where element artifacts are stored                                                                                                                                                                                                              │</span>
+<span class="go">│ --force             -f                        Force push even if the element already exists                                                                                                                                                                                                             │</span>
+<span class="go">│ --latest            -l                        Push the element too as the latest version (if stable version)                                                                                                                                                                                            │</span>
+<span class="go">│ --jobs              -j  INTEGER RANGE [x&gt;=1]  Number of artifacts to upload in parallel [default: 1]                                                                                                                                                                                                    │</span>
+<span class="go">│ --help                                        Show this message and exit.                                                                                                                                                                                                                               │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
