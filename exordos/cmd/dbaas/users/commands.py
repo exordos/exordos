@@ -91,6 +91,8 @@ def add_cmd(
     description: str | None,
     password: str | None,
 ) -> None:
+    import questionary
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -98,11 +100,11 @@ def add_cmd(
         "uuid": str(uuid),
         "project_id": str(project_id),
         "name": name,
+        "password": password
+        or questionary.password(f"Enter password for {ENTITY} {name}:").ask(),
     }
     if description is not None:
         data["description"] = description
-    if password is not None:
-        data["password"] = password
 
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(instance_uuid=instance_uuid), data

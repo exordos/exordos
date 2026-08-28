@@ -134,7 +134,7 @@ def add_cmd(
         "uuid": str(uuid),
         "project_id": str(project_id),
         "name": name,
-        "version": version_uuid,
+        "version": f"{c.PG_VERSION_COLLECTION}{version_uuid}",
         "cpu": cpu,
         "ram": ram,
         "disk_size": disk_size,
