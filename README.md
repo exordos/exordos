@@ -1,8 +1,13 @@
 <p align="center">
-  <img src="https://github.com/exordos/exordos/actions/workflows/tests.yml/badge.svg" alt="Tests workflow">
-  <img src="https://img.shields.io/pypi/pyversions/exordos" alt="PyPI - Python Version">
-  <img src="https://img.shields.io/pypi/dm/exordos" alt="PyPI - Downloads">
-  <img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License">
+  <a href="https://github.com/exordos/exordos/actions/workflows/tests.yml"><img src="https://github.com/exordos/exordos/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.com/exordos/exordos/actions/workflows/build.yml"><img src="https://github.com/exordos/exordos/actions/workflows/build.yml/badge.svg" alt="Build binary"></a>
+  <a href="https://github.com/exordos/exordos/actions/workflows/publish-to-pypi.yml"><img src="https://github.com/exordos/exordos/actions/workflows/publish-to-pypi.yml/badge.svg" alt="Publish Python package"></a>
+  <a href="https://pypi.org/project/exordos/"><img src="https://img.shields.io/pypi/v/exordos" alt="PyPI - Version"></a>
+  <a href="https://pypi.org/project/exordos/"><img src="https://img.shields.io/pypi/pyversions/exordos" alt="PyPI - Python Version"></a>
+  <a href="https://pypi.org/project/exordos/"><img src="https://img.shields.io/pypi/dm/exordos" alt="PyPI - Downloads"></a>
+  <a href="https://github.com/astral-sh/uv"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json" alt="uv"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>
 </p>
 
 <p align="center">
