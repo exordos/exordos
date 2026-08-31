@@ -1,13 +1,13 @@
 
 # exordos_ee_uninstall
 
-Uninstall element by UUID or name
+Uninstall elements by UUID or name
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee uninstall [OPTIONS] UUID_OR_NAME                                                                                                                                                                                                                                                        
+ Usage: exordos ee uninstall [OPTIONS] UUID_OR_NAME...                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -37,9 +37,9 @@ Uninstall element by UUID or name
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos ee uninstall [OPTIONS] UUID_OR_NAME                                                                                                                                                                                                                                                        
+ Usage: exordos ee uninstall [OPTIONS] UUID_OR_NAME...                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
- Uninstall element by UUID or name                                                                                                                                                                                                                                                                         
+ Uninstall elements by UUID or name                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │

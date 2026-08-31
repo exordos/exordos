@@ -1,30 +1,30 @@
 
-# exordos_em_ee_uninstall
+# exordos_realms_pool
 
-Uninstall elements by UUID or name
+Get free realm from pool
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em ee uninstall [OPTIONS] UUID_OR_NAME...                                                                                                                                                                                                                                                  
+ Usage: exordos realms pool [OPTIONS] NAME                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `uuid_or_name` (REQUIRED):
+* `name` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `uuid_or_name`
+    * Usage: `name`
 
-* `y`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `--yes
--y`
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
 
-  Automatically answer yes for all questions
+  the output format, defaults to table
 
 * `help`:
     * Type: boolean
@@ -37,12 +37,12 @@ Uninstall elements by UUID or name
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em ee uninstall [OPTIONS] UUID_OR_NAME...                                                                                                                                                                                                                                                  
+ Usage: exordos realms pool [OPTIONS] NAME                                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- Uninstall elements by UUID or name                                                                                                                                                                                                                                                                        
+ Get free realm from pool                                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --yes   -y  Automatically answer yes for all questions                                                                                                                                                                                                                                                  │
-│ --help      Show this message and exit.                                                                                                                                                                                                                                                                 │
+│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
+│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
