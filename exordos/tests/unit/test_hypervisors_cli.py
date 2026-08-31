@@ -15,16 +15,157 @@
 #    under the License.
 import base64
 import configparser
+import contextlib
 import getpass
+import json
 from unittest.mock import MagicMock
 from unittest.mock import call as mock_call
 from unittest.mock import patch
 
 import click
+from click.testing import CliRunner
 import pytest
 
 from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.common import crypto
+from exordos.common.cmd_context import ContextObject
+
+
+def _obj(auth_data: dict | None = None) -> ContextObject:
+    return ContextObject(
+        auth_data=auth_data or {},
+        cfg_path=None,
+        developer_key_path=None,
+        cfg={},
+        need_update=None,
+    )
+
+
+_FAKE_AGENT_TARGET = hv_commands.AgentInstallTarget(
+    venv_path="/opt/universal_agent/.venv",
+    exec_path="/usr/bin/exordos-universal-agent",
+    config_path="/etc/exordos_universal_agent/exordos_universal_agent.conf",
+    meta_file="/var/lib/exordos/universal_agent/pool_meta.json",
+    default_private_key_path="/var/lib/exordos/universal_agent/private_key",
+    unit_path="/etc/systemd/system/exordos-universal-agent.service",
+    unit_name="exordos-universal-agent.service",
+)
+
+
+@contextlib.contextmanager
+def _patch_common_init_deps():
+    """Patch the init_cmd dependencies almost every test below mocks but
+    never asserts on by name, bundled into one context manager to stay
+    under Python's nested `with (...)` item limit."""
+    with (
+        patch.object(hv_commands, "_check_debian_like", return_value=True),
+        patch("subprocess.call", return_value=0),
+        patch.object(hv_commands, "_install_packages"),
+        patch.object(hv_commands, "_add_user_to_groups"),
+        patch.object(hv_commands, "_create_storage_pool"),
+        patch.object(hv_commands, "_ensure_local_networks"),
+        patch.object(
+            hv_commands,
+            "_download_rom_file",
+            return_value="/usr/share/qemu/1af41041.rom",
+        ),
+    ):
+        yield
+
+
+class TestDetectLocalResources:
+    """Tests for exordos.cmd.compute.hypervisors.commands._detect_local_cores
+    and _detect_local_ram_mb.
+    """
+
+    def test_detect_local_cores_uses_os_cpu_count(self) -> None:
+        with patch.object(hv_commands.os, "cpu_count", return_value=4):
+            assert hv_commands._detect_local_cores() == 4
+
+    def test_detect_local_cores_falls_back_to_one(self) -> None:
+        with patch.object(hv_commands.os, "cpu_count", return_value=None):
+            assert hv_commands._detect_local_cores() == 1
+
+    def test_detect_local_ram_mb_parses_meminfo(self, tmp_path) -> None:
+        meminfo = tmp_path / "meminfo"
+        meminfo.write_text("MemTotal:       16384000 kB\nMemFree:        1000 kB\n")
+
+        assert hv_commands._detect_local_ram_mb(str(meminfo)) == 16384000 // 1024
+
+    def test_detect_local_ram_mb_raises_when_missing(self, tmp_path) -> None:
+        meminfo = tmp_path / "meminfo"
+        meminfo.write_text("MemFree:        1000 kB\n")
+
+        with pytest.raises(click.ClickException, match="Unable to determine"):
+            hv_commands._detect_local_ram_mb(str(meminfo))
+
+
+class TestDefaultHypervisorUuid:
+    """Tests for
+    exordos.cmd.compute.hypervisors.commands._default_hypervisor_uuid.
+    """
+
+    def test_derives_uuid_from_machine_id(self, tmp_path) -> None:
+        machine_id_path = tmp_path / "machine-id"
+        machine_id_path.write_text("1b4e28ba2fa1428193ff9de29d0a3d0e\n")
+
+        result = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+
+        assert result == hv_commands.sys_uuid.UUID(
+            "1b4e28ba-2fa1-4281-93ff-9de29d0a3d0e"
+        )
+
+    def test_same_machine_id_yields_the_same_uuid(self, tmp_path) -> None:
+        machine_id_path = tmp_path / "machine-id"
+        machine_id_path.write_text("1b4e28ba2fa1428193ff9de29d0a3d0e")
+
+        first = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+        second = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+
+        assert first == second
+
+    def test_falls_back_to_random_uuid_when_missing(self, tmp_path) -> None:
+        missing_path = tmp_path / "does-not-exist"
+
+        result = hv_commands._default_hypervisor_uuid(str(missing_path))
+
+        assert isinstance(result, hv_commands.sys_uuid.UUID)
+
+    def test_falls_back_to_random_uuid_when_invalid(self, tmp_path) -> None:
+        machine_id_path = tmp_path / "machine-id"
+        machine_id_path.write_text("not-a-valid-machine-id")
+
+        result = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+
+        assert isinstance(result, hv_commands.sys_uuid.UUID)
+
+    def test_falls_back_to_random_uuid_on_permission_error(self, tmp_path) -> None:
+        # Any OSError (not just the missing-file case), e.g. a hardened
+        # system where /etc/machine-id isn't world-readable, must fall
+        # back too rather than crashing the command.
+        machine_id_path = tmp_path / "machine-id"
+        machine_id_path.write_text("1b4e28ba2fa1428193ff9de29d0a3d0e")
+
+        with patch.object(
+            hv_commands, "open", side_effect=PermissionError, create=True
+        ):
+            result = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+
+        assert isinstance(result, hv_commands.sys_uuid.UUID)
+
+
+class TestDefaultHypervisorName:
+    """Tests for
+    exordos.cmd.compute.hypervisors.commands._default_hypervisor_name.
+    """
+
+    def test_uses_hostname(self) -> None:
+        with patch.object(hv_commands.socket, "gethostname", return_value="host-1"):
+            assert hv_commands._default_hypervisor_name() == "host-1"
+
+    def test_falls_back_when_hostname_empty(self) -> None:
+        with patch.object(hv_commands.socket, "gethostname", return_value=""):
+            assert hv_commands._default_hypervisor_name() == "hypervisor"
 
 
 class TestLocalAgentNodeUuid:
@@ -83,6 +224,491 @@ class TestLocalAgentNodeUuid:
             )
 
 
+class TestInitCmdRegistration:
+    """Tests for exordos.cmd.compute.hypervisors.commands.init_cmd: the
+    always-on dependency install, and the --add-gated registration step.
+    """
+
+    def test_install_agent_venv_always_called(self) -> None:
+        """install_agent_venv() must run regardless of --add: installing
+        gcl_sdk[libvirt] is plain dependency setup, it doesn't need an
+        orchestrator connection.
+        """
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv") as venv_mock,
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands.base_client, "add_entity"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                [],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        venv_mock.assert_called_once_with(
+            _FAKE_AGENT_TARGET.venv_path, with_rawstor=False
+        )
+
+    def test_without_add_skips_registration_and_libvirt_config(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt") as configure_libvirt_mock,
+            patch.object(hv_commands.base_client, "add_entity") as add_entity_mock,
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                [],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        configure_libvirt_mock.assert_not_called()
+        add_entity_mock.assert_not_called()
+
+    def test_add_invokes_add_cmd_directly(self) -> None:
+        """`init --add` must work like `init && add`: it forwards straight
+        to add_cmd, with no get-then-update-if-exists indirection.
+        """
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "_detect_local_cores", return_value=8),
+            patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(hv_commands, "add_cmd") as add_cmd_mock,
+            patch.object(hv_commands.base_client, "get_user_api_client"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        add_cmd_mock.assert_called_once()
+        kwargs = add_cmd_mock.call_args.kwargs
+        assert kwargs["avail_cores"] == 8
+        assert kwargs["avail_ram"] == 16384
+        assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
+
+    def test_add_with_rawstor_includes_rawstor_driver_spec_fields(self) -> None:
+        """ExordosLocalHyperDriverSpec requires rawstor_pools, so
+        --with-rawstor must supply it - otherwise the pool fails to
+        validate once it reaches core.
+        """
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+            patch.object(hv_commands, "add_libvirt_qemu_to_rawstor_group"),
+            patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
+            patch.object(hv_commands, "_detect_local_cores", return_value=8),
+            patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(hv_commands, "add_cmd") as add_cmd_mock,
+            patch.object(hv_commands.base_client, "get_user_api_client"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add", "--with-rawstor"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        rawstor_mock.assert_called_once()
+        kwargs = add_cmd_mock.call_args.kwargs
+        expected_pools = json.dumps(
+            [{"name": "default", "location": hv_commands.RAWSTOR_LOCATION}]
+        )
+        assert f"rawstor_pools={expected_pools}" in kwargs["driver_spec"]
+
+    def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
+        """A local hypervisor's `init --add` must register this host's
+        universal agent and deploy its node's encryption key to the
+        local agent, same as `bootstrap` does, so the agent can talk
+        to orch/status over encrypted communication.
+        """
+        runner = CliRunner()
+        entity_uuid = "8d10a674-b454-4edb-a94f-f46b38b910d2"
+        fake_client = MagicMock()
+        auth_data = {"endpoint": "http://10.100.0.2/api/core", "username": "admin"}
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "_detect_local_cores", return_value=8),
+            patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(
+                hv_commands.base_client,
+                "get_user_api_client",
+                return_value=fake_client,
+            ),
+            patch.object(
+                hv_commands.base_client,
+                "add_entity",
+                return_value={"uuid": entity_uuid},
+            ),
+            patch.object(
+                hv_commands.base_client, "register_agent_and_write_key"
+            ) as register_and_write_mock,
+            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "reset_agent_meta_file") as reset_meta_mock,
+            patch.object(
+                hv_commands,
+                "write_agent_config",
+                return_value="/var/lib/exordos/universal_agent/private_key",
+            ) as write_config_mock,
+            patch.object(
+                hv_commands, "install_agent_systemd_unit"
+            ) as install_unit_mock,
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add", "--uuid", entity_uuid],
+                obj=_obj(auth_data=auth_data),
+            )
+
+        assert result.exit_code == 0, result.output
+        reset_meta_mock.assert_called_once_with(_FAKE_AGENT_TARGET.meta_file)
+        write_config_mock.assert_called_once_with(
+            orch_endpoint=f"http://10.100.0.2:{hv_commands.ORCH_API_PORT}",
+            status_endpoint=f"http://10.100.0.2:{hv_commands.STATUS_API_PORT}",
+            config_path=_FAKE_AGENT_TARGET.config_path,
+            meta_file=_FAKE_AGENT_TARGET.meta_file,
+            default_private_key_path=_FAKE_AGENT_TARGET.default_private_key_path,
+        )
+        register_and_write_mock.assert_called_once_with(
+            fake_client,
+            "node-uuid",
+            "/var/lib/exordos/universal_agent/private_key",
+            capabilities=hv_commands.LOCAL_POOL_AGENT_CAPABILITIES,
+        )
+        install_unit_mock.assert_called_once_with(
+            exec_path=_FAKE_AGENT_TARGET.exec_path,
+            config_path=_FAKE_AGENT_TARGET.config_path,
+            unit_path=_FAKE_AGENT_TARGET.unit_path,
+            unit_name=_FAKE_AGENT_TARGET.unit_name,
+        )
+
+    def test_add_without_connection_uri_or_name_uses_defaults(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt") as configure_libvirt_mock,
+            patch.object(hv_commands, "_detect_local_cores", return_value=8),
+            patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(
+                hv_commands.socket, "gethostname", return_value="my-hyper-host"
+            ),
+            patch.object(
+                hv_commands.base_client, "get_user_api_client"
+            ) as get_client_mock,
+            patch.object(
+                hv_commands.base_client, "add_entity", return_value={"uuid": "x"}
+            ) as add_entity_mock,
+            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            auth_data = {"endpoint": "http://orch:11010", "username": "admin"}
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add"],
+                obj=_obj(auth_data=auth_data),
+            )
+
+        assert result.exit_code == 0, result.output
+        configure_libvirt_mock.assert_not_called()
+        add_entity_mock.assert_called_once()
+        data = add_entity_mock.call_args[0][2]
+        assert data["driver_spec"]["connection_uri"] == "qemu:///system"
+        assert data["driver_spec"]["kind"] == "exordos_local_hyper"
+        assert data["driver_spec"]["node"] == "node-uuid"
+        assert data["avail_cores"] == 8
+        assert data["avail_ram"] == 16384
+        assert data["name"] == "my-hyper-host"
+        for call in get_client_mock.call_args_list:
+            assert call.args[0] == auth_data
+
+    def test_add_with_explicit_avail_cores_and_ram_skips_detection(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "_detect_local_cores") as detect_cores_mock,
+            patch.object(hv_commands, "_detect_local_ram_mb") as detect_ram_mock,
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(hv_commands.base_client, "get_user_api_client"),
+            patch.object(
+                hv_commands.base_client, "add_entity", return_value={"uuid": "x"}
+            ) as add_entity_mock,
+            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add", "--avail-cores", "2", "--avail-ram", "4096"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        detect_cores_mock.assert_not_called()
+        detect_ram_mock.assert_not_called()
+        data = add_entity_mock.call_args[0][2]
+        assert data["avail_cores"] == 2
+        assert data["avail_ram"] == 4096
+
+    def test_add_forwards_all_hypervisor_entity_options(self) -> None:
+        entity_uuid = "8d10a674-b454-4edb-a94f-f46b38b910d2"
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(hv_commands.base_client, "get_user_api_client"),
+            patch.object(
+                hv_commands.base_client, "add_entity", return_value={"uuid": "x"}
+            ) as add_entity_mock,
+            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                [
+                    "--add",
+                    "--uuid",
+                    entity_uuid,
+                    "--name",
+                    "hv-1",
+                    "--description",
+                    "my hypervisor",
+                    "--avail-cores",
+                    "2",
+                    "--avail-ram",
+                    "4096",
+                    "--cores-ratio",
+                    "1.5",
+                    "--ram-ratio",
+                    "2.0",
+                    "--machine-type",
+                    "HW",
+                ],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        add_entity_mock.assert_called_once()
+        data = add_entity_mock.call_args[0][2]
+        assert data["uuid"] == entity_uuid
+        assert data["name"] == "hv-1"
+        assert data["description"] == "my hypervisor"
+        assert data["cores_ratio"] == 1.5
+        assert data["ram_ratio"] == 2.0
+        assert data["machine_type"] == "HW"
+
+    def test_remote_connection_uri_configures_libvirt(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt") as configure_libvirt_mock,
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--connection-uri", "qemu+tcp://10.0.0.5/system"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        configure_libvirt_mock.assert_called_once()
+
+    def test_add_reuses_the_global_exordos_credentials(self) -> None:
+        """--add must authenticate with the same ctx.obj.auth_data the root
+        `exordos --endpoint/--user/--password` options already resolved,
+        not a separate credential source."""
+        runner = CliRunner()
+        auth_data = {
+            "endpoint": "http://10.20.0.2/api/core",
+            "username": "admin",
+            "password": "secret",
+        }
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "_detect_local_cores", return_value=8),
+            patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(
+                hv_commands.base_client, "get_user_api_client"
+            ) as get_client_mock,
+            patch.object(hv_commands.base_client, "add_entity", return_value={}),
+            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add"],
+                obj=_obj(auth_data=auth_data),
+            )
+
+        assert result.exit_code == 0, result.output
+        for call in get_client_mock.call_args_list:
+            assert call.args[0] == auth_data
+
+    def test_with_rawstor_installs_hypervisor_package_set(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv") as venv_mock,
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "is_root", return_value=False),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+            patch.object(
+                hv_commands, "add_libvirt_qemu_to_rawstor_group"
+            ) as group_mock,
+            patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--with-rawstor"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        venv_mock.assert_called_once_with(
+            _FAKE_AGENT_TARGET.venv_path, with_rawstor=True
+        )
+        rawstor_mock.assert_called_once_with(
+            ["librawstor", "rawstor-ost", "rawstor-vhost"], True
+        )
+        group_mock.assert_called_once_with(True)
+
+    def test_without_with_rawstor_skips_rawstor_install(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                [],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        rawstor_mock.assert_not_called()
+
+
 class TestAgentConfigContent:
     """Tests for the pure content-building helpers:
     _agent_config_content, _agent_systemd_unit_content.
@@ -115,6 +741,150 @@ class TestAgentConfigContent:
             "ExecStart=/opt/universal_agent/.venv/bin/exordos-universal-agent "
             "--config-file /etc/exordos_universal_agent/exordos_universal_agent.conf"
             in content
+        )
+
+
+class TestEnsureLocalNetworks:
+    """Tests for _ensure_local_networks. `network`/`boot_network` are
+    logical libvirt network names the orchestrator itself assigns ports
+    by (set up once by the stand's original bootstrap, never renamed
+    per-hypervisor) - a hypervisor added via `init`/`init --add` needs
+    matching local libvirt networks by those exact names, or scheduled
+    machines immediately fail to start.
+
+    On a 'network'-type hypervisor (single-host/local testing), only
+    the boot network is auto-created (isolated); the main network is
+    left to the operator, as before.
+
+    On a 'bridge'-type hypervisor, neither network is local/transient:
+    both the iPXE ROM's `dhcp` and the main network need a real L2 path
+    to wherever the core's centrally-served DHCP/traffic actually flows
+    - ISC dhcpd matches a request to a subnet by the interface it
+    arrived on, and the stand's original bootstrap host typically uses
+    a separate NIC/bridge per network. --network-bridge/--boot-bridge
+    name those bridges explicitly; each falls back to --network's
+    bridge when not given, for a simpler single-bridge setup.
+    """
+
+    def test_creates_missing_boot_network(self) -> None:
+        with (
+            patch.object(hv_commands.libvirt, "has_net", return_value=False),
+            patch.object(
+                hv_commands.libvirt, "create_isolated_network"
+            ) as isolated_mock,
+        ):
+            hv_commands._ensure_local_networks(
+                "network", "exordos-core-net", None, "exordos-core-boot-net", None
+            )
+
+        isolated_mock.assert_called_once_with(name="exordos-core-boot-net")
+
+    def test_skips_boot_network_that_already_exists(self) -> None:
+        with (
+            patch.object(hv_commands.libvirt, "has_net", return_value=True),
+            patch.object(
+                hv_commands.libvirt, "create_isolated_network"
+            ) as isolated_mock,
+            patch.object(
+                hv_commands.libvirt, "create_bridge_forward_network"
+            ) as bridge_mock,
+        ):
+            hv_commands._ensure_local_networks(
+                "network", "exordos-core-net", None, "exordos-core-boot-net", None
+            )
+
+        isolated_mock.assert_not_called()
+        bridge_mock.assert_not_called()
+
+    def test_network_type_network_does_not_auto_create_main_network(self) -> None:
+        """On a 'network'-type hypervisor, --network is deliberately left
+        to the operator - only the boot network is auto-created."""
+        with (
+            patch.object(hv_commands.libvirt, "has_net", return_value=False),
+            patch.object(hv_commands.libvirt, "create_isolated_network"),
+            patch.object(
+                hv_commands.libvirt, "create_bridge_forward_network"
+            ) as bridge_mock,
+        ):
+            hv_commands._ensure_local_networks(
+                "network", "exordos-core-net", None, "exordos-core-boot-net", None
+            )
+
+        bridge_mock.assert_not_called()
+
+    def test_creates_bridge_forwarding_main_and_boot_networks(self) -> None:
+        """On a bridge-type hypervisor without separate bridge overrides,
+        both the main and boot logical networks fall back to
+        --network's own value as the underlying bridge device."""
+        with (
+            patch.object(hv_commands.libvirt, "has_net", return_value=False),
+            patch.object(
+                hv_commands.libvirt, "create_bridge_forward_network"
+            ) as bridge_mock,
+        ):
+            hv_commands._ensure_local_networks(
+                "bridge", "exordos-core-net", None, "exordos-core-boot-net", None
+            )
+
+        bridge_mock.assert_has_calls(
+            [
+                mock_call(name="exordos-core-net", bridge="exordos-core-net"),
+                mock_call(name="exordos-core-boot-net", bridge="exordos-core-net"),
+            ],
+            any_order=True,
+        )
+
+    def test_creates_bridge_forwarding_networks_on_explicit_bridges(self) -> None:
+        """--network-bridge/--boot-bridge, when given, win over
+        --network's own value - e.g. the boot subnet is reachable over a
+        separate L2/NIC from the main one."""
+        with (
+            patch.object(hv_commands.libvirt, "has_net", return_value=False),
+            patch.object(
+                hv_commands.libvirt, "create_bridge_forward_network"
+            ) as bridge_mock,
+        ):
+            hv_commands._ensure_local_networks(
+                "bridge",
+                "exordos-core-net",
+                "br-core",
+                "exordos-core-boot-net",
+                "br-boot",
+            )
+
+        bridge_mock.assert_has_calls(
+            [
+                mock_call(name="exordos-core-net", bridge="br-core"),
+                mock_call(name="exordos-core-boot-net", bridge="br-boot"),
+            ],
+            any_order=True,
+        )
+
+    def test_boot_bridge_falls_back_to_network_bridge_not_network_name(
+        self,
+    ) -> None:
+        """Without --boot-bridge, the boot network rides --network-bridge
+        (the real device) rather than --network (the logical name)."""
+        with (
+            patch.object(hv_commands.libvirt, "has_net", return_value=False),
+            patch.object(
+                hv_commands.libvirt, "create_bridge_forward_network"
+            ) as bridge_mock,
+        ):
+            hv_commands._ensure_local_networks(
+                "bridge",
+                "exordos-core-net",
+                "br-core",
+                "exordos-core-boot-net",
+                None,
+            )
+
+        bridge_mock.assert_has_calls(
+            [
+                mock_call(name="exordos-core-net", bridge="br-core"),
+                mock_call(name="exordos-core-boot-net", bridge="br-core"),
+            ],
+            any_order=True,
         )
 
 
@@ -208,6 +978,28 @@ class TestAgentSetup:
             ["sudo", f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"]
         )
 
+    def test_install_agent_venv_adds_rawstor_wheel_when_with_rawstor(
+        self, tmp_path
+    ) -> None:
+        """--with-rawstor pulls in rawstor's abi3 wheel alongside
+        gcl_sdk[libvirt], so the exordos_local_hyper driver can
+        `import rawstor` straight out of the venv."""
+        venv_path = tmp_path / "agent-home" / "venv"
+        venv_path.mkdir(parents=True)
+
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.install_agent_venv(str(venv_path), with_rawstor=True)
+
+        run_mock.assert_called_once_with(
+            [
+                "sudo",
+                f"{venv_path}/bin/pip",
+                "install",
+                "gcl_sdk[libvirt]",
+                hv_commands.RAWSTOR_WHEEL_URL,
+            ]
+        )
+
     def test_install_agent_systemd_unit_writes_enables_and_restarts(
         self, tmp_path
     ) -> None:
@@ -268,6 +1060,132 @@ class TestAgentSetup:
                 ["sudo", "systemctl", "restart", "exordos-universal-agent.service"]
             ),
         ]
+
+
+class TestInstallRawstorPackages:
+    """Tests for install_rawstor_packages: downloads and installs the
+    given rawstor .deb packages via dpkg + apt-get -f."""
+
+    def test_downloads_and_installs_each_package(self) -> None:
+        version = hv_commands.RAWSTOR_VERSION
+        base_url = f"{hv_commands.RAWSTOR_RELEASES_URL}/v{version}"
+        deb_dir = "/tmp/rawstor-packages"
+
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"])
+
+        assert run_mock.call_args_list == [
+            mock_call(["mkdir", "-p", deb_dir], sudo=False),
+            mock_call(
+                ["wget", f"{base_url}/librawstor_{version}_amd64.deb", "-P", deb_dir],
+                sudo=False,
+            ),
+            mock_call(
+                ["wget", f"{base_url}/rawstor-ost_{version}_amd64.deb", "-P", deb_dir],
+                sudo=False,
+            ),
+            mock_call(
+                [
+                    "dpkg",
+                    "-i",
+                    f"{deb_dir}/librawstor_{version}_amd64.deb",
+                    f"{deb_dir}/rawstor-ost_{version}_amd64.deb",
+                ],
+                sudo=False,
+            ),
+            mock_call(
+                ["apt-get", "install", "-f", "-y"],
+                env=dict(DEBIAN_FRONTEND="noninteractive"),
+                sudo=False,
+            ),
+        ]
+
+    def test_passes_sudo_through(self) -> None:
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.install_rawstor_packages(["librawstor"], add_sudo=True)
+
+        assert all(c.kwargs.get("sudo") is True for c in run_mock.call_args_list)
+
+
+class TestAddLibvirtQemuToRawstorGroup:
+    """Tests for add_libvirt_qemu_to_rawstor_group: lets QEMU (always run
+    by libvirt as the libvirt-qemu user) connect to rawstor-vhost's
+    group-owned, mode-0660 vhost-user sockets."""
+
+    def test_adds_libvirt_qemu_to_the_rawstor_group(self) -> None:
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.add_libvirt_qemu_to_rawstor_group()
+
+        run_mock.assert_called_once_with(
+            ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"], sudo=False
+        )
+
+    def test_passes_sudo_through(self) -> None:
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.add_libvirt_qemu_to_rawstor_group(add_sudo=True)
+
+        run_mock.assert_called_once_with(
+            ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"], sudo=True
+        )
+
+
+class TestInstallAndConfigureRawstor:
+    """Tests for install_and_configure_rawstor: the single entry point
+    both `hypervisors init --with-rawstor` and `bootstrap --with-rawstor`
+    call, so the two provisioning paths install the same packages and
+    grant QEMU access to them the same way."""
+
+    def test_installs_packages_then_grants_qemu_access(self) -> None:
+        with (
+            patch.object(hv_commands, "install_rawstor_packages") as install_mock,
+            patch.object(
+                hv_commands, "add_libvirt_qemu_to_rawstor_group"
+            ) as group_mock,
+            patch.object(
+                hv_commands, "allow_apparmor_access_to_rawstor_sockets"
+            ) as apparmor_mock,
+        ):
+            hv_commands.install_and_configure_rawstor(add_sudo=True)
+
+        install_mock.assert_called_once_with(
+            ["librawstor", "rawstor-ost", "rawstor-vhost"], True
+        )
+        group_mock.assert_called_once_with(True)
+        apparmor_mock.assert_called_once_with(True)
+
+
+class TestAllowApparmorAccessToRawstorSockets:
+    """Tests for allow_apparmor_access_to_rawstor_sockets: libvirt's
+    per-domain AppArmor profile has no rule for a vhostuser disk's unix
+    socket, so QEMU's connect() to it is denied unless this drop-in
+    grants it explicitly."""
+
+    def test_writes_the_dropin_and_reloads_apparmor(self) -> None:
+        with (
+            patch.object(hv_commands, "write_root_owned_file") as write_mock,
+            patch.object(hv_commands, "run_command") as run_mock,
+        ):
+            hv_commands.allow_apparmor_access_to_rawstor_sockets()
+
+        write_mock.assert_called_once_with(
+            "/run/rawstor/*.sock rw,\n",
+            hv_commands.APPARMOR_RAWSTOR_DROPIN_PATH,
+            mode="644",
+        )
+        run_mock.assert_called_once_with(
+            ["systemctl", "reload", "apparmor"], sudo=False
+        )
+
+    def test_passes_sudo_through(self) -> None:
+        with (
+            patch.object(hv_commands, "write_root_owned_file"),
+            patch.object(hv_commands, "run_command") as run_mock,
+        ):
+            hv_commands.allow_apparmor_access_to_rawstor_sockets(add_sudo=True)
+
+        run_mock.assert_called_once_with(
+            ["systemctl", "reload", "apparmor"], sudo=True
+        )
 
 
 class TestReadExistingConfig:

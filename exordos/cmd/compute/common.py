@@ -42,3 +42,20 @@ def extract_image_from_entity(entity: dict) -> str:
         return entity["disk_spec"]["disks"][0]["image"]
 
     return "Unknown"
+
+
+def extract_disk_type_from_entity(entity: dict) -> str:
+    """Extract the root disk's backend type from entity."""
+    if "disk_spec" not in entity:
+        return "Unknown"
+
+    if entity["disk_spec"]["kind"] == "root_disk":
+        return entity["disk_spec"].get("disk_kind", {}).get("kind", "qcow2")
+
+    if entity["disk_spec"]["kind"] == "disks":
+        disks = entity["disk_spec"]["disks"]
+        if not disks:
+            return "Unknown"
+        return disks[0].get("disk_kind", {}).get("kind", "qcow2")
+
+    return "Unknown"

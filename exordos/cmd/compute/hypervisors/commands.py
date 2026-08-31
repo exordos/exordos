@@ -19,6 +19,7 @@ import base64
 import configparser
 import getpass
 import io
+import json
 import os
 import secrets
 import socket
@@ -36,6 +37,7 @@ from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
 from exordos.common.table import show_data
+from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
 
 DEFAULT_LOCAL_CONNECTION_URI = "qemu:///system"
@@ -51,6 +53,13 @@ DEFAULT_LOCAL_CONNECTION_URI = "qemu:///system"
 DEFAULT_AGENT_NAME = "universal_agent"
 AGENT_CONFIG_DIR = "/etc/exordos_universal_agent"
 STANDARD_AGENT_BIN_SYMLINK = "/usr/bin/exordos-universal-agent"
+
+# Must match gcl_sdk's LocalPoolAgentDriver.get_capabilities() - pre-declaring
+# them here lets the scheduler (which only considers agents already
+# reporting the "pool" capability) place pools onto this agent right away,
+# instead of waiting for its first self-registration after the systemd
+# unit actually starts.
+LOCAL_POOL_AGENT_CAPABILITIES = ["pool", "pool_volume", "pool_machine", "local_pool"]
 
 
 def _agent_venv_path(agent_name: str) -> str:
@@ -96,6 +105,7 @@ STATUS_API_PORT = 11012
 
 ENTITY = "hypervisor"
 ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION
+
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
@@ -346,6 +356,40 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
+RAWSTOR_VERSION = "0.2.10"
+RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
+# The bindings' abi3 wheel works unmodified across interpreter versions
+# (unlike the per-interpreter python3.X-rawstor system packages), so one
+# URL covers whichever version `python3 -m venv` (install_agent_venv) uses.
+RAWSTOR_WHEEL_URL = (
+    f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/rawstor-{RAWSTOR_VERSION}"
+    "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+)
+# Matches rawstor-vhost@.service's own RAWSTOR_LOCATION default: rawstor-ost
+# always runs on the same host as the local hypervisor agent that --with-rawstor
+# installs it on.
+RAWSTOR_LOCATION = "ost://127.0.0.1:7777"
+
+
+def install_rawstor_packages(
+    packages: tp.Sequence[str], add_sudo: bool = False
+) -> None:
+    """Download and install the given rawstor .deb packages."""
+    deb_dir = "/tmp/rawstor-packages"
+    run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
+
+    deb_paths = []
+    for package in packages:
+        deb_name = f"{package}_{RAWSTOR_VERSION}_amd64.deb"
+        url = f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/{deb_name}"
+        run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
+        deb_paths.append(os.path.join(deb_dir, deb_name))
+
+    run_command(["dpkg", "-i", *deb_paths], sudo=add_sudo)
+    cmd = ["apt-get", "install", "-f", "-y"]
+    run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
+
+
 def generate_node_private_key_base64() -> str:
     """Generate a node encryption key for the local agent.
 
@@ -525,28 +569,42 @@ def resolve_agent_install_target(
     )
 
 
-def install_agent_venv(venv_path: str = STANDARD_AGENT_VENV_PATH) -> None:
-    """Install (or extend) the universal agent's venv with gcl_sdk[libvirt].
+def install_agent_venv(
+    venv_path: str = STANDARD_AGENT_VENV_PATH, with_rawstor: bool = False
+) -> None:
+    """Install (or extend) the universal agent's venv with gcl_sdk[libvirt],
+    plus rawstor's python bindings when with_rawstor is set.
 
     A venv may already exist at this path - either the standard agent's
     (this host is also a registered compute node, provisioned from the
     exordos-base image) or a previous isolated install - in which case
-    libvirt-python just needs adding, via sudo since the standard venv
+    the packages just need adding, via sudo since the standard venv
     is root-owned. Otherwise a fresh one is created, owned by the
     current (non-root) user so future pip runs don't need elevation.
     The /usr/bin symlink is only (re)pointed at it when installing to
     the standard path - an isolated install must not hijack it, since
     it may belong to an agent this code isn't managing.
+
+    rawstor's python bindings are installed from their own abi3 wheel
+    (RAWSTOR_WHEEL_URL) rather than PyPI, since rawstor isn't published
+    there - the exordos_local_hyper driver can then `import rawstor`
+    straight out of the venv. librawstor itself, which the bindings
+    dynamically link against, still comes from
+    install_and_configure_rawstor's system packages.
     """
+    packages = ["gcl_sdk[libvirt]"]
+    if with_rawstor:
+        packages.append(RAWSTOR_WHEEL_URL)
+
     if os.path.isdir(venv_path):
-        run_command(["sudo", f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
+        run_command(["sudo", f"{venv_path}/bin/pip", "install", *packages])
         return
 
     agent_home = os.path.dirname(venv_path)
     run_command(["sudo", "mkdir", "-p", agent_home])
     run_command(["sudo", "chown", getpass.getuser(), agent_home])
     run_command(["python3", "-m", "venv", venv_path])
-    run_command([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
+    run_command([f"{venv_path}/bin/pip", "install", *packages])
     if venv_path == STANDARD_AGENT_VENV_PATH:
         run_command(
             [
@@ -653,6 +711,55 @@ def _add_user_to_groups(user: str | None, add_sudo: bool = False) -> None:
         run_command(cmd, sudo=add_sudo)
 
 
+def add_libvirt_qemu_to_rawstor_group(add_sudo: bool = False) -> None:
+    """Let QEMU (which libvirt always runs as the libvirt-qemu user) connect
+    to rawstor-vhost's vhost-user sockets.
+
+    rawstor-vhost chmod()s each socket to 0660, owned by the rawstor
+    user/group, so anything outside that group gets a silent connect()
+    EACCES (the guest just retries via reconnect-ms and never boots).
+    """
+    cmd = ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"]
+    run_command(cmd, sudo=add_sudo)
+
+
+APPARMOR_RAWSTOR_DROPIN_PATH = "/etc/apparmor.d/abstractions/libvirt-qemu.d/rawstor"
+APPARMOR_RAWSTOR_SOCKET_RULE = "/run/rawstor/*.sock rw,\n"
+
+
+def allow_apparmor_access_to_rawstor_sockets(add_sudo: bool = False) -> None:
+    """Let libvirt's per-domain AppArmor profile reach rawstor-vhost's sockets.
+
+    libvirt derives each domain's AppArmor profile from its disk XML, but has
+    no rule generator for a vhostuser disk's arbitrary unix socket path - so
+    QEMU's connect() to it is silently denied regardless of the socket's own
+    file permissions, and the guest never leaves "paused (starting up)".
+    `abstractions/libvirt-qemu.d/` is the drop-in directory libvirt's own
+    shipped profile (`include if exists <abstractions/libvirt-qemu.d>`) is
+    written to include, meant for exactly this kind of local addition -
+    unlike the older `local/abstractions/libvirt-qemu` override, which the
+    shipped profile only keeps around deprecated for backward compatibility.
+    """
+    write_root_owned_file(
+        APPARMOR_RAWSTOR_SOCKET_RULE, APPARMOR_RAWSTOR_DROPIN_PATH, mode="644"
+    )
+    run_command(["systemctl", "reload", "apparmor"], sudo=add_sudo)
+
+
+def install_and_configure_rawstor(add_sudo: bool = False) -> None:
+    """Install rawstor's hypervisor-side packages and let QEMU use them.
+
+    Shared by `hypervisors init --with-rawstor` and `bootstrap --with-rawstor`
+    so the two provisioning paths can't drift out of sync with each other.
+    """
+    install_rawstor_packages(
+        ["librawstor", "rawstor-ost", "rawstor-vhost"],
+        add_sudo,
+    )
+    add_libvirt_qemu_to_rawstor_group(add_sudo)
+    allow_apparmor_access_to_rawstor_sockets(add_sudo)
+
+
 def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
     """Create libvirt storage pool if it doesn't exist."""
     # Check if pool exists
@@ -676,7 +783,58 @@ def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
         run_command(cmd, sudo=add_sudo)
 
 
-def _download_rom_file(version: str, add_sudo: bool = False) -> None:
+def _ensure_local_networks(
+    network_type: str,
+    network: str,
+    network_bridge: str | None,
+    boot_network: str,
+    boot_bridge: str | None,
+) -> None:
+    """Create this hypervisor's libvirt networks if missing.
+
+    `network` and `boot_network` are logical libvirt network names the
+    orchestrator itself tracks and assigns to ports by (see
+    exordos_core.compute.dm.models.Port.from_boot_network and the
+    core's main-network Subnet, both created once by the stand's
+    original bootstrap and never renamed per-hypervisor) - a machine
+    scheduled to this hypervisor gets a port whose `source` is one of
+    these exact names, regardless of what this hypervisor calls its own
+    devices. Without a same-named local libvirt network, such machines
+    immediately fail to start.
+
+    On a 'bridge'-type hypervisor neither network is local/transient:
+    the iPXE ROM's plain `dhcp` and the main network both need a real L2
+    path to wherever the core's centrally-served DHCP actually listens.
+    ISC dhcpd matches a request to a subnet declaration by the address
+    of the interface it arrived on, and on the stand's original
+    bootstrap host that's typically a dedicated NIC/bridge per network -
+    so each logical network here is defined as a libvirt network that
+    forwards onto its own bridge device (--network-bridge/--boot-bridge;
+    each falls back to --network's bridge when not given, for a simpler
+    single-bridge setup where they do share one L2).
+
+    For a plain 'network'-type hypervisor (single-host/local testing,
+    not reachable from the rest of the realm anyway), only the boot
+    network is auto-created, as an isolated network - the main network
+    is left to the operator, same as before.
+    """
+    if network_type != "bridge":
+        if not libvirt.has_net(boot_network):
+            libvirt.create_isolated_network(name=boot_network)
+        return
+
+    if not libvirt.has_net(network):
+        libvirt.create_bridge_forward_network(
+            name=network, bridge=network_bridge or network
+        )
+
+    if not libvirt.has_net(boot_network):
+        libvirt.create_bridge_forward_network(
+            name=boot_network, bridge=boot_bridge or network_bridge or network
+        )
+
+
+def _download_rom_file(version: str, add_sudo: bool = False) -> str:
     """Download ROM file if it doesn't exist."""
     rom_filename = "1af41041.rom"
     rom_path = f"/usr/share/qemu/{rom_filename}"
@@ -688,6 +846,8 @@ def _download_rom_file(version: str, add_sudo: bool = False) -> None:
 
     else:
         click.echo(f"ROM file {rom_path} already exists")
+
+    return rom_path
 
 
 def _configure_libvirt(add_sudo: bool = False) -> None:
@@ -768,6 +928,40 @@ def _install_packer(add_sudo: bool = False) -> None:
     return None
 
 
+def _detect_local_cores() -> int:
+    """Detect the number of logical CPU cores available on this machine."""
+    return os.cpu_count() or 1
+
+
+def _detect_local_ram_mb(meminfo_path: str = "/proc/meminfo") -> int:
+    """Detect the total RAM, in Mb, available on this machine."""
+    with open(meminfo_path) as f:
+        for line in f:
+            if line.startswith("MemTotal:"):
+                return int(line.split()[1]) // 1024
+
+    raise click.ClickException(f"Unable to determine total RAM from {meminfo_path}")
+
+
+def _default_hypervisor_uuid(machine_id_path: str = "/etc/machine-id") -> sys_uuid.UUID:
+    """Derive a stable UUID for this machine from /etc/machine-id.
+
+    Used when --uuid isn't given, so this machine always registers under
+    the same hypervisor UUID.
+    """
+    try:
+        with open(machine_id_path) as f:
+            machine_id = f.read().strip()
+        return sys_uuid.UUID(hex=machine_id)
+    except (OSError, ValueError):
+        return sys_uuid.uuid4()
+
+
+def _default_hypervisor_name() -> str:
+    """Default hypervisor name: this machine's hostname."""
+    return socket.gethostname() or "hypervisor"
+
+
 def local_agent_node_uuid(
     node_id_path: str = "/var/lib/exordos/node-id",
     product_uuid_path: str = "/sys/class/dmi/id/product_uuid",
@@ -810,13 +1004,222 @@ def local_agent_node_uuid(
     help="Install packer",
 )
 @click.option(
+    "--with-rawstor",
+    show_default=True,
+    is_flag=True,
+    default=False,
+    help=(
+        "Install rawstor packages (librawstor + rawstor-ost + rawstor-vhost) "
+        "on this hypervisor"
+    ),
+)
+@click.option(
     "--user",
     type=str,
     required=False,
     help="username",
 )
+@click.option(
+    "--add",
+    show_default=True,
+    is_flag=True,
+    default=False,
+    help=(
+        "After initialization, register the hypervisor in the orchestrator "
+        "(same as running `hypervisors add`), using the top-level "
+        "`exordos --endpoint/--user/--password` credentials. --uuid/--name/"
+        "--description/--avail-cores/--avail-ram/--cores-ratio/--ram-ratio/"
+        "--machine-type/--iface-mtu/--machine-prefix only apply in this "
+        "mode. --network/--network-type/--network-bridge/--boot-network/"
+        "--boot-bridge always set up this host's local libvirt networks "
+        "regardless of --add, and additionally feed the registered "
+        "driver_spec when combined with it."
+    ),
+)
+@click.option(
+    "-u",
+    "--uuid",
+    type=click.UUID,
+    default=None,
+    help=(
+        "UUID of the hypervisor. Defaults to a UUID derived from "
+        "/etc/machine-id, so this machine always registers under the same "
+        "hypervisor UUID."
+    ),
+)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default=None,
+    help="Name of the hypervisor. Defaults to this machine's hostname.",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default="",
+    help="Description of the hypervisor",
+)
+@click.option(
+    "--avail-cores",
+    type=int,
+    default=None,
+    help=(
+        "Number of CPU cores available for VMs on this hypervisor. "
+        "Auto-detected from the local machine if not set."
+    ),
+)
+@click.option(
+    "--avail-ram",
+    type=int,
+    default=None,
+    help=(
+        "Amount of RAM in Mb available for VMs on this hypervisor. "
+        "Auto-detected from the local machine if not set."
+    ),
+)
+@click.option(
+    "--cores-ratio",
+    type=float,
+    default=None,
+)
+@click.option(
+    "--ram-ratio",
+    type=float,
+    default=None,
+)
+@click.option(
+    "-m",
+    "--machine-type",
+    type=click.Choice(["VM", "HW"], case_sensitive=False),
+    default=None,
+)
+@click.option(
+    "--connection-uri",
+    type=str,
+    default=DEFAULT_LOCAL_CONNECTION_URI,
+    show_default=True,
+    help=(
+        "Connection URI the orchestrator will use to reach this hypervisor. "
+        "Hypervisors are expected to only run VMs local to themselves, so "
+        "the default connects over the local libvirt Unix socket. Override "
+        "only for backward compatibility or exotic setups, e.g. "
+        "'qemu+tcp://10.0.0.1/system' for remote access."
+    ),
+)
+@click.option(
+    "--network",
+    type=str,
+    default="exordos-core-net",
+    show_default=True,
+    help=(
+        "Name of the libvirt network used for VMs on this hypervisor - "
+        "this is the logical name the orchestrator itself assigns ports "
+        "by (see the stand's original bootstrap), not necessarily a "
+        "literal host device. Don't rename it unless the orchestrator's "
+        "own main network is actually named differently. For "
+        "--network-type bridge, --network-bridge names the real "
+        "underlying device."
+    ),
+)
+@click.option(
+    "--network-type",
+    type=click.Choice(["network", "bridge"], case_sensitive=False),
+    default="network",
+    show_default=True,
+    help="Type of the libvirt network used for VMs on this hypervisor",
+)
+@click.option(
+    "--network-bridge",
+    type=str,
+    default=None,
+    help=(
+        "Host bridge device --network forwards onto. Only used when "
+        "--network-type is 'bridge'; defaults to --network's own value "
+        "if not given (i.e. the local libvirt network and the host "
+        "bridge device happen to share one name)."
+    ),
+)
+@click.option(
+    "--boot-network",
+    type=str,
+    default="exordos-core-boot-net",
+    show_default=True,
+    help=(
+        "Name of the libvirt network new machines PXE-boot on before "
+        "getting their real network port. DHCP (with the PXE next-server "
+        "option) for it is served centrally over the realm's shared L2, "
+        "the same way as for --network - not by anything local to this "
+        "host."
+    ),
+)
+@click.option(
+    "--boot-bridge",
+    type=str,
+    default=None,
+    help=(
+        "Host bridge device the boot network forwards onto, if it's a "
+        "different L2 than --network's bridge (e.g. the stand's bootstrap "
+        "host reaches the boot subnet's DHCP over a separate NIC from the "
+        "main one). Only used when --network-type is 'bridge'; defaults "
+        "to --network's bridge if not given."
+    ),
+)
+@click.option(
+    "--iface-mtu",
+    type=int,
+    default=1500,
+    show_default=True,
+    help="MTU for the VM network interface",
+)
+@click.option(
+    "--machine-prefix",
+    type=str,
+    default="vm-",
+    show_default=True,
+    help="Prefix for VM names created on this hypervisor",
+)
+@click.option(
+    "--pool-agent-name",
+    "agent_name",
+    type=str,
+    default=DEFAULT_AGENT_NAME,
+    show_default=True,
+    help=(
+        "Name of the universal agent to run LocalPoolAgentDriver under. "
+        "The default targets the standard agent (merging in if this host "
+        "is also a registered compute node). Use a different name to run "
+        "a separate, dedicated agent instead - required if the standard "
+        "agent here is already configured for a different core."
+    ),
+)
+@click.pass_context
 def init_cmd(
-    romfile_version: str, pool_name: str, packer: bool, user: str | None
+    ctx: click.Context,
+    romfile_version: str,
+    pool_name: str,
+    packer: bool,
+    with_rawstor: bool,
+    user: str | None,
+    add: bool,
+    uuid: sys_uuid.UUID | None,
+    name: str | None,
+    description: str,
+    avail_cores: int | None,
+    avail_ram: int | None,
+    cores_ratio: float | None,
+    ram_ratio: float | None,
+    machine_type: str | None,
+    connection_uri: str,
+    network: str,
+    network_type: str,
+    network_bridge: str | None,
+    boot_network: str,
+    boot_bridge: str | None,
+    iface_mtu: int,
+    machine_prefix: str,
+    agent_name: str,
 ) -> None:
     """Initialize hypervisor with all required components."""
 
@@ -840,21 +1243,117 @@ def init_cmd(
 
     _install_packages(add_sudo)
 
+    core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
+    orch_endpoint = f"http://{core_host}:{ORCH_API_PORT}"
+    status_endpoint = f"http://{core_host}:{STATUS_API_PORT}"
+    agent_target = resolve_agent_install_target(
+        agent_name=agent_name,
+        orch_endpoint=orch_endpoint,
+        status_endpoint=status_endpoint,
+    )
+
+    log.info("Setting up the local universal agent's virtualenv...")
+    install_agent_venv(agent_target.venv_path, with_rawstor=with_rawstor)
+
     log.info("Adding user to required groups...")
     _add_user_to_groups(user, add_sudo)
 
     log.info("Setting up storage pool...")
     _create_storage_pool(pool_name, add_sudo)
 
-    log.info("Checking ROM file...")
-    _download_rom_file(romfile_version)
+    log.info("Setting up the local boot network...")
+    _ensure_local_networks(
+        network_type, network, network_bridge, boot_network, boot_bridge
+    )
 
-    log.info("Configuring libvirt...")
-    _configure_libvirt(add_sudo)
+    log.info("Checking ROM file...")
+    rom_path = _download_rom_file(romfile_version)
+
+    if connection_uri != DEFAULT_LOCAL_CONNECTION_URI:
+        log.info("Configuring libvirt for remote access...")
+        _configure_libvirt(add_sudo)
+    else:
+        log.info("Using the local libvirt socket, skipping remote TCP setup.")
 
     if packer:
         log.info("Configuring packer...")
         _install_packer()
+
+    if with_rawstor:
+        log.info("Installing rawstor packages...")
+        install_and_configure_rawstor(add_sudo)
+
+    if add:
+        log.info("Registering hypervisor...")
+        final_avail_cores = (
+            avail_cores if avail_cores is not None else _detect_local_cores()
+        )
+        final_avail_ram = avail_ram if avail_ram is not None else _detect_local_ram_mb()
+        final_uuid = uuid if uuid is not None else _default_hypervisor_uuid()
+        final_name = name if name is not None else _default_hypervisor_name()
+        if connection_uri == DEFAULT_LOCAL_CONNECTION_URI:
+            # This machine is the hypervisor: pin the pool to the local
+            # universal agent (LocalPoolAgentDriver) by node uuid, since
+            # exordos_local_hyper pools are only scheduled to the agent
+            # whose node matches (compute/scheduler/service.py).
+            kind_fields = (
+                "kind=exordos_local_hyper",
+                f"node={local_agent_node_uuid()}",
+            )
+            if with_rawstor:
+                rawstor_pools = json.dumps(
+                    [{"name": "default", "location": RAWSTOR_LOCATION}]
+                )
+                kind_fields += (f"rawstor_pools={rawstor_pools}",)
+        else:
+            kind_fields = ("kind=libvirt",)
+        driver_spec = kind_fields + (
+            f"network={network}",
+            f"iface_mtu={iface_mtu}",
+            f"network_type={network_type}",
+            f"storage_pool={pool_name}",
+            f"connection_uri={connection_uri}",
+            f"iface_rom_file={rom_path}",
+            f"machine_prefix={machine_prefix}",
+        )
+        # Same as running `hypervisors add` right after `init`.
+        ctx.invoke(
+            add_cmd,
+            uuid=final_uuid,
+            name=final_name,
+            description=description,
+            driver_spec=driver_spec,
+            avail_cores=final_avail_cores,
+            avail_ram=final_avail_ram,
+            cores_ratio=cores_ratio,
+            ram_ratio=ram_ratio,
+            machine_type=machine_type,
+        )
+
+        if connection_uri == DEFAULT_LOCAL_CONNECTION_URI:
+            log.info("Setting up the local universal agent...")
+            client = base_client.get_user_api_client(ctx.obj.auth_data)
+            node_uuid = local_agent_node_uuid()
+            reset_agent_meta_file(agent_target.meta_file)
+            private_key_path = write_agent_config(
+                orch_endpoint=orch_endpoint,
+                status_endpoint=status_endpoint,
+                config_path=agent_target.config_path,
+                meta_file=agent_target.meta_file,
+                default_private_key_path=agent_target.default_private_key_path,
+            )
+            base_client.register_agent_and_write_key(
+                client,
+                node_uuid,
+                private_key_path,
+                capabilities=LOCAL_POOL_AGENT_CAPABILITIES,
+            )
+            install_agent_systemd_unit(
+                exec_path=agent_target.exec_path,
+                config_path=agent_target.config_path,
+                unit_path=agent_target.unit_path,
+                unit_name=agent_target.unit_name,
+            )
 
     log.important("Hypervisor environment initialized successfully")
 

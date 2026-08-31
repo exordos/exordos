@@ -671,6 +671,7 @@ def _resolve_hypervisor_placement(
     pool_agent_placement: str,
     hyper_connection_uri: str,
     cidr: ipaddress.IPv4Network,
+    with_rawstor: bool = False,
 ) -> tp.Tuple[str, str]:
     """Resolve the hypervisor's connection URI and driver kind.
 
@@ -687,6 +688,14 @@ def _resolve_hypervisor_placement(
                 "talks to the local libvirt socket directly."
             )
         return hv_commands.DEFAULT_LOCAL_CONNECTION_URI, "exordos_local_hyper"
+
+    if with_rawstor:
+        raise click.UsageError(
+            "--with-rawstor is not supported together with "
+            "--pool-agent-placement=core; only the exordos_local_hyper "
+            "driver (--pool-agent-placement=local) backs volumes with "
+            "rawstor."
+        )
 
     return hyper_connection_uri or f"qemu+tcp://{cidr[1]}/system", "libvirt"
 
@@ -883,6 +892,20 @@ def _resolve_hypervisor_placement(
     show_default=True,
 )
 @click.option(
+    "--with-rawstor",
+    show_default=True,
+    is_flag=True,
+    default=False,
+    help=(
+        "Install rawstor packages. Always installs librawstor + rawstor-ost "
+        "on this host (matching `exordos compute hypervisors init "
+        "--with-rawstor`), since it runs the core VM itself via the local "
+        "libvirt socket. Requires --pool-agent-placement=local: only the "
+        "exordos_local_hyper driver backs volumes with rawstor, so it's "
+        "not supported with the default --pool-agent-placement=core."
+    ),
+)
+@click.option(
     "--no-start",
     show_default=True,
     is_flag=True,
@@ -1007,6 +1030,7 @@ def bootstrap_cmd(
     hyper_storage_pool: str,
     hyper_machine_prefix: str,
     hyper_iface_rom_file: str,
+    with_rawstor: bool,
     no_start: bool,
     no_registration: bool,
     disable_telemetry: bool,
@@ -1160,10 +1184,12 @@ def bootstrap_cmd(
         if subprocess.call(["sudo", "-v"]) != 0:
             raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
 
+    add_sudo = not hv_commands.is_root()
+
     hypervisors = []
 
     hyper_connection_uri, hyper_kind = _resolve_hypervisor_placement(
-        pool_agent_placement, hyper_connection_uri, cidr
+        pool_agent_placement, hyper_connection_uri, cidr, with_rawstor
     )
 
     hyper_node = None
@@ -1187,6 +1213,7 @@ def bootstrap_cmd(
         kind=hyper_kind,
         node=hyper_node,
         private_key=hyper_private_key,
+        rawstor_location=hv_commands.RAWSTOR_LOCATION if with_rawstor else None,
         machine_prefix=hyper_machine_prefix,
         iface_rom_file=hyper_iface_rom_file,
     )
@@ -1261,6 +1288,15 @@ def bootstrap_cmd(
             elements=list(elements) if elements else None,
         )
 
+    if with_rawstor and not no_start:
+        # This machine always runs the core VM itself via the local
+        # libvirt socket, so it needs the rawstor client library too.
+        # --with-rawstor requires --pool-agent-placement=local, so it's
+        # also the rawstor-backed hypervisor - hence the python bindings
+        # too, for the exordos_local_hyper driver's local agent to import.
+        with status_lib.status_done("Installing rawstor packages..."):
+            hv_commands.install_and_configure_rawstor(add_sudo)
+
     if hyper_kind == "exordos_local_hyper":
         # The local agent must be configured regardless of --no-start: the
         # core's IP is fixed at network-creation time (not discovered once
@@ -1280,7 +1316,9 @@ def bootstrap_cmd(
                 orch_endpoint=orch_endpoint,
                 status_endpoint=status_endpoint,
             )
-            hv_commands.install_agent_venv(agent_target.venv_path)
+            hv_commands.install_agent_venv(
+                agent_target.venv_path, with_rawstor=with_rawstor
+            )
             hv_commands.reset_agent_meta_file(agent_target.meta_file)
             private_key_path = hv_commands.write_agent_config(
                 orch_endpoint=orch_endpoint,

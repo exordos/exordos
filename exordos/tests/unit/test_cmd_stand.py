@@ -87,3 +87,17 @@ class TestResolveHypervisorPlacement:
             commands._resolve_hypervisor_placement(
                 "local", "qemu+tcp://10.0.0.5/system", self._CIDR
             )
+
+    def test_core_with_rawstor_is_rejected(self):
+        with pytest.raises(click.UsageError, match="--pool-agent-placement=core"):
+            commands._resolve_hypervisor_placement(
+                "core", "", self._CIDR, with_rawstor=True
+            )
+
+    def test_local_with_rawstor_is_allowed(self):
+        uri, kind = commands._resolve_hypervisor_placement(
+            "local", "", self._CIDR, with_rawstor=True
+        )
+
+        assert uri == hv_commands.DEFAULT_LOCAL_CONNECTION_URI
+        assert kind == "exordos_local_hyper"
