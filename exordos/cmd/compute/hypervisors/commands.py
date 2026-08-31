@@ -19,6 +19,7 @@ import base64
 import configparser
 import getpass
 import io
+import json
 import os
 import secrets
 import socket
@@ -1300,7 +1301,10 @@ def init_cmd(
                 f"node={local_agent_node_uuid()}",
             )
             if with_rawstor:
-                kind_fields += (f"rawstor_location={RAWSTOR_LOCATION}",)
+                rawstor_pools = json.dumps(
+                    [{"name": "default", "location": RAWSTOR_LOCATION}]
+                )
+                kind_fields += (f"rawstor_pools={rawstor_pools}",)
         else:
             kind_fields = ("kind=libvirt",)
         driver_spec = kind_fields + (

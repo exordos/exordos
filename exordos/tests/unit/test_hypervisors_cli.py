@@ -17,6 +17,7 @@ import base64
 import configparser
 import contextlib
 import getpass
+import json
 from unittest.mock import MagicMock
 from unittest.mock import call as mock_call
 from unittest.mock import patch
@@ -319,7 +320,7 @@ class TestInitCmdRegistration:
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
 
     def test_add_with_rawstor_includes_rawstor_driver_spec_fields(self) -> None:
-        """ExordosLocalHyperDriverSpec requires rawstor_location, so
+        """ExordosLocalHyperDriverSpec requires rawstor_pools, so
         --with-rawstor must supply it - otherwise the pool fails to
         validate once it reaches core.
         """
@@ -357,7 +358,10 @@ class TestInitCmdRegistration:
         assert result.exit_code == 0, result.output
         rawstor_mock.assert_called_once()
         kwargs = add_cmd_mock.call_args.kwargs
-        assert f"rawstor_location={hv_commands.RAWSTOR_LOCATION}" in kwargs["driver_spec"]
+        expected_pools = json.dumps(
+            [{"name": "default", "location": hv_commands.RAWSTOR_LOCATION}]
+        )
+        assert f"rawstor_pools={expected_pools}" in kwargs["driver_spec"]
 
     def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
         """A local hypervisor's `init --add` must register this host's
