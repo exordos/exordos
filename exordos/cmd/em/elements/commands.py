@@ -515,6 +515,18 @@ def update_cmd(
         client, current_element["name"], version, exclude_uuid=current_element["uuid"]
     )
 
+    # Without an explicit --version the best candidate may still be older than
+    # the installed one (the current element is excluded from the candidates),
+    # so never propose a downgrade implicitly.
+    if version is None and packaging_version.parse(
+        target_element["version"]
+    ) <= packaging_version.parse(current_element["version"]):
+        click.echo(
+            f"Element {current_element['name']} ({current_element['version']}) "
+            "is already up to date"
+        )
+        return
+
     if not (
         y
         or questionary.confirm(

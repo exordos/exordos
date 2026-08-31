@@ -460,3 +460,59 @@ class TestPushCmd:
             repo_commands.push_cmd, ["-j", "0"], obj=self._obj()
         )
         assert result.exit_code != 0
+
+
+class TestUpdateCmd:
+    """Tests for exordos.cmd.em.elements.commands.update_cmd."""
+
+    def _obj(self) -> ContextObject:
+        return ContextObject(
+            auth_data={},
+            cfg_path=None,
+            developer_key_path=None,
+            cfg={},
+            need_update=None,
+        )
+
+    def _invoke(self, args: list[str], current: dict, target: dict):
+        with (
+            patch.object(em_elements.base_client, "get_user_api_client"),
+            patch.object(
+                em_elements,
+                "_select_current_element_by_name",
+                return_value=current,
+            ),
+            patch.object(em_elements, "_select_element_by_name", return_value=target),
+            patch.object(em_elements.base_client, "action_entity") as action_mock,
+        ):
+            result = CliRunner().invoke(em_elements.update_cmd, args, obj=self._obj())
+        assert result.exit_code == 0, result.output
+        return result, action_mock
+
+    def test_update_cmd_older_candidate_is_not_proposed(self) -> None:
+        # The installed element is excluded from the candidates, so the best
+        # remaining one can be older - that must not be offered as an update.
+        current = {"name": "foo", "version": "0.0.34", "uuid": "u_cur"}
+        target = {"name": "foo", "version": "0.0.33", "uuid": "u_old"}
+        result, action_mock = self._invoke(["foo"], current, target)
+        assert "already up to date" in result.output
+        action_mock.assert_not_called()
+
+    def test_update_cmd_same_version_is_not_proposed(self) -> None:
+        current = {"name": "foo", "version": "0.0.34", "uuid": "u_cur"}
+        target = {"name": "foo", "version": "0.0.34", "uuid": "u_dup"}
+        result, action_mock = self._invoke(["foo"], current, target)
+        assert "already up to date" in result.output
+        action_mock.assert_not_called()
+
+    def test_update_cmd_newer_candidate_upgrades(self) -> None:
+        current = {"name": "foo", "version": "0.0.33", "uuid": "u_cur"}
+        target = {"name": "foo", "version": "0.0.34", "uuid": "u_new"}
+        _, action_mock = self._invoke(["-y", "foo"], current, target)
+        assert action_mock.call_args.kwargs["target"] == "u_new"
+
+    def test_update_cmd_explicit_version_allows_downgrade(self) -> None:
+        current = {"name": "foo", "version": "0.0.34", "uuid": "u_cur"}
+        target = {"name": "foo", "version": "0.0.33", "uuid": "u_old"}
+        _, action_mock = self._invoke(["-y", "-v", "0.0.33", "foo"], current, target)
+        assert action_mock.call_args.kwargs["target"] == "u_old"
