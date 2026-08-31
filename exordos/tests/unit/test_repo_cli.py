@@ -177,13 +177,13 @@ class TestGetSortKey:
             "repository": f"/v1/repo/repositories/{u}",
         }
         repo_priorities = {u: 100}
-        priority, version = em_elements._get_sort_key(element, repo_priorities)
+        version, priority = em_elements._get_sort_key(element, repo_priorities)
         assert priority == 100
         assert str(version) == "1.0.0"
 
     def test_default_priority_zero(self) -> None:
         element = {"version": "2.0.0"}
-        priority, _ = em_elements._get_sort_key(element, {})
+        _, priority = em_elements._get_sort_key(element, {})
         assert priority == 0
 
     def test_unknown_repo_uuid_defaults_to_zero(self) -> None:
@@ -192,13 +192,22 @@ class TestGetSortKey:
             "version": "1.0.0",
             "repository": f"/v1/repo/repositories/{u}",
         }
-        priority, _ = em_elements._get_sort_key(element, {})
+        _, priority = em_elements._get_sort_key(element, {})
         assert priority == 0
 
     def test_invalid_repository_ref_defaults_to_zero(self) -> None:
         element = {"version": "1.0.0", "repository": "not-a-uuid"}
-        priority, _ = em_elements._get_sort_key(element, {})
+        _, priority = em_elements._get_sort_key(element, {})
         assert priority == 0
+
+    def test_version_outranks_priority(self) -> None:
+        u = "12345678-1234-1234-1234-123456789abc"
+        newer = {"version": "0.0.35", "repository": ""}
+        older = {"version": "0.0.6", "repository": f"/v1/repo/repositories/{u}"}
+        repo_priorities = {u: 4096}
+        assert em_elements._get_sort_key(
+            newer, repo_priorities
+        ) > em_elements._get_sort_key(older, repo_priorities)
 
 
 class TestSelectElementByName:
@@ -261,6 +270,31 @@ class TestSelectElementByName:
         client = self._client(elements, repositories)
         selected = em_elements._select_element_by_name(client, "foo", None)
         assert selected["uuid"] == "u2"
+
+    def test_selects_newer_version_from_lower_priority_repo(self) -> None:
+        u_low = "11111111-1111-1111-1111-111111111111"
+        u_high = "22222222-2222-2222-2222-222222222222"
+        elements = [
+            {
+                "name": "foo",
+                "version": "0.0.35",
+                "uuid": "u1",
+                "repository": f"/v1/repo/repositories/{u_low}",
+            },
+            {
+                "name": "foo",
+                "version": "0.0.6",
+                "uuid": "u2",
+                "repository": f"/v1/repo/repositories/{u_high}",
+            },
+        ]
+        repositories = [
+            {"uuid": u_low, "priority": 10},
+            {"uuid": u_high, "priority": 4096},
+        ]
+        client = self._client(elements, repositories)
+        selected = em_elements._select_element_by_name(client, "foo", None)
+        assert selected["uuid"] == "u1"
 
     def test_version_filter_exact_match(self) -> None:
         elements = [

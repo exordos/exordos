@@ -146,15 +146,19 @@ def show_element_ips(ctx: click.Context, name: str) -> None:
 
 def _get_sort_key(
     element: dict[str, tp.Any], repo_priorities: dict[str, int]
-) -> tuple[int, packaging_version.Version]:
-    """Get sort key for element: (repository_priority, version).
+) -> tuple[packaging_version.Version, int]:
+    """Get sort key for element: (version, repository_priority).
+
+    The version comes first so that the newest element always wins, no matter
+    which repository carries it; repository priority only breaks ties between
+    repositories offering the same version.
 
     Args:
         element: Element dictionary containing version and repository reference.
         repo_priorities: Dictionary mapping repository UUID to priority value.
 
     Returns:
-        Tuple of (repository_priority, version) for sorting.
+        Tuple of (version, repository_priority) for sorting.
         Higher values indicate higher priority.
     """
     version_obj = packaging_version.parse(element["version"])
@@ -169,7 +173,7 @@ def _get_sort_key(
         except Exception:
             pass
 
-    return (repo_priority, version_obj)
+    return (version_obj, repo_priority)
 
 
 def _select_element_by_name(
@@ -178,11 +182,11 @@ def _select_element_by_name(
     version_filter: str | None,
     exclude_uuid: str | None = None,
 ) -> dict[str, tp.Any]:
-    """Select the best element by name, sorting by (repository_priority, version).
+    """Select the best element by name, sorting by (version, repository_priority).
 
     Filters out development versions unless version_filter is specified.
-    Sorts elements by repository priority (higher is better) and version
-    (higher is better), then returns the highest priority element.
+    Sorts elements by version (higher is better) and repository priority
+    (higher is better), then returns the best element.
 
     Args:
         client: API client for making requests.
@@ -233,7 +237,7 @@ def _select_element_by_name(
                 f"No elements found with name '{name}' and version '{version_filter}'"
             )
 
-    # Sort by (repository_priority, version) - higher is better
+    # Sort by (version, repository_priority) - higher is better
     elements.sort(key=lambda e: _get_sort_key(e, repo_priorities), reverse=True)
 
     return elements[0]
