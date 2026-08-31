@@ -170,7 +170,7 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "disk_type": disk_type,
+            "disk_kind": {"kind": disk_type},
         },
     }
     if hostname is not None:
@@ -476,7 +476,7 @@ def add_or_update_node_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "disk_type": disk_type,
+            "disk_kind": {"kind": disk_type},
         },
     }
     if hostname is not None:
