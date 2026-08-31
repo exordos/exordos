@@ -168,7 +168,7 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "disk_type": disk_type,
+            "disk_kind": {"kind": disk_type},
         },
     }
     data.update(tag_data)
