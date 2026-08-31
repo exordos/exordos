@@ -149,7 +149,7 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "disk_type": disk_type,
+            "disk_kind": {"kind": disk_type},
         },
     }
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
@@ -417,7 +417,7 @@ def add_or_update_node_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "disk_type": disk_type,
+            "disk_kind": {"kind": disk_type},
         },
     }
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
