@@ -40,6 +40,7 @@ FIELDS_MAP = {
     "RAM": "ram",
     "IP": lambda x: x.get("default_network", {}).get("ipv4", "unknown"),
     "Disks": compute_common.extract_disks_from_entity,
+    "Disk type": compute_common.extract_disk_type_from_entity,
     "Image": compute_common.extract_image_from_entity,
     "Status": "status",
 }
@@ -100,6 +101,13 @@ def _validate_hostname(hostname: str) -> None:
     help="Name of the image to deploy",
 )
 @click.option(
+    "--disk-type",
+    type=click.Choice(["qcow2", "rawstor"]),
+    default="qcow2",
+    show_default=True,
+    help="Backend to store the root disk on",
+)
+@click.option(
     "-n",
     "--name",
     type=str,
@@ -141,6 +149,7 @@ def add_cmd(
     ram: int,
     root_disk: int,
     image: str,
+    disk_type: str,
     name: str,
     description: str,
     hostname: str | None,
@@ -161,6 +170,7 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
+            "disk_type": disk_type,
         },
     }
     if hostname is not None:
@@ -369,6 +379,13 @@ def update_cmd(
     help="Name of the image to deploy",
 )
 @click.option(
+    "--disk-type",
+    type=click.Choice(["qcow2", "rawstor"]),
+    default="qcow2",
+    show_default=True,
+    help="Backend to store the root disk on",
+)
+@click.option(
     "-n",
     "--name",
     type=str,
@@ -403,6 +420,7 @@ def add_or_update_node_cmd(
     ram: int,
     root_disk: int,
     image: str,
+    disk_type: str,
     name: str,
     description: str,
     hostname: str | None,
@@ -422,6 +440,7 @@ def add_or_update_node_cmd(
             ram=ram,
             root_disk=root_disk,
             image=image,
+            disk_type=disk_type,
             name=name,
             description=description,
             hostname=hostname,
@@ -440,6 +459,7 @@ def add_or_update_node_cmd(
             ram=ram,
             root_disk=root_disk,
             image=image,
+            disk_type=disk_type,
             name=name,
             description=description,
             hostname=hostname,
@@ -456,6 +476,7 @@ def add_or_update_node_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
+            "disk_type": disk_type,
         },
     }
     if hostname is not None:
