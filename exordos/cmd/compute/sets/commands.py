@@ -41,6 +41,7 @@ FIELDS_MAP = {
     "Cores": "cores",
     "RAM": "ram",
     "Disks": compute_common.extract_disks_from_entity,
+    "Disk type": compute_common.extract_disk_type_from_entity,
     "Image": compute_common.extract_image_from_entity,
     "NodeType": "node_type",
     "Status": "status",
@@ -101,6 +102,13 @@ sets_group = create_entity_group(
     help="Name of the image to deploy",
 )
 @click.option(
+    "--disk-type",
+    type=click.Choice(["qcow2", "rawstor"]),
+    default="qcow2",
+    show_default=True,
+    help="Backend to store the root disk on",
+)
+@click.option(
     "-n",
     "--name",
     type=str,
@@ -137,6 +145,7 @@ def add_cmd(
     ram: int,
     root_disk: int,
     image: str,
+    disk_type: str,
     name: str,
     description: str,
     replicas: int,
@@ -160,6 +169,7 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
+            "disk_type": disk_type,
         },
     }
     data.update(tag_data)
