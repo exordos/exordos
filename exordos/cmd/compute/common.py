@@ -50,12 +50,12 @@ def extract_disk_type_from_entity(entity: dict) -> str:
         return "Unknown"
 
     if entity["disk_spec"]["kind"] == "root_disk":
-        return entity["disk_spec"].get("disk_type", "qcow2")
+        return entity["disk_spec"].get("disk_kind", {}).get("kind", "qcow2")
 
     if entity["disk_spec"]["kind"] == "disks":
         disks = entity["disk_spec"]["disks"]
         if not disks:
             return "Unknown"
-        return disks[0].get("disk_type", "qcow2")
+        return disks[0].get("disk_kind", {}).get("kind", "qcow2")
 
     return "Unknown"
