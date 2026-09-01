@@ -229,16 +229,26 @@ def do_upload(
 
     wait_for_repository_active(client, entity_uuid, timeout)
 
-    base_client.action_entity(
-        client,
-        c.REPOSITORY_COLLECTION,
-        "upload",
-        entity_uuid,
-        element_name=name,
-        element_version=version,
-        manifest=manifest_data,
-        description=description,
-    )
+    try:
+        base_client.action_entity(
+            client,
+            c.REPOSITORY_COLLECTION,
+            "upload",
+            entity_uuid,
+            element_name=name,
+            element_version=version,
+            manifest=manifest_data,
+            description=description,
+        )
+    except bazooka_exc.ConflictError:
+        # This exact version is already in the repository — a re-run of the
+        # same command. Nothing to upload; let the caller carry on with what
+        # it wanted to do with it.
+        click.echo(
+            f"Element {click.style(f'{name}:{version}', fg='green')} is "
+            "already in the repository"
+        )
+        return
     click.echo(
         f"Element {click.style(f'{name}:{version}', fg='green')} was uploaded "
         f"successfully to repository {click.style(repository, fg='green')}"
