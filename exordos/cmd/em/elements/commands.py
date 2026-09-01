@@ -541,35 +541,36 @@ def update_cmd(
     )
 
 
-@click.command("uninstall", help="Uninstall element by UUID or name")
-@click.argument("uuid_or_name", type=str)
+@click.command("uninstall", help="Uninstall elements by UUID or name")
+@click.argument("uuid_or_name", type=str, nargs=-1, required=True)
 @click.option(
     "--yes", "-y", "y", help="Automatically answer yes for all questions", is_flag=True
 )
 @click.pass_context
-def uninstall_cmd(ctx: click.Context, uuid_or_name: str, y: bool) -> None:
-    """Uninstall element by UUID or name"""
+def uninstall_cmd(ctx: click.Context, uuid_or_name: tuple[str, ...], y: bool) -> None:
+    """Uninstall elements by UUID or name"""
     import questionary
 
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
-    if not (y or questionary.confirm(f"Delete {ENTITY} {uuid_or_name}?").ask()):
-        return
+    for element_ref in uuid_or_name:
+        if not (y or questionary.confirm(f"Delete {ENTITY} {element_ref}?").ask()):
+            continue
 
-    if utils.is_valid_uuid(uuid_or_name):
-        element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=uuid_or_name)
-        element_uuid = element["uuid"]
-    else:
-        element = _select_current_element_by_name(client, uuid_or_name)
-        element_uuid = element["uuid"]
+        if utils.is_valid_uuid(element_ref):
+            element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=element_ref)
+            element_uuid = element["uuid"]
+        else:
+            element = _select_current_element_by_name(client, element_ref)
+            element_uuid = element["uuid"]
 
-    base_client.action_entity(
-        client, c.REPOSITORY_ELEMENT_COLLECTION, "uninstall", element_uuid
-    )
+        base_client.action_entity(
+            client, c.REPOSITORY_ELEMENT_COLLECTION, "uninstall", element_uuid
+        )
 
-    click.echo(
-        f"Element {click.style(element['name'], fg='green')} was uninstalled successfully"
-    )
+        click.echo(
+            f"Element {click.style(element['name'], fg='green')} was uninstalled successfully"
+        )
 
 
 def edit_data(data: str, editor: str = "nano") -> tp.Tuple[str, dict]:
