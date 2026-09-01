@@ -28,8 +28,7 @@ jobs:
       run: |
         set -eux
 
-        sudo curl --fail --show-error --location --progress-bar https://repo.exordos.com/exordos/latest/exordos-linux --output /usr/local/bin/exordos
-        sudo chmod +x /usr/local/bin/exordos
+        curl -fsSL https://repo.exordos.com/install.sh | sudo sh
         
         which exordos
         exordos version
