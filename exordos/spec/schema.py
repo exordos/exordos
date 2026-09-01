@@ -119,6 +119,13 @@ def update_manifest_schema(base_manifest_schema: dict, user_api_spec: dict) -> d
     return base_manifest_schema
 
 
+def resolve_schema_ref(scheme: dict, schema: dict) -> dict:
+    ref = schema.get("$ref")
+    if not ref:
+        return schema
+    return scheme.get("components", {}).get("schemas", {}).get(ref.split("/")[-1], {})
+
+
 def search_parameter_example(
     scheme: dict, resource_type: str, parameter: str
 ) -> tp.Any:
@@ -131,19 +138,17 @@ def search_parameter_example(
     model_name = ref.split("/")[-1]
     model = scheme["components"]["schemas"].get(model_name)
     if model:
-        model_ref = model.get("$ref")
-        if model_ref:
-            model_ref_name = model_ref.split("/")[-1]
-            model = scheme["components"]["schemas"].get(model_ref_name)
-        example = model.get("properties", {}).get(parameter, {}).get("example")
+        model = resolve_schema_ref(scheme, model)
+        properties = model.get("properties", {})
+        example = properties.get(parameter, {}).get("example")
         if example is not None:
             return example
-        for prop in model["properties"].values():
-            if "oneOf" in prop:
-                for oneOf in prop["oneOf"]:
-                    example = oneOf["properties"].get(parameter, {}).get("example")
-                    if example is not None:
-                        return example
+        for prop in properties.values():
+            for one_of in prop.get("oneOf", []):
+                one_of = resolve_schema_ref(scheme, one_of)
+                example = one_of.get("properties", {}).get(parameter, {}).get("example")
+                if example is not None:
+                    return example
     return None
 
 
