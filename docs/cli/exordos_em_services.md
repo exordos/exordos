@@ -1,0 +1,29 @@
+
+# exordos_em_services
+
+Manage services in the Exordos installation
+
+## Usage
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos em services [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                           
+```
+
+## Options
+
+* `help`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--help`
+
+  Show this message and exit.
+
+## CLI Help
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos em services [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                           
+```

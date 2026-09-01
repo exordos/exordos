@@ -31,6 +31,7 @@ from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
 from exordos.cmd.compute.nodes import commands as nodes_commands
 from exordos.cmd.configs import commands as configs_commands
+from exordos.cmd.dbaas import dbaas_group
 from exordos.cmd.deploy import commands as deploy_commands
 from exordos.cmd.dns import dns_group
 from exordos.cmd.em import em_group
@@ -325,6 +326,7 @@ exordos.add_command(vars_commands.vv_group)
 exordos.add_command(quota_commands.limits_group, aliases=["q"])
 
 exordos.add_command(dns_group)
+exordos.add_command(dbaas_group)
 exordos.add_command(network_group)
 
 exordos.add_command(rules_group)

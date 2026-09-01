@@ -1,0 +1,59 @@
+
+# exordos_iam_role_bindings_add
+
+Add a new role_binding to the Exordos installation
+
+## Usage
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                           
+```
+
+## Options
+
+* `uuid`:
+    * Type: uuid
+    * Default: `none`
+    * Usage: `-u
+--uuid`
+
+  UUID of the role_binding
+
+* `project_id`:
+    * Type: uuid
+    * Default: `sentinel.unset`
+    * Usage: `-p
+--project-id`
+
+  UUID of the project in which to deploy the role_binding
+
+* `user` (REQUIRED):
+    * Type: uuid
+    * Default: `sentinel.unset`
+    * Usage: `--user`
+
+  role uuid
+
+* `role` (REQUIRED):
+    * Type: uuid
+    * Default: `sentinel.unset`
+    * Usage: `--role`
+
+  user uuid
+
+* `help`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--help`
+
+  Show this message and exit.
+
+## CLI Help
+
+```console
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                           
+```
