@@ -69,27 +69,22 @@ def info_cmd(
     resource = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
     show_data(resource, output, "Resource")
 
-    # Find target_resource
     targets = base_client.list_entities(client, c.TARGET_RESOURCE_COLLECTION, uuid=uuid)
-    target_resource = None
-    if targets:
-        target_resource = targets[0]
-        for target in targets:
-            show_data(target, output, "Target resource")
-
-    # Find actual_resource
     actuals = base_client.list_entities(client, c.ACTUAL_RESOURCE_COLLECTION, uuid=uuid)
-    actual_resource = None
-    if actuals:
-        actual_resource = actuals[0]
-        for actual in actuals:
-            show_data(actual, output, "Actual resource")
+    actuals_by_key = {(actual["uuid"], actual["kind"]): actual for actual in actuals}
 
-    if (
-        target_resource
-        and actual_resource
-        and target_resource["hash"] != actual_resource["hash"]
-    ):
-        click.secho(
-            "Target resource and actual resource hashes are different", fg="red"
-        )
+    for target in targets:
+        show_data(target, output, "Target resource")
+        actual = actuals_by_key.pop((target["uuid"], target["kind"]), None)
+        if actual is None:
+            click.secho("Actual resource is missing", fg="red")
+            continue
+        show_data(actual, output, "Actual resource")
+        if target["hash"] != actual["hash"]:
+            click.secho(
+                "Target resource and actual resource hashes are different", fg="red"
+            )
+
+    for actual in actuals_by_key.values():
+        show_data(actual, output, "Actual resource")
+        click.secho("Target resource is missing", fg="red")
