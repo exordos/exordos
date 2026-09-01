@@ -521,6 +521,8 @@ def _bootstrap_core(
     realm_uuid: str,
     realm_secret: str,
     realm_tokens: dict,
+    realm_id: str | None = None,
+    realm_domain: str | None = None,
     ssh_public_key: str | None = None,
     elements: list[str] | None = None,
 ) -> ipaddress.IPv4Address | None:
@@ -601,6 +603,8 @@ def _bootstrap_core(
             realm_uuid=realm_uuid,
             realm_secret=realm_secret,
             realm_tokens=realm_tokens,
+            realm_id=realm_id,
+            realm_domain=realm_domain,
             developer_keys=ssh_public_key,
             iam=iam,
             elements=elements,
@@ -1199,11 +1203,15 @@ def bootstrap_cmd(
         realm_uuid = realm_spec_data["realm_uuid"]
         realm_secret = realm_spec_data["realm_secret"]
         realm_tokens = realm_spec_data["realm_tokens"]
+        realm_id = realm_spec_data.get("realm_id")
+        realm_domain = realm_spec_data.get("realm_domain")
         click.secho(
             "Using pre-assigned realm identity from the realm spec",
             fg="cyan",
         )
     else:
+        realm_id = None
+        realm_domain = None
         with status_lib.status_done("Registering realm in ecosystem..."):
             realm_uuid, realm_secret, realm_tokens = _register_core(
                 ecosystem_endpoint=ecosystem_endpoint,
@@ -1257,6 +1265,8 @@ def bootstrap_cmd(
             realm_uuid=realm_uuid,
             realm_secret=realm_secret,
             realm_tokens=realm_tokens,
+            realm_id=realm_id,
+            realm_domain=realm_domain,
             ssh_public_key=ssh_public_key_content,
             elements=list(elements) if elements else None,
         )
