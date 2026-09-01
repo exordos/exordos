@@ -148,6 +148,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_cn_delete/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_cn_info/</loc>
+        <lastmod>2026-09-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_cn_info/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_cn_info/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_cn_list/</loc>
         <lastmod>2026-09-01</lastmod>
         <changefreq>daily</changefreq>
@@ -202,6 +209,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_compute_cn_delete/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_compute_cn_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_compute_cn_info/</loc>
+        <lastmod>2026-09-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_compute_cn_info/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_compute_cn_info/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_compute_cn_list/</loc>
@@ -1688,6 +1702,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_realms_list/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_realms_pool/</loc>
+        <lastmod>2026-09-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_realms_pool/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_realms_pool/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_realms_show/</loc>
         <lastmod>2026-09-01</lastmod>
         <changefreq>daily</changefreq>
@@ -2598,6 +2619,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_cn_delete/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_cn_info/</loc>
+        <lastmod>2026-09-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_cn_info/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_cn_info/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_cn_list/</loc>
         <lastmod>2026-09-01</lastmod>
         <changefreq>daily</changefreq>
@@ -2652,6 +2680,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_compute_cn_delete/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_compute_cn_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_compute_cn_info/</loc>
+        <lastmod>2026-09-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_compute_cn_info/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_compute_cn_info/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_compute_cn_list/</loc>
@@ -4136,6 +4171,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_realms_list/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_realms_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_realms_pool/</loc>
+        <lastmod>2026-09-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_realms_pool/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_realms_pool/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_realms_show/</loc>
