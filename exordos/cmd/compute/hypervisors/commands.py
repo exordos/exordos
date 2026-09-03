@@ -36,10 +36,16 @@ from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
 from exordos.common.table import show_data
+from exordos.exceptions import RunException
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
 
 DEFAULT_LOCAL_CONNECTION_URI = "qemu:///system"
+
+# Namespace this command's derived UUIDs from, so they can't collide with
+# UUIDs some other exordos component derives from the same source string
+# (e.g. a DMI product UUID) via its own uuid5 namespace.
+_HYPERVISOR_UUID_NAMESPACE = sys_uuid.UUID("6f7c9b0e-6e0a-4b7a-9b1e-6b6b8f3a2c1d")
 
 # The universal agent that runs LocalPoolAgentDriver so this hypervisor's
 # pool is actually managed. Named "universal_agent" by default, matching
@@ -694,6 +700,12 @@ def _ensure_local_networks(
 ) -> None:
     """Create this hypervisor's libvirt networks if missing.
 
+    On a plain 'network'-type hypervisor (single-host/local testing, not
+    reachable from the rest of the realm anyway), only the boot network
+    is auto-created here, as an isolated network - the main network is
+    left to the operator, same as before. Only 'bridge'-type creates
+    both.
+
     `network` and `boot_network` are logical libvirt network names the
     orchestrator itself tracks and assigns to ports by (see
     exordos_core.compute.dm.models.Port.from_boot_network and the
@@ -714,11 +726,6 @@ def _ensure_local_networks(
     forwards onto its own bridge device (--network-bridge/--boot-bridge;
     each falls back to --network's bridge when not given, for a simpler
     single-bridge setup where they do share one L2).
-
-    For a plain 'network'-type hypervisor (single-host/local testing,
-    not reachable from the rest of the realm anyway), only the boot
-    network is auto-created, as an isolated network - the main network
-    is left to the operator, same as before.
     """
     if network_type != "bridge":
         if not libvirt.has_net(boot_network):
@@ -845,17 +852,25 @@ def _detect_local_ram_mb(meminfo_path: str = "/proc/meminfo") -> int:
     raise click.ClickException(f"Unable to determine total RAM from {meminfo_path}")
 
 
-def _default_hypervisor_uuid(machine_id_path: str = "/etc/machine-id") -> sys_uuid.UUID:
-    """Derive a stable UUID for this machine from /etc/machine-id.
+def _default_hypervisor_uuid(
+    product_uuid_path: str = "/sys/class/dmi/id/product_uuid",
+) -> sys_uuid.UUID:
+    """Derive a stable UUID for this machine from its DMI product UUID.
 
     Used when --uuid isn't given, so this machine always registers under
-    the same hypervisor UUID.
+    the same hypervisor UUID. /etc/machine-id doesn't work for this once
+    baremetal nodes are image-provisioned too: nodes cloned from the same
+    image end up with the same machine-id. The DMI product UUID is
+    burned into hardware/firmware instead, so it stays distinct per host
+    - and it's convenient for debugging, since it's also the value an
+    operator can read straight off the hardware. It's re-hashed through
+    uuid5 (rather than parsed as a UUID directly) so an oddly-formatted
+    or placeholder DMI value still yields a valid, stable UUID.
     """
     try:
-        with open(machine_id_path) as f:
-            machine_id = f.read().strip()
-        return sys_uuid.UUID(hex=machine_id)
-    except (OSError, ValueError):
+        product_uuid = read_with_sudo(product_uuid_path).strip()
+        return sys_uuid.uuid5(_HYPERVISOR_UUID_NAMESPACE, product_uuid)
+    except (OSError, RunException):
         return sys_uuid.uuid4()
 
 

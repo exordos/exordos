@@ -104,22 +104,23 @@ class TestDefaultHypervisorUuid:
     exordos.cmd.compute.hypervisors.commands._default_hypervisor_uuid.
     """
 
-    def test_derives_uuid_from_machine_id(self, tmp_path) -> None:
-        machine_id_path = tmp_path / "machine-id"
-        machine_id_path.write_text("1b4e28ba2fa1428193ff9de29d0a3d0e\n")
+    def test_derives_stable_uuid_from_product_uuid(self, tmp_path) -> None:
+        product_uuid_path = tmp_path / "product_uuid"
+        product_uuid_path.write_text("4c4c4544-0034-3010-8035-b9c04f503432\n")
 
-        result = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+        result = hv_commands._default_hypervisor_uuid(str(product_uuid_path))
 
-        assert result == hv_commands.sys_uuid.UUID(
-            "1b4e28ba-2fa1-4281-93ff-9de29d0a3d0e"
+        assert result == hv_commands.sys_uuid.uuid5(
+            hv_commands._HYPERVISOR_UUID_NAMESPACE,
+            "4c4c4544-0034-3010-8035-b9c04f503432",
         )
 
-    def test_same_machine_id_yields_the_same_uuid(self, tmp_path) -> None:
-        machine_id_path = tmp_path / "machine-id"
-        machine_id_path.write_text("1b4e28ba2fa1428193ff9de29d0a3d0e")
+    def test_same_product_uuid_yields_the_same_uuid(self, tmp_path) -> None:
+        product_uuid_path = tmp_path / "product_uuid"
+        product_uuid_path.write_text("4c4c4544-0034-3010-8035-b9c04f503432")
 
-        first = hv_commands._default_hypervisor_uuid(str(machine_id_path))
-        second = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+        first = hv_commands._default_hypervisor_uuid(str(product_uuid_path))
+        second = hv_commands._default_hypervisor_uuid(str(product_uuid_path))
 
         assert first == second
 
@@ -130,25 +131,57 @@ class TestDefaultHypervisorUuid:
 
         assert isinstance(result, hv_commands.sys_uuid.UUID)
 
-    def test_falls_back_to_random_uuid_when_invalid(self, tmp_path) -> None:
-        machine_id_path = tmp_path / "machine-id"
-        machine_id_path.write_text("not-a-valid-machine-id")
+    def test_yields_a_valid_uuid_even_for_a_placeholder_dmi_value(
+        self, tmp_path
+    ) -> None:
+        # Some hypervisors/BIOSes report a placeholder like this instead
+        # of a real product UUID - it must still hash into a valid UUID
+        # rather than crash the command.
+        product_uuid_path = tmp_path / "product_uuid"
+        product_uuid_path.write_text("Not Settable")
 
-        result = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+        result = hv_commands._default_hypervisor_uuid(str(product_uuid_path))
 
         assert isinstance(result, hv_commands.sys_uuid.UUID)
 
-    def test_falls_back_to_random_uuid_on_permission_error(self, tmp_path) -> None:
-        # Any OSError (not just the missing-file case), e.g. a hardened
-        # system where /etc/machine-id isn't world-readable, must fall
-        # back too rather than crashing the command.
-        machine_id_path = tmp_path / "machine-id"
-        machine_id_path.write_text("1b4e28ba2fa1428193ff9de29d0a3d0e")
+    def test_falls_back_to_sudo_cat_on_permission_error(self, tmp_path) -> None:
+        # product_uuid is typically root-only readable; this command runs
+        # as a regular sudo-capable user, not root.
+        product_uuid_path = tmp_path / "product_uuid"
+        product_uuid_path.write_text("4c4c4544-0034-3010-8035-b9c04f503432\n")
 
-        with patch.object(
-            hv_commands, "open", side_effect=PermissionError, create=True
+        fake_result = MagicMock(stdout="4c4c4544-0034-3010-8035-b9c04f503432\n")
+        with (
+            patch.object(hv_commands, "open", side_effect=PermissionError, create=True),
+            patch.object(
+                hv_commands, "run_command", return_value=fake_result
+            ) as run_mock,
         ):
-            result = hv_commands._default_hypervisor_uuid(str(machine_id_path))
+            result = hv_commands._default_hypervisor_uuid(str(product_uuid_path))
+
+        assert result == hv_commands.sys_uuid.uuid5(
+            hv_commands._HYPERVISOR_UUID_NAMESPACE,
+            "4c4c4544-0034-3010-8035-b9c04f503432",
+        )
+        run_mock.assert_called_once_with(["sudo", "cat", str(product_uuid_path)])
+
+    def test_falls_back_to_random_uuid_when_sudo_cat_also_fails(
+        self, tmp_path
+    ) -> None:
+        # A hardened system where even sudo can't read the file must fall
+        # back too, rather than crashing the command.
+        product_uuid_path = tmp_path / "product_uuid"
+        product_uuid_path.write_text("4c4c4544-0034-3010-8035-b9c04f503432")
+
+        with (
+            patch.object(hv_commands, "open", side_effect=PermissionError, create=True),
+            patch.object(
+                hv_commands,
+                "run_command",
+                side_effect=hv_commands.RunException("sudo cat failed"),
+            ),
+        ):
+            result = hv_commands._default_hypervisor_uuid(str(product_uuid_path))
 
         assert isinstance(result, hv_commands.sys_uuid.UUID)
 
