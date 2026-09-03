@@ -178,7 +178,7 @@ class TestDefaultHypervisorUuid:
             patch.object(
                 hv_commands,
                 "run_command",
-                side_effect=hv_commands.RunException("sudo cat failed"),
+                side_effect=hv_commands.exceptions.RunException("sudo cat failed"),
             ),
         ):
             result = hv_commands._default_hypervisor_uuid(str(product_uuid_path))

@@ -29,6 +29,7 @@ import uuid as sys_uuid
 import rich_click as click
 
 from exordos import constants as c
+from exordos import exceptions
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
@@ -36,7 +37,6 @@ from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
 from exordos.common.table import show_data
-from exordos.exceptions import RunException
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
 
@@ -876,7 +876,7 @@ def _default_hypervisor_uuid(
     try:
         product_uuid = read_with_sudo(product_uuid_path).strip()
         return sys_uuid.uuid5(_HYPERVISOR_UUID_NAMESPACE, product_uuid)
-    except (OSError, RunException):
+    except (OSError, exceptions.RunException):
         return sys_uuid.uuid4()
 
 
