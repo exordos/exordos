@@ -866,6 +866,12 @@ def _default_hypervisor_uuid(
     operator can read straight off the hardware. It's re-hashed through
     uuid5 (rather than parsed as a UUID directly) so an oddly-formatted
     or placeholder DMI value still yields a valid, stable UUID.
+
+    This only distinguishes physical hosts: a VM cloned from a shared
+    template/snapshot can carry the same product UUID as its siblings
+    (the hypervisor copies it into the guest's SMBIOS from the image),
+    so this doesn't dedupe image-provisioned VMs, only image-provisioned
+    baremetal.
     """
     try:
         product_uuid = read_with_sudo(product_uuid_path).strip()
