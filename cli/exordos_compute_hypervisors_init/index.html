@@ -5372,6 +5372,171 @@
 </ul>
 <p>username</p>
 <ul>
+<li><code>add</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>--add</code></li>
+</ul>
+</li>
+</ul>
+<p>After initialization, register the hypervisor in the orchestrator (same as running <code>hypervisors add</code>), using the top-level <code>exordos --endpoint/--user/--password</code> credentials. --uuid/--name/--description/--avail-cores/--avail-ram/--cores-ratio/--ram-ratio/--machine-type/--iface-mtu/--machine-prefix only apply in this mode. --network/--network-type/--network-bridge/--boot-network/--boot-bridge always set up this host's local libvirt networks regardless of --add, and additionally feed the registered driver_spec when combined with it.</p>
+<ul>
+<li><code>uuid</code>:<ul>
+<li>Type: uuid</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-u
+--uuid</code></li>
+</ul>
+</li>
+</ul>
+<p>UUID of the hypervisor. Defaults to a UUID derived from /etc/machine-id, so re-running this command with --add updates the same hypervisor instead of registering a new one each time.</p>
+<ul>
+<li><code>name</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-n
+--name</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of the hypervisor. Defaults to this machine's hostname.</p>
+<ul>
+<li><code>description</code>:<ul>
+<li>Type: text</li>
+<li>Default: ``</li>
+<li>Usage: <code>-D
+--description</code></li>
+</ul>
+</li>
+</ul>
+<p>Description of the hypervisor</p>
+<ul>
+<li><code>avail_cores</code>:<ul>
+<li>Type: integer</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>--avail-cores</code></li>
+</ul>
+</li>
+</ul>
+<p>Number of CPU cores available for VMs on this hypervisor. Auto-detected from the local machine if not set.</p>
+<ul>
+<li><code>avail_ram</code>:<ul>
+<li>Type: integer</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>--avail-ram</code></li>
+</ul>
+</li>
+</ul>
+<p>Amount of RAM in Mb available for VMs on this hypervisor. Auto-detected from the local machine if not set.</p>
+<ul>
+<li>
+<p><code>cores_ratio</code>:</p>
+<ul>
+<li>Type: float</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>--cores-ratio</code></li>
+</ul>
+</li>
+<li>
+<p><code>ram_ratio</code>:</p>
+<ul>
+<li>Type: float</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>--ram-ratio</code></li>
+</ul>
+</li>
+<li>
+<p><code>machine_type</code>:</p>
+<ul>
+<li>Type: choice</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-m
+--machine-type</code></li>
+</ul>
+</li>
+<li>
+<p><code>connection_uri</code>:</p>
+<ul>
+<li>Type: text</li>
+<li>Default: <code>qemu:///system</code></li>
+<li>Usage: <code>--connection-uri</code></li>
+</ul>
+</li>
+</ul>
+<p>Connection URI the orchestrator will use to reach this hypervisor. Hypervisors are expected to only run VMs local to themselves, so the default connects over the local libvirt Unix socket. Override only for backward compatibility or exotic setups, e.g. 'qemu+tcp://10.0.0.1/system' for remote access.</p>
+<ul>
+<li><code>network</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>exordos-core-net</code></li>
+<li>Usage: <code>--network</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of the libvirt network used for VMs on this hypervisor - this is the logical name the orchestrator itself assigns ports by (see the stand's original bootstrap), not necessarily a literal host device. Don't rename it unless the orchestrator's own main network is actually named differently. For --network-type bridge, --network-bridge names the real underlying device.</p>
+<ul>
+<li><code>network_type</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>network</code></li>
+<li>Usage: <code>--network-type</code></li>
+</ul>
+</li>
+</ul>
+<p>Type of the libvirt network used for VMs on this hypervisor</p>
+<ul>
+<li><code>network_bridge</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>--network-bridge</code></li>
+</ul>
+</li>
+</ul>
+<p>Host bridge device --network forwards onto. Only used when --network-type is 'bridge'; defaults to --network's own value if not given (i.e. the local libvirt network and the host bridge device happen to share one name).</p>
+<ul>
+<li><code>boot_network</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>exordos-core-boot-net</code></li>
+<li>Usage: <code>--boot-network</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of the libvirt network new machines PXE-boot on before getting their real network port. DHCP (with the PXE next-server option) for it is served centrally over the realm's shared L2, the same way as for --network - not by anything local to this host.</p>
+<ul>
+<li><code>boot_bridge</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>--boot-bridge</code></li>
+</ul>
+</li>
+</ul>
+<p>Host bridge device the boot network forwards onto, if it's a different L2 than --network's bridge (e.g. the stand's bootstrap host reaches the boot subnet's DHCP over a separate NIC from the main one). Only used when --network-type is 'bridge'; defaults to --network's bridge if not given.</p>
+<ul>
+<li><code>iface_mtu</code>:<ul>
+<li>Type: integer</li>
+<li>Default: <code>1500</code></li>
+<li>Usage: <code>--iface-mtu</code></li>
+</ul>
+</li>
+</ul>
+<p>MTU for the VM network interface</p>
+<ul>
+<li><code>machine_prefix</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>vm-</code></li>
+<li>Usage: <code>--machine-prefix</code></li>
+</ul>
+</li>
+</ul>
+<p>Prefix for VM names created on this hypervisor</p>
+<ul>
+<li><code>agent_name</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>universal_agent</code></li>
+<li>Usage: <code>--pool-agent-name</code></li>
+</ul>
+</li>
+</ul>
+<p>Name of the universal agent to run LocalPoolAgentDriver under. The default targets the standard agent (merging in if this host is also a registered compute node). Use a different name to run a separate, dedicated agent instead - required if the standard agent here is already configured for a different core.</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
