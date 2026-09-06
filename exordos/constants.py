@@ -102,6 +102,9 @@ PG_INSTANCE_COLLECTION = "/v1/types/postgres/instances/"
 PG_DATABASE_COLLECTION = "/v1/types/postgres/instances/{instance_uuid}/databases/"
 PG_USER_COLLECTION = "/v1/types/postgres/instances/{instance_uuid}/users/"
 
+# Served by the metapaas element itself, not by core.
+METAPAAS_TYPE_COLLECTION = "/v1/types/"
+
 AGENT_COLLECTION = "/v1/ua/agents/"
 ACTUAL_RESOURCE_COLLECTION = "/v1/ua/resources/"
 TARGET_RESOURCE_COLLECTION = "/v1/ua/target_resources/"
