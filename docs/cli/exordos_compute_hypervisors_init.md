@@ -47,7 +47,7 @@ Initialize hypervisor
     * Default: `false`
     * Usage: `--add`
 
-  After initialization, register the hypervisor in the orchestrator (same as running `hypervisors add`), using the top-level `exordos --endpoint/--user/--password` credentials. --uuid/--name/--description/--avail-cores/--avail-ram/--cores-ratio/--ram-ratio/--machine-type/--iface-mtu/--machine-prefix only apply in this mode. --network/--network-type/--network-bridge/--boot-network/--boot-bridge always set up this host's local libvirt networks regardless of --add, and additionally feed the registered driver_spec when combined with it.
+  After initialization, register the hypervisor in the orchestrator (same as running `hypervisors add`), using the top-level `exordos --endpoint/--user/--password` credentials. --uuid/--name/--description/--avail-cores/--avail-ram/--cores-ratio/--ram-ratio/--machine-type/--iface-mtu/--machine-prefix only apply in this mode. --network/--network-type/--network-bridge/--boot-network/--boot-bridge set up this host's local libvirt networks and feed the registered driver_spec, only when --add is passed.
 
 * `uuid`:
     * Type: uuid
