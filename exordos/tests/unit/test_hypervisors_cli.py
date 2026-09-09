@@ -165,9 +165,7 @@ class TestDefaultHypervisorUuid:
         )
         run_mock.assert_called_once_with(["sudo", "cat", str(product_uuid_path)])
 
-    def test_falls_back_to_random_uuid_when_sudo_cat_also_fails(
-        self, tmp_path
-    ) -> None:
+    def test_falls_back_to_random_uuid_when_sudo_cat_also_fails(self, tmp_path) -> None:
         # A hardened system where even sudo can't read the file must fall
         # back too, rather than crashing the command.
         product_uuid_path = tmp_path / "product_uuid"
@@ -261,10 +259,10 @@ class TestInitCmdRegistration:
     always-on dependency install, and the --add-gated registration step.
     """
 
-    def test_install_agent_venv_always_called(self) -> None:
-        """install_agent_venv() must run regardless of --add: installing
-        gcl_sdk[libvirt] is plain dependency setup, it doesn't need an
-        orchestrator connection.
+    def test_without_add_skips_agent_setup(self) -> None:
+        """Without --add, no agent setup runs: the command must be usable
+        during image build where no core is reachable yet, so neither
+        resolve_agent_install_target nor install_agent_venv may be called.
         """
         runner = CliRunner()
         with (
@@ -274,7 +272,7 @@ class TestInitCmdRegistration:
                 hv_commands,
                 "resolve_agent_install_target",
                 return_value=_FAKE_AGENT_TARGET,
-            ),
+            ) as resolve_target_mock,
             patch.object(hv_commands, "_configure_libvirt"),
             patch.object(hv_commands.base_client, "add_entity"),
         ):
@@ -285,7 +283,8 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
-        venv_mock.assert_called_once_with(_FAKE_AGENT_TARGET.venv_path)
+        venv_mock.assert_not_called()
+        resolve_target_mock.assert_not_called()
 
     def test_without_add_skips_registration_and_libvirt_config(self) -> None:
         runner = CliRunner()

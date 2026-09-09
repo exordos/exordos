@@ -945,9 +945,8 @@ def local_agent_node_uuid(
         "--description/--avail-cores/--avail-ram/--cores-ratio/--ram-ratio/"
         "--machine-type/--iface-mtu/--machine-prefix only apply in this "
         "mode. --network/--network-type/--network-bridge/--boot-network/"
-        "--boot-bridge always set up this host's local libvirt networks "
-        "regardless of --add, and additionally feed the registered "
-        "driver_spec when combined with it."
+        "--boot-bridge set up this host's local libvirt networks and feed "
+        "the registered driver_spec, only when --add is passed."
     ),
 )
 @click.option(
@@ -1156,28 +1155,11 @@ def init_cmd(
 
     _install_packages(add_sudo)
 
-    core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
-    orch_endpoint = f"http://{core_host}:{ORCH_API_PORT}"
-    status_endpoint = f"http://{core_host}:{STATUS_API_PORT}"
-    agent_target = resolve_agent_install_target(
-        agent_name=agent_name,
-        orch_endpoint=orch_endpoint,
-        status_endpoint=status_endpoint,
-    )
-
-    log.info("Setting up the local universal agent's virtualenv...")
-    install_agent_venv(agent_target.venv_path)
-
     log.info("Adding user to required groups...")
     _add_user_to_groups(user, add_sudo)
 
     log.info("Setting up storage pool...")
     _create_storage_pool(pool_name, add_sudo)
-
-    log.info("Setting up the local boot network...")
-    _ensure_local_networks(
-        network_type, network, network_bridge, boot_network, boot_bridge
-    )
 
     log.info("Checking ROM file...")
     rom_path = _download_rom_file(romfile_version)
@@ -1193,6 +1175,11 @@ def init_cmd(
         _install_packer()
 
     if add:
+        log.info("Setting up the local boot network...")
+        _ensure_local_networks(
+            network_type, network, network_bridge, boot_network, boot_bridge
+        )
+
         log.info("Registering hypervisor...")
         final_avail_cores = (
             avail_cores if avail_cores is not None else _detect_local_cores()
@@ -1236,6 +1223,16 @@ def init_cmd(
 
         if connection_uri == DEFAULT_LOCAL_CONNECTION_URI:
             log.info("Setting up the local universal agent...")
+            core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
+            orch_endpoint = f"http://{core_host}:{ORCH_API_PORT}"
+            status_endpoint = f"http://{core_host}:{STATUS_API_PORT}"
+            agent_target = resolve_agent_install_target(
+                agent_name=agent_name,
+                orch_endpoint=orch_endpoint,
+                status_endpoint=status_endpoint,
+            )
+            log.info("Setting up the local universal agent's virtualenv...")
+            install_agent_venv(agent_target.venv_path)
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             node_uuid = local_agent_node_uuid()
             reset_agent_meta_file(agent_target.meta_file)
