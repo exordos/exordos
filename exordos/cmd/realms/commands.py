@@ -191,7 +191,7 @@ def list_cmd(ctx: click.Context, output: str) -> None:
                 continue
             try:
                 ip = exordos_utils.get_ip_from_url(endpoint)
-            except ValueError:
+            except (ValueError, RuntimeError):
                 continue
             status = "CONNECTED" if check_api(endpoint) else "DISCONNECTED"
             realms[ip] = Realm(config_realm_name, ip, "remote", status)

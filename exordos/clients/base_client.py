@@ -30,7 +30,7 @@ from exordos.common.crypto import write_agent_private_key
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
 CONNECT_TIMEOUT = 5
-READ_TIMEOUT = 5
+READ_TIMEOUT = 10
 
 
 def get_user_api_client(
