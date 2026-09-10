@@ -301,6 +301,78 @@ class TestSelectElementByName:
         assert selected["uuid"] == "u2"
         select_mock.assert_not_called()
 
+    def _requested_collections(self, client) -> list[str]:
+        return [call.args[0] for call in client.filter.call_args_list]
+
+    def test_single_repository_skips_repositories_request(self) -> None:
+        """Repository priorities are irrelevant for one repo: don't fetch them."""
+        u_repo = "11111111-1111-1111-1111-111111111111"
+        elements = [
+            {
+                "name": "foo",
+                "version": "0.0.12",
+                "uuid": "u1",
+                "repository": f"/v1/repo/repositories/{u_repo}",
+            },
+            {
+                "name": "foo",
+                "version": "0.0.13",
+                "uuid": "u2",
+                "repository": f"/v1/repo/repositories/{u_repo}",
+            },
+        ]
+        client = self._client(elements, [{"uuid": u_repo, "priority": 10}])
+        em_elements._select_element_by_name(client, "foo", None)
+        assert not [
+            collection
+            for collection in self._requested_collections(client)
+            if collection.endswith("/repositories/")
+        ]
+
+    def test_several_repositories_fetch_repositories_once(self) -> None:
+        """Priorities are needed to rank across repos, so they are fetched."""
+        u_low = "11111111-1111-1111-1111-111111111111"
+        u_high = "22222222-2222-2222-2222-222222222222"
+        elements = [
+            {
+                "name": "foo",
+                "version": "1.0.0",
+                "uuid": "u1",
+                "repository": f"/v1/repo/repositories/{u_low}",
+            },
+            {
+                "name": "foo",
+                "version": "1.0.0",
+                "uuid": "u2",
+                "repository": f"/v1/repo/repositories/{u_high}",
+            },
+        ]
+        repositories = [
+            {"uuid": u_low, "priority": 10},
+            {"uuid": u_high, "priority": 100},
+        ]
+        client = self._client(elements, repositories)
+        selected = em_elements._select_element_by_name(client, "foo", None)
+        assert selected["uuid"] == "u2"
+        assert [
+            collection
+            for collection in self._requested_collections(client)
+            if collection.endswith("/repositories/")
+        ] == ["/v1/repo/repositories/"]
+
+    def test_element_query_requests_only_selection_fields(self) -> None:
+        """The embedded manifest must stay out of the selection response."""
+        elements = [{"name": "foo", "version": "1.0.0", "uuid": "u1", "repository": ""}]
+        client = self._client(elements)
+        em_elements._select_element_by_name(client, "foo", None)
+        collection = self._requested_collections(client)[0]
+        base, _, query = collection.partition("?")
+        assert base == "/v1/repo/elements/"
+        assert sorted(query.split("&")) == sorted(
+            f"fields={field}" for field in em_elements.SELECTION_FIELDS
+        )
+        assert "fields=manifest" not in collection
+
     def test_aborts_when_version_selection_is_cancelled(self) -> None:
         u_low = "11111111-1111-1111-1111-111111111111"
         u_high = "22222222-2222-2222-2222-222222222222"
