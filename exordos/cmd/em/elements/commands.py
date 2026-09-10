@@ -49,6 +49,16 @@ ENTITY_COLLECTION = c.ELEMENT_COLLECTION
 DEFAULT_UPLOAD_REPO_NAME = "exordos-upload-repo"
 DEFAULT_PRIORITY = 4096
 DEFAULT_TIMEOUT = 600.0
+# Fields the element selection helpers need, keeps the embedded manifest out
+# of the response.
+SELECTION_FIELDS = (
+    "uuid",
+    "name",
+    "version",
+    "repository",
+    "status",
+    "installation_state",
+)
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
@@ -224,10 +234,12 @@ def _select_element_by_name(
         click.ClickException: If no elements found or no stable versions available.
         click.Abort: If the user cancels the version selection.
     """
-    import questionary
-
     elements = base_client.list_entities(
-        client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
+        client,
+        base_client.add_fields_to_url(
+            c.REPOSITORY_ELEMENT_COLLECTION, SELECTION_FIELDS
+        ),
+        name=name,
     )
 
     if exclude_uuid:
@@ -235,17 +247,6 @@ def _select_element_by_name(
 
     if not elements:
         raise click.ClickException(f"No elements found with name '{name}'")
-
-    # Fetch all repositories once to build priority and name caches
-    repo_priorities: dict[str, int] = {}
-    repo_names: dict[str, str] = {}
-    try:
-        repositories = base_client.list_entities(client, c.REPOSITORY_COLLECTION)
-        for repo in repositories:
-            repo_priorities[repo["uuid"]] = repo.get("priority", 0)
-            repo_names[repo["uuid"]] = repo.get("name", repo["uuid"])
-    except Exception:
-        pass
 
     # Filter out development versions unless version is explicitly provided
     if version_filter is None:
@@ -273,6 +274,24 @@ def _select_element_by_name(
         if not elements:
             return None
 
+    # Every candidate comes from the same repository: there is no repository
+    # priority to weigh against the version, so take the latest one.
+    single_repo = len({_get_repo_uuid(e) for e in elements}) == 1
+
+    # Repository priorities and names only matter when candidates span several
+    # repositories, so the extra request is skipped for the common single
+    # repository case.
+    repo_priorities: dict[str, int] = {}
+    repo_names: dict[str, str] = {}
+    if not single_repo:
+        try:
+            repositories = base_client.list_entities(client, c.REPOSITORY_COLLECTION)
+            for repo in repositories:
+                repo_priorities[repo["uuid"]] = repo.get("priority", 0)
+                repo_names[repo["uuid"]] = repo.get("name", repo["uuid"])
+        except Exception:
+            pass
+
     # Sort by (repository_priority, version) - higher is better
     elements.sort(key=lambda e: _get_sort_key(e, repo_priorities), reverse=True)
 
@@ -282,12 +301,10 @@ def _select_element_by_name(
     for element in elements:
         by_version.setdefault(element["version"], element)
 
-    # Every candidate comes from the same repository: there is no repository
-    # priority to weigh against the version, so take the latest one.
-    single_repo = len({_get_repo_uuid(e) for e in elements}) == 1
-
     if auto_select or single_repo or len(by_version) == 1:
         return elements[0]
+
+    import questionary
 
     candidates = sorted(
         by_version.values(),
@@ -341,7 +358,11 @@ def _select_current_element_by_name(
             elements are installed at once (ambiguous, user must give a UUID).
     """
     elements = base_client.list_entities(
-        client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
+        client,
+        base_client.add_fields_to_url(
+            c.REPOSITORY_ELEMENT_COLLECTION, SELECTION_FIELDS
+        ),
+        name=name,
     )
 
     installed = [e for e in elements if e.get("installation_state") == "INSTALLED"]
@@ -406,12 +427,14 @@ def install_cmd(
     uuid_or_name_or_path: str | None,
 ) -> None:
     """Install element from repository API by UUID, name, or manifest path"""
-    import questionary
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if not uuid_or_name_or_path:
+        import questionary
+
         all_elements = base_client.list_entities(
-            base_client.get_user_api_client(ctx.obj.auth_data),
-            c.REPOSITORY_ELEMENT_COLLECTION,
+            client,
+            base_client.add_fields_to_url(c.REPOSITORY_ELEMENT_COLLECTION, ("name",)),
         )
         element_names = sorted(set(e["name"] for e in all_elements))
         uuid_or_name_or_path = questionary.select(
@@ -421,8 +444,6 @@ def install_cmd(
         if not uuid_or_name_or_path:
             click.echo("No element selected, aborting")
             return
-
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if os.path.isfile(uuid_or_name_or_path):
         manifest_path = pathlib.Path(uuid_or_name_or_path)
@@ -511,10 +532,12 @@ def update_cmd(
     """Update element from repository API by UUID, name, or manifest path"""
     import questionary
 
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+
     if not uuid_or_name_or_path:
         all_elements = base_client.list_entities(
-            base_client.get_user_api_client(ctx.obj.auth_data),
-            c.REPOSITORY_ELEMENT_COLLECTION,
+            client,
+            base_client.add_fields_to_url(c.REPOSITORY_ELEMENT_COLLECTION, ("name",)),
         )
         element_names = sorted(set(e["name"] for e in all_elements))
         uuid_or_name_or_path = questionary.select(
@@ -524,8 +547,6 @@ def update_cmd(
         if not uuid_or_name_or_path:
             click.echo("No element selected, aborting")
             return
-
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if os.path.isfile(uuid_or_name_or_path):
         manifest_path = pathlib.Path(uuid_or_name_or_path)
