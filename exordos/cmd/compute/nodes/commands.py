@@ -38,7 +38,8 @@ FIELDS_MAP = {
     "RAM": "ram",
     "IP": lambda x: x.get("default_network", {}).get("ipv4", "unknown"),
     "Disks": compute_common.extract_disks_from_entity,
-    "Disk type": compute_common.extract_disk_type_from_entity,
+    "Speed": compute_common.extract_disk_speed_from_entity,
+    "Ephemeral": compute_common.extract_disk_ephemeral_from_entity,
     "Image": compute_common.extract_image_from_entity,
     "Status": "status",
 }
@@ -94,11 +95,17 @@ cn_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "cn")
     help="Name of the image to deploy",
 )
 @click.option(
-    "--disk-type",
-    type=click.Choice(["qcow2", "rawstor"]),
-    default="qcow2",
+    "--speed",
+    type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
+    default="WARM",
     show_default=True,
-    help="Backend to store the root disk on",
+    help="Speed tier to schedule the root disk onto",
+)
+@click.option(
+    "--ephemeral/--no-ephemeral",
+    default=False,
+    show_default=True,
+    help="Whether the root disk is ephemeral storage",
 )
 @click.option(
     "-n",
@@ -129,7 +136,8 @@ def add_cmd(
     ram: int,
     root_disk: int,
     image: str,
-    disk_type: str,
+    speed: str,
+    ephemeral: bool,
     name: str,
     description: str,
     wait: bool,
@@ -149,7 +157,8 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "disk_kind": {"kind": disk_type},
+            "speed": speed,
+            "ephemeral": ephemeral,
         },
     }
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
@@ -335,11 +344,17 @@ def update_cmd(
     help="Name of the image to deploy",
 )
 @click.option(
-    "--disk-type",
-    type=click.Choice(["qcow2", "rawstor"]),
-    default="qcow2",
+    "--speed",
+    type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
+    default="WARM",
     show_default=True,
-    help="Backend to store the root disk on",
+    help="Speed tier to schedule the root disk onto",
+)
+@click.option(
+    "--ephemeral/--no-ephemeral",
+    default=False,
+    show_default=True,
+    help="Whether the root disk is ephemeral storage",
 )
 @click.option(
     "-n",
@@ -370,7 +385,8 @@ def add_or_update_node_cmd(
     ram: int,
     root_disk: int,
     image: str,
-    disk_type: str,
+    speed: str,
+    ephemeral: bool,
     name: str,
     description: str,
     wait: bool,
@@ -385,7 +401,8 @@ def add_or_update_node_cmd(
             ram=ram,
             root_disk=root_disk,
             image=image,
-            disk_type=disk_type,
+            speed=speed,
+            ephemeral=ephemeral,
             name=name,
             description=description,
             wait=wait,
@@ -402,7 +419,8 @@ def add_or_update_node_cmd(
             ram=ram,
             root_disk=root_disk,
             image=image,
-            disk_type=disk_type,
+            speed=speed,
+            ephemeral=ephemeral,
             name=name,
             description=description,
             wait=wait,
@@ -417,7 +435,8 @@ def add_or_update_node_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "disk_kind": {"kind": disk_type},
+            "speed": speed,
+            "ephemeral": ephemeral,
         },
     }
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
