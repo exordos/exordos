@@ -79,6 +79,8 @@ NODE_COLLECTION = "/v1/compute/nodes/"
 HYPERVISOR_COLLECTION = "/v1/compute/hypervisors/"
 SET_COLLECTION = "/v1/compute/sets/"
 
+STORAGE_CLUSTER_COLLECTION = "/v1/storage/clusters/"
+
 USER_COLLECTION = "/v1/iam/users/"
 IDP_COLLECTION = "/v1/iam/idp/"
 CLIENT_COLLECTION = "/v1/iam/clients/"

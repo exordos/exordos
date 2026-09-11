@@ -405,16 +405,17 @@ def _agent_config_content(
     status_endpoint: str,
     meta_file: str,
     private_key_path: str,
+    driver_name: str = "LocalPoolAgentDriver",
 ) -> str:
     return f"""[universal_agent]
 orch_secure_communication = True
 orch_endpoint = {orch_endpoint}
 status_endpoint = {status_endpoint}
 private_key_path = {private_key_path}
-caps_drivers = LocalPoolAgentDriver
+caps_drivers = {driver_name}
 verify_node_on_register = False
 
-[LocalPoolAgentDriver]
+[{driver_name}]
 meta_file = {meta_file}
 """
 
@@ -446,27 +447,29 @@ def _config_value(content: str, section: str, option: str, fallback: str) -> str
     return parser.get(section, option, fallback=fallback)
 
 
-def _merge_local_pool_into_config(existing_content: str, meta_file: str) -> str:
-    """Add LocalPoolAgentDriver to an already-installed agent's config.
+def _merge_driver_into_config(
+    existing_content: str, driver_name: str, meta_file: str
+) -> str:
+    """Add a capability driver to an already-installed agent's config.
 
     This host already runs the standard universal agent (it's also a
     registered compute node, provisioned from the exordos-base image),
-    so the pool capability is appended to its existing caps_drivers and
+    so the capability is appended to its existing caps_drivers and
     everything else (orch_endpoint, its own private_key_path, other
     drivers) is left untouched - one shared agent identity, not a
     second, competing one.
     """
     raw = _config_value(existing_content, "universal_agent", "caps_drivers", "")
     drivers = [d.strip() for d in raw.replace("\n", ",").split(",") if d.strip()]
-    if "LocalPoolAgentDriver" not in drivers:
-        drivers.append("LocalPoolAgentDriver")
+    if driver_name not in drivers:
+        drivers.append(driver_name)
 
     parser = configparser.ConfigParser()
     parser.read_string(existing_content)
     parser.set("universal_agent", "caps_drivers", ", ".join(drivers))
-    if not parser.has_section("LocalPoolAgentDriver"):
-        parser.add_section("LocalPoolAgentDriver")
-    parser.set("LocalPoolAgentDriver", "meta_file", meta_file)
+    if not parser.has_section(driver_name):
+        parser.add_section(driver_name)
+    parser.set(driver_name, "meta_file", meta_file)
 
     buf = io.StringIO()
     parser.write(buf)
@@ -570,10 +573,16 @@ def resolve_agent_install_target(
 
 
 def install_agent_venv(
-    venv_path: str = STANDARD_AGENT_VENV_PATH, with_rawstor: bool = False
+    venv_path: str = STANDARD_AGENT_VENV_PATH,
+    with_rawstor: bool = False,
+    packages: tp.Sequence[str] | None = None,
 ) -> None:
-    """Install (or extend) the universal agent's venv with gcl_sdk[libvirt],
-    plus rawstor's python bindings when with_rawstor is set.
+    """Install (or extend) the universal agent's venv.
+
+    Defaults to gcl_sdk[libvirt] (this hypervisor's own use), plus
+    rawstor's python bindings when with_rawstor is set. Pass an explicit
+    `packages` list to install something else entirely instead (e.g. a
+    storage-only node needs gcl_sdk without the libvirt extra).
 
     A venv may already exist at this path - either the standard agent's
     (this host is also a registered compute node, provisioned from the
@@ -592,9 +601,10 @@ def install_agent_venv(
     dynamically link against, still comes from
     install_and_configure_rawstor's system packages.
     """
-    packages = ["gcl_sdk[libvirt]"]
-    if with_rawstor:
-        packages.append(RAWSTOR_WHEEL_URL)
+    if packages is None:
+        packages = ["gcl_sdk[libvirt]"]
+        if with_rawstor:
+            packages = [*packages, RAWSTOR_WHEEL_URL]
 
     if os.path.isdir(venv_path):
         run_command(["sudo", f"{venv_path}/bin/pip", "install", *packages])
@@ -623,14 +633,15 @@ def write_agent_config(
     config_path: str = AGENT_CONFIG_PATH,
     meta_file: str = AGENT_META_FILE,
     default_private_key_path: str = AGENT_PRIVATE_KEY_PATH,
+    driver_name: str = "LocalPoolAgentDriver",
 ) -> str:
-    """Configure the universal agent to (also) run LocalPoolAgentDriver.
+    """Configure the universal agent to (also) run the given capability driver.
 
     If a config already exists here (this host already runs an agent
-    for the same core), LocalPoolAgentDriver is merged into its
-    caps_drivers instead of replacing the file. Otherwise a fresh,
-    pool-only config is written; `verify_node_on_register` is disabled
-    since a bare hypervisor host isn't itself a registered compute node.
+    for the same core), the driver is merged into its caps_drivers
+    instead of replacing the file. Otherwise a fresh, single-driver
+    config is written; `verify_node_on_register` is disabled since a
+    bare hypervisor/storage host isn't itself a registered compute node.
 
     Returns the private_key_path this config ends up using, so the
     caller writes the key to the right place.
@@ -640,13 +651,13 @@ def write_agent_config(
     if existing is None:
         private_key_path = default_private_key_path
         content = _agent_config_content(
-            orch_endpoint, status_endpoint, meta_file, private_key_path
+            orch_endpoint, status_endpoint, meta_file, private_key_path, driver_name
         )
     else:
         private_key_path = _config_value(
             existing, "universal_agent", "private_key_path", default_private_key_path
         )
-        content = _merge_local_pool_into_config(existing, meta_file)
+        content = _merge_driver_into_config(existing, driver_name, meta_file)
 
     # Explicit mode, not left to `sudo cp`'s default: a brand-new
     # destination inherits the source tempfile's mode (mkstemp -> 0600,

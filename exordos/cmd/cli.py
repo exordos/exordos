@@ -47,6 +47,7 @@ from exordos.cmd.settings import commands as settings_commands
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand import commands as stand_commands
 from exordos.cmd.stand import utils_commands
+from exordos.cmd.storages import commands as storages_commands
 from exordos.cmd.ua import ua_group
 from exordos.cmd.version import commands as version_commands
 from exordos.cmd.vs import vs_group
@@ -68,6 +69,7 @@ COMMANDS_WITHOUT_CONFIG = {
     utils_commands.hello.name,
     utils_commands.introduction.name,
     hypervisors_commands.init_cmd.name,
+    storages_commands.init_cmd.name,
     settings_commands.settings_group.name,
     repo_commands.push_cmd.name,
 }
@@ -331,6 +333,7 @@ exordos.add_command(rules_group)
 
 exordos.add_command(compute_group, aliases=["c"])
 exordos.add_command(nodes_commands.cn_group)
+exordos.add_command(storages_commands.storages_group, aliases=["st"])
 
 exordos.add_command(em_group, aliases=["e"])  # exordos em e l, exordos e e l
 exordos.add_command(
