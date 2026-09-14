@@ -295,18 +295,35 @@ repository_group.add_command(repository_add_cmd, aliases=["a"])
 repository_group.add_command(repository_update_cmd, aliases=["u"])
 
 
-@click.command("refresh", help=f"Refresh {REPOSITORY_ENTITY}")
+@click.command(
+    "refresh",
+    help=f"Refresh {REPOSITORY_ENTITY}. Refresh all lazy repositories if not specified",
+)
 @click.pass_context
 @click.argument(
     "name_or_uuid",
     type=str,
-    required=True,
+    required=False,
 )
 def repository_refresh_cmd(
     ctx: click.Context,
-    name_or_uuid: str,
+    name_or_uuid: str | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
+    if name_or_uuid is None:
+        repositories = base_client.list_entities(
+            client, c.REPOSITORY_COLLECTION, sync_mode="lazy"
+        )
+        for repository in repositories:
+            base_client.action_entity(
+                client, c.REPOSITORY_COLLECTION, "refresh", repository["uuid"]
+            )
+            click.echo(
+                f"Repository {click.style(repository['name'], fg='green')} "
+                "was refreshed successfully"
+            )
+        return
+
     entity_uuid = base_client._get_entity_uuid(
         client, c.REPOSITORY_COLLECTION, name_or_uuid
     )
