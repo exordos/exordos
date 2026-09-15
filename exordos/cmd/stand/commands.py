@@ -516,6 +516,8 @@ def _bootstrap_core(
     manifest_path: str,
     eco_manifest_path: str,
     hypervisors: tp.Collection[stand_models.Hypervisor],
+    evpn_rr_address: str | None,
+    evpn_peer_prefixes: tp.Tuple[str, ...],
     no_start: bool,
     ecosystem_endpoint: str,
     disable_telemetry: bool,
@@ -551,9 +553,19 @@ def _bootstrap_core(
             boot_network=stand_boot_network,
             bootstrap_name=bootstrap_domain_name,
             hypervisors=hypervisors,
+            evpn_rr_address=evpn_rr_address,
+            evpn_peer_prefixes=evpn_peer_prefixes,
         )
     else:
         dev_stand = stand_models.Stand.from_spec(stand_spec)
+        # Named on the command line, they win over the spec — as the image
+        # does below. Dropping them silently was the alternative, and the
+        # symptom is a realm whose extra hypervisors never peer the
+        # reflector, with nothing said about why.
+        if evpn_rr_address is not None:
+            dev_stand.evpn_rr_address = evpn_rr_address
+        if evpn_peer_prefixes:
+            dev_stand.evpn_peer_prefixes = list(evpn_peer_prefixes)
         if dev_stand.network.is_dummy:
             dev_stand.network = stand_main_network
 
@@ -911,6 +923,39 @@ def _resolve_hypervisor_placement(
     show_default=True,
 )
 @click.option(
+    "--hyper-ovs",
+    is_flag=True,
+    # `None` when the flag is absent, so a stand that was not asked for an
+    # OVS hypervisor sends nothing about one -- a core that does not know
+    # the field refuses the whole spec, not the key.
+    default=None,
+    help=(
+        "OVS-backed hypervisor (SDN): guests' overlay ports plug into "
+        "the host's br-int. Requires openvswitch + the SDN agent on the "
+        "hypervisor host."
+    ),
+)
+@click.option(
+    "--evpn-rr-address",
+    default=None,
+    help=(
+        "SDN route-reflector address advertised to the overlay hypervisors. "
+        "In a multi-hypervisor realm the RR runs on the control node, but the "
+        "extra hypervisors reach it through the control node's flat address "
+        "(Border forwards 179). Defaults to the core node's own IP."
+    ),
+)
+@click.option(
+    "--evpn-peer-prefix",
+    "evpn_peer_prefixes",
+    multiple=True,
+    help=(
+        "Extra CIDR the route reflector accepts passive BGP neighbours from, "
+        "beyond the installation network — e.g. the flat network the overlay "
+        "hypervisors peer from. Repeatable."
+    ),
+)
+@click.option(
     "--no-start",
     show_default=True,
     is_flag=True,
@@ -1035,6 +1080,9 @@ def bootstrap_cmd(
     hyper_storage_pool: str,
     hyper_machine_prefix: str,
     hyper_iface_rom_file: str,
+    hyper_ovs: bool | None,
+    evpn_rr_address: str | None,
+    evpn_peer_prefixes: tp.Tuple[str, ...],
     no_start: bool,
     no_registration: bool,
     disable_telemetry: bool,
@@ -1222,6 +1270,7 @@ def bootstrap_cmd(
         private_key=hyper_private_key,
         machine_prefix=hyper_machine_prefix,
         iface_rom_file=hyper_iface_rom_file,
+        ovs=hyper_ovs,
     )
     hypervisors.append(hypervisor)
 
@@ -1294,6 +1343,8 @@ def bootstrap_cmd(
             manifest_path=manifest_path,
             eco_manifest_path=eco_manifest_path,
             hypervisors=hypervisors,
+            evpn_rr_address=evpn_rr_address,
+            evpn_peer_prefixes=evpn_peer_prefixes,
             no_start=no_start,
             ecosystem_endpoint=ecosystem_endpoint,
             disable_telemetry=disable_telemetry,

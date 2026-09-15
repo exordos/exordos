@@ -134,6 +134,15 @@ ROUTE_COLLECTION = "/v1/network/lb/{lb_uuid}/vhosts/{vhost_uuid}/routes/"
 # SNAT/DNAT rules are inline on the border resource (no sub-collections).
 BORDER_COLLECTION = "/v1/network/border/"
 
+# SDN control-plane API: networks and the objects a port composes.
+NETWORK_COLLECTION = "/v1/network/networks/"
+SUBNET_COLLECTION = "/v1/network/subnets/"
+PORT_COLLECTION = "/v1/network/ports/"
+NF_COLLECTION = "/v1/network/nfs/"
+SECURITY_GROUP_COLLECTION = "/v1/network/catalog/security_groups/"
+IDENTITY_GROUP_COLLECTION = "/v1/network/catalog/identity_groups/"
+ADDRESS_COLLECTION = "/v1/network/catalog/addresses/"
+
 # Cli
 CONFIG_DIR = "~/.exordos"
 CONFIG_FILE = os.path.expanduser(f"{CONFIG_DIR}/exordosctl.yaml")

@@ -68,6 +68,14 @@ def get_user_api_client(
     return client
 
 
+def _conflict_message(exc: Exception) -> str:
+    """The server's own explanation of a 409, without the HTTP noise."""
+    try:
+        return exc.cause.response.json()["message"]
+    except Exception:
+        return str(exc)
+
+
 def _get_entity_uuid(
     client: http_client.CollectionBaseClient,
     collection: str,
@@ -145,9 +153,14 @@ def delete_entity(
     collection: str,
     entity_uuid_or_name: sys_uuid.UUID | str,
 ) -> None:
-    client.delete(
-        collection, uuid=_get_entity_uuid(client, collection, entity_uuid_or_name)
-    )
+    try:
+        client.delete(
+            collection, uuid=_get_entity_uuid(client, collection, entity_uuid_or_name)
+        )
+    except bazooka_exc.ConflictError as e:
+        # Something still references it (a network with subnets, a subnet
+        # with ports). The server says what; a traceback does not.
+        raise click.ClickException(_conflict_message(e))
 
 
 def action_entity(
@@ -206,6 +219,34 @@ def register_agent_and_write_key(
         c.AGENT_COLLECTION, "issue_key", agent_uuid, invoke=True
     )["key"]
     write_agent_private_key(private_key_base64, key_path)
+
+
+def get_agent_private_key(
+    client: http_client.CollectionBaseClient,
+    collection: str,
+    uuid: sys_uuid.UUID | str,
+) -> str:
+    """Return a node's universal-agent encryption private key.
+
+    ``get_private_key`` is a GET action on the node resource and answers with
+    the base64 key itself. The core generates it when the node is created
+    (``NodeEncryptionKey``); the node's universal agent needs it to register
+    with the orchestrator.
+
+    One shape, and anything else is refused rather than unwrapped. What comes
+    back is written to the file the agent reads as its identity, so a value
+    that is not a key must not be allowed to become one: an empty string
+    there is an agent that fails every registration with nothing anywhere
+    saying why.
+    """
+    result = client.do_action(
+        collection, uuid=uuid, name="get_private_key", invoke=False
+    )
+    if not isinstance(result, str) or not result:
+        raise click.ClickException(
+            f"Node {uuid}: the core answered with no encryption key"
+        )
+    return result
 
 
 def add_fields_to_url(

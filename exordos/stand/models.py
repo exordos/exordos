@@ -145,6 +145,17 @@ class Hypervisor:
     # core's TFTP), which works with any guest RAM size. The custom Seed
     # OS iPXE ROM hangs at "initialising devices" with >2048 MiB guests.
     iface_rom_file: str | None = None
+    # OVS-backed hypervisor (SDN): overlay ports of guests plug into the
+    # host's br-int. Requires openvswitch + the SDN agent on the host
+    # (the exordos-realm image ships both).
+    #
+    # `None` rather than `False` so that a stand which was not asked for an
+    # OVS hypervisor says nothing about one: the spec goes to the core as
+    # the pool's `driver_spec`, and a core that does not know the field
+    # refuses to parse the whole spec -- `ParseError: (Unknown fields:
+    # {'ovs': False})`, on an installation that never asked for any of
+    # this. Dropped from the rendered spec by `as_spec` below.
+    ovs: bool | None = None
 
     @classmethod
     def from_spec(cls, spec: dict[str, tp.Any]) -> Hypervisor:
@@ -177,6 +188,29 @@ class Stand:
     baremetals: list[Node]
     hypervisors: list[Hypervisor] = dataclasses.field(default_factory=list)
     name: str = "dev-stand"
+    # SDN route-reflector overrides for a multi-hypervisor realm: the extra
+    # hypervisors live outside the nested core's network and reach the RR
+    # through the control node's flat address (Border forwards 179). Empty
+    # leaves the core node's own IP and just the installation network.
+    evpn_rr_address: str | None = None
+    evpn_peer_prefixes: list[str] = dataclasses.field(default_factory=list)
+
+    def as_spec(self) -> dict[str, tp.Any]:
+        """The stand as it goes onto the config drive.
+
+        `asdict`, minus what was never asked for. A hypervisor's block
+        reaches the core as a machine pool's `driver_spec`, and a core that
+        does not know a key in it refuses the *whole* spec rather than the
+        key -- `ParseError: (Unknown fields: {'ovs': False})`, on a
+        bootstrap that never mentioned an overlay. So an option nobody set
+        is not sent at all, which is also the only thing this CLI can do
+        about a core older than itself.
+        """
+        spec = dataclasses.asdict(self)
+        for hypervisor in spec.get("hypervisors") or []:
+            if hypervisor.get("ovs") is None:
+                hypervisor.pop("ovs", None)
+        return spec
 
     def is_valid(self) -> bool:
         if self.network.is_dummy or not self.bootstraps:
@@ -219,6 +253,8 @@ class Stand:
         name: str = "dev-stand",
         bootstrap_name: str = "bootstrap",
         hypervisors: tp.Collection[Hypervisor] = (),
+        evpn_rr_address: str | None = None,
+        evpn_peer_prefixes: tp.Collection[str] = (),
     ) -> Stand:
         ports = [
             Port(mac=Port.gen_mac(), ip=core_ip),
@@ -254,6 +290,8 @@ class Stand:
             ],
             baremetals=[],
             hypervisors=list(hypervisors),
+            evpn_rr_address=evpn_rr_address,
+            evpn_peer_prefixes=list(evpn_peer_prefixes),
         )
 
     @classmethod

@@ -310,6 +310,16 @@ def list_cmd(ctx: click.Context, output: str) -> None:
     help=f"Url of the {ENTITY} image",
 )
 @click.option(
+    "--hypervisor-count",
+    type=int,
+    required=False,
+    help=(
+        f"Extra hypervisor nodes the {ENTITY} gets beyond the control node "
+        "that bootstraps its core. Its workloads are placed on those, so "
+        "they no longer share a host with the core"
+    ),
+)
+@click.option(
     "--core-version",
     type=str,
     required=False,
@@ -330,6 +340,7 @@ def add_cmd(
     node_ram: int | None,
     node_root_disk_size: int | None,
     node_image: str | None,
+    hypervisor_count: int | None,
     core_version: str | None,
     ssh_public_key: str | None,
 ) -> None:
@@ -353,6 +364,8 @@ def add_cmd(
         data["node_root_disk_size"] = node_root_disk_size
     if node_image is not None:
         data["node_image"] = node_image
+    if hypervisor_count is not None:
+        data["hypervisor_count"] = hypervisor_count
     if core_version is not None:
         data["core_version"] = core_version
     if ssh_public_key is not None:

@@ -26,6 +26,7 @@ import typing as tp
 from urllib.parse import urlparse
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 import rich_click as click
 
 from exordos import constants as c
@@ -33,6 +34,8 @@ from exordos import exceptions
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.compute import common as compute_common
+from exordos.cmd.network import common as net_common
 from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
@@ -355,11 +358,37 @@ def _install_packages(add_sudo: bool = False) -> None:
         "python3-venv",
         "libev-dev",
     ]
-    cmd = ["apt-get", "update"]
-    run_command(cmd, sudo=add_sudo)
+    _apt_install(packages, add_sudo)
+
+
+def _apt_install(packages: list[str], add_sudo: bool = False) -> None:
+    run_command(["apt-get", "update"], sudo=add_sudo)
     cmd = ["apt-get", "install", "-y"]
     cmd.extend(packages)
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
+
+
+def _install_sdn_packages(add_sudo: bool = False) -> None:
+    """Install what the overlay data plane needs, when it is asked for.
+
+    Kept out of `init` on purpose. A hypervisor of an installation with no
+    overlay has no use for an Open vSwitch daemon and a `br-int` bridge, and
+    still less for a C toolchain; on a mirror without `openvswitch-switch`,
+    installing them would fail `init` before libvirt is even configured.
+    """
+    packages = [
+        # Open vSwitch backs the SDN overlay: ovs_evpn machine pools plug
+        # guest taps into the `br-int` integration bridge.
+        "openvswitch-switch",
+        # What the agent's venv is built from source with on a machine that
+        # has never built anything: the SDK's server has no wheel for this
+        # interpreter and compiles against libev, and a hypervisor that is a
+        # plain cloud image carries neither.
+        "build-essential",
+        "python3-dev",
+        "libev-dev",
+    ]
+    _apt_install(packages, add_sudo)
 
 
 def generate_node_private_key_base64() -> str:
@@ -439,6 +468,27 @@ def _merge_local_pool_into_config(existing_content: str, meta_file: str) -> str:
     if not parser.has_section("LocalPoolAgentDriver"):
         parser.add_section("LocalPoolAgentDriver")
     parser.set("LocalPoolAgentDriver", "meta_file", meta_file)
+
+    buf = io.StringIO()
+    parser.write(buf)
+    return buf.getvalue()
+
+
+def _merge_driver_into_config(existing_content: str, driver: str) -> str:
+    """Add a capability driver to an installed agent's caps_drivers.
+
+    The content comes back unchanged when the driver is already there, so a
+    caller can tell whether the agent needs a restart.
+    """
+    raw = _config_value(existing_content, "universal_agent", "caps_drivers", "")
+    drivers = [d.strip() for d in raw.replace("\n", ",").split(",") if d.strip()]
+    if driver in drivers:
+        return existing_content
+    drivers.append(driver)
+
+    parser = configparser.ConfigParser()
+    parser.read_string(existing_content)
+    parser.set("universal_agent", "caps_drivers", ", ".join(drivers))
 
     buf = io.StringIO()
     parser.write(buf)
@@ -789,6 +839,21 @@ def _configure_libvirt(add_sudo: bool = False) -> None:
     run_command(cmd, sudo=add_sudo)
 
 
+def _configure_sdn(add_sudo: bool = True) -> None:
+    """Set up the host SDN dataplane for overlay (ovs_evpn) machine pools.
+
+    OVS-backed pools plug each guest tap into the ``br-int`` integration
+    bridge (an openvswitch virtualport carrying ``iface-id=<port uuid>``),
+    where the hypervisor's evpn agent wires it into the EVPN/VXLAN overlay.
+    libvirt can only plug into a bridge that already exists, so ensure Open
+    vSwitch is running and ``br-int`` is present. Both steps are idempotent.
+
+    Both need root, like every other step that touches the host.
+    """
+    run_command(["systemctl", "enable", "--now", "openvswitch-switch"], sudo=add_sudo)
+    run_command(["ovs-vsctl", "--may-exist", "add-br", "br-int"], sudo=add_sudo)
+
+
 def _check_debian_like():
     """Check if the OS is Debian-like."""
     try:
@@ -1107,6 +1172,59 @@ def local_agent_node_uuid(
         "agent here is already configured for a different core."
     ),
 )
+@click.option(
+    "--sdn",
+    is_flag=True,
+    default=False,
+    help=(
+        "Also make this host an SDN hypervisor: install Open vSwitch, gobgpd, "
+        "evpn_connector and the agent that wires guests into overlay "
+        "networks, and point this host's machine pool at that agent. Safe to "
+        "re-run on a host that is already initialized. Needs root and the "
+        "top-level `exordos --endpoint/--user/--password` credentials."
+    ),
+)
+@click.option(
+    "--sdn-connector",
+    type=str,
+    default=None,
+    help=(
+        "evpn_connector source - a path, a URL or a pip requirement. "
+        "Required with --sdn."
+    ),
+)
+@click.option(
+    "--sdn-pool",
+    type=str,
+    default=None,
+    help=(
+        "Machine pool this host serves, by name or uuid. Defaults to the "
+        "pool --add registers, or else the installation's only pool."
+    ),
+)
+@click.option(
+    "--sdn-project-id",
+    type=click.UUID,
+    default=None,
+    help=(
+        "Project the SDN agent's node is registered in. Needed when the pool "
+        "is not run by an agent on this host."
+    ),
+)
+@click.option(
+    "--sdn-sdk",
+    type=str,
+    default=compute_common.SDK_DEFAULT_PACKAGE,
+    show_default=True,
+    help="SDN agent source (a path or wheel URL for a development build)",
+)
+@click.option(
+    "--sdn-gobgp-url",
+    type=str,
+    default=compute_common.GOBGP_DEFAULT_URL,
+    show_default=True,
+    help="gobgp release archive (point it at a local mirror when offline)",
+)
 @click.pass_context
 def init_cmd(
     ctx: click.Context,
@@ -1132,6 +1250,12 @@ def init_cmd(
     iface_mtu: int,
     machine_prefix: str,
     agent_name: str,
+    sdn: bool,
+    sdn_connector: str | None,
+    sdn_pool: str | None,
+    sdn_project_id: sys_uuid.UUID | None,
+    sdn_sdk: str,
+    sdn_gobgp_url: str,
 ) -> None:
     """Initialize hypervisor with all required components."""
 
@@ -1139,6 +1263,10 @@ def init_cmd(
         raise click.ClickException(
             "This command is only supported on Debian-based systems."
         )
+    if sdn and not is_root():
+        raise click.ClickException("--sdn needs root privileges (run it under sudo).")
+    if sdn and not sdn_connector:
+        raise click.ClickException("--sdn needs --sdn-connector.")
 
     import subprocess
 
@@ -1256,7 +1384,460 @@ def init_cmd(
                 unit_name=agent_target.unit_name,
             )
 
+    if sdn:
+        _init_sdn(
+            ctx,
+            log,
+            pool_ref=sdn_pool or (str(final_uuid) if add else "auto"),
+            agent_name=agent_name,
+            connector=sdn_connector,
+            sdk=sdn_sdk,
+            gobgp_url=sdn_gobgp_url,
+            project_id=sdn_project_id,
+        )
+
     log.important("Hypervisor environment initialized successfully")
+
+
+def _tool(name: str) -> str | None:
+    """Absolute path of an executable, or None."""
+    import shutil
+
+    return shutil.which(name)
+
+
+def _install_gobgp(url: str) -> None:
+    """Lay down the gobgpd/gobgp binaries (the agent renders their config)."""
+    if os.path.exists(compute_common.GOBGPD_BIN):
+        click.echo(f"gobgpd already present at {compute_common.GOBGPD_BIN}")
+        return
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        archive = os.path.join(tmp, "gobgp.tar.gz")
+        run_command(
+            ["curl", "-fsSL", "--retry", "5", "--retry-all-errors", "-o", archive, url]
+        )
+        import hashlib
+
+        with open(archive, "rb") as fh:
+            digest = hashlib.sha256(fh.read()).hexdigest()
+        if digest != compute_common.GOBGP_SHA256:
+            raise click.ClickException(
+                f"gobgp archive sha256 {digest} does not match the expected "
+                f"{compute_common.GOBGP_SHA256}; refusing to install it as root"
+            )
+        run_command(["tar", "-xf", archive, "-C", tmp])
+        run_command(
+            [
+                "install",
+                "-m",
+                "0755",
+                os.path.join(tmp, "gobgpd"),
+                os.path.join(tmp, "gobgp"),
+                "/usr/local/bin/",
+            ]
+        )
+
+
+def _write_fabric_units() -> None:
+    """The two daemon units, left disabled — the agent starts them."""
+    for path, content in (
+        (compute_common.GOBGPD_UNIT_PATH, compute_common.GOBGPD_UNIT),
+        (compute_common.CONNECTOR_UNIT_PATH, compute_common.CONNECTOR_UNIT),
+    ):
+        with open(path, "w") as f:
+            f.write(content)
+    run_command(["systemctl", "daemon-reload"])
+
+
+def _install_connector(source: str) -> None:
+    """Build the evpn_connector venv from the source the operator names.
+
+    The host's own Python: the connector's gobgp v3 stubs are generated for
+    a current protobuf runtime, so it no longer needs an interpreter of its
+    own fetched to run ancient cp38-only wheels.
+    """
+    os.makedirs(os.path.join(compute_common.EVPN_DIR, "vm_conf"), exist_ok=True)
+    if os.path.exists(f"{compute_common.EVPN_VENV}/bin/evpn-connector"):
+        click.echo(f"evpn_connector already present in {compute_common.EVPN_VENV}")
+        return
+    run_command(["python3", "-m", "venv", compute_common.EVPN_VENV])
+    run_command(
+        [f"{compute_common.EVPN_VENV}/bin/pip", "install", "--upgrade", "pip", "-q"]
+    )
+    run_command(
+        [f"{compute_common.EVPN_VENV}/bin/pip", "install", "-q", "setuptools", source],
+        # pbr wants a version when the source has no git metadata.
+        env=dict(os.environ, PBR_VERSION="0.0.1"),
+    )
+
+
+def _build_sdk_venv(source: str) -> None:
+    run_command(["python3", "-m", "venv", compute_common.SDK_VENV])
+    run_command(
+        [f"{compute_common.SDK_VENV}/bin/pip", "install", "--upgrade", "pip", "-q"]
+    )
+    _pip_install_sdk(compute_common.SDK_VENV, source)
+
+
+def _pip_install_sdk(venv_path: str, source: str) -> None:
+    run_command(
+        [f"{venv_path}/bin/pip", "install", "-q", source],
+        # Named for the package, not for the environment. A developer
+        # checkout has no git metadata to derive a version from, and the
+        # plain `SETUPTOOLS_SCM_PRETEND_VERSION` answers for *every* sdist
+        # pip builds along the way: a dependency that also uses
+        # setuptools_scm then reports 0.0.1 as its own version, pip sees a
+        # build that does not satisfy the requirement that asked for it,
+        # and the install dies on "No matching distribution found" for a
+        # package it just downloaded. (Measured on a fresh hypervisor:
+        # renameat2 0.4.4, requested >=0.4.4, built as 0.0.1.)
+        env=dict(os.environ, SETUPTOOLS_SCM_PRETEND_VERSION_FOR_GCL_SDK="0.0.1"),
+    )
+
+
+EVPN_DRIVER_MODULE = "gcl_sdk.agents.universal.drivers.evpn"
+
+
+def _require_evpn_driver(venv_path: str, source: str) -> None:
+    """Refuse an agent whose SDK has no overlay driver.
+
+    pip leaves an installed `gcl-sdk` alone when the source names no newer
+    version, so "installed" is not "has the driver" -- and an agent told to
+    load a driver it does not have fails on start, taking the host's pool
+    with it.
+    """
+    probe = run_command(
+        [f"{venv_path}/bin/python", "-c", f"import {EVPN_DRIVER_MODULE}"],
+        check=False,
+    )
+    if probe.returncode != 0:
+        raise click.ClickException(
+            f"The SDK in {venv_path} has no overlay driver ({EVPN_DRIVER_MODULE}); "
+            f"pass --sdn-sdk a source that has it (tried {source!r})"
+        )
+
+
+def _install_sdn_agent(source: str) -> None:
+    """The universal agent that drives the fabric, in its own venv."""
+    if os.path.exists(f"{compute_common.SDK_VENV}/bin/exordos-universal-agent"):
+        click.echo(f"agent already present in {compute_common.SDK_VENV}")
+    else:
+        _build_sdk_venv(source)
+    _require_evpn_driver(compute_common.SDK_VENV, source)
+    # The unit calls the bare name.
+    if os.path.islink(compute_common.AGENT_BIN) or os.path.exists(
+        compute_common.AGENT_BIN
+    ):
+        os.remove(compute_common.AGENT_BIN)
+    os.symlink(
+        f"{compute_common.SDK_VENV}/bin/exordos-universal-agent",
+        compute_common.AGENT_BIN,
+    )
+
+
+def _install_sdn_fabric(connector: str, gobgp_url: str) -> None:
+    """What an SDN hypervisor runs next to libvirt, whichever agent drives
+    it. Runs as root; what is already there is left alone."""
+    _install_sdn_packages(add_sudo=False)
+    _configure_sdn(add_sudo=False)
+    _install_gobgp(gobgp_url)
+    _install_connector(connector)
+    _write_fabric_units()
+
+
+def _serve_pool_overlay(
+    client: tp.Any,
+    pool_uuid: sys_uuid.UUID | str,
+    agent_uuid: sys_uuid.UUID | str,
+    log: ClickLogger,
+) -> None:
+    """Point a machine pool at the agent that wires its guests' overlay ports."""
+    # Pointing a pool at this agent *is* the statement that its guests are
+    # wired by the SDN: they have to be plugged into the OVS integration
+    # bridge for the agent to find them at all. Setting `ovs` here keeps
+    # the two from disagreeing — an agent that waits for guests that
+    # libvirt put on a Linux bridge is a silent dead end.
+    pool = base_client.get_entity(client, ENTITY_COLLECTION, str(pool_uuid))
+    driver_spec = dict(pool.get("driver_spec") or {})
+    driver_spec["ovs"] = True
+    base_client.update_entity(
+        client,
+        ENTITY_COLLECTION,
+        str(pool_uuid),
+        {"hypervisor_node": str(agent_uuid), "driver_spec": driver_spec},
+    )
+    log.important(
+        f"Pool {pool_uuid}: hypervisor_node set to {agent_uuid}, guests "
+        "plugged into OVS"
+    )
+
+
+def _init_sdn(
+    ctx: click.Context,
+    log: ClickLogger,
+    pool_ref: str,
+    agent_name: str,
+    connector: str,
+    sdk: str,
+    gobgp_url: str,
+    project_id: sys_uuid.UUID | None,
+) -> None:
+    """Make an initialized hypervisor an SDN one.
+
+    Which agent wires the guests follows from the pool. A pool pinned to
+    this host is already run by an agent here, and that agent carries the
+    host's system uuid; a second agent under the same uuid would take its
+    record over, so that one agent gains the overlay driver. Any other pool
+    is served by a dedicated SDN agent registered with a node of its own.
+
+    Everything that can refuse is asked before anything is installed.
+    """
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    if pool_ref == "auto":
+        pools = base_client.list_entities(client, ENTITY_COLLECTION)
+        if len(pools) != 1:
+            raise click.ClickException(
+                f"--sdn-pool is needed: the installation has {len(pools)} pools"
+            )
+        pool = pools[0]
+    else:
+        pool = base_client.get_entity(client, ENTITY_COLLECTION, pool_ref)
+
+    spec = pool.get("driver_spec") or {}
+    local_node = None
+    if spec.get("kind") == "exordos_local_hyper" and sys_uuid.UUID(
+        str(spec.get("node"))
+    ) == sys_uuid.UUID(local_agent_node_uuid()):
+        local_node = spec["node"]
+        core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
+        target = resolve_agent_install_target(
+            agent_name=agent_name,
+            orch_endpoint=f"http://{core_host}:{ORCH_API_PORT}",
+            status_endpoint=f"http://{core_host}:{STATUS_API_PORT}",
+        )
+        existing = _read_existing_config(target.config_path)
+        if existing is None:
+            raise click.ClickException(
+                f"Pool {pool['uuid']} is pinned to this host, but no agent is "
+                f"configured at {target.config_path}; run `init --add` first"
+            )
+    elif project_id is None:
+        raise click.ClickException(
+            f"--sdn-project-id is needed: pool {pool['uuid']} is not run by an "
+            "agent on this host, so the SDN agent registers a node of its own"
+        )
+
+    log.info("Installing the SDN data plane...")
+    _install_sdn_fabric(connector, gobgp_url)
+
+    if local_node is None:
+        log.info("Installing the SDN agent...")
+        _install_sdn_agent(sdk)
+        ctx.invoke(
+            register_agent_cmd,
+            name=f"sdn-{_default_hypervisor_name()}",
+            project_id=project_id,
+            machine_type="HW",
+            pool_ref=str(pool["uuid"]),
+            write_config=True,
+        )
+        return
+
+    log.info("Giving this host's pool agent the overlay...")
+    _pip_install_sdk(target.venv_path, sdk)
+    _require_evpn_driver(target.venv_path, sdk)
+    merged = _merge_driver_into_config(existing, compute_common.EVPN_DRIVER)
+    # A re-run on a host that already has it restarts nothing.
+    if merged != existing:
+        write_root_owned_file(merged, target.config_path, mode="644")
+        run_command(["systemctl", "restart", target.unit_name])
+    _serve_pool_overlay(client, pool["uuid"], local_node, log)
+
+
+@hypervisors_group.command(
+    "register-agent",
+    help=(
+        "Register a universal-agent node in the core and install its "
+        "encryption key locally (e.g. the SDN evpn_node agent on this "
+        "hypervisor)."
+    ),
+)
+@click.pass_context
+@click.option("--name", required=True, help="Name for the agent node")
+@click.option(
+    "-p",
+    "--project-id",
+    type=click.UUID,
+    required=True,
+    help="Project in which to register the node",
+)
+@click.option(
+    "-u",
+    "--uuid",
+    "node_uuid",
+    type=click.UUID,
+    default=None,
+    help="Node UUID (generated if omitted)",
+)
+@click.option("-c", "--cores", type=int, default=1, show_default=True)
+@click.option("-r", "--ram", type=int, default=1024, show_default=True)
+@click.option(
+    "--root-disk",
+    type=int,
+    default=10,
+    show_default=True,
+    help="Root disk size in GiB",
+)
+@click.option(
+    "-m",
+    "--machine-type",
+    type=click.Choice(["HW", "VM"], case_sensitive=False),
+    default="HW",
+    show_default=True,
+    help=(
+        "HW registers a bare node identity (no VM is provisioned) for an "
+        "agent running on this host, e.g. the hypervisor's evpn_node agent. "
+        "VM creates a regular compute node."
+    ),
+)
+@click.option(
+    "--image",
+    default=None,
+    help="Image for the node (required for VM; unused for HW)",
+)
+@click.option(
+    "--key-path",
+    default=None,
+    help=(
+        "Where to install the node's encryption key "
+        f"[default: {compute_common.SDN_AGENT_KEY_PATH}]"
+    ),
+)
+@click.option(
+    "--pool",
+    "pool_ref",
+    default=None,
+    help=(
+        "Machine pool served by this hypervisor: its hypervisor_node is "
+        "set to the new node, so the core schedules the pool's guest SDN "
+        "wiring (evpn) to this agent. 'auto' picks the only pool of the "
+        "installation"
+    ),
+)
+@click.option(
+    "--write-config",
+    is_flag=True,
+    default=False,
+    help=(
+        "Also write the SDN universal-agent config + systemd unit on this "
+        "host and enable the service (orch/status endpoints derived from "
+        "the realm endpoint)"
+    ),
+)
+def register_agent_cmd(
+    ctx: click.Context,
+    name: str,
+    project_id: sys_uuid.UUID,
+    node_uuid: sys_uuid.UUID | None,
+    cores: int,
+    ram: int,
+    root_disk: int,
+    machine_type: str,
+    image: str | None,
+    key_path: str | None,
+    pool_ref: str | None,
+    write_config: bool,
+) -> None:
+    """Create the agent's node in the core, fetch its encryption key and
+    write it where the local universal agent expects it."""
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    log = ClickLogger()
+    machine_type = machine_type.upper()
+    if machine_type == "VM" and not image:
+        raise click.ClickException("--image is required for a VM node")
+    if key_path is None:
+        # Never the host agent's own key: `hypervisors init` registers that
+        # one under another node uuid, and overwriting it unregisters the host.
+        key_path = compute_common.SDN_AGENT_KEY_PATH
+    if node_uuid is None:
+        if machine_type == "HW":
+            # The universal agent's encryptor identifies itself by the
+            # machine's system uuid, so a host agent's node MUST use it.
+            node_uuid = compute_common.read_system_uuid()
+            log.info(f"Using the host system uuid {node_uuid}")
+        else:
+            node_uuid = sys_uuid.uuid4()
+
+    pool_uuid: sys_uuid.UUID | None = None
+    if pool_ref == "auto":
+        pools = base_client.list_entities(client, c.HYPERVISOR_COLLECTION)
+        if len(pools) != 1:
+            raise click.ClickException(
+                f"--pool auto needs exactly one pool, found {len(pools)}"
+            )
+        pool_uuid = sys_uuid.UUID(pools[0]["uuid"])
+    elif pool_ref is not None:
+        # A name is what an operator has in front of them; every other
+        # reference in this CLI takes one, and a bare `UUID()` on it is a
+        # traceback rather than an answer.
+        pool_uuid = sys_uuid.UUID(
+            net_common.resolve(client, c.HYPERVISOR_COLLECTION, pool_ref)
+        )
+    data = {
+        "uuid": str(node_uuid),
+        "project_id": str(project_id),
+        "cores": cores,
+        "ram": ram,
+        "name": name,
+        "node_type": machine_type,
+        "disk_spec": {
+            "kind": "root_disk",
+            "size": root_disk,
+            # HW nodes provision no volumes; the image is a required-but-unused
+            # placeholder there.
+            "image": image or "none",
+        },
+    }
+    log.info(f"Registering agent node {node_uuid}...")
+    try:
+        base_client.add_entity(
+            client, c.NODE_COLLECTION, data, handle_conflict_error=False
+        )
+    except bazooka_exc.ConflictError:
+        # Re-running register-agent must be safe: a first run that failed after
+        # creating the node (a key-fetch, pool-wiring or --write-config error)
+        # would otherwise abort here on the retry, before those remaining steps
+        # ever run. But only for a node this command made: with the system
+        # uuid, the node taken may be the host's own agent, and fetching its
+        # key would give a second agent the same identity.
+        existing = base_client.get_entity(client, c.NODE_COLLECTION, str(node_uuid))
+        existing_type = str(existing.get("node_type") or machine_type).upper()
+        if existing.get("name") != name or existing_type != machine_type:
+            raise click.ClickException(
+                f"Node {node_uuid} already exists as "
+                f"{existing.get('name')!r} ({existing.get('node_type')}), "
+                f"not as the {machine_type} agent {name!r} this would "
+                "register; refusing to take over its identity. Pass --uuid "
+                "for a node of its own"
+            )
+        log.info(f"Agent node {node_uuid} already exists, continuing")
+    key = base_client.get_agent_private_key(client, c.NODE_COLLECTION, str(node_uuid))
+    compute_common.write_agent_key(key_path, key)
+    log.important(
+        f"Registered agent node {node_uuid}; encryption key installed at {key_path}"
+    )
+    if pool_uuid is not None:
+        _serve_pool_overlay(client, pool_uuid, node_uuid, log)
+    if write_config:
+        endpoint = ctx.obj.auth_data["endpoint"]
+        compute_common.write_sdn_agent_service(
+            node_uuid=node_uuid,
+            endpoint=endpoint,
+            key_path=key_path,
+        )
+        log.important("SDN agent configured and enabled (exordos-universal-agent-sdn)")
 
 
 hypervisors_group.add_command(add_cmd, aliases=["a"])
