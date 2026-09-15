@@ -110,7 +110,7 @@ sets_group = create_entity_group(
 )
 @click.option(
     "--ephemeral/--no-ephemeral",
-    default=False,
+    default=True,
     show_default=True,
     help="Whether the root disk is ephemeral storage",
 )
