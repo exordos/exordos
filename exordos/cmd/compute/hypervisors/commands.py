@@ -106,6 +106,20 @@ STATUS_API_PORT = 11012
 ENTITY = "hypervisor"
 ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION
 
+
+def _pool0(entity: dict, field: str, default: str = "Unknown"):
+    """First storage pool's value for `field`, e.g. "Speed"/"Total".
+
+    A hypervisor can self-report more than one pool (its own qcow2 pool
+    plus any --with-rawstor ones), same as a storage cluster - showing
+    just the first one keeps this table matching `exordos storages
+    list`'s, at the cost of hiding the rest; see `hypervisors info` for
+    the full list.
+    """
+    pools = entity.get("storage_pools") or [{}]
+    return pools[0].get(field, default)
+
+
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
@@ -114,6 +128,10 @@ FIELDS_MAP = {
     "Avail cores": "avail_cores",
     "All ram": "all_ram",
     "Avail ram": "avail_ram",
+    "Speed": lambda e: _pool0(e, "speed"),
+    "Ephemeral": lambda e: _pool0(e, "ephemeral"),
+    "Total": lambda e: _pool0(e, "capacity_usable"),
+    "Available": lambda e: _pool0(e, "available_actual"),
     "Status": "status",
 }
 

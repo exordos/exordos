@@ -73,6 +73,27 @@ def _patch_common_init_deps():
         yield
 
 
+class TestPool0:
+    """Tests for exordos.cmd.compute.hypervisors.commands._pool0, which
+    backs the Speed/Ephemeral/Total/Available columns in `hypervisors list`.
+    """
+
+    def test_extracts_the_first_pool_field(self) -> None:
+        entity = {
+            "storage_pools": [
+                {"speed": "HOT", "ephemeral": False, "capacity_usable": 100},
+                {"speed": "COLD", "ephemeral": True, "capacity_usable": 50},
+            ]
+        }
+
+        assert hv_commands._pool0(entity, "speed") == "HOT"
+        assert hv_commands._pool0(entity, "capacity_usable") == 100
+
+    def test_defaults_to_unknown_without_storage_pools(self) -> None:
+        assert hv_commands._pool0({}, "speed") == "Unknown"
+        assert hv_commands._pool0({"storage_pools": []}, "speed") == "Unknown"
+
+
 class TestDetectLocalResources:
     """Tests for exordos.cmd.compute.hypervisors.commands._detect_local_cores
     and _detect_local_ram_mb.
