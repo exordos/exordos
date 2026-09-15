@@ -38,7 +38,7 @@ class TestAddCmdDiskSpec:
     matching RootDiskSpec's real speed/ephemeral fields directly.
     """
 
-    def test_defaults_to_warm_and_not_ephemeral(self) -> None:
+    def test_defaults_to_warm_and_ephemeral(self) -> None:
         runner = CliRunner()
         with (
             patch.object(nodes_commands.base_client, "get_user_api_client"),
@@ -59,7 +59,7 @@ class TestAddCmdDiskSpec:
         assert result.exit_code == 0, result.output
         data = add_mock.call_args.args[2]
         assert data["disk_spec"]["speed"] == "WARM"
-        assert data["disk_spec"]["ephemeral"] is False
+        assert data["disk_spec"]["ephemeral"] is True
         assert "disk_kind" not in data["disk_spec"]
 
     def test_speed_and_ephemeral_are_forwarded(self) -> None:
