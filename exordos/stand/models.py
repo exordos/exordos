@@ -141,8 +141,9 @@ class Hypervisor:
     # stores the same key instead of generating a mismatched one.
     private_key: str | None = None
     # Required by the "exordos_local_hyper" kind when it backs volumes
-    # with rawstor (--with-rawstor): where rawstor objects live.
-    rawstor_location: str | None = None
+    # with rawstor (--with-rawstor): named rawstor pools, same shape as
+    # ExordosLocalHyperDriverSpec.rawstor_pools.
+    rawstor_pools: list | None = None
     machine_prefix: str = "vm-"
     iface_rom_file: str = "/usr/share/qemu/1af41041.rom"
 
