@@ -51,6 +51,8 @@ class TestProvisionRawstorCluster:
     def test_returns_driver_spec_and_default_pool(self) -> None:
         with (
             patch.object(hv_commands, "install_rawstor_packages") as install_mock,
+            patch.object(storages_commands, "write_root_owned_file") as write_mock,
+            patch.object(storages_commands, "run_command") as run_mock,
             patch.object(
                 storages_commands,
                 "_detect_local_endpoint",
@@ -71,6 +73,14 @@ class TestProvisionRawstorCluster:
             )
 
         install_mock.assert_called_once_with(["librawstor", "rawstor-ost"], True)
+        write_mock.assert_called_once_with(
+            "BIND_ADDR=10.0.0.5:7777\n",
+            storages_commands.RAWSTOR_OST_CONF_PATH,
+            mode="644",
+        )
+        run_mock.assert_called_once_with(
+            ["systemctl", "restart", "rawstor-ost"], sudo=True
+        )
         assert driver_spec == {
             "kind": "rawstor",
             "location": storages_commands.RAWSTOR_DEFAULT_BACKING_STORE,
@@ -114,7 +124,7 @@ class TestProvisionRawstorCluster:
             )
 
         write_mock.assert_called_once_with(
-            "LOCATION=file:///data/rawstor\n",
+            "BIND_ADDR=1.2.3.4:7777\nLOCATION=file:///data/rawstor\n",
             storages_commands.RAWSTOR_OST_CONF_PATH,
             mode="644",
         )
