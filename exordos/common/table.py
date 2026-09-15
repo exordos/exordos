@@ -74,7 +74,9 @@ def fill_table(
     for entity in entities:
         table.add_row(
             *[
-                str(entity[field.lower()]) if not callable(field) else field(entity)
+                str(entity[field.lower()])
+                if not callable(field)
+                else str(field(entity))
                 for field in fields_map.values()
             ]
         )
