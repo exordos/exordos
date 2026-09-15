@@ -897,12 +897,14 @@ def _resolve_hypervisor_placement(
     is_flag=True,
     default=False,
     help=(
-        "Install rawstor packages. Always installs librawstor + rawstor-ost "
-        "on this host (matching `exordos compute hypervisors init "
-        "--with-rawstor`), since it runs the core VM itself via the local "
-        "libvirt socket. Requires --pool-agent-placement=local: only the "
-        "exordos_local_hyper driver backs volumes with rawstor, so it's "
-        "not supported with the default --pool-agent-placement=core."
+        "Install rawstor packages (librawstor + rawstor-vhost, matching "
+        "`exordos compute hypervisors init --with-rawstor`) so this "
+        "hypervisor can attach rawstor-backed disks - it doesn't run a "
+        "backing store of its own, run `storages init` separately for "
+        "somewhere to actually schedule them onto. Requires "
+        "--pool-agent-placement=local: only the exordos_local_hyper driver "
+        "backs volumes with rawstor, so it's not supported with the default "
+        "--pool-agent-placement=core."
     ),
 )
 @click.option(
@@ -1213,11 +1215,6 @@ def bootstrap_cmd(
         kind=hyper_kind,
         node=hyper_node,
         private_key=hyper_private_key,
-        rawstor_pools=(
-            [{"name": "default", "location": hv_commands.RAWSTOR_LOCATION}]
-            if with_rawstor
-            else None
-        ),
         machine_prefix=hyper_machine_prefix,
         iface_rom_file=hyper_iface_rom_file,
     )

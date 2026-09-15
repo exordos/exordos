@@ -17,7 +17,6 @@ import base64
 import configparser
 import contextlib
 import getpass
-import json
 from unittest.mock import MagicMock
 from unittest.mock import call as mock_call
 from unittest.mock import patch
@@ -340,10 +339,10 @@ class TestInitCmdRegistration:
         assert kwargs["avail_ram"] == 16384
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
 
-    def test_add_with_rawstor_includes_rawstor_driver_spec_fields(self) -> None:
-        """ExordosLocalHyperDriverSpec requires rawstor_pools, so
-        --with-rawstor must supply it - otherwise the pool fails to
-        validate once it reaches core.
+    def test_add_with_rawstor_installs_packages_but_no_local_pool(self) -> None:
+        """--with-rawstor only installs the vhost-attaching packages -
+        it doesn't claim a local rawstor pool (that's `storages init`'s
+        job now), so driver_spec must not carry rawstor_pools.
         """
         runner = CliRunner()
         with (
@@ -379,10 +378,7 @@ class TestInitCmdRegistration:
         assert result.exit_code == 0, result.output
         rawstor_mock.assert_called_once()
         kwargs = add_cmd_mock.call_args.kwargs
-        expected_pools = json.dumps(
-            [{"name": "default", "location": hv_commands.RAWSTOR_LOCATION}]
-        )
-        assert f"rawstor_pools={expected_pools}" in kwargs["driver_spec"]
+        assert not any(f.startswith("rawstor_pools=") for f in kwargs["driver_spec"])
 
     def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
         """A local hypervisor's `init --add` must register this host's
@@ -702,9 +698,7 @@ class TestInitCmdRegistration:
         venv_mock.assert_called_once_with(
             _FAKE_AGENT_TARGET.venv_path, with_rawstor=True
         )
-        rawstor_mock.assert_called_once_with(
-            ["librawstor", "rawstor-ost", "rawstor-vhost"], True
-        )
+        rawstor_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
         group_mock.assert_called_once_with(True)
 
     def test_without_with_rawstor_skips_rawstor_install(self) -> None:
@@ -1168,9 +1162,7 @@ class TestInstallAndConfigureRawstor:
         ):
             hv_commands.install_and_configure_rawstor(add_sudo=True)
 
-        install_mock.assert_called_once_with(
-            ["librawstor", "rawstor-ost", "rawstor-vhost"], True
-        )
+        install_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
         group_mock.assert_called_once_with(True)
         apparmor_mock.assert_called_once_with(True)
 

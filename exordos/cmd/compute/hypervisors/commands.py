@@ -19,7 +19,6 @@ import base64
 import configparser
 import getpass
 import io
-import json
 import os
 import secrets
 import socket
@@ -383,10 +382,6 @@ RAWSTOR_WHEEL_URL = (
     f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/rawstor-{RAWSTOR_VERSION}"
     "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
 )
-# Matches rawstor-vhost@.service's own RAWSTOR_LOCATION default: rawstor-ost
-# always runs on the same host as the local hypervisor agent that --with-rawstor
-# installs it on.
-RAWSTOR_LOCATION = "ost://127.0.0.1:7777"
 
 
 def install_rawstor_packages(
@@ -780,11 +775,13 @@ def install_and_configure_rawstor(add_sudo: bool = False) -> None:
 
     Shared by `hypervisors init --with-rawstor` and `bootstrap --with-rawstor`
     so the two provisioning paths can't drift out of sync with each other.
+
+    Only librawstor + rawstor-vhost - this hypervisor attaches rawstor-backed
+    vhost disks, it doesn't run a backing store of its own. rawstor-ost (and
+    everything about where the bytes actually live) is `storages init`'s job,
+    whether that's this same host or a separate storage node.
     """
-    install_rawstor_packages(
-        ["librawstor", "rawstor-ost", "rawstor-vhost"],
-        add_sudo,
-    )
+    install_rawstor_packages(["librawstor", "rawstor-vhost"], add_sudo)
     add_libvirt_qemu_to_rawstor_group(add_sudo)
     allow_apparmor_access_to_rawstor_sockets(add_sudo)
 
@@ -1038,8 +1035,10 @@ def local_agent_node_uuid(
     is_flag=True,
     default=False,
     help=(
-        "Install rawstor packages (librawstor + rawstor-ost + rawstor-vhost) "
-        "on this hypervisor"
+        "Install rawstor packages (librawstor + rawstor-vhost) so this "
+        "hypervisor can attach rawstor-backed disks. Doesn't run a backing "
+        "store of its own - pair with `storages init` (on this host or a "
+        "separate storage node) for somewhere to actually schedule them onto."
     ),
 )
 @click.option(
@@ -1329,11 +1328,6 @@ def init_cmd(
                 "kind=exordos_local_hyper",
                 f"node={local_agent_node_uuid()}",
             )
-            if with_rawstor:
-                rawstor_pools = json.dumps(
-                    [{"name": "default", "location": RAWSTOR_LOCATION}]
-                )
-                kind_fields += (f"rawstor_pools={rawstor_pools}",)
         else:
             kind_fields = ("kind=libvirt",)
         driver_spec = kind_fields + (
