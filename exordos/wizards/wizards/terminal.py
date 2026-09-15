@@ -15,14 +15,22 @@
 #    under the License.
 from __future__ import annotations
 
-import readline
 import sys
+
+try:
+    import readline
+except ImportError:  # pragma: no cover - readline is unavailable on Windows
+    readline = None
 
 from rich import console as rich_console
 from rich import panel as rich_panel
 from rich import text as rich_text
 import rich.align
-import simple_term_menu
+
+try:
+    import simple_term_menu
+except (ImportError, NotImplementedError):  # pragma: no cover - Windows fallback
+    simple_term_menu = None
 
 DEFAULT_PROMPT_COLOR = "grey50"
 DEFAULT_TEXT_COLOR = "grey80"
@@ -216,20 +224,26 @@ def framed_prompt(
     # editable value. If the user submits an empty value and a default is
     # available, we apply the default and also render it into the input field
     # for visual consistency.
-    if initial_text is not None:
+    readline_available = readline is not None
+    if initial_text is not None and readline_available:
         readline.set_startup_hook(lambda: readline.insert_text(str(initial_text)))
 
     try:
         value_str = input()
     finally:
-        readline.set_startup_hook()
+        if readline_available:
+            readline.set_startup_hook()
 
-    used_default = False
-    if value_str == "" and default is not None:
-        value_str = str(default)
-        used_default = True
+    used_fallback_value = False
+    if value_str == "":
+        if initial_text is not None and not readline_available:
+            value_str = str(initial_text)
+            used_fallback_value = True
+        elif default is not None:
+            value_str = str(default)
+            used_fallback_value = True
 
-    if used_default:
+    if used_fallback_value:
         max_value_len = max(0, width - input_column - 1)
         clipped_value = value_str[:max_value_len]
         sys.stdout.write(f"\x1b[1A\x1b[{input_column}G{clipped_value}\x1b[1B")
@@ -254,6 +268,15 @@ def selector(options: list[str], title: str) -> int:
     #     tui.markdown_message(text=text, title=action.prompt)
 
     # return action.choices[index]
+
+    if simple_term_menu is None:
+        import questionary
+
+        choices = [
+            questionary.Choice(title=option, value=index)
+            for index, option in enumerate(options)
+        ]
+        return questionary.select(title, choices=choices).unsafe_ask()
 
     menu = simple_term_menu.TerminalMenu(
         options,
