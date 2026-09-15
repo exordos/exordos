@@ -255,15 +255,15 @@ def provision_rawstor_cluster(
     log.info("Installing rawstor packages...")
     hyper_commands.install_rawstor_packages(["librawstor", "rawstor-ost"], add_sudo)
 
-    if location is not None:
-        log.info("Configuring rawstor-ost's backing store...")
-        write_root_owned_file(
-            f"LOCATION={location}\n", RAWSTOR_OST_CONF_PATH, mode="644"
-        )
-        run_command(["systemctl", "restart", "rawstor-ost"], sudo=add_sudo)
-
     final_location = location or RAWSTOR_DEFAULT_BACKING_STORE
     final_endpoint = endpoint or _detect_local_endpoint(core_endpoint)
+
+    log.info("Configuring rawstor-ost's bind address and backing store...")
+    conf_lines = [f"BIND_ADDR={final_endpoint.removeprefix('ost://')}\n"]
+    if location is not None:
+        conf_lines.append(f"LOCATION={location}\n")
+    write_root_owned_file("".join(conf_lines), RAWSTOR_OST_CONF_PATH, mode="644")
+    run_command(["systemctl", "restart", "rawstor-ost"], sudo=add_sudo)
 
     driver_spec = {
         "kind": "rawstor",
