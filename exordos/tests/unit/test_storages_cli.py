@@ -81,6 +81,7 @@ class TestProvisionRawstorCluster:
         assert storage_pools == [
             {
                 "kind": "thin_storage_pool",
+                "pool_type": "rawstor",
                 "name": "default",
                 "speed": "HOT",
                 "ephemeral": False,

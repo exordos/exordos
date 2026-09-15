@@ -115,8 +115,8 @@ storages_group = create_entity_group(
     help=(
         "Storage pools as a JSON list, for a cluster with more than the "
         'single "default" pool `storages init` creates, e.g. \'[{"kind": '
-        '"thin_storage_pool", "name": "default", "speed": "HOT", '
-        '"ephemeral": false, "capacity_usable": 100}]\''
+        '"thin_storage_pool", "pool_type": "rawstor", "name": "default", '
+        '"speed": "HOT", "ephemeral": false, "capacity_usable": 100}]\''
     ),
 )
 def add_cmd(
@@ -277,6 +277,11 @@ def provision_rawstor_cluster(
             # ThinStoragePool.KIND - storage_pools is a KindModelSelectorType
             # on the server, so each entry needs its discriminator.
             "kind": "thin_storage_pool",
+            # AbstractStoragePool.pool_type is required - it's the storage
+            # backend tag the agent itself would set when self-reporting
+            # (see gcl_sdk's ExordosLocalHyperDriver/RawstorStorageCluster
+            # Driver), not the entry's own "kind" discriminator above.
+            "pool_type": "rawstor",
             "name": "default",
             "speed": speed,
             "ephemeral": ephemeral,
