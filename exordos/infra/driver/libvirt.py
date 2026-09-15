@@ -15,7 +15,6 @@
 #    under the License.
 from __future__ import annotations
 
-import dataclasses
 import ipaddress
 import itertools
 import json
@@ -176,12 +175,16 @@ class LibvirtInfraDriver(base.AbstractInfraDriver):
         if stand.boot_network.managed_network:
             libvirt.create_isolated_network(
                 name=stand.boot_network.name,
+                # The host on the boot network: a hypervisor reaches the
+                # installation's boot API there, and an overlay guest
+                # netboots only by asking its hypervisor to fetch for it.
+                cidr=stand.boot_network.cidr,
             )
 
         # Prepare config drive for the bootstrap node
         spec = {
             "schema_version": 2,
-            "stand": dataclasses.asdict(stand),
+            "stand": stand.as_spec(),
             **extra_data,
         }
 

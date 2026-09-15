@@ -13,10 +13,17 @@
 import rich_click as click
 
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.network.addresses import commands as addresses_commands
 from exordos.cmd.network.backend_pools import commands as backend_pools_commands
 from exordos.cmd.network.border import commands as border_commands
+from exordos.cmd.network.identity_groups import commands as identity_groups_commands
 from exordos.cmd.network.lb import commands as lb_commands
+from exordos.cmd.network.networks import commands as networks_commands
+from exordos.cmd.network.nfs import commands as nfs_commands
+from exordos.cmd.network.ports import commands as ports_commands
 from exordos.cmd.network.routes import commands as routes_commands
+from exordos.cmd.network.security_groups import commands as security_groups_commands
+from exordos.cmd.network.subnets import commands as subnets_commands
 from exordos.cmd.network.vhosts import commands as vhosts_commands
 
 
@@ -32,3 +39,14 @@ network_group.add_command(backend_pools_commands.backend_pools_group, aliases=["
 network_group.add_command(vhosts_commands.vhosts_group, aliases=["v"])
 network_group.add_command(routes_commands.routes_group, aliases=["r"])
 network_group.add_command(border_commands.borders_group, aliases=["bo"])
+network_group.add_command(networks_commands.networks_group, aliases=["n", "net"])
+network_group.add_command(subnets_commands.subnets_group, aliases=["s", "sub"])
+network_group.add_command(ports_commands.ports_group, aliases=["p"])
+network_group.add_command(
+    security_groups_commands.security_groups_group, aliases=["sg"]
+)
+network_group.add_command(
+    identity_groups_commands.identity_groups_group, aliases=["ig"]
+)
+network_group.add_command(addresses_commands.addresses_group, aliases=["a", "addr"])
+network_group.add_command(nfs_commands.nfs_group, aliases=["nf"])

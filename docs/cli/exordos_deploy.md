@@ -83,7 +83,7 @@ Deploy a built element to a realm. The element must already be built (`exordos b
 
 * `exordosctl_cfg_file`:
     * Type: text
-    * Default: `/home/user/.exordos/exordosctl.yaml`
+    * Default: `/home/gmelikov/.exordos/exordosctl.yaml`
     * Usage: `-c
 --exordosctl-cfg-file`
 
