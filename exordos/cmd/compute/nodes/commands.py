@@ -110,7 +110,7 @@ def _validate_hostname(hostname: str) -> None:
 )
 @click.option(
     "--ephemeral/--no-ephemeral",
-    default=False,
+    default=True,
     show_default=True,
     help="Whether the root disk is ephemeral storage",
 )
@@ -396,7 +396,7 @@ def update_cmd(
 )
 @click.option(
     "--ephemeral/--no-ephemeral",
-    default=False,
+    default=True,
     show_default=True,
     help="Whether the root disk is ephemeral storage",
 )
