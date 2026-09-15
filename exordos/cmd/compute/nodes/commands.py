@@ -103,7 +103,7 @@ cn_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "cn")
 )
 @click.option(
     "--ephemeral/--no-ephemeral",
-    default=False,
+    default=True,
     show_default=True,
     help="Whether the root disk is ephemeral storage",
 )
@@ -352,7 +352,7 @@ def update_cmd(
 )
 @click.option(
     "--ephemeral/--no-ephemeral",
-    default=False,
+    default=True,
     show_default=True,
     help="Whether the root disk is ephemeral storage",
 )
