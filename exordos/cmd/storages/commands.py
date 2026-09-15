@@ -114,8 +114,9 @@ storages_group = create_entity_group(
     default=None,
     help=(
         "Storage pools as a JSON list, for a cluster with more than the "
-        'single "default" pool `storages init` creates, e.g. \'[{"name": '
-        '"default", "speed": "HOT", "ephemeral": false, "capacity_usable": 100}]\''
+        'single "default" pool `storages init` creates, e.g. \'[{"kind": '
+        '"thin_storage_pool", "name": "default", "speed": "HOT", '
+        '"ephemeral": false, "capacity_usable": 100}]\''
     ),
 )
 def add_cmd(
@@ -273,6 +274,9 @@ def provision_rawstor_cluster(
     }
     storage_pools = [
         {
+            # ThinStoragePool.KIND - storage_pools is a KindModelSelectorType
+            # on the server, so each entry needs its discriminator.
+            "kind": "thin_storage_pool",
             "name": "default",
             "speed": speed,
             "ephemeral": ephemeral,
@@ -363,7 +367,8 @@ STORAGE_TYPE_PROVISIONERS: dict[str, tp.Callable] = {
     help="Description of the storage cluster",
 )
 @click.option(
-    "--agent-name",
+    "--pool-agent-name",
+    "agent_name",
     type=str,
     default=hyper_commands.DEFAULT_AGENT_NAME,
     show_default=True,
