@@ -174,3 +174,22 @@ def test_show_data_json_keeps_field_value_rows(capsys):
         {"field": "cores", "value": "2"},
         {"field": "spec", "value": "{'enabled': True}"},
     ]
+
+class TestFillTable:
+    def test_callable_field_returning_a_bool_is_rendered(self) -> None:
+        fields_map = {
+            "Ephemeral": lambda e: e["ephemeral"],
+        }
+
+        result = table_utils.fill_table([{"ephemeral": False}], fields_map)
+
+        assert list(result.columns[0].cells) == ["False"]
+
+    def test_callable_field_returning_an_int_is_rendered(self) -> None:
+        fields_map = {
+            "Total": lambda e: e["total"],
+        }
+
+        result = table_utils.fill_table([{"total": 100}], fields_map)
+
+        assert list(result.columns[0].cells) == ["100"]
