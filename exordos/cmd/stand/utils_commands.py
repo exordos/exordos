@@ -85,7 +85,13 @@ def hello() -> None:
 ▙▖▚▘▛▌▛▘▛▌▛▌▛▘
 ▙▖▞▖▙▌▌ ▙▌▙▌▄▌
 """
-    click.echo(msg)
+    stream = click.get_text_stream("stdout")
+    encoding = stream.encoding or "utf-8"
+    try:
+        msg.encode(encoding)
+    except UnicodeEncodeError:
+        msg = "Exordos"
+    click.echo(msg, file=stream)
 
 
 def get_grandparent_process_name() -> str:
