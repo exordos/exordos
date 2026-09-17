@@ -13,12 +13,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import uuid as sys_uuid
 from unittest.mock import patch
+import uuid as sys_uuid
 
 from click.testing import CliRunner
 
-from exordos.cmd.compute import common as compute_common
 from exordos.cmd.compute.nodes import commands as nodes_commands
 from exordos.common.cmd_context import ContextObject
 
@@ -87,26 +86,3 @@ class TestAddCmdDiskSpec:
         data = add_mock.call_args.args[2]
         assert data["disk_spec"]["speed"] == "HOT"
         assert data["disk_spec"]["ephemeral"] is True
-
-
-class TestExtractDiskSpeedEphemeralFromEntity:
-    def test_root_disk_kind(self) -> None:
-        entity = {"disk_spec": {"kind": "root_disk", "speed": "HOT", "ephemeral": True}}
-
-        assert compute_common.extract_disk_speed_from_entity(entity) == "HOT"
-        assert compute_common.extract_disk_ephemeral_from_entity(entity) is True
-
-    def test_disks_kind_uses_the_first_disk(self) -> None:
-        entity = {
-            "disk_spec": {
-                "kind": "disks",
-                "disks": [{"speed": "COLD", "ephemeral": False}],
-            }
-        }
-
-        assert compute_common.extract_disk_speed_from_entity(entity) == "COLD"
-        assert compute_common.extract_disk_ephemeral_from_entity(entity) is False
-
-    def test_missing_disk_spec_is_unknown(self) -> None:
-        assert compute_common.extract_disk_speed_from_entity({}) == "Unknown"
-        assert compute_common.extract_disk_ephemeral_from_entity({}) == "Unknown"

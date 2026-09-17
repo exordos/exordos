@@ -39,8 +39,6 @@ FIELDS_MAP = {
     "Cores": "cores",
     "RAM": "ram",
     "Disks": compute_common.extract_disks_from_entity,
-    "Speed": compute_common.extract_disk_speed_from_entity,
-    "Ephemeral": compute_common.extract_disk_ephemeral_from_entity,
     "Image": compute_common.extract_image_from_entity,
     "NodeType": "node_type",
     "Status": "status",
