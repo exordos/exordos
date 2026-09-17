@@ -72,6 +72,7 @@ LIMIT_COLLECTION = "/v1/quota/limits/"
 
 CERTIFICATE_COLLECTION = "/v1/secret/certificates/"
 PASSWORD_COLLECTION = "/v1/secret/passwords/"
+SECRET_COLLECTION = "/v1/secret/secrets/"
 SSH_KEY_COLLECTION = "/v1/secret/ssh_keys/"
 RSA_KEY_COLLECTION = "/v1/secret/rsa_keys/"
 
