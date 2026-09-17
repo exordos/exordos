@@ -42,37 +42,3 @@ def extract_image_from_entity(entity: dict) -> str:
         return entity["disk_spec"]["disks"][0]["image"]
 
     return "Unknown"
-
-
-def extract_disk_speed_from_entity(entity: dict) -> str:
-    """Extract the root disk's speed tier from entity."""
-    if "disk_spec" not in entity:
-        return "Unknown"
-
-    if entity["disk_spec"]["kind"] == "root_disk":
-        return entity["disk_spec"].get("speed", "Unknown")
-
-    if entity["disk_spec"]["kind"] == "disks":
-        disks = entity["disk_spec"]["disks"]
-        if not disks:
-            return "Unknown"
-        return disks[0].get("speed", "Unknown")
-
-    return "Unknown"
-
-
-def extract_disk_ephemeral_from_entity(entity: dict) -> str:
-    """Extract the root disk's ephemeral flag from entity."""
-    if "disk_spec" not in entity:
-        return "Unknown"
-
-    if entity["disk_spec"]["kind"] == "root_disk":
-        return entity["disk_spec"].get("ephemeral", "Unknown")
-
-    if entity["disk_spec"]["kind"] == "disks":
-        disks = entity["disk_spec"]["disks"]
-        if not disks:
-            return "Unknown"
-        return disks[0].get("ephemeral", "Unknown")
-
-    return "Unknown"
