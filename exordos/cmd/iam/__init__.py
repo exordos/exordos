@@ -23,6 +23,7 @@ from exordos.cmd.iam.permission_binding import commands as permission_binding_co
 from exordos.cmd.iam.project import commands as project_commands
 from exordos.cmd.iam.role import commands as role_commands
 from exordos.cmd.iam.role_binding import commands as role_binding_commands
+from exordos.cmd.iam.token import commands as token_commands
 from exordos.cmd.iam.user import commands as user_commands
 
 
@@ -62,5 +63,6 @@ iam_group.add_command(
 # 4
 iam_group.add_command(user_commands.users_group, aliases=["u"])  # noqa
 iam_group.add_command(role_binding_commands.role_bindings_group, aliases=["rb"])  # noqa
+iam_group.add_command(token_commands.tokens_group, aliases=["t"])  # noqa
 
 iam_group.add_command(introspect, aliases=["intro"])
