@@ -38,8 +38,6 @@ FIELDS_MAP = {
     "RAM": "ram",
     "IP": lambda x: x.get("default_network", {}).get("ipv4", "unknown"),
     "Disks": compute_common.extract_disks_from_entity,
-    "Speed": compute_common.extract_disk_speed_from_entity,
-    "Ephemeral": compute_common.extract_disk_ephemeral_from_entity,
     "Image": compute_common.extract_image_from_entity,
     "Status": "status",
 }
