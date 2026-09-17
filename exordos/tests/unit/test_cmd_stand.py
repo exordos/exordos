@@ -88,16 +88,35 @@ class TestResolveHypervisorPlacement:
                 "local", "qemu+tcp://10.0.0.5/system", self._CIDR
             )
 
-    def test_core_with_rawstor_is_rejected(self):
-        with pytest.raises(click.UsageError, match="--pool-agent-placement=core"):
-            commands._resolve_hypervisor_placement(
-                "core", "", self._CIDR, with_rawstor=True
+
+class TestRequireLocalHypervisorProvisioned:
+    def test_raises_if_agent_venv_is_missing(self):
+        with (
+            mock.patch.object(hv_commands, "agent_venv_exists", return_value=False),
+            mock.patch.object(hv_commands, "storage_pool_exists") as pool_exists_mock,
+            pytest.raises(click.UsageError, match="hypervisors init"),
+        ):
+            commands._require_local_hypervisor_provisioned(
+                "exordos-agent", "default", add_sudo=False
             )
 
-    def test_local_with_rawstor_is_allowed(self):
-        uri, kind = commands._resolve_hypervisor_placement(
-            "local", "", self._CIDR, with_rawstor=True
-        )
+        pool_exists_mock.assert_not_called()
 
-        assert uri == hv_commands.DEFAULT_LOCAL_CONNECTION_URI
-        assert kind == "exordos_local_hyper"
+    def test_raises_if_storage_pool_is_missing(self):
+        with (
+            mock.patch.object(hv_commands, "agent_venv_exists", return_value=True),
+            mock.patch.object(hv_commands, "storage_pool_exists", return_value=False),
+            pytest.raises(click.UsageError, match="Storage pool 'default'"),
+        ):
+            commands._require_local_hypervisor_provisioned(
+                "exordos-agent", "default", add_sudo=False
+            )
+
+    def test_passes_when_both_are_present(self):
+        with (
+            mock.patch.object(hv_commands, "agent_venv_exists", return_value=True),
+            mock.patch.object(hv_commands, "storage_pool_exists", return_value=True),
+        ):
+            commands._require_local_hypervisor_provisioned(
+                "exordos-agent", "default", add_sudo=False
+            )

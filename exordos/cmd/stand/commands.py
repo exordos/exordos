@@ -671,7 +671,6 @@ def _resolve_hypervisor_placement(
     pool_agent_placement: str,
     hyper_connection_uri: str,
     cidr: ipaddress.IPv4Network,
-    with_rawstor: bool = False,
 ) -> tp.Tuple[str, str]:
     """Resolve the hypervisor's connection URI and driver kind.
 
@@ -689,15 +688,34 @@ def _resolve_hypervisor_placement(
             )
         return hv_commands.DEFAULT_LOCAL_CONNECTION_URI, "exordos_local_hyper"
 
-    if with_rawstor:
+    return hyper_connection_uri or f"qemu+tcp://{cidr[1]}/system", "libvirt"
+
+
+def _require_local_hypervisor_provisioned(
+    agent_name: str, storage_pool: str, add_sudo: bool
+) -> None:
+    """Fail fast unless `hypervisors init` has already provisioned this host.
+
+    --pool-agent-placement=local makes this machine a hypervisor too, but
+    bootstrap only wires it up (private key, agent config, stand spec) -
+    all the actual host provisioning (packages, the agent's venv, the
+    storage pool, rawstor if wanted) is `hypervisors init`'s job, run
+    beforehand. Catching a missing prerequisite here, before spending time
+    creating the core VM, beats failing later with a broken agent.
+    """
+    if not hv_commands.agent_venv_exists(agent_name):
         raise click.UsageError(
-            "--with-rawstor is not supported together with "
-            "--pool-agent-placement=core; only the exordos_local_hyper "
-            "driver (--pool-agent-placement=local) backs volumes with "
-            "rawstor."
+            "--pool-agent-placement=local requires this host to already be "
+            "provisioned as a hypervisor - run `exordos compute hypervisors "
+            "init` first (add --with-rawstor there for rawstor-backed disks)."
         )
 
-    return hyper_connection_uri or f"qemu+tcp://{cidr[1]}/system", "libvirt"
+    if not hv_commands.storage_pool_exists(storage_pool, add_sudo):
+        raise click.UsageError(
+            f"Storage pool {storage_pool!r} not found on this host - run "
+            "`exordos compute hypervisors init` first, or pass a "
+            "--hyper-storage-pool that already exists."
+        )
 
 
 @click.command("bootstrap", help="Bootstrap exordos locally")
@@ -852,10 +870,12 @@ def _resolve_hypervisor_placement(
     help=(
         "Where the pool agent that drives the hypervisor's libvirt runs. "
         "'core' runs it inside core's own services, reaching libvirt over "
-        "the network (see --hyper-connection-uri). 'local' installs a "
+        "the network (see --hyper-connection-uri). 'local' wires up a "
         "dedicated universal agent on this host that talks to the local "
-        "libvirt socket directly (matching `exordos compute hypervisors "
-        "init`); --hyper-connection-uri is not supported in this mode."
+        "libvirt socket directly - this host must already be provisioned "
+        "as a hypervisor via `exordos compute hypervisors init` first "
+        "(add --with-rawstor there for rawstor-backed disks); "
+        "--hyper-connection-uri is not supported in this mode."
     ),
 )
 @click.option(
@@ -890,22 +910,6 @@ def _resolve_hypervisor_placement(
     type=str,
     help="A path to the custom ROM file of a network interface.",
     show_default=True,
-)
-@click.option(
-    "--with-rawstor",
-    show_default=True,
-    is_flag=True,
-    default=False,
-    help=(
-        "Install rawstor packages (librawstor + rawstor-vhost, matching "
-        "`exordos compute hypervisors init --with-rawstor`) so this "
-        "hypervisor can attach rawstor-backed disks - it doesn't run a "
-        "backing store of its own, run `storages init` separately for "
-        "somewhere to actually schedule them onto. Requires "
-        "--pool-agent-placement=local: only the exordos_local_hyper driver "
-        "backs volumes with rawstor, so it's not supported with the default "
-        "--pool-agent-placement=core."
-    ),
 )
 @click.option(
     "--no-start",
@@ -1032,7 +1036,6 @@ def bootstrap_cmd(
     hyper_storage_pool: str,
     hyper_machine_prefix: str,
     hyper_iface_rom_file: str,
-    with_rawstor: bool,
     no_start: bool,
     no_registration: bool,
     disable_telemetry: bool,
@@ -1191,12 +1194,14 @@ def bootstrap_cmd(
     hypervisors = []
 
     hyper_connection_uri, hyper_kind = _resolve_hypervisor_placement(
-        pool_agent_placement, hyper_connection_uri, cidr, with_rawstor
+        pool_agent_placement, hyper_connection_uri, cidr
     )
 
     hyper_node = None
     hyper_private_key = None
     if hyper_kind == "exordos_local_hyper":
+        _require_local_hypervisor_provisioned(agent_name, hyper_storage_pool, add_sudo)
+
         # This machine is the hypervisor, reachable over the local
         # libvirt socket by the local universal agent (LocalPoolAgentDriver)
         # only, matched by node uuid.
@@ -1289,15 +1294,6 @@ def bootstrap_cmd(
             elements=list(elements) if elements else None,
         )
 
-    if with_rawstor and not no_start:
-        # This machine always runs the core VM itself via the local
-        # libvirt socket, so it needs the rawstor client library too.
-        # --with-rawstor requires --pool-agent-placement=local, so it's
-        # also the rawstor-backed hypervisor - hence the python bindings
-        # too, for the exordos_local_hyper driver's local agent to import.
-        with status_lib.status_done("Installing rawstor packages..."):
-            hv_commands.install_and_configure_rawstor(add_sudo)
-
     if hyper_kind == "exordos_local_hyper":
         # The local agent must be configured regardless of --no-start: the
         # core's IP is fixed at network-creation time (not discovered once
@@ -1316,9 +1312,6 @@ def bootstrap_cmd(
                 agent_name=agent_name,
                 orch_endpoint=orch_endpoint,
                 status_endpoint=status_endpoint,
-            )
-            hv_commands.install_agent_venv(
-                agent_target.venv_path, with_rawstor=with_rawstor
             )
             hv_commands.reset_agent_meta_file(agent_target.meta_file)
             private_key_path = hv_commands.write_agent_config(

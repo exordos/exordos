@@ -1145,10 +1145,9 @@ class TestAddLibvirtQemuToRawstorGroup:
 
 
 class TestInstallAndConfigureRawstor:
-    """Tests for install_and_configure_rawstor: the single entry point
-    both `hypervisors init --with-rawstor` and `bootstrap --with-rawstor`
-    call, so the two provisioning paths install the same packages and
-    grant QEMU access to them the same way."""
+    """Tests for install_and_configure_rawstor: `hypervisors init
+    --with-rawstor`'s job of installing rawstor's packages and granting
+    QEMU access to them."""
 
     def test_installs_packages_then_grants_qemu_access(self) -> None:
         with (
@@ -1165,6 +1164,32 @@ class TestInstallAndConfigureRawstor:
         install_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
         group_mock.assert_called_once_with(True)
         apparmor_mock.assert_called_once_with(True)
+
+
+class TestStoragePoolExists:
+    def test_true_when_pool_name_is_in_the_listing(self) -> None:
+        result = MagicMock(output="default\ndefault-pool\n")
+        with patch.object(hv_commands, "runsh") as runsh_mock:
+            runsh_mock.return_value.raise_on_result.return_value = result
+            assert hv_commands.storage_pool_exists("default-pool") is True
+
+    def test_false_when_pool_name_is_not_in_the_listing(self) -> None:
+        result = MagicMock(output="default\n")
+        with patch.object(hv_commands, "runsh") as runsh_mock:
+            runsh_mock.return_value.raise_on_result.return_value = result
+            assert hv_commands.storage_pool_exists("default-pool") is False
+
+
+class TestAgentVenvExists:
+    def test_true_when_the_venv_directory_exists(self, tmp_path) -> None:
+        with patch.object(hv_commands, "_agent_venv_path", return_value=str(tmp_path)):
+            assert hv_commands.agent_venv_exists("exordos-agent") is True
+
+    def test_false_when_the_venv_directory_is_missing(self, tmp_path) -> None:
+        with patch.object(
+            hv_commands, "_agent_venv_path", return_value=str(tmp_path / "missing")
+        ):
+            assert hv_commands.agent_venv_exists("exordos-agent") is False
 
 
 class TestAllowApparmorAccessToRawstorSockets:

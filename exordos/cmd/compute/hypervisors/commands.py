@@ -773,8 +773,10 @@ def allow_apparmor_access_to_rawstor_sockets(add_sudo: bool = False) -> None:
 def install_and_configure_rawstor(add_sudo: bool = False) -> None:
     """Install rawstor's hypervisor-side packages and let QEMU use them.
 
-    Shared by `hypervisors init --with-rawstor` and `bootstrap --with-rawstor`
-    so the two provisioning paths can't drift out of sync with each other.
+    `hypervisors init --with-rawstor`'s job - a hypervisor set up via
+    `bootstrap --pool-agent-placement=local` must already have this done
+    beforehand (bootstrap only wires up an already-provisioned host, it
+    doesn't provision one itself).
 
     Only librawstor + rawstor-vhost - this hypervisor attaches rawstor-backed
     vhost disks, it doesn't run a backing store of its own. rawstor-ost (and
@@ -786,11 +788,19 @@ def install_and_configure_rawstor(add_sudo: bool = False) -> None:
     allow_apparmor_access_to_rawstor_sockets(add_sudo)
 
 
+def storage_pool_exists(pool_name: str, add_sudo: bool = False) -> bool:
+    result = runsh("virsh pool-list --all", sudo=add_sudo).raise_on_result()
+    return pool_name in result.output
+
+
+def agent_venv_exists(agent_name: str) -> bool:
+    """Whether install_agent_venv has already set up this agent's venv."""
+    return os.path.isdir(_agent_venv_path(agent_name))
+
+
 def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
     """Create libvirt storage pool if it doesn't exist."""
-    # Check if pool exists
-    result = runsh("virsh pool-list --all", sudo=add_sudo).raise_on_result()
-    if pool_name not in result.output:
+    if not storage_pool_exists(pool_name, add_sudo):
         # Create storage pool
         cmd = [
             "virsh",
