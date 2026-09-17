@@ -770,3 +770,56 @@ class TestUpdateCmd:
         target = {"name": "foo", "version": "0.0.33", "uuid": "u_old"}
         _, action_mock = self._invoke(["-y", "-v", "0.0.33", "foo"], current, target)
         assert action_mock.call_args.kwargs["target"] == "u_old"
+
+
+class TestRepositoryRefreshCmd:
+    """Tests for exordos.cmd.repo.commands.repository_refresh_cmd."""
+
+    def _obj(self) -> ContextObject:
+        return ContextObject(
+            auth_data={},
+            cfg_path=None,
+            developer_key_path=None,
+            cfg={},
+            need_update=None,
+        )
+
+    def test_repository_refresh_cmd_without_name_refreshes_lazy_repos(self) -> None:
+        repositories = [
+            {"uuid": "u1", "name": "repo1"},
+            {"uuid": "u2", "name": "repo2"},
+        ]
+        with (
+            patch.object(repo_commands.base_client, "get_user_api_client"),
+            patch.object(
+                repo_commands.base_client,
+                "list_entities",
+                return_value=repositories,
+            ) as list_mock,
+            patch.object(repo_commands.base_client, "action_entity") as action_mock,
+        ):
+            result = CliRunner().invoke(
+                repo_commands.repository_refresh_cmd, [], obj=self._obj()
+            )
+        assert result.exit_code == 0, result.output
+        assert list_mock.call_args.kwargs == {"sync_mode": "lazy"}
+        assert [call.args[3] for call in action_mock.call_args_list] == ["u1", "u2"]
+        assert "repo1" in result.output
+        assert "repo2" in result.output
+
+    def test_repository_refresh_cmd_with_name_refreshes_one(self) -> None:
+        with (
+            patch.object(repo_commands.base_client, "get_user_api_client"),
+            patch.object(
+                repo_commands.base_client, "_get_entity_uuid", return_value="u1"
+            ),
+            patch.object(repo_commands.base_client, "list_entities") as list_mock,
+            patch.object(repo_commands.base_client, "action_entity") as action_mock,
+        ):
+            result = CliRunner().invoke(
+                repo_commands.repository_refresh_cmd, ["repo1"], obj=self._obj()
+            )
+        assert result.exit_code == 0, result.output
+        list_mock.assert_not_called()
+        action_mock.assert_called_once()
+        assert action_mock.call_args.args[3] == "u1"
