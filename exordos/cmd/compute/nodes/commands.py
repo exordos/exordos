@@ -434,8 +434,9 @@ def info_cmd(ctx: click.Context, node: str, output: str) -> None:
     details = base_client.action_entity(
         client, ENTITY_COLLECTION, "details", entity["uuid"], invoke=False
     )
-    if "hypervisor" in details:
-        show_data(details["hypervisor"], output=output, msg="Hypervisor")
+    # The details action returns the hypervisor UUID, or None if not placed yet
+    if details.get("hypervisor"):
+        show_data({"uuid": details["hypervisor"]}, output=output, msg="Hypervisor")
 
 
 cn_group.add_command(add_cmd, aliases=["a"])
