@@ -1,5 +1,5 @@
 
-# exordos_metapaas_s3_instances_update
+# exordos_metapaas_mail_instances_update
 
 Update instance
 
@@ -7,7 +7,7 @@ Update instance
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail instances update [OPTIONS] UUID                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -65,7 +65,7 @@ Update instance
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail instances update [OPTIONS] UUID                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
  Update instance                                                                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                            

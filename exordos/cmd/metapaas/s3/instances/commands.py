@@ -98,13 +98,6 @@ instances_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     required=True,
     help="Disk size per node in GB",
 )
-@click.option(
-    "--nodes-number",
-    type=click.IntRange(1, 16),
-    default=1,
-    show_default=True,
-    help="Number of nodes in the cluster",
-)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -115,7 +108,6 @@ def add_cmd(
     cpu: int,
     ram: int,
     disk_size: int,
-    nodes_number: int,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -131,7 +123,8 @@ def add_cmd(
         "cpu": cpu,
         "ram": ram,
         "disk_size": disk_size,
-        "nodes_number": nodes_number,
+        # The column is NOT NULL and the only kind, single_node, requires 1.
+        "nodes_number": 1,
     }
     if description is not None:
         data["description"] = description
@@ -178,12 +171,6 @@ def add_cmd(
     required=False,
     help="Disk size per node in GB, shrink is not supported",
 )
-@click.option(
-    "--nodes-number",
-    type=click.IntRange(1, 16),
-    required=False,
-    help="Number of nodes in the cluster",
-)
 def update_cmd(
     ctx: click.Context,
     uuid: str,
@@ -192,7 +179,6 @@ def update_cmd(
     cpu: int | None,
     ram: int | None,
     disk_size: int | None,
-    nodes_number: int | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -206,8 +192,6 @@ def update_cmd(
         data["ram"] = ram
     if disk_size is not None:
         data["disk_size"] = disk_size
-    if nodes_number is not None:
-        data["nodes_number"] = nodes_number
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)

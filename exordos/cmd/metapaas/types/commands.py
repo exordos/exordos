@@ -30,6 +30,7 @@ FIELDS_MAP = {
     "UUID": "uuid",
     "Project": "project_id",
     "Name": "name",
+    "Description": "description",
     "Element": "element_name",
     "Package": "package",
     "Version": "version",
@@ -136,10 +137,24 @@ def add_cmd(
     required=True,
 )
 @click.option(
+    "-n",
+    "--name",
+    type=str,
+    required=False,
+    help=f"Name of the {ENTITY}, the PaaS slug, for example: s3",
+)
+@click.option(
     "--description",
     type=str,
     required=False,
     help=f"Description of the {ENTITY}",
+)
+@click.option(
+    "-e",
+    "--element-name",
+    type=str,
+    required=False,
+    help="Name of the element the PaaS is exposed under, for example: s3aas",
 )
 @click.option(
     "--package",
@@ -163,15 +178,21 @@ def add_cmd(
 def update_cmd(
     ctx: click.Context,
     uuid: str,
+    name: str | None,
     description: str | None,
+    element_name: str | None,
     package: str | None,
     version: str | None,
     index_url: str | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
+    if name is not None:
+        data["name"] = name
     if description is not None:
         data["description"] = description
+    if element_name is not None:
+        data["element_name"] = element_name
     if package is not None:
         data["package"] = package
     if version is not None:

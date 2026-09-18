@@ -110,7 +110,6 @@ def add_cmd(
         "uuid": str(uuid),
         "project_id": str(project_id),
         "name": name,
-        "instance": f"{c.S3_INSTANCE_COLLECTION}{instance_uuid}",
         "content": _parse_content(content),
     }
     if description is not None:

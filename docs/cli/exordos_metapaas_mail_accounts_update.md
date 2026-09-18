@@ -1,13 +1,13 @@
 
-# exordos_metapaas_s3_instances_update
+# exordos_metapaas_mail_accounts_update
 
-Update instance
+Update account
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail accounts update [OPTIONS] UUID                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -18,41 +18,42 @@ Update instance
     * Default: `sentinel.unset`
     * Usage: `uuid`
 
+* `instance_uuid` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-i
+--instance-uuid`
+
+  UUID of the mail instance the account belongs to
+
 * `name`:
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `-n
 --name`
 
-  Name of the instance
+  Name of the account
 
 * `description`:
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `--description`
 
-  Description of the instance
+  Description of the account
 
-* `cpu`:
-    * Type: integer range
+* `password`:
+    * Type: text
     * Default: `sentinel.unset`
-    * Usage: `--cpu`
+    * Usage: `--password`
 
-  Number of CPU cores per node
+  Password of the account, hashed by the API before it is stored
 
-* `ram`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--ram`
+* `active`:
+    * Type: boolean
+    * Default: `none`
+    * Usage: `--active`
 
-  RAM per node in MB
-
-* `disk_size`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--disk-size`
-
-  Disk size per node in GB, shrink is not supported
+  Whether the account is allowed to authenticate
 
 * `help`:
     * Type: boolean
@@ -65,16 +66,16 @@ Update instance
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail accounts update [OPTIONS] UUID                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
- Update instance                                                                                                                                                                                                                                                                                           
+ Update account                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name         -n  TEXT                                Name of the instance                                                                                                                                                                                                                             │
-│ --description      TEXT                                Description of the instance                                                                                                                                                                                                                      │
-│ --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node                                                                                                                                                                                                                     │
-│ --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB                                                                                                                                                                                                                               │
-│ --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB, shrink is not supported                                                                                                                                                                                                │
-│ --help                                                 Show this message and exit.                                                                                                                                                                                                                      │
+│ *  --instance-uuid       -i  TEXT  UUID of the mail instance the account belongs to [required]                                                                                                                                                                                                          │
+│    --name                -n  TEXT  Name of the account                                                                                                                                                                                                                                                  │
+│    --description             TEXT  Description of the account                                                                                                                                                                                                                                           │
+│    --password                TEXT  Password of the account, hashed by the API before it is stored                                                                                                                                                                                                       │
+│    --active/--no-active            Whether the account is allowed to authenticate                                                                                                                                                                                                                       │
+│    --help                          Show this message and exit.                                                                                                                                                                                                                                          │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

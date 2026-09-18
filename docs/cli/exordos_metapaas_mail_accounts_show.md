@@ -1,13 +1,13 @@
 
-# exordos_metapaas_s3_instances_update
+# exordos_metapaas_mail_accounts_show
 
-Update instance
+Show account
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail accounts show [OPTIONS] UUID                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -18,41 +18,18 @@ Update instance
     * Default: `sentinel.unset`
     * Usage: `uuid`
 
-* `name`:
-    * Type: text
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  the output format, defaults to table
+
+* `instance_uuid` (REQUIRED):
+    * Type: uuid
     * Default: `sentinel.unset`
-    * Usage: `-n
---name`
-
-  Name of the instance
-
-* `description`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--description`
-
-  Description of the instance
-
-* `cpu`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--cpu`
-
-  Number of CPU cores per node
-
-* `ram`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--ram`
-
-  RAM per node in MB
-
-* `disk_size`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--disk-size`
-
-  Disk size per node in GB, shrink is not supported
+    * Usage: `--instance-uuid`
 
 * `help`:
     * Type: boolean
@@ -65,16 +42,13 @@ Update instance
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail accounts show [OPTIONS] UUID                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- Update instance                                                                                                                                                                                                                                                                                           
+ Show account                                                                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name         -n  TEXT                                Name of the instance                                                                                                                                                                                                                             │
-│ --description      TEXT                                Description of the instance                                                                                                                                                                                                                      │
-│ --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node                                                                                                                                                                                                                     │
-│ --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB                                                                                                                                                                                                                               │
-│ --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB, shrink is not supported                                                                                                                                                                                                │
-│ --help                                                 Show this message and exit.                                                                                                                                                                                                                      │
+│    --output         -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                    │
+│ *  --instance-uuid      UUID                    [required]                                                                                                                                                                                                                                              │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                             │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

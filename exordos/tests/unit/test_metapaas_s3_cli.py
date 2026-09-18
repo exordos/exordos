@@ -99,7 +99,7 @@ class TestS3Buckets:
         assert result.exit_code == 0, result.output
         _, collection, data = add_entity.call_args[0]
         assert collection == f"/v1/types/s3/instances/{INSTANCE_UUID}/buckets/"
-        assert data["instance"] == f"/v1/types/s3/instances/{INSTANCE_UUID}"
+        assert "instance" not in data
         assert data["versioning_enabled"] is True
         assert data["quota_bytes"] == 1024
         assert "public" not in data
@@ -180,7 +180,7 @@ class TestS3Users:
         assert result.exit_code == 0, result.output
         _, collection, data = add_entity.call_args[0]
         assert collection == f"/v1/types/s3/instances/{INSTANCE_UUID}/users/"
-        assert data["instance"] == f"/v1/types/s3/instances/{INSTANCE_UUID}"
+        assert "instance" not in data
         assert data["name"] == "app"
 
 

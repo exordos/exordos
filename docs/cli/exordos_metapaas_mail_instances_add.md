@@ -1,5 +1,5 @@
 
-# exordos_metapaas_s3_instances_add
+# exordos_metapaas_mail_instances_add
 
 Add a new instance
 
@@ -7,7 +7,7 @@ Add a new instance
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances add [OPTIONS]                                                                                                                                                                                                                                                        
+ Usage: exordos metapaas mail instances add [OPTIONS]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -44,13 +44,21 @@ Add a new instance
 
   Description of the instance
 
+* `domain` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-d
+--domain`
+
+  Mail domain to serve, for example: example.com
+
 * `version` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `-v
 --version`
 
-  UUID or name of the s3 version
+  UUID or name of the mail version
 
 * `cpu` (REQUIRED):
     * Type: integer range
@@ -84,7 +92,7 @@ Add a new instance
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances add [OPTIONS]                                                                                                                                                                                                                                                        
+ Usage: exordos metapaas mail instances add [OPTIONS]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
  Add a new instance                                                                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
@@ -93,7 +101,8 @@ Add a new instance
 │ *  --project-id   -p  UUID                                UUID of the project in which to deploy the instance [required]                                                                                                                                                                                │
 │ *  --name         -n  TEXT                                Name of the instance [required]                                                                                                                                                                                                               │
 │    --description      TEXT                                Description of the instance                                                                                                                                                                                                                   │
-│ *  --version      -v  TEXT                                UUID or name of the s3 version [required]                                                                                                                                                                                                     │
+│ *  --domain       -d  TEXT                                Mail domain to serve, for example: example.com [required]                                                                                                                                                                                     │
+│ *  --version      -v  TEXT                                UUID or name of the mail version [required]                                                                                                                                                                                                   │
 │ *  --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node [required]                                                                                                                                                                                                       │
 │ *  --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB [required]                                                                                                                                                                                                                 │
 │ *  --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB [required]                                                                                                                                                                                                           │

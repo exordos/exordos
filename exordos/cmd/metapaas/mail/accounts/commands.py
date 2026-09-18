@@ -112,9 +112,8 @@ def add_cmd(
     data = {
         "uuid": str(uuid),
         "project_id": str(project_id),
-        "instance": f"{c.MAIL_INSTANCE_COLLECTION}{instance_uuid}",
         "username": username,
-        "password_hash": password
+        "password": password
         or questionary.password(f"Enter password for {ENTITY} {username}:").ask(),
     }
     if name is not None:
@@ -184,7 +183,7 @@ def update_cmd(
     if description is not None:
         data["description"] = description
     if password is not None:
-        data["password_hash"] = password
+        data["password"] = password
     if active is not None:
         data["active"] = active
 

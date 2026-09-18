@@ -1,58 +1,55 @@
 
-# exordos_metapaas_s3_instances_update
+# exordos_metapaas_mail_instances_list
 
-Update instance
+List instances
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail instances list [OPTIONS]                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `uuid` (REQUIRED):
+* `filters`:
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `uuid`
+    * Usage: `-f
+--filters`
 
-* `name`:
+  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+
+* `fields`:
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `-n
---name`
+    * Usage: `--fields`
 
-  Name of the instance
+  fields to show, defaults to all, for example: --fields name --fields status
 
-* `description`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--description`
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
 
-  Description of the instance
+  the output format, defaults to table
 
-* `cpu`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--cpu`
+* `watch`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-w
+--watch`
 
-  Number of CPU cores per node
+  Watch the list of instances
 
-* `ram`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--ram`
+* `interval`:
+    * Type: float range
+    * Default: `0.5`
+    * Usage: `--interval`
 
-  RAM per node in MB
-
-* `disk_size`:
-    * Type: integer range
-    * Default: `sentinel.unset`
-    * Usage: `--disk-size`
-
-  Disk size per node in GB, shrink is not supported
+  Refresh interval in seconds.
 
 * `help`:
     * Type: boolean
@@ -65,16 +62,16 @@ Update instance
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
+ Usage: exordos metapaas mail instances list [OPTIONS]                                                                                                                                                                                                                                                     
                                                                                                                                                                                                                                                                                                            
- Update instance                                                                                                                                                                                                                                                                                           
+ List instances                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name         -n  TEXT                                Name of the instance                                                                                                                                                                                                                             │
-│ --description      TEXT                                Description of the instance                                                                                                                                                                                                                      │
-│ --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node                                                                                                                                                                                                                     │
-│ --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB                                                                                                                                                                                                                               │
-│ --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB, shrink is not supported                                                                                                                                                                                                │
-│ --help                                                 Show this message and exit.                                                                                                                                                                                                                      │
+│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
+│ --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                     │
+│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
+│ --watch     -w                          Watch the list of instances                                                                                                                                                                                                                                     │
+│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
+│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

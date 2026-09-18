@@ -1,22 +1,32 @@
 
-# exordos_realms_pool
+# exordos_metapaas_mail_versions_list
 
-Get free realm from pool
+List versions
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos realms pool [OPTIONS] NAME                                                                                                                                                                                                                                                                 
+ Usage: exordos metapaas mail versions list [OPTIONS]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `name` (REQUIRED):
+* `filters`:
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `name`
+    * Usage: `-f
+--filters`
+
+  Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
+
+* `fields`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--fields`
+
+  fields to show, defaults to all, for example: --fields name --fields status
 
 * `output`:
     * Type: choice
@@ -25,6 +35,21 @@ Get free realm from pool
 -o`
 
   the output format, defaults to table
+
+* `watch`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-w
+--watch`
+
+  Watch the list of versions
+
+* `interval`:
+    * Type: float range
+    * Default: `0.5`
+    * Usage: `--interval`
+
+  Refresh interval in seconds.
 
 * `help`:
     * Type: boolean
@@ -37,12 +62,16 @@ Get free realm from pool
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos realms pool [OPTIONS] NAME                                                                                                                                                                                                                                                                 
+ Usage: exordos metapaas mail versions list [OPTIONS]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Get free realm from pool                                                                                                                                                                                                                                                                                  
+ List versions                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
-│ --help                                Show this message and exit.                                                                                                                                                                                                                                       │
+│ --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                              │
+│ --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                     │
+│ --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                            │
+│ --watch     -w                          Watch the list of versions                                                                                                                                                                                                                                      │
+│ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                    │
+│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
