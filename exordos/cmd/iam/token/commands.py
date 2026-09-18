@@ -127,3 +127,36 @@ def add_cmd(
 
 
 tokens_group.add_command(add_cmd, aliases=["a"])
+
+
+@click.command(
+    "regenerate",
+    help=(
+        f"Sign a new {ENTITY} in place of the one issued so far. The "
+        "previous token stops working at once, and the new one is in the "
+        "answer to this command and nowhere else: copy it now"
+    ),
+)
+@click.pass_context
+@click.argument("uuid", type=click.UUID)
+@click.option(
+    "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
+)
+def regenerate_cmd(ctx: click.Context, uuid: sys_uuid.UUID, y: bool) -> None:
+    import questionary
+
+    if (
+        not y
+        and not questionary.confirm(
+            f"Regenerate {ENTITY} {uuid}? Whatever uses the current token "
+            "loses access until it is given the new one."
+        ).ask()
+    ):
+        return
+
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    entity = base_client.action_entity(client, ENTITY_COLLECTION, "regenerate", uuid)
+    show_data(entity)
+
+
+tokens_group.add_command(regenerate_cmd, aliases=["r"])
