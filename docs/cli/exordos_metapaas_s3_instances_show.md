@@ -1,22 +1,22 @@
 
-# exordos_realms_pool
+# exordos_metapaas_s3_instances_show
 
-Get free realm from pool
+Show instance
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos realms pool [OPTIONS] NAME                                                                                                                                                                                                                                                                 
+ Usage: exordos metapaas s3 instances show [OPTIONS] UUID                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `name` (REQUIRED):
+* `uuid` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `name`
+    * Usage: `uuid`
 
 * `output`:
     * Type: choice
@@ -37,9 +37,9 @@ Get free realm from pool
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos realms pool [OPTIONS] NAME                                                                                                                                                                                                                                                                 
+ Usage: exordos metapaas s3 instances show [OPTIONS] UUID                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
- Get free realm from pool                                                                                                                                                                                                                                                                                  
+ Show instance                                                                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
