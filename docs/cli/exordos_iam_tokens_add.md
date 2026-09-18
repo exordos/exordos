@@ -1,7 +1,7 @@
 
 # exordos_iam_tokens_add
 
-Add a new token to the Exordos installation
+Issue a new token. The signed token is in the answer to this command and nowhere else: copy it now, a read never returns it
 
 ## Usage
 
@@ -21,16 +21,16 @@ Add a new token to the Exordos installation
 
   UUID of the token
 
-* `user` (REQUIRED):
+* `user`:
     * Type: uuid
-    * Default: `sentinel.unset`
+    * Default: `none`
     * Usage: `--user`
 
-  UUID of the user the token authenticates
+  UUID of the user the token authenticates. Defaults to the account running the command; naming another user takes the iam.token.create_all permission
 
-* `iam_client` (REQUIRED):
+* `iam_client`:
     * Type: uuid
-    * Default: `sentinel.unset`
+    * Default: `00000000-0000-0000-0000-000000000000`
     * Usage: `--iam-client`
 
   UUID of the IAM client that signs the token
@@ -43,13 +43,20 @@ Add a new token to the Exordos installation
 
   Scope of the token, e.g. 'project:<uuid>'
 
-* `expiration_delta`:
-    * Type: integer
-    * Default: `none`
-    * Usage: `-e
---expiration-delta`
+* `days`:
+    * Type: integer range
+    * Default: `30`
+    * Usage: `-d
+--days`
 
-  Lifetime in seconds, at least 60. The platform renews the token
+  How many days the token lives before it is spent
+
+* `no_expire`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--no-expire`
+
+  Keep the token alive instead: the platform renews it before it expires, for as long as the token exists
 
 * `help`:
     * Type: boolean
@@ -64,14 +71,15 @@ Add a new token to the Exordos installation
                                                                                                                                                                                                                                                                                                            
  Usage: exordos iam tokens add [OPTIONS]                                                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                                                                                            
- Add a new token to the Exordos installation                                                                                                                                                                                                                                                               
+ Issue a new token. The signed token is in the answer to this command and nowhere else: copy it now, a read never returns it                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid              -u  UUID     UUID of the token                                                                                                                                                                                                                                                   │
-│ *  --user                  UUID     UUID of the user the token authenticates [required]                                                                                                                                                                                                                 │
-│ *  --iam-client            UUID     UUID of the IAM client that signs the token [required]                                                                                                                                                                                                              │
-│    --scope             -s  TEXT     Scope of the token, e.g. 'project:<uuid>'                                                                                                                                                                                                                           │
-│    --expiration-delta  -e  INTEGER  Lifetime in seconds, at least 60. The platform renews the token                                                                                                                                                                                                     │
-│    --help                           Show this message and exit.                                                                                                                                                                                                                                         │
+│ --uuid        -u  UUID                  UUID of the token                                                                                                                                                                                                                                               │
+│ --user            UUID                  UUID of the user the token authenticates. Defaults to the account running the command; naming another user takes the iam.token.create_all permission                                                                                                            │
+│ --iam-client      UUID                  UUID of the IAM client that signs the token [default: 00000000-0000-0000-0000-000000000000]                                                                                                                                                                     │
+│ --scope       -s  TEXT                  Scope of the token, e.g. 'project:<uuid>'                                                                                                                                                                                                                       │
+│ --days        -d  INTEGER RANGE [x>=1]  How many days the token lives before it is spent [default: 30]                                                                                                                                                                                                  │
+│ --no-expire                             Keep the token alive instead: the platform renews it before it expires, for as long as the token exists                                                                                                                                                         │
+│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
