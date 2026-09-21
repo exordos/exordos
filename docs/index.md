@@ -87,6 +87,12 @@ exordos build my_project
 
 After a successful build, output artifacts are stored in the `output` directory. For full reference see the [build documentation](https://exordos.github.io/exordos_core/app-developer-guide/build/).
 
+Packer caches downloaded base images in `~/.cache/packer` (or `$XDG_CACHE_HOME/packer`, or `PACKER_CACHE_DIR` if set). To remove the cache, run:
+
+```sh
+exordos clear-build-cache
+```
+
 ## Stand specification
 
 For multi-node installations, use a stand specification file to describe the topology. See [stand specification](stand-spec.md).

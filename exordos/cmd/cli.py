@@ -57,6 +57,7 @@ import exordos.constants as c
 
 COMMANDS_WITHOUT_CONFIG = {
     builds_commands.build_cmd.name,
+    builds_commands.clear_build_cache_cmd.name,
     initialization_commands.init_cmd.name,
     version_commands.version_cmd.name,
     version_commands.latest_cmd.name,
@@ -339,6 +340,7 @@ exordos.add_command(
     elements_commands.ee_group, aliases=["elements"]
 )  # exordos ee l, exordos elements l
 exordos.add_command(builds_commands.build_cmd)
+exordos.add_command(builds_commands.clear_build_cache_cmd)
 
 exordos.add_command(configs_commands.configs_group)
 exordos.add_command(settings_commands.settings_group)
