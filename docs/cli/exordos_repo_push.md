@@ -44,6 +44,13 @@ Push the element to the repository
 
   Target repository to push to
 
+* `realm_repo`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--realm-repo`
+
+  Push to the current realm's repository of the project given by --project-id or the context, authenticated as the current user
+
 * `element_dir`:
     * Type: path
     * Default: `output`
@@ -101,6 +108,7 @@ Push the element to the repository
 │ --driver            -d  TEXT                  Driver to use, nginx for example                                                                                                                                                                                                                          │
 │ --driver-params         TEXT                  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                         │
 │ --target            -t  TEXT                  Target repository to push to                                                                                                                                                                                                                              │
+│ --realm-repo                                  Push to the current realm's repository of the project given by --project-id or the context, authenticated as the current user                                                                                                                             │
 │ --element-dir       -e  PATH                  Directory where element artifacts are stored                                                                                                                                                                                                              │
 │ --force             -f                        Force push even if the element already exists                                                                                                                                                                                                             │
 │ --latest            -l                        Push the element too as the latest version (if stable version)                                                                                                                                                                                            │
