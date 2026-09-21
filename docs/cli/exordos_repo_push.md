@@ -76,6 +76,13 @@ Push the element to the repository
 
   Number of artifacts to upload in parallel
 
+* `delete_output`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--delete-output`
+
+  Delete the element directory after a successful push
+
 * `project_dir`:
     * Type: path
     * Default: `.`
@@ -105,6 +112,7 @@ Push the element to the repository
 │ --force             -f                        Force push even if the element already exists                                                                                                                                                                                                             │
 │ --latest            -l                        Push the element too as the latest version (if stable version)                                                                                                                                                                                            │
 │ --jobs              -j  INTEGER RANGE [x>=1]  Number of artifacts to upload in parallel [default: 1]                                                                                                                                                                                                    │
+│ --delete-output                               Delete the element directory after a successful push                                                                                                                                                                                                      │
 │ --help                                        Show this message and exit.                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
