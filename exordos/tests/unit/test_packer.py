@@ -14,6 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import pytest
+
+from exordos.builder import base
 from exordos.builder import packer
 
 
@@ -31,3 +34,18 @@ class TestPackerVariable:
             {"disk_size": "10G", "cpus": 1, "memory": 1024}
         )
         assert content == 'disk_size = "10G"\ncpus = 1\nmemory = 1024'
+
+
+class TestPackerBuilder:
+    def test_run_pre_build_failure_is_not_masked(self, tmp_path, monkeypatch) -> None:
+        def fail_pre_build(*args, **kwargs):
+            raise FileNotFoundError(2, "No such file or directory", "packer")
+
+        builder = packer.PackerBuilder()
+        monkeypatch.setattr(builder, "pre_build", fail_pre_build)
+        image = base.Image(script="install.sh", name="img")
+
+        with pytest.raises(FileNotFoundError) as exc_info:
+            builder.run(str(tmp_path), image, [], output_dir=str(tmp_path / "out"))
+
+        assert exc_info.value.filename == "packer"

@@ -195,7 +195,9 @@ class PackerBuilder(base.DummyImageBuilder):
             for img in glob.glob(os.path.join(tmp_output_dir, "*")):
                 shutil.move(img, output_dir)
         finally:
-            shutil.rmtree(tmp_output_dir)
+            # The directory is not created if the build fails early, e.g. when
+            # packer is missing; don't let the cleanup mask that error.
+            shutil.rmtree(tmp_output_dir, ignore_errors=True)
 
     def pre_build(
         self,
