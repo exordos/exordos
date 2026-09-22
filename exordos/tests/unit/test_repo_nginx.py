@@ -15,7 +15,6 @@
 #    under the License.
 """Unit tests for the parallel artifact upload of the nginx repo driver."""
 
-import json
 import pathlib
 import threading
 
@@ -77,91 +76,8 @@ class TestUploadArtifacts:
         assert len(threads) == 3
 
 
-class _FakeResponse:
-    def __init__(self, status_code: int, body: dict | None = None) -> None:
-        self.status_code = status_code
-        self._body = body
-
-    def json(self) -> dict:
-        return self._body
-
-    def raise_for_status(self) -> None:
-        if self.status_code >= 400:
-            raise AssertionError(f"HTTP {self.status_code}")
-
-
-class _FakeSession:
-    """Serves one in-memory repo-level index over GET and PUT."""
-
-    def __init__(self, index: dict | None = None) -> None:
-        self.index = index
-
-    def get(self, url: str) -> _FakeResponse:
-        if self.index is None:
-            return _FakeResponse(404)
-        return _FakeResponse(200, self.index)
-
-    def put(self, url: str, data: bytes) -> _FakeResponse:
-        self.index = json.loads(data)
-        return _FakeResponse(201)
-
-
-class TestIndex:
-    """The realm reads the repo-level inventory.json before anything else."""
-
+class TestBearerToken:
     def test_token_is_sent_as_bearer(self) -> None:
         driver = nginx.NginxRepoDriver(url="http://repo", token="tkn")
 
         assert driver._session.headers["Authorization"] == "Bearer tkn"
-
-    def test_first_push_creates_the_index(self) -> None:
-        driver = nginx.NginxRepoDriver(url="http://repo", update_index=True)
-        driver._session = _FakeSession()
-
-        driver._set_index_entry(_element(), {"name": "elem"})
-
-        assert driver._session.index == {
-            "elements": {"elem": {"1.0.0": {"name": "elem"}}}
-        }
-
-    def test_push_keeps_other_elements_and_versions(self) -> None:
-        driver = nginx.NginxRepoDriver(url="http://repo", update_index=True)
-        driver._session = _FakeSession(
-            {"elements": {"elem": {"0.9.0": {}}, "other": {"2.0.0": {}}}}
-        )
-
-        driver._set_index_entry(_element(), {"name": "elem"})
-
-        assert driver._session.index == {
-            "elements": {
-                "elem": {"0.9.0": {}, "1.0.0": {"name": "elem"}},
-                "other": {"2.0.0": {}},
-            }
-        }
-
-    def test_an_index_without_elements_is_repaired(self) -> None:
-        driver = nginx.NginxRepoDriver(url="http://repo", update_index=True)
-        driver._session = _FakeSession({})
-
-        driver._set_index_entry(_element(), {"name": "elem"})
-
-        assert driver._session.index == {
-            "elements": {"elem": {"1.0.0": {"name": "elem"}}}
-        }
-
-    def test_remove_drops_the_version_and_an_emptied_element(self) -> None:
-        driver = nginx.NginxRepoDriver(url="http://repo", update_index=True)
-        driver._session = _FakeSession(
-            {"elements": {"elem": {"1.0.0": {}}, "other": {"2.0.0": {}}}}
-        )
-
-        driver._set_index_entry(_element(), None)
-
-        assert driver._session.index == {"elements": {"other": {"2.0.0": {}}}}
-
-    def test_index_lives_next_to_the_elements(self) -> None:
-        driver = nginx.NginxRepoDriver(url="http://realm/repo/p1")
-
-        assert (
-            driver.index_path == "http://realm/repo/p1/exordos-elements/inventory.json"
-        )

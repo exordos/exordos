@@ -87,7 +87,6 @@ def test_driver_pushes_with_a_fresh_token_and_keeps_the_index():
 
     auth.authenticate.assert_called_once()
     assert driver._session.headers["Authorization"] == "Bearer tkn"
-    assert driver._update_index is True
     assert driver.elements_path == (
         f"https://realm.example.com/repo/{PROJECT}/exordos-elements"
     )

@@ -46,7 +46,6 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         auth: tuple[str, str] | list[str, str] | None = None,
         logger: logger_base.AbstractLogger = logger_base.ClickLogger(),
         token: str | None = None,
-        update_index: bool = False,
     ):
         """Initialize the Nginx repo driver.
 
@@ -55,8 +54,6 @@ class NginxRepoDriver(base.AbstractRepoDriver):
             auth: Optional tuple of (username, password) for basic auth
             logger: Logger instance for output
             token: Optional bearer token, e.g. a core IAM token
-            update_index: Keep the repo-level inventory.json, which the
-                realm reads first, in sync on push and remove
         """
         self._base_url = url.rstrip("/")
         self._name = name
@@ -64,7 +61,6 @@ class NginxRepoDriver(base.AbstractRepoDriver):
             auth = (auth[0], auth[1])
         self._auth = auth
         self._logger = logger
-        self._update_index = update_index
         self._session = requests.Session()
         if self._auth:
             self._session.auth = self._auth
@@ -92,35 +88,6 @@ class NginxRepoDriver(base.AbstractRepoDriver):
     ) -> str:
         """Get the base path for elements in the repository."""
         return f"{self._base_url}/{c.ELEMENT_REPO_PATH}/{element.name}/latest/inventory.json"
-
-    @property
-    def index_path(self) -> str:
-        """Get the path of the repo-level inventory of all elements."""
-        return f"{self.elements_path}/inventory.json"
-
-    def _set_index_entry(
-        self, element: builder_base.ElementInventory, spec: dict | None
-    ) -> None:
-        """Add (or with `spec` None drop) an element version in the index."""
-        response = self._session.get(self.index_path)
-        if response.status_code == 404:
-            index: dict = {"elements": {}}
-        else:
-            response.raise_for_status()
-            index = response.json()
-
-        versions = index.setdefault("elements", {}).setdefault(element.name, {})
-        if spec is None:
-            versions.pop(element.version, None)
-            if not versions:
-                del index["elements"][element.name]
-        else:
-            versions[element.version] = spec
-
-        response = self._session.put(
-            self.index_path, data=json.dumps(index, indent=2).encode("utf-8")
-        )
-        response.raise_for_status()
 
     def _upload_file(self, local_path: str, remote_path: str) -> None:
         """Upload a file to the Nginx server.
@@ -298,8 +265,6 @@ class NginxRepoDriver(base.AbstractRepoDriver):
             data=json.dumps(spec, indent=2).encode("utf-8"),
         )
         response.raise_for_status()
-        if self._update_index:
-            self._set_index_entry(element, spec)
 
         self._logger.info(
             f"Pushed {element.name} version {element.version} "
@@ -403,8 +368,6 @@ class NginxRepoDriver(base.AbstractRepoDriver):
 
             # Delete inventory file
             self._delete_remote(self.elements_inventory_path(element))
-            if self._update_index:
-                self._set_index_entry(element, None)
 
             # Try to delete the version directory
             self._delete_remote(element_url)

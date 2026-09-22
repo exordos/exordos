@@ -87,7 +87,6 @@ def load_driver(auth_data: dict[str, tp.Any], project_id: str) -> nginx.NginxRep
         url=repo_url(auth_data["endpoint"], project_id),
         name=f"internal repo of project {project_id}",
         token=token,
-        update_index=True,
     )
 
 
