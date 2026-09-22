@@ -159,10 +159,56 @@ push:
   local:
     driver: fs
     path: /var/lib/exordos-pools/http
+  company:
+    driver: nginx                     # a WebDAV-enabled nginx server
+    url: https://repo.example.com
+    auth: [user, password]            # optional basic auth
 ```
 
-To push to a specific target, pass the config file with the `-c` flag:
+To push to a specific target, pass the config file with the `-c` flag and
+name the target with `-t` when the file has more than one:
 
 ```bash
-exordos push -c exordos/exordos.push.yaml
+exordos push -c exordos/exordos.push.yaml -t company
 ```
+
+### Internal repository
+
+Every project has its own internal repository in a realm, written with the
+core IAM token of the current user. It needs no push target: set the project
+in the realm's context of `~/.exordos/exordosctl.yaml`
+
+```yaml
+realms:
+  my_realm:
+    endpoint: https://my-realm.example.com/api/core
+    contexts:
+      developer:
+        user: developer
+        project_id: 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f
+    current-context: developer
+current-realm: my_realm
+```
+
+and push with `--internal-repo`:
+
+```bash
+exordos push --internal-repo
+# or for another project of the same realm
+exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --internal-repo
+```
+
+Without `project_id` in the context or `--project-id`, an admin pushes to
+the admin project `00000000-0000-0000-0000-000000000000` and anyone else to
+their default project.
+
+A token scoped to a project carries only that project's permissions, so an
+admin names another target project with `--repo-project`, which keeps the
+token unscoped:
+
+```bash
+exordos push --internal-repo --repo-project 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f
+```
+
+The elements go to `https://my-realm.example.com/repo/<project_id>/`, and
+the realm picks them up right away in the project's `internal` repository.

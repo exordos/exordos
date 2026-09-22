@@ -27,6 +27,7 @@ from exordos.cmd.base import create_entity_group
 from exordos.cmd.repo.elements import commands as elements_commands
 from exordos.cmd.repo.store import commands as store_commands
 from exordos.common.table import show_data
+from exordos.repo import internal as internal_repo_lib
 from exordos.repo import utils as repo_utils
 
 if tp.TYPE_CHECKING:
@@ -378,6 +379,24 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     help="Target repository to push to",
 )
 @click.option(
+    "--internal-repo",
+    is_flag=True,
+    help=(
+        "Push to the project's internal repository in the current realm; "
+        "the project comes from --project-id or the context, else it is "
+        "the admin project for an admin and the default project for others"
+    ),
+)
+@click.option(
+    "--repo-project",
+    type=click.UUID,
+    default=None,
+    help=(
+        "Project of the internal repository to push to with an unscoped "
+        "token, e.g. as an admin (with --internal-repo)"
+    ),
+)
+@click.option(
     "-e",
     "--element-dir",
     default=lambda: pathlib.Path(c.DEF_GEN_OUTPUT_DIR_NAME),
@@ -414,12 +433,29 @@ def push_cmd(
     driver: str | None,
     driver_params: tuple[str, ...],
     target: str | None,
+    internal_repo: bool,
+    repo_project: sys_uuid.UUID | None,
     element_dir: pathlib.Path,
     force: bool,
     latest: bool,
     jobs: int,
     project_dir: pathlib.Path,
 ) -> None:
+    if internal_repo:
+        if target or driver or driver_params:
+            raise click.UsageError(
+                "--internal-repo cannot be combined with --target, --driver "
+                "or --driver-params"
+            )
+        auth_data, project_id = internal_repo_lib.resolve(obj.auth_data, repo_project)
+        repo_driver = internal_repo_lib.load_driver(auth_data, project_id)
+        repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
+        internal_repo_lib.refresh(auth_data, project_id)
+        return
+
+    if repo_project:
+        raise click.UsageError("--repo-project needs --internal-repo")
+
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
     )

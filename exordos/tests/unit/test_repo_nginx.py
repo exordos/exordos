@@ -74,3 +74,10 @@ class TestUploadArtifacts:
             "http://repo/elem/1.0.0/manifests/elem.yaml",
         ]
         assert len(threads) == 3
+
+
+class TestBearerToken:
+    def test_token_is_sent_as_bearer(self) -> None:
+        driver = nginx.NginxRepoDriver(url="http://repo", token="tkn")
+
+        assert driver._session.headers["Authorization"] == "Bearer tkn"

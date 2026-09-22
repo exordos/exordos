@@ -129,10 +129,56 @@ push:
   local:
     driver: fs
     path: /var/lib/exordos-pools/http
+  company:
+    driver: nginx                     # nginx-сервер с включённым WebDAV
+    url: https://repo.example.com
+    auth: [user, password]            # опциональный basic auth
 ```
 
-Для отправки в конкретный целевой объект передайте файл конфигурации с флагом `-c`:
+Для отправки в конкретный целевой объект передайте файл конфигурации с
+флагом `-c` и укажите цель через `-t`, если их в файле несколько:
 
 ```bash
-exordos push -c exordos/exordos.push.yaml
+exordos push -c exordos/exordos.push.yaml -t company
 ```
+
+### Внутренний репозиторий
+
+У каждого проекта в реалме есть свой внутренний репозиторий, запись в
+который идёт с токеном core IAM текущего пользователя. Цель push для него не
+нужна: укажите проект в контексте реалма в `~/.exordos/exordosctl.yaml`
+
+```yaml
+realms:
+  my_realm:
+    endpoint: https://my-realm.example.com/api/core
+    contexts:
+      developer:
+        user: developer
+        project_id: 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f
+    current-context: developer
+current-realm: my_realm
+```
+
+и выполните push с `--internal-repo`:
+
+```bash
+exordos push --internal-repo
+# или для другого проекта того же реалма
+exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --internal-repo
+```
+
+Без `project_id` в контексте и без `--project-id` администратор выполняет
+push в проект администратора `00000000-0000-0000-0000-000000000000`, а
+остальные пользователи — в свой проект по умолчанию.
+
+Токен, ограниченный проектом, несёт только права этого проекта, поэтому
+администратор указывает другой целевой проект через `--repo-project`, и
+токен остаётся без проекта:
+
+```bash
+exordos push --internal-repo --repo-project 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f
+```
+
+Элементы попадают в `https://my-realm.example.com/repo/<project_id>/`, и
+реалм сразу подхватывает их в репозитории проекта `internal`.

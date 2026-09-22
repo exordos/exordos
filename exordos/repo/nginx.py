@@ -45,6 +45,7 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         name: str = "nginx_repo",
         auth: tuple[str, str] | list[str, str] | None = None,
         logger: logger_base.AbstractLogger = logger_base.ClickLogger(),
+        token: str | None = None,
     ):
         """Initialize the Nginx repo driver.
 
@@ -52,6 +53,7 @@ class NginxRepoDriver(base.AbstractRepoDriver):
             url: Base URL of the Nginx server (e.g., 'http://localhost:8080')
             auth: Optional tuple of (username, password) for basic auth
             logger: Logger instance for output
+            token: Optional bearer token, e.g. a core IAM token
         """
         self._base_url = url.rstrip("/")
         self._name = name
@@ -62,6 +64,8 @@ class NginxRepoDriver(base.AbstractRepoDriver):
         self._session = requests.Session()
         if self._auth:
             self._session.auth = self._auth
+        if token:
+            self._session.headers["Authorization"] = f"Bearer {token}"
 
     @property
     def name(self) -> str:

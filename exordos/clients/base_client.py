@@ -33,6 +33,32 @@ CONNECT_TIMEOUT = 5
 READ_TIMEOUT = 10
 
 
+def get_authenticator(
+    auth_data: dict,
+    bazooka_client: Client | None = None,
+) -> http_client.CoreIamAuthenticator | None:
+    if auth_data.get("no_auth"):
+        return None
+    bazooka_client = bazooka_client or Client(
+        default_timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
+    )
+    return http_client.CoreIamAuthenticator(
+        base_url=auth_data["endpoint"],
+        username=auth_data.get("username", auth_data.get("user")),
+        login=auth_data.get("login"),
+        password=auth_data.get("password"),
+        access_token=auth_data.get("access_token"),
+        refresh_token=auth_data.get("refresh_token"),
+        scope=auth_data.get("scope"),
+        ttl=auth_data.get("ttl"),
+        refresh_ttl=auth_data.get("refresh_ttl"),
+        http_client=bazooka_client,
+        password_prompt=auth_data.get("password_prompt"),
+        otp_prompt=auth_data.get("otp_prompt"),
+        realm=auth_data.get("realm"),
+    )
+
+
 def get_user_api_client(
     auth_data: dict,
     timeout: tp.Tuple[int, int] | None = None,
@@ -40,24 +66,7 @@ def get_user_api_client(
     bazooka_client = Client(
         default_timeout=timeout or (CONNECT_TIMEOUT, READ_TIMEOUT),
     )
-    if auth_data.get("no_auth"):
-        auth = None
-    else:
-        auth = http_client.CoreIamAuthenticator(
-            base_url=auth_data["endpoint"],
-            username=auth_data.get("username", auth_data.get("user")),
-            login=auth_data.get("login"),
-            password=auth_data.get("password"),
-            access_token=auth_data.get("access_token"),
-            refresh_token=auth_data.get("refresh_token"),
-            scope=auth_data.get("scope"),
-            ttl=auth_data.get("ttl"),
-            refresh_ttl=auth_data.get("refresh_ttl"),
-            http_client=bazooka_client,
-            password_prompt=auth_data.get("password_prompt"),
-            otp_prompt=auth_data.get("otp_prompt"),
-            realm=auth_data.get("realm"),
-        )
+    auth = get_authenticator(auth_data, bazooka_client)
     # Elements deployed next to core (dbaas, ecosystem, ...) serve their own
     # API, but are authenticated by core IAM at auth_data["endpoint"].
     client = http_client.CollectionBaseClient(
