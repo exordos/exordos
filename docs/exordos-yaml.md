@@ -159,10 +159,44 @@ push:
   local:
     driver: fs
     path: /var/lib/exordos-pools/http
+  company:
+    driver: nginx                     # a WebDAV-enabled nginx server
+    url: https://repo.example.com
+    auth: [user, password]            # optional basic auth
 ```
 
-To push to a specific target, pass the config file with the `-c` flag:
+To push to a specific target, pass the config file with the `-c` flag and
+name the target with `-t` when the file has more than one:
 
 ```bash
-exordos push -c exordos/exordos.push.yaml
+exordos push -c exordos/exordos.push.yaml -t company
 ```
+
+### Realm repository
+
+Every project has its own repository in a realm, written with the core IAM
+token of the current user. It needs no push target: set the project in the
+realm's context of `~/.exordos/exordosctl.yaml`
+
+```yaml
+realms:
+  my_realm:
+    endpoint: https://my-realm.example.com/api/core
+    contexts:
+      developer:
+        user: developer
+        project_id: 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f
+    current-context: developer
+current-realm: my_realm
+```
+
+and push with `--realm-repo`:
+
+```bash
+exordos push --realm-repo
+# or for another project of the same realm
+exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --realm-repo
+```
+
+The elements go to `https://my-realm.example.com/repo/<project_id>/`, and
+the realm picks them up right away in the project's `internal` repository.

@@ -129,10 +129,44 @@ push:
   local:
     driver: fs
     path: /var/lib/exordos-pools/http
+  company:
+    driver: nginx                     # nginx-сервер с включённым WebDAV
+    url: https://repo.example.com
+    auth: [user, password]            # опциональный basic auth
 ```
 
-Для отправки в конкретный целевой объект передайте файл конфигурации с флагом `-c`:
+Для отправки в конкретный целевой объект передайте файл конфигурации с
+флагом `-c` и укажите цель через `-t`, если их в файле несколько:
 
 ```bash
-exordos push -c exordos/exordos.push.yaml
+exordos push -c exordos/exordos.push.yaml -t company
 ```
+
+### Репозиторий реалма
+
+У каждого проекта в реалме есть свой репозиторий, запись в который идёт с
+токеном core IAM текущего пользователя. Цель push для него не нужна:
+укажите проект в контексте реалма в `~/.exordos/exordosctl.yaml`
+
+```yaml
+realms:
+  my_realm:
+    endpoint: https://my-realm.example.com/api/core
+    contexts:
+      developer:
+        user: developer
+        project_id: 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f
+    current-context: developer
+current-realm: my_realm
+```
+
+и выполните push с `--realm-repo`:
+
+```bash
+exordos push --realm-repo
+# или для другого проекта того же реалма
+exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --realm-repo
+```
+
+Элементы попадают в `https://my-realm.example.com/repo/<project_id>/`, и
+реалм сразу подхватывает их в репозитории проекта `internal`.
