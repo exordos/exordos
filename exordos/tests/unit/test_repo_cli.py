@@ -701,21 +701,21 @@ class TestPushCmd:
         )
         assert result.exit_code != 0
 
-    def test_push_cmd_realm_repo_pushes_then_refreshes(self) -> None:
+    def test_push_cmd_internal_repo_pushes_then_refreshes(self) -> None:
         driver = MagicMock()
         calls = MagicMock()
         with (
             patch.object(
-                repo_commands.realm_repo_lib, "load_driver", return_value=driver
+                repo_commands.internal_repo_lib, "load_driver", return_value=driver
             ),
-            patch.object(repo_commands.realm_repo_lib, "refresh", calls.refresh),
+            patch.object(repo_commands.internal_repo_lib, "refresh", calls.refresh),
             patch.object(repo_commands.repo_utils, "do_push", calls.do_push),
             patch.object(
                 repo_commands.repo_utils, "load_repo_driver"
             ) as load_repo_driver,
         ):
             result = CliRunner().invoke(
-                repo_commands.push_cmd, ["--realm-repo"], obj=self._obj()
+                repo_commands.push_cmd, ["--internal-repo"], obj=self._obj()
             )
 
         assert result.exit_code == 0, result.output
@@ -723,14 +723,14 @@ class TestPushCmd:
         assert calls.do_push.call_args.args[0] is driver
         load_repo_driver.assert_not_called()
 
-    def test_push_cmd_realm_repo_rejects_a_target(self) -> None:
+    def test_push_cmd_internal_repo_rejects_a_target(self) -> None:
         result = CliRunner().invoke(
             repo_commands.push_cmd,
-            ["--realm-repo", "--target", "other"],
+            ["--internal-repo", "--target", "other"],
             obj=self._obj(),
         )
         assert result.exit_code != 0
-        assert "--realm-repo" in result.output
+        assert "--internal-repo" in result.output
 
 
 class TestUpdateCmd:

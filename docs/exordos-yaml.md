@@ -172,11 +172,11 @@ name the target with `-t` when the file has more than one:
 exordos push -c exordos/exordos.push.yaml -t company
 ```
 
-### Realm repository
+### Internal repository
 
-Every project has its own repository in a realm, written with the core IAM
-token of the current user. It needs no push target: set the project in the
-realm's context of `~/.exordos/exordosctl.yaml`
+Every project has its own internal repository in a realm, written with the
+core IAM token of the current user. It needs no push target: set the project
+in the realm's context of `~/.exordos/exordosctl.yaml`
 
 ```yaml
 realms:
@@ -190,12 +190,12 @@ realms:
 current-realm: my_realm
 ```
 
-and push with `--realm-repo`:
+and push with `--internal-repo`:
 
 ```bash
-exordos push --realm-repo
+exordos push --internal-repo
 # or for another project of the same realm
-exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --realm-repo
+exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --internal-repo
 ```
 
 The elements go to `https://my-realm.example.com/repo/<project_id>/`, and

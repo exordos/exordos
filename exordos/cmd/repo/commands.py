@@ -27,7 +27,7 @@ from exordos.cmd.base import create_entity_group
 from exordos.cmd.repo.elements import commands as elements_commands
 from exordos.cmd.repo.store import commands as store_commands
 from exordos.common.table import show_data
-from exordos.repo import realm as realm_repo_lib
+from exordos.repo import internal as internal_repo_lib
 from exordos.repo import utils as repo_utils
 
 if tp.TYPE_CHECKING:
@@ -379,11 +379,11 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     help="Target repository to push to",
 )
 @click.option(
-    "--realm-repo",
+    "--internal-repo",
     is_flag=True,
     help=(
-        "Push to the current realm's repository of the project given by "
-        "--project-id or the context, authenticated as the current user"
+        "Push to the project's internal repository in the current realm; "
+        "the project comes from --project-id or the context"
     ),
 )
 @click.option(
@@ -423,21 +423,21 @@ def push_cmd(
     driver: str | None,
     driver_params: tuple[str, ...],
     target: str | None,
-    realm_repo: bool,
+    internal_repo: bool,
     element_dir: pathlib.Path,
     force: bool,
     latest: bool,
     jobs: int,
     project_dir: pathlib.Path,
 ) -> None:
-    if realm_repo:
+    if internal_repo:
         if target or driver:
             raise click.UsageError(
-                "--realm-repo cannot be combined with --target or --driver"
+                "--internal-repo cannot be combined with --target or --driver"
             )
-        repo_driver = realm_repo_lib.load_driver(obj.auth_data)
+        repo_driver = internal_repo_lib.load_driver(obj.auth_data)
         repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
-        realm_repo_lib.refresh(obj.auth_data)
+        internal_repo_lib.refresh(obj.auth_data)
         return
 
     repo_driver = repo_utils.load_repo_driver(

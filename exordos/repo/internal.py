@@ -38,7 +38,7 @@ def _project_id(auth_data: dict[str, tp.Any]) -> str:
     scope = auth_data.get("scope") or ""
     if not scope.startswith(PROJECT_SCOPE_PREFIX):
         raise click.ClickException(
-            "The realm repository belongs to a project: pass --project-id "
+            "The internal repository belongs to a project: pass --project-id "
             "or set project_id in the current context."
         )
     return scope[len(PROJECT_SCOPE_PREFIX) :]
@@ -55,13 +55,13 @@ def load_driver(auth_data: dict[str, tp.Any]) -> nginx.NginxRepoDriver:
     project_id = _project_id(auth_data)
     auth = base_client.get_authenticator(auth_data)
     if auth is None:
-        raise click.ClickException("The realm repository requires authentication.")
+        raise click.ClickException("The internal repository requires authentication.")
     # A fresh token: a cached one may expire in the middle of a push.
     auth.authenticate()
     token = auth.get_auth_header()["Authorization"].split(" ", 1)[1]
     return nginx.NginxRepoDriver(
         url=repo_url(auth_data["endpoint"], project_id),
-        name=f"realm repo of project {project_id}",
+        name=f"internal repo of project {project_id}",
         token=token,
         update_index=True,
     )
