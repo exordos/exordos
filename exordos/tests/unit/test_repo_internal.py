@@ -37,6 +37,16 @@ def test_repo_url_is_on_the_api_host():
     )
 
 
+def test_resolve_repo_project_keeps_the_token_unscoped():
+    with patch.object(internal.base_client, "get_user_api_client") as client:
+        auth_data, project_id = internal.resolve(AUTH_DATA, "p2")
+
+    # A token scoped to p2 would lack an admin's unscoped permissions.
+    assert project_id == "p2"
+    assert auth_data["scope"] is None
+    client.assert_not_called()
+
+
 def test_resolve_keeps_the_given_project():
     with patch.object(internal.base_client, "get_user_api_client") as client:
         assert internal.resolve(AUTH_DATA) == (AUTH_DATA, PROJECT)

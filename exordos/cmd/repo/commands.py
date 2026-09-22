@@ -388,6 +388,15 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     ),
 )
 @click.option(
+    "--repo-project",
+    type=click.UUID,
+    default=None,
+    help=(
+        "Project of the internal repository to push to with an unscoped "
+        "token, e.g. as an admin (with --internal-repo)"
+    ),
+)
+@click.option(
     "-e",
     "--element-dir",
     default=lambda: pathlib.Path(c.DEF_GEN_OUTPUT_DIR_NAME),
@@ -425,6 +434,7 @@ def push_cmd(
     driver_params: tuple[str, ...],
     target: str | None,
     internal_repo: bool,
+    repo_project: sys_uuid.UUID | None,
     element_dir: pathlib.Path,
     force: bool,
     latest: bool,
@@ -437,11 +447,14 @@ def push_cmd(
                 "--internal-repo cannot be combined with --target, --driver "
                 "or --driver-params"
             )
-        auth_data, project_id = internal_repo_lib.resolve(obj.auth_data)
+        auth_data, project_id = internal_repo_lib.resolve(obj.auth_data, repo_project)
         repo_driver = internal_repo_lib.load_driver(auth_data, project_id)
         repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
         internal_repo_lib.refresh(auth_data, project_id)
         return
+
+    if repo_project:
+        raise click.UsageError("--repo-project needs --internal-repo")
 
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params

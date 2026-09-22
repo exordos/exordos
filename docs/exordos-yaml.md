@@ -201,5 +201,13 @@ exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --internal-repo
 Without `project_id` in the context or `--project-id`, the push goes to the
 user's default project.
 
+A token scoped to a project carries only that project's permissions, so an
+admin names the target project with `--repo-project` instead, which keeps
+the token unscoped:
+
+```bash
+exordos push --internal-repo --repo-project 00000000-0000-0000-0000-000000000000
+```
+
 The elements go to `https://my-realm.example.com/repo/<project_id>/`, and
 the realm picks them up right away in the project's `internal` repository.

@@ -731,6 +731,36 @@ class TestPushCmd:
         calls.refresh.assert_called_once_with(scoped, "p1")
         load_repo_driver.assert_not_called()
 
+    def test_push_cmd_repo_project_reaches_resolve(self) -> None:
+        project = "00000000-0000-4000-8000-00000000000b"
+        with (
+            patch.object(
+                repo_commands.internal_repo_lib,
+                "resolve",
+                return_value=({}, project),
+            ) as resolve,
+            patch.object(repo_commands.internal_repo_lib, "load_driver"),
+            patch.object(repo_commands.internal_repo_lib, "refresh"),
+            patch.object(repo_commands.repo_utils, "do_push"),
+        ):
+            result = CliRunner().invoke(
+                repo_commands.push_cmd,
+                ["--internal-repo", "--repo-project", project],
+                obj=self._obj(),
+            )
+
+        assert result.exit_code == 0, result.output
+        assert str(resolve.call_args.args[1]) == project
+
+    def test_push_cmd_repo_project_needs_internal_repo(self) -> None:
+        result = CliRunner().invoke(
+            repo_commands.push_cmd,
+            ["--repo-project", "00000000-0000-4000-8000-00000000000b"],
+            obj=self._obj(),
+        )
+        assert result.exit_code != 0
+        assert "--internal-repo" in result.output
+
     @pytest.mark.parametrize(
         "args",
         [["--target", "other"], ["--driver", "nginx"], ["--driver-params", "a=b"]],

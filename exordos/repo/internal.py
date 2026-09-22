@@ -36,12 +36,19 @@ PROJECT_SCOPE_PREFIX = "project:"
 DEFAULT_PROJECT_SCOPE = f"{PROJECT_SCOPE_PREFIX}default"
 
 
-def resolve(auth_data: dict[str, tp.Any]) -> tuple[dict[str, tp.Any], str]:
-    """Return the auth data scoped to the project to push to, and its ID.
+def resolve(
+    auth_data: dict[str, tp.Any], repo_project: str | None = None
+) -> tuple[dict[str, tp.Any], str]:
+    """Return the auth data to push with and the ID of the project.
 
-    The project given by --project-id or the context wins; without one the
-    user's default project is used.
+    `repo_project` wins and keeps the token unscoped: core takes a token's
+    permissions from its project's bindings, so an admin's are only in an
+    unscoped one. Then comes the project of --project-id or the context,
+    then the user's default project.
     """
+    if repo_project:
+        return {**auth_data, "scope": None}, str(repo_project)
+
     scope = auth_data.get("scope") or ""
     if scope.startswith(PROJECT_SCOPE_PREFIX):
         return auth_data, scope[len(PROJECT_SCOPE_PREFIX) :]
