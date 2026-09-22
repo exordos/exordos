@@ -432,9 +432,10 @@ def push_cmd(
     project_dir: pathlib.Path,
 ) -> None:
     if internal_repo:
-        if target or driver:
+        if target or driver or driver_params:
             raise click.UsageError(
-                "--internal-repo cannot be combined with --target or --driver"
+                "--internal-repo cannot be combined with --target, --driver "
+                "or --driver-params"
             )
         auth_data, project_id = internal_repo_lib.resolve(obj.auth_data)
         repo_driver = internal_repo_lib.load_driver(auth_data, project_id)

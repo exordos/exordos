@@ -139,6 +139,16 @@ class TestIndex:
             }
         }
 
+    def test_an_index_without_elements_is_repaired(self) -> None:
+        driver = nginx.NginxRepoDriver(url="http://repo", update_index=True)
+        driver._session = _FakeSession({})
+
+        driver._set_index_entry(_element(), {"name": "elem"})
+
+        assert driver._session.index == {
+            "elements": {"elem": {"1.0.0": {"name": "elem"}}}
+        }
+
     def test_remove_drops_the_version_and_an_emptied_element(self) -> None:
         driver = nginx.NginxRepoDriver(url="http://repo", update_index=True)
         driver._session = _FakeSession(

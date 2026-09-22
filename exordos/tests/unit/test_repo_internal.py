@@ -83,6 +83,17 @@ def test_driver_pushes_with_a_fresh_token_and_keeps_the_index():
     )
 
 
+def test_a_bare_access_token_is_used_as_is():
+    auth = MagicMock()
+    auth.get_auth_header.return_value = {"Authorization": "Bearer given"}
+    with patch.object(internal.base_client, "get_authenticator", return_value=auth):
+        driver = internal.load_driver({**AUTH_DATA, "access_token": "given"}, PROJECT)
+
+    # Nothing to refresh from: re-authenticating would run a password grant.
+    auth.authenticate.assert_not_called()
+    assert driver._session.headers["Authorization"] == "Bearer given"
+
+
 def test_refresh_refreshes_the_internal_repo_only():
     repos = [
         {"uuid": "nginx-uuid", "driver_spec": {"kind": "nginx"}},

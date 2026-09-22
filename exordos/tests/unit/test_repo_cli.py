@@ -731,11 +731,13 @@ class TestPushCmd:
         calls.refresh.assert_called_once_with(scoped, "p1")
         load_repo_driver.assert_not_called()
 
-    def test_push_cmd_internal_repo_rejects_a_target(self) -> None:
+    @pytest.mark.parametrize(
+        "args",
+        [["--target", "other"], ["--driver", "nginx"], ["--driver-params", "a=b"]],
+    )
+    def test_push_cmd_internal_repo_rejects_other_targets(self, args) -> None:
         result = CliRunner().invoke(
-            repo_commands.push_cmd,
-            ["--internal-repo", "--target", "other"],
-            obj=self._obj(),
+            repo_commands.push_cmd, ["--internal-repo", *args], obj=self._obj()
         )
         assert result.exit_code != 0
         assert "--internal-repo" in result.output

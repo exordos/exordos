@@ -109,7 +109,7 @@ class NginxRepoDriver(base.AbstractRepoDriver):
             response.raise_for_status()
             index = response.json()
 
-        versions = index["elements"].setdefault(element.name, {})
+        versions = index.setdefault("elements", {}).setdefault(element.name, {})
         if spec is None:
             versions.pop(element.version, None)
             if not versions:

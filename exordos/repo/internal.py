@@ -71,8 +71,10 @@ def load_driver(auth_data: dict[str, tp.Any], project_id: str) -> nginx.NginxRep
     auth = base_client.get_authenticator(auth_data)
     if auth is None:
         raise click.ClickException("The internal repository requires authentication.")
-    # A fresh token: a cached one may expire in the middle of a push.
-    auth.authenticate()
+    # A fresh token: a cached one may expire in the middle of a push. A
+    # bare --access-token has nothing to refresh from, so it is used as is.
+    if auth_data.get("refresh_token") or not auth_data.get("access_token"):
+        auth.authenticate()
     token = auth.get_auth_header()["Authorization"].split(" ", 1)[1]
     return nginx.NginxRepoDriver(
         url=repo_url(auth_data["endpoint"], project_id),
