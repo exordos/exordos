@@ -592,6 +592,20 @@
   
   
     <li class="md-nav__item">
+      <a href="cli/exordos_clear-build-cache/" class="md-nav__link">
+        exordos_clear-build-cache
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="cli/exordos_cn/" class="md-nav__link">
         exordos_cn
       </a>
@@ -4372,6 +4386,90 @@
   
   
     <li class="md-nav__item">
+      <a href="cli/exordos_secret_secrets/" class="md-nav__link">
+        exordos_secret_secrets
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/exordos_secret_secrets_add/" class="md-nav__link">
+        exordos_secret_secrets_add
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/exordos_secret_secrets_delete/" class="md-nav__link">
+        exordos_secret_secrets_delete
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/exordos_secret_secrets_list/" class="md-nav__link">
+        exordos_secret_secrets_list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/exordos_secret_secrets_show/" class="md-nav__link">
+        exordos_secret_secrets_show
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/exordos_secret_secrets_update/" class="md-nav__link">
+        exordos_secret_secrets_update
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="cli/exordos_secret_ssh_keys/" class="md-nav__link">
         exordos_secret_ssh_keys
       </a>
@@ -5456,6 +5554,9 @@ sudo<span class="w"> </span>adduser<span class="w"> </span><span class="nv">$USE
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>build<span class="w"> </span>my_project
 </code></pre></div>
 <p>After a successful build, output artifacts are stored in the <code>output</code> directory. For full reference see the <a href="https://exordos.github.io/exordos_core/app-developer-guide/build/">build documentation</a>.</p>
+<p>Packer caches downloaded base images in <code>~/.cache/packer</code> (or <code>$XDG_CACHE_HOME/packer</code>, or <code>PACKER_CACHE_DIR</code> if set). To remove the cache, run:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>clear-build-cache
+</code></pre></div>
 <h2 id="stand-specification">Stand specification<a class="headerlink" href="#stand-specification" title="Permanent link">#</a></h2>
 <p>For multi-node installations, use a stand specification file to describe the topology. See <a href="stand-spec/">stand specification</a>.</p>
 <h2 id="backups">Backups<a class="headerlink" href="#backups" title="Permanent link">#</a></h2>
