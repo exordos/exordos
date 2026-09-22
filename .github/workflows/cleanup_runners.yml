@@ -1,0 +1,47 @@
+name: Clean up VM runners
+
+on:
+  schedule:
+  # Every Sunday at 00:00 UTC
+  - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    name: Clean up ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ github-packer-runner-0, github-packer-runner-1, github-packer-runner-2, github-packer-runner-3, runner-4 ]
+    steps:
+    - name: Show disk usage before cleanup
+      run: df -h
+
+    - name: Clear packer cache
+      run: |
+        set -eux
+
+        # Packer keeps its cache either in PACKER_CACHE_DIR, in the XDG cache
+        # dir of the user or, for older versions, in ./packer_cache.
+        sudo rm -rf "${PACKER_CACHE_DIR:-$HOME/.cache/packer}" "$HOME/.cache/packer"
+
+        WORK_ROOT="$(dirname "$RUNNER_WORKSPACE")"
+        sudo find "$WORK_ROOT" -type d -name packer_cache -prune -exec rm -rf {} +
+
+    - name: Clear build output directories
+      run: |
+        set -eux
+
+        # Runner work root, e.g. ~/actions-runner/_work
+        WORK_ROOT="$(dirname "$RUNNER_WORKSPACE")"
+
+        sudo find "$WORK_ROOT" \
+          \( -path "$WORK_ROOT/_actions" -o -path "$WORK_ROOT/_tool" \
+             -o -path "$WORK_ROOT/_temp" -o -name .git -o -name .tox \
+             -o -name .venv -o -name node_modules \) -prune \
+          -o -type d -name output -prune -print -exec rm -rf {} +
+
+    - name: Show disk usage after cleanup
+      if: always()
+      run: df -h
