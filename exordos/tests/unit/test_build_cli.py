@@ -108,3 +108,50 @@ def test_build_cmd_unknown_element_exits_before_build(monkeypatch, tmp_path) -> 
     assert marker.read_text() == "keep"
     builder.fetch_dependency.assert_not_called()
     builder.build.assert_not_called()
+
+
+def test_clear_build_cache_cmd_removes_default_dir(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv("PACKER_CACHE_DIR", raising=False)
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    cache_dir = tmp_path / ".cache" / "packer"
+    cache_dir.mkdir(parents=True)
+    (cache_dir / "image.iso").write_text("data")
+
+    result = CliRunner().invoke(commands.clear_build_cache_cmd)
+
+    assert result.exit_code == 0, result.output
+    assert not cache_dir.exists()
+
+
+def test_clear_build_cache_cmd_uses_xdg_cache_home(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv("PACKER_CACHE_DIR", raising=False)
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path))
+    cache_dir = tmp_path / "packer"
+    cache_dir.mkdir()
+
+    result = CliRunner().invoke(commands.clear_build_cache_cmd)
+
+    assert result.exit_code == 0, result.output
+    assert not cache_dir.exists()
+
+
+def test_clear_build_cache_cmd_uses_packer_cache_dir(monkeypatch, tmp_path) -> None:
+    cache_dir = tmp_path / "custom_cache"
+    cache_dir.mkdir()
+    monkeypatch.setenv("PACKER_CACHE_DIR", str(cache_dir))
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "xdg"))
+
+    result = CliRunner().invoke(commands.clear_build_cache_cmd)
+
+    assert result.exit_code == 0, result.output
+    assert not cache_dir.exists()
+
+
+def test_clear_build_cache_cmd_missing_dir(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("PACKER_CACHE_DIR", str(tmp_path / "missing"))
+
+    result = CliRunner().invoke(commands.clear_build_cache_cmd)
+
+    assert result.exit_code == 0, result.output
+    assert "does not exist" in result.output

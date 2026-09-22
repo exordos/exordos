@@ -378,6 +378,62 @@ class TestDeployCmdPushMode:
         assert find_repo_mock.call_args[1]["sync_mode"] == "lazy"
         deploy_elements_mock.assert_called_once()
 
+    def _invoke_push_mode(
+        self, output_dir: pathlib.Path, args: list[str], deploy_side_effect=None
+    ):
+        fake_driver = MagicMock()
+        fake_driver.elements_path = "http://repo.example.com/exordos-elements"
+        with (
+            patch.object(
+                deploy_commands.base_client,
+                "get_user_api_client",
+                return_value=MagicMock(),
+            ),
+            patch.object(
+                deploy_commands.repo_utils,
+                "load_repo_driver_from_settings",
+                return_value=fake_driver,
+            ),
+            patch.object(deploy_commands.repo_utils, "do_push"),
+            patch.object(
+                deploy_commands.repo_utils,
+                "ensure_repository",
+                return_value={"uuid": "repo-uuid"},
+            ),
+            patch.object(
+                deploy_commands, "_deploy_element", side_effect=deploy_side_effect
+            ),
+        ):
+            return CliRunner().invoke(
+                deploy_commands.deploy_cmd,
+                ["-e", str(output_dir), "-t", "my-target", *args],
+                obj=_obj(),
+            )
+
+    def test_deploy_cmd_delete_output(self, tmp_path: pathlib.Path) -> None:
+        output_dir = _make_build_output(tmp_path)
+        result = self._invoke_push_mode(output_dir, ["--delete-output"])
+        assert result.exit_code == 0, result.output
+        assert not output_dir.exists()
+
+    def test_deploy_cmd_keeps_output_by_default(self, tmp_path: pathlib.Path) -> None:
+        output_dir = _make_build_output(tmp_path)
+        result = self._invoke_push_mode(output_dir, [])
+        assert result.exit_code == 0, result.output
+        assert output_dir.exists()
+
+    def test_deploy_cmd_delete_output_keeps_dir_on_failure(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        output_dir = _make_build_output(tmp_path)
+        result = self._invoke_push_mode(
+            output_dir,
+            ["--delete-output"],
+            deploy_side_effect=click.ClickException("install failed"),
+        )
+        assert result.exit_code != 0
+        assert output_dir.exists()
+
 
 class TestDeployCmdRealmValidation:
     def test_invalid_realm_raises(self, tmp_path: pathlib.Path) -> None:
@@ -462,6 +518,47 @@ class TestDeployCmdLocalMode:
         }
         assert find_repo_mock.call_args[1]["sync_mode"] == "copy"
         deploy_elements_mock.assert_called_once()
+
+    def test_local_mode_delete_output(self, tmp_path: pathlib.Path) -> None:
+        output_dir = _make_build_output(tmp_path)
+
+        @contextlib.contextmanager
+        def fake_serve_directory(path, host, port=0):
+            yield f"http://{host}:{port}/"
+            # The directory must still exist while it is being served
+            assert path.exists()
+
+        with (
+            patch.object(
+                deploy_commands.base_client,
+                "get_user_api_client",
+                return_value=MagicMock(),
+            ),
+            patch.object(deploy_commands, "_is_local_realm", return_value=True),
+            patch.object(
+                deploy_commands, "_get_local_host_bind", return_value="192.168.1.5"
+            ),
+            patch.object(deploy_commands, "_check_port_available"),
+            patch.object(
+                deploy_commands.local_server,
+                "serve_directory",
+                side_effect=fake_serve_directory,
+            ),
+            patch.object(
+                deploy_commands.repo_utils,
+                "ensure_repository",
+                return_value={"uuid": "repo-uuid"},
+            ),
+            patch.object(deploy_commands, "_deploy_element"),
+        ):
+            result = CliRunner().invoke(
+                deploy_commands.deploy_cmd,
+                ["-e", str(output_dir), "--delete-output"],
+                obj=_obj(),
+            )
+
+        assert result.exit_code == 0, result.output
+        assert not output_dir.exists()
 
     def test_busy_port_aborts(self, tmp_path: pathlib.Path) -> None:
         output_dir = _make_build_output(tmp_path)

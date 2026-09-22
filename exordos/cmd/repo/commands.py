@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import pathlib
+import shutil
 import typing as tp
 import uuid as sys_uuid
 
@@ -406,6 +407,12 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     type=click.IntRange(min=1),
     help="Number of artifacts to upload in parallel",
 )
+@click.option(
+    "--delete-output",
+    show_default=True,
+    is_flag=True,
+    help="Delete the element directory after a successful push",
+)
 @click.argument("project_dir", type=click.Path(), default=".")
 @click.pass_obj
 def push_cmd(
@@ -418,9 +425,13 @@ def push_cmd(
     force: bool,
     latest: bool,
     jobs: int,
+    delete_output: bool,
     project_dir: pathlib.Path,
 ) -> None:
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
     )
     repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
+
+    if delete_output:
+        shutil.rmtree(element_dir)

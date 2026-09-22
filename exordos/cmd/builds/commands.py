@@ -200,3 +200,33 @@ def build_cmd(
         with tempfile.TemporaryDirectory() as temp_dir:
             builder.fetch_dependency(deps_dir or temp_dir)
             builder.build(developer_keys, manifest_vars, validate)
+
+
+def _packer_cache_dir() -> pathlib.Path:
+    # Mirror packer-plugin-sdk `CachePath` resolution
+    if cache_dir := os.environ.get("PACKER_CACHE_DIR"):
+        return pathlib.Path(cache_dir)
+    if os.name == "nt":
+        return pathlib.Path("packer_cache")
+    if xdg_cache_home := os.environ.get("XDG_CACHE_HOME"):
+        return pathlib.Path(xdg_cache_home) / "packer"
+    return pathlib.Path.home() / ".cache" / "packer"
+
+
+@click.command(
+    "clear-build-cache",
+    help=(
+        "Remove the Packer cache with downloaded base images. The cache "
+        "directory is resolved the same way as Packer does: PACKER_CACHE_DIR, "
+        "then $XDG_CACHE_HOME/packer, then ~/.cache/packer ('packer_cache' in "
+        "the current directory on Windows)."
+    ),
+)
+def clear_build_cache_cmd() -> None:
+    cache_dir = _packer_cache_dir()
+    if not cache_dir.exists():
+        click.secho(f"The '{cache_dir}' cache directory does not exist", fg="yellow")
+        return
+
+    shutil.rmtree(cache_dir)
+    click.secho(f"The '{cache_dir}' cache directory has been removed", fg="green")

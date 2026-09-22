@@ -87,6 +87,12 @@ exordos build my_project
 
 После успешной сборки выходные артефакты сохраняются в каталоге `output`. Для полного справочника см. [документацию по сборке](https://exordos.github.io/exordos_core/app-developer-guide/build/).
 
+Packer кеширует загруженные базовые образы в каталоге `~/.cache/packer` (или `$XDG_CACHE_HOME/packer`, либо `PACKER_CACHE_DIR`, если задан). Чтобы удалить кеш, выполните:
+
+```sh
+exordos clear-build-cache
+```
+
 ## Спецификация стенда
 
 Для многоузловых установок используйте файл спецификации стенда для описания топологии. См. [спецификация стенда](stand-spec.ru.md).

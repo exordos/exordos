@@ -706,6 +706,37 @@ class TestPushCmd:
         )
         assert result.exit_code != 0
 
+    def test_push_cmd_delete_output(self, tmp_path) -> None:
+        element_dir = tmp_path / "output"
+        element_dir.mkdir()
+        self._invoke(["-e", str(element_dir), "--delete-output"])
+        assert not element_dir.exists()
+
+    def test_push_cmd_keeps_output_by_default(self, tmp_path) -> None:
+        element_dir = tmp_path / "output"
+        element_dir.mkdir()
+        self._invoke(["-e", str(element_dir)])
+        assert element_dir.exists()
+
+    def test_push_cmd_delete_output_keeps_dir_on_failure(self, tmp_path) -> None:
+        element_dir = tmp_path / "output"
+        element_dir.mkdir()
+        with (
+            patch.object(
+                repo_commands.repo_utils,
+                "load_repo_driver",
+                return_value=MagicMock(),
+            ),
+            patch.object(repo_commands.repo_utils, "do_push", side_effect=RuntimeError),
+        ):
+            result = CliRunner().invoke(
+                repo_commands.push_cmd,
+                ["-e", str(element_dir), "--delete-output"],
+                obj=self._obj(),
+            )
+        assert result.exit_code != 0
+        assert element_dir.exists()
+
 
 class TestUpdateCmd:
     """Tests for exordos.cmd.em.elements.commands.update_cmd."""
