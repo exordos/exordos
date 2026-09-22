@@ -96,6 +96,13 @@ Deploy a built element to a realm. The element must already be built (`exordos b
 
   TCP port used by the in-process HTTP server in local mode. If the port is already in use, the command aborts with an error.
 
+* `delete_output`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--delete-output`
+
+  Delete the element directory after a successful deploy
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -123,6 +130,7 @@ Deploy a built element to a realm. The element must already be built (`exordos b
 │ --realm                -r  TEXT                         Name of the realm to deploy to. If omitted, the current realm from the configuration is used.                                                                                                                                                   │
 │ --exordosctl-cfg-file  -c  TEXT                         Name of the exordosctl configuration file                                                                                                                                                                                                       │
 │ --port                     INTEGER RANGE [1<=x<=65535]  TCP port used by the in-process HTTP server in local mode. If the port is already in use, the command aborts with an error. [default: 33101]                                                                                                    │
+│ --delete-output                                         Delete the element directory after a successful deploy                                                                                                                                                                                          │
 │ --help                                                  Show this message and exit.                                                                                                                                                                                                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

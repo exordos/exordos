@@ -19,6 +19,7 @@ import errno
 import ipaddress
 import json
 import pathlib
+import shutil
 import socket
 import typing as tp
 import uuid as sys_uuid
@@ -381,6 +382,11 @@ def _deploy_element(
         "If the port is already in use, the command aborts with an error."
     ),
 )
+@click.option(
+    "--delete-output",
+    is_flag=True,
+    help="Delete the element directory after a successful deploy",
+)
 @click.pass_obj
 def deploy_cmd(
     obj: "ContextObject",
@@ -395,6 +401,7 @@ def deploy_cmd(
     exordosctl_cfg_file: str,
     realm: str | None,
     port: int,
+    delete_output: bool,
 ) -> None:
     import questionary
 
@@ -452,7 +459,10 @@ def deploy_cmd(
                 sync_mode="copy",
             )
             _deploy_element(client, repository_spec, e_name, e_version, timeout, force)
-            return
+
+        if delete_output:
+            shutil.rmtree(element_dir)
+        return
 
     if not repository:
         raise click.ClickException(
@@ -483,3 +493,6 @@ def deploy_cmd(
         client, repository, driver_spec, project_id, dev_repo_priority, sync_mode="lazy"
     )
     _deploy_element(client, repository_spec, e_name, e_version, timeout, force)
+
+    if delete_output:
+        shutil.rmtree(element_dir)
