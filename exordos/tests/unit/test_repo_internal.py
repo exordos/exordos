@@ -54,26 +54,54 @@ def test_resolve_keeps_the_given_project():
     client.assert_not_called()
 
 
+def _clients(unscoped_permissions, default_project=PROJECT):
+    """get_user_api_client stand-in answering introspection per scope."""
+    by_scope = {
+        None: {"project_id": None, "permissions": unscoped_permissions},
+        "project:default": {"project_id": default_project, "permissions": []},
+    }
+
+    def client(auth_data):
+        c = MagicMock()
+        c.introspect.return_value = by_scope[auth_data["scope"]]
+        return c
+
+    return client
+
+
+@pytest.mark.parametrize("permissions", [["*.*.*"], ["repo.repository.upload"]])
+def test_resolve_sends_an_admin_to_the_admin_project(permissions):
+    with patch.object(
+        internal.base_client, "get_user_api_client", side_effect=_clients(permissions)
+    ):
+        auth_data, project_id = internal.resolve({**AUTH_DATA, "scope": None})
+
+    assert project_id == "00000000-0000-0000-0000-000000000000"
+    # Scoped to it, the token would lose the admin's permissions.
+    assert auth_data["scope"] is None
+
+
 @pytest.mark.parametrize("scope", [None, ""])
 def test_resolve_falls_back_to_the_default_project(scope):
-    client = MagicMock()
-    client.introspect.return_value = {"project_id": PROJECT}
     with patch.object(
-        internal.base_client, "get_user_api_client", return_value=client
-    ) as get_client:
+        internal.base_client,
+        "get_user_api_client",
+        side_effect=_clients(["repo.repository.read", "*.element.*"]),
+    ):
         auth_data, project_id = internal.resolve({**AUTH_DATA, "scope": scope})
 
     assert project_id == PROJECT
     # Core scopes a `project:default` token to the user's default project.
     assert auth_data["scope"] == "project:default"
-    assert get_client.call_args.args[0]["scope"] == "project:default"
 
 
 def test_resolve_without_a_default_project_says_what_to_do():
-    client = MagicMock()
-    client.introspect.return_value = {"project_id": None}
     with (
-        patch.object(internal.base_client, "get_user_api_client", return_value=client),
+        patch.object(
+            internal.base_client,
+            "get_user_api_client",
+            side_effect=_clients([], default_project=None),
+        ),
         pytest.raises(click.ClickException, match="--project-id"),
     ):
         internal.resolve({**AUTH_DATA, "scope": None})

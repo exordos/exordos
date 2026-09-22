@@ -49,7 +49,7 @@ Push the element to the repository
     * Default: `false`
     * Usage: `--internal-repo`
 
-  Push to the project's internal repository in the current realm; the project comes from --project-id or the context, else the user's default project
+  Push to the project's internal repository in the current realm; the project comes from --project-id or the context, else it is the admin project for an admin and the default project for others
 
 * `repo_project`:
     * Type: uuid
@@ -115,7 +115,7 @@ Push the element to the repository
 │ --driver            -d  TEXT                  Driver to use, nginx for example                                                                                                                                                                                                                          │
 │ --driver-params         TEXT                  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                         │
 │ --target            -t  TEXT                  Target repository to push to                                                                                                                                                                                                                              │
-│ --internal-repo                               Push to the project's internal repository in the current realm; the project comes from --project-id or the context, else the user's default project                                                                                                       │
+│ --internal-repo                               Push to the project's internal repository in the current realm; the project comes from --project-id or the context, else it is the admin project for an admin and the default project for others                                                          │
 │ --repo-project          UUID                  Project of the internal repository to push to with an unscoped token, e.g. as an admin (with --internal-repo)                                                                                                                                             │
 │ --element-dir       -e  PATH                  Directory where element artifacts are stored                                                                                                                                                                                                              │
 │ --force             -f                        Force push even if the element already exists                                                                                                                                                                                                             │

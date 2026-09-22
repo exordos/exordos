@@ -168,15 +168,16 @@ exordos push --internal-repo
 exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --internal-repo
 ```
 
-Без `project_id` в контексте и без `--project-id` push идёт в проект
-пользователя по умолчанию.
+Без `project_id` в контексте и без `--project-id` администратор выполняет
+push в проект администратора `00000000-0000-0000-0000-000000000000`, а
+остальные пользователи — в свой проект по умолчанию.
 
 Токен, ограниченный проектом, несёт только права этого проекта, поэтому
-администратор указывает целевой проект через `--repo-project`, и токен
-остаётся без проекта:
+администратор указывает другой целевой проект через `--repo-project`, и
+токен остаётся без проекта:
 
 ```bash
-exordos push --internal-repo --repo-project 00000000-0000-0000-0000-000000000000
+exordos push --internal-repo --repo-project 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f
 ```
 
 Элементы попадают в `https://my-realm.example.com/repo/<project_id>/`, и

@@ -34,6 +34,21 @@ from exordos.repo import nginx
 PROJECT_SCOPE_PREFIX = "project:"
 # Core scopes such a token to the user's default project.
 DEFAULT_PROJECT_SCOPE = f"{PROJECT_SCOPE_PREFIX}default"
+# The admin's default project.
+ADMIN_PROJECT_ID = "00000000-0000-0000-0000-000000000000"
+UPLOAD_PERMISSION = "repo.repository.upload"
+
+
+def _grants(permissions: tp.Iterable[str], rule: str) -> bool:
+    """Tell whether a permission, `*` matching any segment, grants `rule`."""
+    wanted = rule.split(".")
+    for permission in permissions:
+        parts = permission.split(".")
+        if len(parts) == len(wanted) and all(
+            p in ("*", w) for p, w in zip(parts, wanted)
+        ):
+            return True
+    return False
 
 
 def resolve(
@@ -43,8 +58,9 @@ def resolve(
 
     `repo_project` wins and keeps the token unscoped: core takes a token's
     permissions from its project's bindings, so an admin's are only in an
-    unscoped one. Then comes the project of --project-id or the context,
-    then the user's default project.
+    unscoped one. Then comes the project of --project-id or the context.
+    Without one an admin, whose unscoped token may upload, pushes to the
+    admin project, and anyone else to their default project.
     """
     if repo_project:
         return {**auth_data, "scope": None}, str(repo_project)
@@ -52,6 +68,11 @@ def resolve(
     scope = auth_data.get("scope") or ""
     if scope.startswith(PROJECT_SCOPE_PREFIX):
         return auth_data, scope[len(PROJECT_SCOPE_PREFIX) :]
+
+    unscoped = {**auth_data, "scope": None}
+    permissions = base_client.get_user_api_client(unscoped).introspect()
+    if _grants(permissions.get("permissions") or (), UPLOAD_PERMISSION):
+        return unscoped, ADMIN_PROJECT_ID
 
     auth_data = {**auth_data, "scope": DEFAULT_PROJECT_SCOPE}
     client = base_client.get_user_api_client(auth_data)

@@ -383,8 +383,8 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     is_flag=True,
     help=(
         "Push to the project's internal repository in the current realm; "
-        "the project comes from --project-id or the context, else the "
-        "user's default project"
+        "the project comes from --project-id or the context, else it is "
+        "the admin project for an admin and the default project for others"
     ),
 )
 @click.option(
