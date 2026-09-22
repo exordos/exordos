@@ -16,6 +16,7 @@ from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.secret.certificate import commands as certificate_commands
 from exordos.cmd.secret.passwords import commands as password_commands
 from exordos.cmd.secret.rsa_keys import commands as rsa_keys_commands
+from exordos.cmd.secret.secrets import commands as secrets_commands
 from exordos.cmd.secret.ssh_keys import commands as ssh_keys_commands
 
 
@@ -29,4 +30,5 @@ def secret_group():
 secret_group.add_command(certificate_commands.certificates_group, aliases=["c"])  # noqa
 secret_group.add_command(password_commands.passwords_group, aliases=["p"])  # noqa
 secret_group.add_command(rsa_keys_commands.rsa_keys_group, aliases=["r"])  # noqa
+secret_group.add_command(secrets_commands.secrets_group, aliases=["sec"])  # noqa
 secret_group.add_command(ssh_keys_commands.ssh_keys_group, aliases=["s"])  # noqa
