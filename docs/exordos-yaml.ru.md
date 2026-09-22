@@ -168,5 +168,8 @@ exordos push --internal-repo
 exordos --project-id 7d3b5c1e-2f4a-4b8e-9c6d-0a1b2c3d4e5f push --internal-repo
 ```
 
+Без `project_id` в контексте и без `--project-id` push идёт в проект
+пользователя по умолчанию.
+
 Элементы попадают в `https://my-realm.example.com/repo/<project_id>/`, и
 реалм сразу подхватывает их в репозитории проекта `internal`.

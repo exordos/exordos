@@ -32,16 +32,29 @@ from exordos.clients import base_client
 from exordos.repo import nginx
 
 PROJECT_SCOPE_PREFIX = "project:"
+# Core scopes such a token to the user's default project.
+DEFAULT_PROJECT_SCOPE = f"{PROJECT_SCOPE_PREFIX}default"
 
 
-def _project_id(auth_data: dict[str, tp.Any]) -> str:
+def resolve(auth_data: dict[str, tp.Any]) -> tuple[dict[str, tp.Any], str]:
+    """Return the auth data scoped to the project to push to, and its ID.
+
+    The project given by --project-id or the context wins; without one the
+    user's default project is used.
+    """
     scope = auth_data.get("scope") or ""
-    if not scope.startswith(PROJECT_SCOPE_PREFIX):
+    if scope.startswith(PROJECT_SCOPE_PREFIX):
+        return auth_data, scope[len(PROJECT_SCOPE_PREFIX) :]
+
+    auth_data = {**auth_data, "scope": DEFAULT_PROJECT_SCOPE}
+    client = base_client.get_user_api_client(auth_data)
+    project_id = client.introspect().get("project_id")
+    if not project_id:
         raise click.ClickException(
-            "The internal repository belongs to a project: pass --project-id "
-            "or set project_id in the current context."
+            "You have no default project: pass --project-id or set "
+            "project_id in the current context."
         )
-    return scope[len(PROJECT_SCOPE_PREFIX) :]
+    return auth_data, str(project_id)
 
 
 def repo_url(endpoint: str, project_id: str) -> str:
@@ -50,9 +63,11 @@ def repo_url(endpoint: str, project_id: str) -> str:
     return f"{parsed.scheme}://{parsed.netloc}/repo/{project_id}"
 
 
-def load_driver(auth_data: dict[str, tp.Any]) -> nginx.NginxRepoDriver:
-    """Build a driver pushing to the current realm's project repository."""
-    project_id = _project_id(auth_data)
+def load_driver(auth_data: dict[str, tp.Any], project_id: str) -> nginx.NginxRepoDriver:
+    """Build a driver pushing to the project's internal repository.
+
+    `auth_data` and `project_id` come from :func:`resolve`.
+    """
     auth = base_client.get_authenticator(auth_data)
     if auth is None:
         raise click.ClickException("The internal repository requires authentication.")
@@ -67,9 +82,8 @@ def load_driver(auth_data: dict[str, tp.Any]) -> nginx.NginxRepoDriver:
     )
 
 
-def refresh(auth_data: dict[str, tp.Any]) -> None:
+def refresh(auth_data: dict[str, tp.Any], project_id: str) -> None:
     """Make the realm pick up what was pushed to the project repository."""
-    project_id = _project_id(auth_data)
     client = base_client.get_user_api_client(auth_data)
     repos = [
         r

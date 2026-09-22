@@ -37,17 +37,43 @@ def test_repo_url_is_on_the_api_host():
     )
 
 
+def test_resolve_keeps_the_given_project():
+    with patch.object(internal.base_client, "get_user_api_client") as client:
+        assert internal.resolve(AUTH_DATA) == (AUTH_DATA, PROJECT)
+
+    client.assert_not_called()
+
+
 @pytest.mark.parametrize("scope", [None, ""])
-def test_a_project_is_required(scope):
-    with pytest.raises(click.ClickException, match="--project-id"):
-        internal.load_driver({**AUTH_DATA, "scope": scope})
+def test_resolve_falls_back_to_the_default_project(scope):
+    client = MagicMock()
+    client.introspect.return_value = {"project_id": PROJECT}
+    with patch.object(
+        internal.base_client, "get_user_api_client", return_value=client
+    ) as get_client:
+        auth_data, project_id = internal.resolve({**AUTH_DATA, "scope": scope})
+
+    assert project_id == PROJECT
+    # Core scopes a `project:default` token to the user's default project.
+    assert auth_data["scope"] == "project:default"
+    assert get_client.call_args.args[0]["scope"] == "project:default"
+
+
+def test_resolve_without_a_default_project_says_what_to_do():
+    client = MagicMock()
+    client.introspect.return_value = {"project_id": None}
+    with (
+        patch.object(internal.base_client, "get_user_api_client", return_value=client),
+        pytest.raises(click.ClickException, match="--project-id"),
+    ):
+        internal.resolve({**AUTH_DATA, "scope": None})
 
 
 def test_driver_pushes_with_a_fresh_token_and_keeps_the_index():
     auth = MagicMock()
     auth.get_auth_header.return_value = {"Authorization": "Bearer tkn"}
     with patch.object(internal.base_client, "get_authenticator", return_value=auth):
-        driver = internal.load_driver(AUTH_DATA)
+        driver = internal.load_driver(AUTH_DATA, PROJECT)
 
     auth.authenticate.assert_called_once()
     assert driver._session.headers["Authorization"] == "Bearer tkn"
@@ -67,7 +93,7 @@ def test_refresh_refreshes_the_internal_repo_only():
         patch.object(internal.base_client, "list_entities", return_value=repos) as ls,
         patch.object(internal.base_client, "action_entity") as action,
     ):
-        internal.refresh(AUTH_DATA)
+        internal.refresh(AUTH_DATA, PROJECT)
 
     assert ls.call_args.kwargs == {"project_id": PROJECT}
     assert action.call_args.args[2:] == ("refresh", "internal-uuid")
@@ -79,6 +105,6 @@ def test_refresh_without_a_pushed_repo_does_nothing():
         patch.object(internal.base_client, "list_entities", return_value=[]),
         patch.object(internal.base_client, "action_entity") as action,
     ):
-        internal.refresh(AUTH_DATA)
+        internal.refresh(AUTH_DATA, PROJECT)
 
     action.assert_not_called()

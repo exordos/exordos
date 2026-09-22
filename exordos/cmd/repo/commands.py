@@ -383,7 +383,8 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     is_flag=True,
     help=(
         "Push to the project's internal repository in the current realm; "
-        "the project comes from --project-id or the context"
+        "the project comes from --project-id or the context, else the "
+        "user's default project"
     ),
 )
 @click.option(
@@ -435,9 +436,10 @@ def push_cmd(
             raise click.UsageError(
                 "--internal-repo cannot be combined with --target or --driver"
             )
-        repo_driver = internal_repo_lib.load_driver(obj.auth_data)
+        auth_data, project_id = internal_repo_lib.resolve(obj.auth_data)
+        repo_driver = internal_repo_lib.load_driver(auth_data, project_id)
         repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
-        internal_repo_lib.refresh(obj.auth_data)
+        internal_repo_lib.refresh(auth_data, project_id)
         return
 
     repo_driver = repo_utils.load_repo_driver(

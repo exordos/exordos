@@ -49,7 +49,7 @@ Push the element to the repository
     * Default: `false`
     * Usage: `--internal-repo`
 
-  Push to the project's internal repository in the current realm; the project comes from --project-id or the context
+  Push to the project's internal repository in the current realm; the project comes from --project-id or the context, else the user's default project
 
 * `element_dir`:
     * Type: path
@@ -108,7 +108,7 @@ Push the element to the repository
 │ --driver            -d  TEXT                  Driver to use, nginx for example                                                                                                                                                                                                                          │
 │ --driver-params         TEXT                  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                         │
 │ --target            -t  TEXT                  Target repository to push to                                                                                                                                                                                                                              │
-│ --internal-repo                               Push to the project's internal repository in the current realm; the project comes from --project-id or the context                                                                                                                                        │
+│ --internal-repo                               Push to the project's internal repository in the current realm; the project comes from --project-id or the context, else the user's default project                                                                                                       │
 │ --element-dir       -e  PATH                  Directory where element artifacts are stored                                                                                                                                                                                                              │
 │ --force             -f                        Force push even if the element already exists                                                                                                                                                                                                             │
 │ --latest            -l                        Push the element too as the latest version (if stable version)                                                                                                                                                                                            │

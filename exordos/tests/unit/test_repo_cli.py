@@ -704,10 +704,16 @@ class TestPushCmd:
     def test_push_cmd_internal_repo_pushes_then_refreshes(self) -> None:
         driver = MagicMock()
         calls = MagicMock()
+        scoped = {"scope": "project:p1"}
         with (
             patch.object(
-                repo_commands.internal_repo_lib, "load_driver", return_value=driver
+                repo_commands.internal_repo_lib,
+                "resolve",
+                return_value=(scoped, "p1"),
             ),
+            patch.object(
+                repo_commands.internal_repo_lib, "load_driver", return_value=driver
+            ) as load_driver_mock,
             patch.object(repo_commands.internal_repo_lib, "refresh", calls.refresh),
             patch.object(repo_commands.repo_utils, "do_push", calls.do_push),
             patch.object(
@@ -721,6 +727,8 @@ class TestPushCmd:
         assert result.exit_code == 0, result.output
         assert [name for name, *_ in calls.mock_calls] == ["do_push", "refresh"]
         assert calls.do_push.call_args.args[0] is driver
+        load_driver_mock.assert_called_once_with(scoped, "p1")
+        calls.refresh.assert_called_once_with(scoped, "p1")
         load_repo_driver.assert_not_called()
 
     def test_push_cmd_internal_repo_rejects_a_target(self) -> None:
