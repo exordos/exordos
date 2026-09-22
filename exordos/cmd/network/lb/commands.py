@@ -39,7 +39,10 @@ FIELDS_MAP = {
 lbs_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
-@click.command("info", help="Show load balancer details with vhosts and backend_pools")
+@click.command(
+    "info",
+    help="Show load balancer details with vhosts, routes and backend_pools",
+)
 @click.argument(
     "uuid",
     type=str,
@@ -65,9 +68,25 @@ def info_cmd(ctx: click.Context, uuid: str, output: str) -> None:
         client, c.VHOST_COLLECTION.format(lb_uuid=lb_data["uuid"])
     )
     if vhosts:
+        from exordos.cmd.network.routes.commands import FIELDS_MAP as ROUTES_FIELDS_MAP
         from exordos.cmd.network.vhosts.commands import FIELDS_MAP as VHOSTS_FIELDS_MAP
 
         print_table(fill_table(vhosts, VHOSTS_FIELDS_MAP), output)
+
+        # Show routes of every vhost
+        for vhost in vhosts:
+            routes = base_client.list_entities(
+                client,
+                c.ROUTE_COLLECTION.format(
+                    lb_uuid=lb_data["uuid"], vhost_uuid=vhost["uuid"]
+                ),
+            )
+            if routes:
+                print_table(
+                    fill_table(routes, ROUTES_FIELDS_MAP),
+                    output,
+                    msg=f"Routes of vhost {vhost.get('name') or vhost['uuid']}:",
+                )
 
     # Show associated backend_pools
     backend_pools = base_client.list_entities(

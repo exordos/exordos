@@ -1,7 +1,7 @@
 
 # exordos_network_load_balancers_info
 
-Show load balancer details with vhosts and backend_pools
+Show load balancer details with vhosts, routes and backend_pools
 
 ## Usage
 
@@ -39,7 +39,7 @@ Show load balancer details with vhosts and backend_pools
                                                                                                                                                                                                                                                                                                            
  Usage: exordos network load_balancers info [OPTIONS] UUID                                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                                            
- Show load balancer details with vhosts and backend_pools                                                                                                                                                                                                                                                  
+ Show load balancer details with vhosts, routes and backend_pools                                                                                                                                                                                                                                          
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --output  -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                              │
