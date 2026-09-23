@@ -38,6 +38,9 @@ from exordos.repo import fs as repo_fs
 
 POLL_INTERVAL = 2.0
 STABLE_CHECKS = 10
+DEFAULT_TIMEOUT = 600.0
+# Repository statuses an upload can never succeed from.
+REPOSITORY_DEAD_STATUSES = ("ERROR", "DISABLED")
 
 
 def get_published() -> str:
@@ -198,6 +201,7 @@ def do_upload(
     client: tp.Any,
     repository: str,
     manifest: pathlib.Path,
+    timeout: float = DEFAULT_TIMEOUT,
 ) -> None:
     """Upload an element manifest to a repository via the API.
 
@@ -222,6 +226,8 @@ def do_upload(
         raise click.ClickException("Manifest must contain 'name' field")
     if not version:
         raise click.ClickException("Manifest must contain 'version' field")
+
+    wait_for_repository_active(client, entity_uuid, timeout)
 
     base_client.action_entity(
         client,
@@ -260,6 +266,46 @@ def install_element(client: tp.Any, repo_element_uuid: str) -> None:
     except bazooka_exc.BadRequestError as e:
         if "Element must be uninstalled" not in e.cause.response.text:
             raise
+
+
+def wait_for_repository_active(
+    client: tp.Any,
+    repository_uuid: str,
+    timeout: float,
+) -> None:
+    """Wait for a freshly created repository to finish provisioning.
+
+    A repository stays NEW until the platform has built its inventory, and
+    uploading into it before that is rejected.
+    """
+    deadline = time.monotonic() + timeout
+    announced = False
+
+    while True:
+        repository = base_client.get_entity(
+            client, c.REPOSITORY_COLLECTION, repository_uuid
+        )
+        status = repository.get("status")
+        if status == "ACTIVE":
+            return
+
+        if status in REPOSITORY_DEAD_STATUSES:
+            raise click.ClickException(
+                f"Repository {repository_uuid} is {status}, cannot upload. "
+                f"Check `exordos repo show {repository_uuid}`."
+            )
+
+        if time.monotonic() > deadline:
+            raise click.ClickException(
+                f"Timed out waiting for repository {repository_uuid} to become "
+                f"ACTIVE, last status was {status}. Check `exordos repo show "
+                f"{repository_uuid}`."
+            )
+
+        if not announced:
+            click.echo(f"Waiting for repository {repository_uuid} to become ACTIVE...")
+            announced = True
+        time.sleep(POLL_INTERVAL)
 
 
 def wait_for_repo_element(

@@ -234,6 +234,58 @@ class TestFindOrUpdateRepository:
             )
 
 
+class TestWaitForRepositoryActive:
+    def test_returns_when_active(self) -> None:
+        client = MagicMock()
+        client.get.return_value = {"status": "ACTIVE"}
+        repo_utils.wait_for_repository_active(client, str(sys_uuid.uuid4()), timeout=5)
+
+    def test_raises_on_error_status(self) -> None:
+        client = MagicMock()
+        client.get.return_value = {"status": "ERROR"}
+        with pytest.raises(click.ClickException, match="is ERROR"):
+            repo_utils.wait_for_repository_active(
+                client, str(sys_uuid.uuid4()), timeout=5
+            )
+
+    def test_times_out_while_new(self) -> None:
+        client = MagicMock()
+        client.get.return_value = {"status": "NEW"}
+        with pytest.raises(click.ClickException, match="Timed out"):
+            repo_utils.wait_for_repository_active(
+                client, str(sys_uuid.uuid4()), timeout=-1
+            )
+
+
+class TestDoUpload:
+    @staticmethod
+    def _manifest(tmp_path: pathlib.Path) -> pathlib.Path:
+        manifest = tmp_path / "foo.yaml"
+        manifest.write_text("name: foo\nversion: 1.0.0\n")
+        return manifest
+
+    def test_uploads_once_repository_is_active(self, tmp_path: pathlib.Path) -> None:
+        client = MagicMock()
+        client.get.return_value = {"status": "ACTIVE"}
+        with patch.object(repo_utils.base_client, "action_entity") as action:
+            repo_utils.do_upload(
+                client, str(sys_uuid.uuid4()), self._manifest(tmp_path)
+            )
+        assert action.call_count == 1
+
+    def test_does_not_upload_into_a_new_repository(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        client = MagicMock()
+        client.get.return_value = {"status": "NEW"}
+        with patch.object(repo_utils.base_client, "action_entity") as action:
+            with pytest.raises(click.ClickException, match="Timed out"):
+                repo_utils.do_upload(
+                    client, str(sys_uuid.uuid4()), self._manifest(tmp_path), timeout=-1
+                )
+        action.assert_not_called()
+
+
 class TestWaitForRepoElement:
     def test_returns_matching_element(self) -> None:
         repo_uuid = str(sys_uuid.uuid4())
