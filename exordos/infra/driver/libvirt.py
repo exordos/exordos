@@ -185,73 +185,75 @@ class LibvirtInfraDriver(base.AbstractInfraDriver):
             **extra_data,
         }
 
+        # Keep the ISO in a per-run temp dir until bootstrap domains are created
         with tempfile.TemporaryDirectory() as temp_dir:
+            src_dir = os.path.join(temp_dir, "config-drive")
+            os.mkdir(src_dir)
+
             # Copy the original manifests to the config drive
             manifest_name = os.path.basename(manifest_path)
-            shutil.copy(manifest_path, os.path.join(temp_dir, manifest_name))
+            shutil.copy(manifest_path, os.path.join(src_dir, manifest_name))
             eco_manifest_name = os.path.basename(eco_manifest_path)
-            shutil.copy(eco_manifest_path, os.path.join(temp_dir, eco_manifest_name))
+            shutil.copy(eco_manifest_path, os.path.join(src_dir, eco_manifest_name))
 
             # Prepare and copy installation specification to the config drive
-            spec_path = os.path.join(temp_dir, "spec.json")
+            spec_path = os.path.join(src_dir, "spec.json")
             with open(spec_path, "w") as f:
                 json.dump(spec, f, indent=2, sort_keys=True, default=str)
 
-            config_drive_path = os.path.join(
-                "/tmp/genesis-config-drives", "config-drive.iso"
-            )
-            utils.make_iso(temp_dir, config_drive_path)
+            config_drive_path = os.path.join(temp_dir, "config-drive.iso")
+            utils.make_iso(src_dir, config_drive_path)
 
-        # It's fine to use the first hypervisor at the moment since
-        # we support only one hypervisor per stand at start time.
-        prefix = spec["stand"]["hypervisors"][0]["machine_prefix"]
-        storage_pool = spec["stand"]["hypervisors"][0]["storage_pool"]
+            # It's fine to use the first hypervisor at the moment since
+            # we support only one hypervisor per stand at start time.
+            prefix = spec["stand"]["hypervisors"][0]["machine_prefix"]
+            storage_pool = spec["stand"]["hypervisors"][0]["storage_pool"]
 
-        # Create bootstraps first and set metadata about network in the
-        # boostarp domains.
-        for bootstrap in stand.bootstraps:
-            tags = (
-                self._tag(vc.EXORDOS_META_STAND_TAG, stand.name),
-                self._tag(vc.EXORDOS_META_CPU_TAG, bootstrap.cores),
-                self._tag(vc.EXORDOS_META_MEM_TAG, bootstrap.memory),
-                self._tag(
-                    vc.EXORDOS_META_IMAGE_TAG, fields={"uri": bootstrap.image_uri}
-                ),
-                self._tag(vc.EXORDOS_META_NODE_TYPE_TAG, "bootstrap"),
-                self._tag(
-                    vc.EXORDOS_META_NET_TAG,
-                    stand.network.name,
-                    {
-                        "cidr": str(stand.network.cidr),
-                        "managed_network": int(stand.network.managed_network),
-                        "dhcp": int(stand.network.dhcp),
-                    },
-                ),
-                self._tag(
-                    vc.EXORDOS_META_BOOT_NET_TAG,
-                    stand.boot_network.name,
-                    {
-                        "cidr": str(stand.boot_network.cidr),
-                        "managed_network": int(stand.boot_network.managed_network),
-                        "dhcp": int(stand.boot_network.dhcp),
-                    },
-                ),
-            )
+            # Create bootstraps first and set metadata about network in the
+            # boostarp domains.
+            for bootstrap in stand.bootstraps:
+                tags = (
+                    self._tag(vc.EXORDOS_META_STAND_TAG, stand.name),
+                    self._tag(vc.EXORDOS_META_CPU_TAG, bootstrap.cores),
+                    self._tag(vc.EXORDOS_META_MEM_TAG, bootstrap.memory),
+                    self._tag(
+                        vc.EXORDOS_META_IMAGE_TAG, fields={"uri": bootstrap.image_uri}
+                    ),
+                    self._tag(vc.EXORDOS_META_NODE_TYPE_TAG, "bootstrap"),
+                    self._tag(
+                        vc.EXORDOS_META_NET_TAG,
+                        stand.network.name,
+                        {
+                            "cidr": str(stand.network.cidr),
+                            "managed_network": int(stand.network.managed_network),
+                            "dhcp": int(stand.network.dhcp),
+                        },
+                    ),
+                    self._tag(
+                        vc.EXORDOS_META_BOOT_NET_TAG,
+                        stand.boot_network.name,
+                        {
+                            "cidr": str(stand.boot_network.cidr),
+                            "managed_network": int(stand.boot_network.managed_network),
+                            "dhcp": int(stand.boot_network.dhcp),
+                        },
+                    ),
+                )
 
-            libvirt.create_domain(
-                uuid=bootstrap.uuid,
-                name=f"{prefix}{str(bootstrap.uuid)[:8]}-{bootstrap.name}",
-                image=bootstrap.image,
-                cores=bootstrap.cores,
-                memory=bootstrap.memory,
-                disks=bootstrap.disks,
-                networks=(stand.network, stand.boot_network),
-                ports=bootstrap.ports,
-                meta_tags=tags,
-                config_drive=config_drive_path,
-                pool=storage_pool,
-                start=not no_start,
-            )
+                libvirt.create_domain(
+                    uuid=bootstrap.uuid,
+                    name=f"{prefix}{str(bootstrap.uuid)[:8]}-{bootstrap.name}",
+                    image=bootstrap.image,
+                    cores=bootstrap.cores,
+                    memory=bootstrap.memory,
+                    disks=bootstrap.disks,
+                    networks=(stand.network, stand.boot_network),
+                    ports=bootstrap.ports,
+                    meta_tags=tags,
+                    config_drive=config_drive_path,
+                    pool=storage_pool,
+                    start=not no_start,
+                )
 
         for node in stand.baremetals:
             tags = (
