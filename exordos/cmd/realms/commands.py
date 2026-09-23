@@ -32,6 +32,7 @@ from exordos import constants as c
 from exordos import utils as exordos_utils
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.settings import config as settings_config
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
@@ -87,6 +88,39 @@ def get_stand_core_ip(
     if stand.network.dhcp:
         return libvirt.get_domain_ip(stand.bootstraps[0].name)
     return stand.network.cidr[2]
+
+
+def get_stand_auth_data(
+    ctx: click.Context,
+    stand: "stand_models.Stand",
+) -> dict | None:
+    """Return auth data of the config realm pointing to the local stand."""
+    core_ip = str(get_stand_core_ip(stand))
+    for realm_name, realm_conf in (ctx.obj.cfg.get("realms") or {}).items():
+        endpoint = realm_conf.get("endpoint", "")
+        try:
+            if exordos_utils.get_ip_from_url(endpoint) != core_ip:
+                continue
+        except (ValueError, RuntimeError):
+            continue
+
+        # Keep CLI overrides if the realm is already selected
+        if realm_name == ctx.obj.auth_data.get("realm"):
+            return ctx.obj.auth_data
+
+        context_conf = settings_config.get_context(realm_conf)
+        return {
+            **ctx.obj.auth_data,
+            "endpoint": endpoint,
+            "username": context_conf.get("user"),
+            "login": context_conf.get("login"),
+            "password": context_conf.get("password"),
+            "access_token": context_conf.get("access_token"),
+            "refresh_token": context_conf.get("refresh_token"),
+            "scope": None,
+            "realm": realm_name,
+        }
+    return None
 
 
 @click.group("realms", cls=ClickAliasedGroup, help="Manage realms")
@@ -166,8 +200,8 @@ def list_cmd(ctx: click.Context, output: str) -> None:
         from yretry import defaults
 
         defaults.HTTP_RETRY_ATTEMPTS = 1
-        ecosystem_client = get_ecosystem_client(ctx)
         try:
+            ecosystem_client = get_ecosystem_client(ctx)
             ecosystem_realms = base_client.list_entities(
                 ecosystem_client,
                 ENTITY_COLLECTION,
@@ -409,41 +443,40 @@ def claim_cmd(
 @click.argument("name_uuid", type=str)
 @click.pass_context
 def delete_cmd(ctx: click.Context, name_uuid: str) -> None:
-    # Get the list of realms from the ecosystem
     from yretry import defaults
 
+    # An unreachable realm or ecosystem must fail fast, not retry
     defaults.HTTP_RETRY_ATTEMPTS = 1
-    ecosystem_client = get_ecosystem_client(ctx)
-    try:
-        ecosystem_realms = base_client.list_entities(
-            ecosystem_client,
-            ENTITY_COLLECTION,
-        )
-    except Exception:
-        ecosystem_realms = []
 
-    for realm in ecosystem_realms:
-        if realm["name"] == name_uuid:
-            base_client.delete_entity(
-                ecosystem_client, ENTITY_COLLECTION, realm["uuid"]
-            )
-            click.echo(f"{ENTITY} {name_uuid} deleted")
-            return None
-        elif realm["uuid"] == name_uuid:
-            base_client.delete_entity(ecosystem_client, ENTITY_COLLECTION, name_uuid)
-            click.echo(f"{ENTITY} {name_uuid} deleted")
-            return None
+    def warn(message: str) -> None:
+        # Teardown must never fail the caller, so problems are warnings
+        click.secho(message, fg="yellow", err=True)
 
+    # Local realms go first so a same-named ecosystem realm isn't touched
     infra = libvirt_infra.LibvirtInfraDriver()
-    local_stands = infra.list_stands()
+    try:
+        local_stands = infra.list_stands()
+    except Exception as err:
+        warn(f"Unable to list local stands: {err}")
+        local_stands = []
 
-    def clear_local_realm() -> None:
+    def clear_local_realm(stand: "stand_models.Stand") -> None:
         try:
             import time
 
             from rich.progress import track
 
             from exordos.cmd.em.elements.commands import clear
+
+            # Clear the realm being deleted, not the current one
+            auth_data = get_stand_auth_data(ctx, stand)
+            if auth_data is None:
+                warn(
+                    f"Realm of local stand {stand.name} not found in config, "
+                    "skipping elements cleanup"
+                )
+                return
+            ctx.obj = ctx.obj._replace(auth_data=auth_data)
 
             click.echo(f"Clearing local realm {stand.name}...")
             was_cleared = ctx.invoke(
@@ -454,14 +487,26 @@ def delete_cmd(ctx: click.Context, name_uuid: str) -> None:
             if was_cleared:
                 for _ in track(range(5), description="Waiting clearing resources..."):
                     time.sleep(1)
-        except Exception:
-            pass
+        except Exception as err:
+            warn(
+                f"Failed to clear local realm {stand.name}, "
+                f"element resources may be left behind: {err}"
+            )
+
+    def delete_local_realm(stand: "stand_models.Stand") -> None:
+        clear_local_realm(stand)
+        click.echo(f"Deleting local realm {stand.name}...")
+        try:
+            infra.delete_stand(stand)
+        except Exception as err:
+            warn(
+                f"Failed to delete local realm {stand.name}, "
+                f"resources may be left behind: {err}"
+            )
 
     for stand in local_stands:
         if stand.name == name_uuid:
-            clear_local_realm()
-            click.echo(f"Deleting local realm {stand.name}...")
-            infra.delete_stand(stand)
+            delete_local_realm(stand)
             return None
 
     config = ctx.obj.cfg
@@ -473,14 +518,33 @@ def delete_cmd(ctx: click.Context, name_uuid: str) -> None:
             for stand in local_stands:
                 ip = get_stand_core_ip(stand)
                 if str(ip) == config_ip:
-                    clear_local_realm()
-                    click.echo(f"Deleting local realm {stand.name}...")
-                    infra.delete_stand(stand)
+                    delete_local_realm(stand)
                     return None
-        except ValueError as err:
-            click.echo(f"Error while converting IP address: {err}")
+        except Exception as err:
+            warn(f"Unable to match local stands by endpoint: {err}")
 
-    raise click.ClickException(f"Local realm {name_uuid} not found")
+    # Get the list of realms from the ecosystem
+    try:
+        ecosystem_client = get_ecosystem_client(ctx)
+        ecosystem_realms = base_client.list_entities(
+            ecosystem_client,
+            ENTITY_COLLECTION,
+        )
+    except Exception:
+        ecosystem_realms = []
+
+    for realm in ecosystem_realms:
+        if name_uuid in (realm["name"], realm["uuid"]):
+            try:
+                base_client.delete_entity(
+                    ecosystem_client, ENTITY_COLLECTION, realm["uuid"]
+                )
+                click.echo(f"{ENTITY} {name_uuid} deleted")
+            except Exception as err:
+                warn(f"Failed to delete {ENTITY} {name_uuid}: {err}")
+            return None
+
+    warn(f"Realm {name_uuid} not found, nothing to delete")
 
 
 @click.command("show", help="Show realm details")
