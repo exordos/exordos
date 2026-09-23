@@ -1,19 +1,19 @@
 
 # exordos_repo_refresh
 
-Refresh repository
+Refresh repository. Refresh all lazy repositories if not specified
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo refresh [OPTIONS] NAME_OR_UUID                                                                                                                                                                                                                                                        
+ Usage: exordos repo refresh [OPTIONS] [NAME_OR_UUID]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
 
-* `name_or_uuid` (REQUIRED):
+* `name_or_uuid`:
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `name_or_uuid`
@@ -29,9 +29,9 @@ Refresh repository
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos repo refresh [OPTIONS] NAME_OR_UUID                                                                                                                                                                                                                                                        
+ Usage: exordos repo refresh [OPTIONS] [NAME_OR_UUID]                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
- Refresh repository                                                                                                                                                                                                                                                                                        
+ Refresh repository. Refresh all lazy repositories if not specified                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
