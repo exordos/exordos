@@ -315,13 +315,27 @@ def repository_refresh_cmd(
         repositories = base_client.list_entities(
             client, c.REPOSITORY_COLLECTION, sync_mode="lazy"
         )
+        failed = []
         for repository in repositories:
-            base_client.action_entity(
-                client, c.REPOSITORY_COLLECTION, "refresh", repository["uuid"]
-            )
+            try:
+                base_client.action_entity(
+                    client, c.REPOSITORY_COLLECTION, "refresh", repository["uuid"]
+                )
+            except Exception as exc:
+                failed.append(repository["name"])
+                click.echo(
+                    f"Repository {click.style(repository['name'], fg='red')} "
+                    f"was not refreshed: {exc}",
+                    err=True,
+                )
+                continue
             click.echo(
                 f"Repository {click.style(repository['name'], fg='green')} "
                 "was refreshed successfully"
+            )
+        if failed:
+            raise click.ClickException(
+                f"Failed to refresh repositories: {', '.join(failed)}"
             )
         return
 

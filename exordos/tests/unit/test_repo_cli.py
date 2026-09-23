@@ -896,3 +896,30 @@ class TestRepositoryRefreshCmd:
         list_mock.assert_not_called()
         action_mock.assert_called_once()
         assert action_mock.call_args.args[3] == "u1"
+
+    def test_repository_refresh_cmd_without_name_continues_after_failure(self) -> None:
+        repositories = [
+            {"uuid": "u1", "name": "repo1"},
+            {"uuid": "u2", "name": "repo2"},
+        ]
+        with (
+            patch.object(repo_commands.base_client, "get_user_api_client"),
+            patch.object(
+                repo_commands.base_client,
+                "list_entities",
+                return_value=repositories,
+            ),
+            patch.object(
+                repo_commands.base_client,
+                "action_entity",
+                side_effect=[RuntimeError("boom"), None],
+            ) as action_mock,
+        ):
+            result = CliRunner().invoke(
+                repo_commands.repository_refresh_cmd, [], obj=self._obj()
+            )
+        assert result.exit_code == 1, result.output
+        assert [call.args[3] for call in action_mock.call_args_list] == ["u1", "u2"]
+        assert "repo1" in result.output
+        assert "boom" in result.output
+        assert "was refreshed successfully" in result.output
