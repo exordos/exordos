@@ -928,20 +928,27 @@ def clear(ctx: click.Context, y: bool, timeout: float) -> bool:
     uninstalling: set[str] = set()
     last_errors: dict[str, str] = {}
     deadline = time.monotonic() + timeout
+    reported_count = len(installed)
+
+    def remaining() -> str:
+        return ", ".join(
+            f"{e['name']} ({last_errors[e['uuid']]})"
+            if e["uuid"] in last_errors
+            else e["name"]
+            for e in installed
+        )
 
     # Uninstall is asynchronous, so wait until elements are gone
     while installed:
         if time.monotonic() > deadline:
-            remaining = ", ".join(
-                f"{e['name']} ({last_errors[e['uuid']]})"
-                if e["uuid"] in last_errors
-                else e["name"]
-                for e in installed
-            )
             raise click.ClickException(
                 f"Failed to uninstall all elements in {timeout}s. "
-                f"Remaining: {remaining}"
+                f"Remaining: {remaining()}"
             )
+
+        if len(installed) != reported_count:
+            reported_count = len(installed)
+            click.echo(f"Waiting for {reported_count} element(s) to be uninstalled")
 
         for element in installed:
             if element["uuid"] in uninstalling:
@@ -955,6 +962,10 @@ def clear(ctx: click.Context, y: bool, timeout: float) -> bool:
                 )
             except Exception as e:
                 # Dependent elements must go first, retry on the next round
+                if last_errors.get(element["uuid"]) != str(e):
+                    click.echo(
+                        f"  Uninstall of {element['name']} rejected, will retry: {e}"
+                    )
                 last_errors[element["uuid"]] = str(e)
                 continue
             last_errors.pop(element["uuid"], None)
@@ -962,6 +973,16 @@ def clear(ctx: click.Context, y: bool, timeout: float) -> bool:
             uninstalled_name = f"{element['name']} ({element['version']})"
             click.echo(
                 f"  Uninstalling element {click.style(uninstalled_name, fg='green')}"
+            )
+
+        # Nothing is being uninstalled and every call was rejected,
+        # so waiting will not change the result
+        if not any(
+            e["uuid"] in uninstalling or e.get("status") == "IN_PROGRESS"
+            for e in installed
+        ):
+            raise click.ClickException(
+                f"Failed to uninstall all elements. Remaining: {remaining()}"
             )
 
         time.sleep(2)

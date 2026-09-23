@@ -21,6 +21,7 @@ from click.testing import CliRunner
 from exordos.cmd.em.elements import commands
 
 EMPTY = {"uuid": "e1", "name": "empty", "version": "0.0.14", "status": "ACTIVE"}
+DEPENDENT = {"uuid": "e2", "name": "dependent", "version": "1.0.0", "status": "ACTIVE"}
 
 
 def _invoke_clear(listings: list, action_side_effect=None, args=()) -> tuple:
@@ -53,11 +54,24 @@ def test_clear_waits_for_async_uninstall() -> None:
 
 def test_clear_retries_failed_uninstall() -> None:
     result, _, action_entity = _invoke_clear(
-        [[EMPTY], [EMPTY], []], action_side_effect=[RuntimeError("depends"), None]
+        [[EMPTY, DEPENDENT], [EMPTY], []],
+        action_side_effect=[RuntimeError("depends"), None, None],
     )
 
     assert result.exit_code == 0, result.output
-    assert action_entity.call_count == 2
+    assert action_entity.call_count == 3
+    assert "Uninstall of empty rejected, will retry: depends" in result.output
+    assert "Waiting for 1 element(s) to be uninstalled" in result.output
+
+
+def test_clear_fails_fast_when_all_uninstalls_rejected() -> None:
+    result, list_entities, _ = _invoke_clear(
+        [[EMPTY]], action_side_effect=RuntimeError("403 Forbidden")
+    )
+
+    assert result.exit_code == 1
+    assert "Remaining: empty (403 Forbidden)" in result.output
+    list_entities.assert_called_once()
 
 
 def test_clear_timeout() -> None:
@@ -74,10 +88,10 @@ def test_clear_timeout() -> None:
 def test_clear_timeout_reports_uninstall_error() -> None:
     with mock.patch.object(commands.time, "monotonic", side_effect=[0, 0, 11]):
         result, _, _ = _invoke_clear(
-            [[EMPTY], [EMPTY]],
-            action_side_effect=RuntimeError("403 Forbidden"),
+            [[{**EMPTY, "status": "IN_PROGRESS"}]] * 2,
+            action_side_effect=RuntimeError("409 Conflict"),
             args=("--timeout", "10"),
         )
 
     assert result.exit_code == 1
-    assert "Remaining: empty (403 Forbidden)" in result.output
+    assert "Remaining: empty (409 Conflict)" in result.output
