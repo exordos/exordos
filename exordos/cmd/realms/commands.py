@@ -17,12 +17,14 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 import dataclasses
+import datetime
 import ipaddress
 import os
 import subprocess
 from urllib.parse import urljoin
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 import requests
 import rich_click as click
 
@@ -39,9 +41,19 @@ from exordos.logger import ClickLogger
 from exordos.stand import models as stand_models
 
 ENTITY_COLLECTION = "/v1/realms/"
+POOL_COLLECTION = "/v1/realms/pool/"
 ENTITY = "realm"
 REALM_SCOPE = "openid email profile project:default"
 ECOSYSTEM_URL_PART = "/api/ecosystem/"
+
+# An empty pool is an ordinary answer, not a broken command: the caller orders
+# a realm the usual way instead. It carries an exit code of its own so a script
+# can tell it from a failure without reading stderr.
+POOL_EMPTY_EXIT_CODE = 3
+
+
+class PoolEmptyError(click.ClickException):
+    exit_code = POOL_EMPTY_EXIT_CODE
 
 
 def get_ecosystem_client(ctx: click.Context):
@@ -316,6 +328,83 @@ def add_cmd(
     show_data(data)
 
 
+@click.command("claim", help=f"Claim a warm {ENTITY} from the pool")
+@click.pass_context
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    required=True,
+    help=f"Name to give the claimed {ENTITY}",
+)
+@click.option(
+    "--description",
+    type=str,
+    required=False,
+)
+@click.option(
+    "--ttl-hours",
+    type=float,
+    required=False,
+    help=f"Delete the {ENTITY} automatically this many hours from now",
+)
+@click.option(
+    "--ssh-public-key",
+    envvar="SSH_PUBLIC_KEY",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    required=False,
+    help="Path to the ssh public key",
+)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+def claim_cmd(
+    ctx: click.Context,
+    name: str,
+    description: str | None,
+    ttl_hours: float | None,
+    ssh_public_key: str | None,
+    output: str,
+) -> None:
+    """Take one ready realm out of the pool.
+
+    A warm realm is handed over already provisioned, so the answer is the
+    realm itself -- and it is the only time its generated admin password is
+    ever readable. An empty pool exits with POOL_EMPTY_EXIT_CODE.
+    """
+    ecosystem_client = get_ecosystem_client(ctx)
+    data = {"name": name}
+    if description is not None:
+        data["description"] = description
+    if ttl_hours is not None:
+        # The platform refuses a naive deadline, so the offset travels with it.
+        expires_at = datetime.datetime.now(datetime.timezone.utc) + (
+            datetime.timedelta(hours=ttl_hours)
+        )
+        data["expires_at"] = expires_at.isoformat()
+    if ssh_public_key is not None:
+        with open(ssh_public_key, "r") as f:
+            data["ssh_public_key"] = f.read()
+
+    try:
+        data = base_client.add_entity(
+            ecosystem_client,
+            POOL_COLLECTION,
+            data,
+            handle_conflict_error=False,
+        )
+    except bazooka_exc.ConflictError:
+        raise PoolEmptyError(
+            f"No warm {ENTITY} is ready in the pool; order one instead"
+        ) from None
+
+    show_data(data, output)
+
+
 @click.command("delete", help="Delete realm")
 @click.argument("name_uuid", type=str)
 @click.pass_context
@@ -447,5 +536,6 @@ def ssh_connection_cmd(ctx: click.Context, name_uuid: str, output: str) -> None:
 realms_group.add_command(list_cmd, aliases=["l"])
 realms_group.add_command(delete_cmd, aliases=["d"])
 realms_group.add_command(add_cmd, aliases=["a"])
+realms_group.add_command(claim_cmd, aliases=["c"])
 realms_group.add_command(show_cmd, aliases=["get", "g"])
 realms_group.add_command(ssh_connection_cmd)
