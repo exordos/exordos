@@ -21,6 +21,13 @@ Uninstall all elements, except base
 
   Automatically answer yes for all questions
 
+* `timeout`:
+    * Type: float
+    * Default: `600.0`
+    * Usage: `--timeout`
+
+  Seconds to wait for elements to be uninstalled
+
 * `help`:
     * Type: boolean
     * Default: `false`
