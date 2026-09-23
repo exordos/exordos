@@ -14,8 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import contextlib
 import os
 import tempfile
+import typing as tp
 
 import rich_click as click
 import yaml
@@ -85,6 +87,34 @@ def save_config(config: dict, cfg_path: str = c.CONFIG_FILE) -> None:
         if "tmp_path" in locals() and os.path.exists(tmp_path):
             os.unlink(tmp_path)
         raise click.ClickException(f"Error writing settings: {e}")
+
+
+@contextlib.contextmanager
+def locked_config(cfg_path: str = c.CONFIG_FILE) -> tp.Iterator[dict]:
+    """Read, modify and save the config while holding an exclusive lock.
+
+    Keeps concurrent writers (e.g. parallel bootstraps) from overwriting
+    each other's entries.
+    """
+    try:
+        import fcntl
+    except ImportError:
+        fcntl = None
+
+    dir_name = os.path.dirname(cfg_path) or "."
+    os.makedirs(dir_name, exist_ok=True)
+
+    with open(os.path.join(dir_name, ".exordosctl.lock"), "w") as lock_f:
+        if fcntl is not None:
+            fcntl.flock(lock_f, fcntl.LOCK_EX)
+        try:
+            with open(cfg_path, "r") as f:
+                config = yaml.safe_load(f) or {}
+        except FileNotFoundError:
+            config = {}
+
+        yield config
+        save_config(config, cfg_path)
 
 
 def get_current_realm(config: dict) -> dict | None:
