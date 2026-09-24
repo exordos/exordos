@@ -20,7 +20,9 @@ from unittest import mock
 
 from bazooka import exceptions as bazooka_exc
 from click.testing import CliRunner
+import rich_click as click
 
+from exordos.cmd.em.elements import commands as elements_commands
 from exordos.cmd.realms import commands
 from exordos.common.cmd_context import ContextObject
 
@@ -130,3 +132,181 @@ def test_claim_cmd_reads_the_ssh_key_from_its_file() -> None:
 
     assert result.exit_code == 0
     assert add_entity.call_args.args[2]["ssh_public_key"] == "ssh-ed25519 AAAA test\n"
+
+
+def _invoke_delete(
+    cfg: dict,
+    clear_cmd,
+    ecosystem_error=None,
+    ecosystem_realms=(),
+    stands=None,
+    list_error=None,
+    delete_error=None,
+) -> tuple:
+    stand = SimpleNamespace(name="test-core")
+    infra = mock.Mock()
+    if list_error is not None:
+        infra.list_stands.side_effect = list_error
+    else:
+        infra.list_stands.return_value = [stand] if stands is None else stands
+    infra.delete_stand.side_effect = delete_error
+    obj = ContextObject(
+        auth_data={"endpoint": "http://10.20.0.2/api/core", "realm": "main"},
+        cfg_path="",
+        developer_key_path="",
+        cfg=cfg,
+        need_update=None,
+    )
+
+    with (
+        mock.patch.object(
+            commands, "get_ecosystem_client", side_effect=ecosystem_error
+        ),
+        mock.patch.object(
+            commands.base_client, "list_entities", return_value=list(ecosystem_realms)
+        ),
+        mock.patch.object(
+            commands.libvirt_infra, "LibvirtInfraDriver", return_value=infra
+        ),
+        mock.patch.object(commands, "get_stand_core_ip", return_value="10.40.0.2"),
+        mock.patch.object(elements_commands, "clear", clear_cmd),
+        mock.patch("time.sleep"),
+    ):
+        result = CliRunner().invoke(commands.delete_cmd, ["test-core"], obj=obj)
+
+    return result, infra, stand
+
+
+REALMS_CFG = {
+    "realms": {
+        "main": {"endpoint": "http://10.20.0.2/api/core"},
+        "test-core": {
+            "endpoint": "http://10.40.0.2/api/core",
+            "current-context": "admin",
+            "contexts": {"admin": {"user": "admin", "password": "secret"}},
+        },
+    }
+}
+
+
+def test_delete_cmd_clears_target_realm() -> None:
+    used_auth_data = []
+
+    @click.command()
+    @click.option("-y", "y", is_flag=True)
+    @click.pass_context
+    def clear_cmd(ctx: click.Context, y: bool) -> bool:
+        used_auth_data.append(ctx.obj.auth_data)
+        return True
+
+    result, infra, stand = _invoke_delete(REALMS_CFG, clear_cmd)
+
+    assert result.exit_code == 0, result.output
+    assert used_auth_data[0]["endpoint"] == "http://10.40.0.2/api/core"
+    assert used_auth_data[0]["realm"] == "test-core"
+    assert used_auth_data[0]["password"] == "secret"
+    infra.delete_stand.assert_called_once_with(stand)
+
+
+def test_delete_cmd_warns_on_clear_failure() -> None:
+    @click.command()
+    @click.option("-y", "y", is_flag=True)
+    def clear_cmd(y: bool) -> bool:
+        raise click.ClickException("api is down")
+
+    result, infra, stand = _invoke_delete(REALMS_CFG, clear_cmd)
+
+    assert result.exit_code == 0, result.output
+    assert "Failed to clear local realm test-core" in result.output
+    assert "api is down" in result.output
+    infra.delete_stand.assert_called_once_with(stand)
+
+
+def test_delete_cmd_skips_clear_without_config_realm() -> None:
+    clear_cmd = mock.Mock()
+
+    result, infra, stand = _invoke_delete(
+        {"realms": {"main": {"endpoint": "http://10.20.0.2/api/core"}}}, clear_cmd
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "skipping elements cleanup" in result.output
+    clear_cmd.assert_not_called()
+    infra.delete_stand.assert_called_once_with(stand)
+
+
+def test_delete_cmd_deletes_local_realm_without_ecosystem_auth() -> None:
+    clear_cmd = mock.Mock()
+
+    result, infra, stand = _invoke_delete(
+        {"realms": {"main": {"endpoint": "http://10.20.0.2/api/core"}}},
+        clear_cmd,
+        ecosystem_error=RuntimeError("bad creds"),
+    )
+
+    assert result.exit_code == 0, result.output
+    infra.delete_stand.assert_called_once_with(stand)
+
+
+def test_delete_cmd_prefers_local_realm_over_ecosystem() -> None:
+    clear_cmd = mock.Mock()
+
+    with mock.patch.object(commands.base_client, "delete_entity") as delete_entity:
+        result, infra, stand = _invoke_delete(
+            {"realms": {"main": {"endpoint": "http://10.20.0.2/api/core"}}},
+            clear_cmd,
+            ecosystem_realms=[{"name": "test-core", "uuid": "r1"}],
+        )
+
+    assert result.exit_code == 0, result.output
+    delete_entity.assert_not_called()
+    infra.delete_stand.assert_called_once_with(stand)
+
+
+def test_list_cmd_without_ecosystem_auth() -> None:
+    infra = mock.Mock()
+    infra.list_stands.return_value = []
+
+    with (
+        mock.patch.object(
+            commands, "get_ecosystem_client", side_effect=RuntimeError("bad creds")
+        ),
+        mock.patch.object(
+            commands.libvirt_infra, "LibvirtInfraDriver", return_value=infra
+        ),
+    ):
+        result = CliRunner().invoke(
+            commands.list_cmd, obj=SimpleNamespace(auth_data={}, cfg={})
+        )
+
+    assert result.exit_code == 0, result.output
+
+
+def test_delete_cmd_warns_when_realm_not_found() -> None:
+    result, infra, _ = _invoke_delete(REALMS_CFG, mock.Mock(), stands=[])
+
+    assert result.exit_code == 0, result.output
+    # Teardown warnings must go to stderr, so stdout stays machine-readable
+    assert "Realm test-core not found, nothing to delete" in result.stderr
+    infra.delete_stand.assert_not_called()
+
+
+def test_delete_cmd_warns_on_delete_stand_failure() -> None:
+    result, infra, stand = _invoke_delete(
+        REALMS_CFG, mock.Mock(), delete_error=RuntimeError("virsh is gone")
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Failed to delete local realm test-core" in result.output
+    assert "virsh is gone" in result.output
+    infra.delete_stand.assert_called_once_with(stand)
+
+
+def test_delete_cmd_warns_when_stands_cannot_be_listed() -> None:
+    result, infra, _ = _invoke_delete(
+        REALMS_CFG, mock.Mock(), list_error=RuntimeError("no libvirt")
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Unable to list local stands: no libvirt" in result.output
+    infra.delete_stand.assert_not_called()
