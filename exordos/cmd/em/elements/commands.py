@@ -895,8 +895,15 @@ def define(
 @click.option(
     "--y", "-y", help="Automatically answer yes for all questions", is_flag=True
 )
+@click.option(
+    "--timeout",
+    type=float,
+    default=600.0,
+    show_default=True,
+    help="Seconds to wait for elements to be uninstalled",
+)
 @click.pass_context
-def clear(ctx: click.Context, y: bool) -> bool:  # pragma: no cover
+def clear(ctx: click.Context, y: bool, timeout: float) -> bool:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if not (y or click.confirm("Do you want to uninstall all non-base elements?")):
@@ -914,21 +921,38 @@ def clear(ctx: click.Context, y: bool) -> bool:  # pragma: no cover
         ]
 
     installed = get_installed_elements()
-    max_attempts = len(installed) + 1
+    uninstalling: set[str] = set()
+    last_errors: dict[str, str] = {}
+    deadline = time.monotonic() + timeout
+    reported_count = len(installed)
 
-    for attempt in range(1, max_attempts + 1):
-        if not installed:
-            break
-
-        click.echo(
-            f"Uninstall attempt {attempt}/{max_attempts}: "
-            f"{len(installed)} element(s) remaining"
+    def remaining() -> str:
+        return ", ".join(
+            f"{e['name']} ({last_errors[e['uuid']]})"
+            if e["uuid"] in last_errors
+            else e["name"]
+            for e in installed
         )
-        for element in installed:
-            uninstalled_name = f"{element['name']} ({element['version']})"
-            click.echo(
-                f"  Uninstalling element {click.style(uninstalled_name, fg='green')}"
+
+    # Uninstall is asynchronous, so wait until elements are gone
+    while installed:
+        if time.monotonic() > deadline:
+            raise click.ClickException(
+                f"Failed to uninstall all elements in {timeout}s. "
+                f"Remaining: {remaining()}"
             )
+
+        if len(installed) != reported_count:
+            reported_count = len(installed)
+            click.echo(f"Waiting for {reported_count} element(s) to be uninstalled")
+
+        for element in installed:
+            # Uninstall was already requested, e.g. by an interrupted run,
+            # and core keeps the status ACTIVE until it completes
+            if element.get("installation_state") == "UNINSTALLED":
+                uninstalling.add(element["uuid"])
+            if element["uuid"] in uninstalling:
+                continue
             try:
                 base_client.action_entity(
                     client,
@@ -936,17 +960,33 @@ def clear(ctx: click.Context, y: bool) -> bool:  # pragma: no cover
                     "uninstall",
                     element["uuid"],
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                # Dependent elements must go first, retry on the next round
+                if last_errors.get(element["uuid"]) != str(e):
+                    click.echo(
+                        f"  Uninstall of {element['name']} rejected, will retry: {e}"
+                    )
+                last_errors[element["uuid"]] = str(e)
+                continue
+            last_errors.pop(element["uuid"], None)
+            uninstalling.add(element["uuid"])
+            uninstalled_name = f"{element['name']} ({element['version']})"
+            click.echo(
+                f"  Uninstalling element {click.style(uninstalled_name, fg='green')}"
+            )
 
-        time.sleep(0.2)
+        # Nothing is being uninstalled and every call was rejected,
+        # so waiting will not change the result
+        if not any(
+            e["uuid"] in uninstalling or e.get("status") == "IN_PROGRESS"
+            for e in installed
+        ):
+            raise click.ClickException(
+                f"Failed to uninstall all elements. Remaining: {remaining()}"
+            )
+
+        time.sleep(2)
         installed = get_installed_elements()
-
-    if installed:
-        remaining = ", ".join(e["name"] for e in installed)
-        raise click.ClickException(
-            f"Failed to uninstall all elements. Remaining: {remaining}"
-        )
 
     click.echo("All non-base elements were successfully uninstalled")
     return True
