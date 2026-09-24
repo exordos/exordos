@@ -461,7 +461,7 @@ def install_cmd(
             sync_mode="copy",
         )
 
-        repo_utils.do_upload(client, DEFAULT_UPLOAD_REPO_NAME, manifest_path)
+        repo_utils.do_upload(client, DEFAULT_UPLOAD_REPO_NAME, manifest_path, timeout)
 
         click.echo(f"Waiting for {name} ({e_version}) to become AVAILABLE...")
         repo_element = repo_utils.wait_for_repo_element(
@@ -525,7 +525,7 @@ def _update_element_from_manifest(
         sync_mode="copy",
     )
 
-    repo_utils.do_upload(client, DEFAULT_UPLOAD_REPO_NAME, manifest_path)
+    repo_utils.do_upload(client, DEFAULT_UPLOAD_REPO_NAME, manifest_path, timeout)
 
     click.echo(f"Waiting for {name} ({e_version}) to become AVAILABLE...")
     target_element = repo_utils.wait_for_repo_element(
