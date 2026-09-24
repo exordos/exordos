@@ -25,6 +25,7 @@ import time
 import typing as tp
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 import rich_click as click
 import yaml
 
@@ -244,6 +245,21 @@ def extract_repository_uuid(element: dict[str, tp.Any]) -> str:
     if not repo_ref or not isinstance(repo_ref, str):
         return ""
     return repo_ref.rstrip("/").split("/")[-1]
+
+
+def install_element(client: tp.Any, repo_element_uuid: str) -> None:
+    """Install a repository element.
+
+    The API rejects the install with "Element must be uninstalled" when the
+    element is already installed, treat that as success.
+    """
+    try:
+        base_client.action_entity(
+            client, c.REPOSITORY_ELEMENT_COLLECTION, "install", repo_element_uuid
+        )
+    except bazooka_exc.BadRequestError as e:
+        if "Element must be uninstalled" not in e.cause.response.text:
+            raise
 
 
 def wait_for_repo_element(

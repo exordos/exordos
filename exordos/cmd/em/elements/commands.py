@@ -468,9 +468,7 @@ def install_cmd(
             client, repository["uuid"], name, e_version, "AVAILABLE", timeout
         )
 
-        base_client.action_entity(
-            client, c.REPOSITORY_ELEMENT_COLLECTION, "install", repo_element["uuid"]
-        )
+        repo_utils.install_element(client, repo_element["uuid"])
 
         installed_name = f"{name} ({e_version})"
         click.echo(
@@ -484,9 +482,7 @@ def install_cmd(
         element = _select_element_by_name(client, uuid_or_name_or_path, version)
 
     element_uuid = element["uuid"]
-    base_client.action_entity(
-        client, c.REPOSITORY_ELEMENT_COLLECTION, "install", element_uuid
-    )
+    repo_utils.install_element(client, element_uuid)
 
     installed_name = f"{element['name']} ({element['version']})"
     click.echo(
