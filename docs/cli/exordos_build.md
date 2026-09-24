@@ -82,6 +82,14 @@ Additional variables can be passed using the --manifest-var options.
 
   Validate the manifest after building
 
+- `jobs`:
+    - Type: integer range
+    - Default: `1`
+    - Usage: `-j
+--jobs`
+
+  Number of images of an element to build in parallel. Every image build runs its own VM, so make sure there are enough CPU, memory and disk resources. If one image fails, the other builds are interrupted
+
 - `project_dir`:
     - Type: path
     - Default: `.`
@@ -108,14 +116,15 @@ Additional variables can be passed using the --manifest-var options.
  Additional variables can be passed using the --manifest-var options.                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --exordos-cfg-file        -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                              │
-│ --deps-dir                    TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                        │
-│ --output-dir              -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                     │
-│ --ssh-public-key          -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                     │
-│ --force                   -f        Rebuild if the output already exists                                                                                                                                                                                                                                │
-│ --element                 -e  TEXT  Name of the element to build. Builds all elements when omitted                                                                                                                                                                                                      │
-│ --manifest-var                TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                │
-│ --validate/--no-validate            Validate the manifest after building [default: validate]                                                                                                                                                                                                            │
-│ --help                              Show this message and exit.                                                                                                                                                                                                                                         │
+│ --exordos-cfg-file        -c  TEXT                  Name of the project configuration file                                                                                                                                                                                                              │
+│ --deps-dir                    TEXT                  Directory where dependencies will be fetched                                                                                                                                                                                                        │
+│ --output-dir              -o  PATH                  Directory where output artifacts will be stored                                                                                                                                                                                                     │
+│ --ssh-public-key          -i  PATH                  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                     │
+│ --force                   -f                        Rebuild if the output already exists                                                                                                                                                                                                                │
+│ --element                 -e  TEXT                  Name of the element to build. Builds all elements when omitted                                                                                                                                                                                      │
+│ --manifest-var                TEXT                  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                │
+│ --validate/--no-validate                            Validate the manifest after building [default: validate]                                                                                                                                                                                            │
+│ --jobs                    -j  INTEGER RANGE [x>=1]  Number of images of an element to build in parallel. Every image build runs its own VM, so make sure there are enough CPU, memory and disk resources. If one image fails, the other builds are interrupted [default: 1]                             │
+│ --help                                              Show this message and exit.                                                                                                                                                                                                                         │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

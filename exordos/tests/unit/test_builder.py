@@ -18,6 +18,8 @@ import pathlib
 import stat
 import subprocess
 import tarfile
+import threading
+import time
 import typing as tp
 from unittest.mock import MagicMock
 import uuid as sys_uuid
@@ -25,6 +27,7 @@ import uuid as sys_uuid
 import pytest
 
 from exordos.builder import base
+from exordos.builder import builder as builder_module
 from exordos.builder.builder import SimpleBuilder
 from exordos.builder.builder import _urn_artifact
 from exordos.builder.builder import _urn_image
@@ -359,6 +362,93 @@ class TestBuilder:
         image_names = [pathlib.Path(p).name for p in images]
         assert any(n.endswith(".raw") for n in image_names)
         assert any(n.endswith(".raw.gz") for n in image_names)
+
+
+class TestBuildImagesParallel:
+    """Tests for building images of an element in parallel."""
+
+    def _builder(
+        self, tmp_path, image_builder, jobs: int
+    ) -> tuple[SimpleBuilder, base.Element]:
+        element = base.Element(
+            images=[
+                base.Image(script="install.sh", formats=["raw"], name=name)
+                for name in ("first", "second")
+            ]
+        )
+        builder = SimpleBuilder(
+            exordos_dir=tmp_path,
+            deps=[],
+            elements=[element],
+            image_builder=image_builder,
+            logger=DummyLogger(),
+            elements_output_dir=tmp_path / "out",
+            jobs=jobs,
+        )
+        return builder, element
+
+    def test_build_images_runs_concurrently(self, tmp_path) -> None:
+        # Both builds must be in progress at the same time to pass the barrier
+        barrier = threading.Barrier(2, timeout=5)
+
+        def fake_run(image_dir, image, deps, developer_keys, output_dir):
+            barrier.wait()
+            (pathlib.Path(output_dir) / f"{image.name}.raw").write_bytes(b"raw")
+
+        image_builder = MagicMock(spec=base.AbstractImageBuilder)
+        image_builder.run.side_effect = fake_run
+        builder, element = self._builder(tmp_path, image_builder, jobs=2)
+
+        paths = builder._build_images(element, tmp_path)
+
+        assert paths == [pathlib.Path("first.raw"), pathlib.Path("second.raw")]
+        image_builder.cancel.assert_not_called()
+
+    def test_build_images_failure_cancels_other_builds(self, tmp_path) -> None:
+        cancelled = threading.Event()
+
+        def fake_run(image_dir, image, deps, developer_keys, output_dir):
+            if image.name == "second":
+                raise ValueError("second failed")
+            # Simulate a long build interrupted by cancel()
+            assert cancelled.wait(timeout=5)
+            raise subprocess.CalledProcessError(1, "packer")
+
+        image_builder = MagicMock(spec=base.AbstractImageBuilder)
+        image_builder.run.side_effect = fake_run
+        image_builder.cancel.side_effect = cancelled.set
+        builder, element = self._builder(tmp_path, image_builder, jobs=2)
+
+        with pytest.raises(ValueError, match="second failed"):
+            builder._build_images(element, tmp_path)
+
+        image_builder.cancel.assert_called_once()
+
+    def test_build_images_interrupt_skips_queued_builds(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        started = []
+
+        def fake_run(image_dir, image, deps, developer_keys, output_dir):
+            started.append(image.name)
+            time.sleep(0.2)
+            (pathlib.Path(output_dir) / f"{image.name}.raw").write_bytes(b"raw")
+
+        def interrupted_wait(*args, **kwargs):
+            raise KeyboardInterrupt()
+
+        image_builder = MagicMock(spec=base.AbstractImageBuilder)
+        image_builder.run.side_effect = fake_run
+        builder, element = self._builder(tmp_path, image_builder, jobs=2)
+        element.images.append(
+            base.Image(script="install.sh", formats=["raw"], name="third")
+        )
+        monkeypatch.setattr(builder_module.futures, "wait", interrupted_wait)
+
+        with pytest.raises(KeyboardInterrupt):
+            builder._build_images(element, tmp_path)
+
+        assert "third" not in started
 
 
 class TestImageNames:

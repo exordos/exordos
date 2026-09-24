@@ -14,6 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import signal
+import subprocess
+import threading
+from unittest.mock import MagicMock
+
 import pytest
 
 from exordos.builder import base
@@ -49,3 +54,51 @@ class TestPackerBuilder:
             builder.run(str(tmp_path), image, [], output_dir=str(tmp_path / "out"))
 
         assert exc_info.value.filename == "packer"
+
+    def test_build_cancel_interrupts_running_process(self, monkeypatch) -> None:
+        started = threading.Event()
+        interrupted = threading.Event()
+
+        class FakePopen:
+            def __init__(self, args):
+                self.args = args
+                started.set()
+
+            def wait(self):
+                assert interrupted.wait(timeout=5)
+                return 1
+
+            def send_signal(self, sig):
+                assert sig == signal.SIGINT
+                interrupted.set()
+
+        monkeypatch.setattr(packer.subprocess, "Popen", FakePopen)
+        builder = packer.PackerBuilder()
+        image = base.Image(script="install.sh", name="img")
+        errors = []
+
+        def build():
+            try:
+                builder.build("image_dir", image)
+            except subprocess.CalledProcessError as e:
+                errors.append(e)
+
+        thread = threading.Thread(target=build)
+        thread.start()
+        assert started.wait(timeout=5)
+        builder.cancel()
+        thread.join(timeout=5)
+
+        assert len(errors) == 1
+        assert errors[0].returncode == 1
+
+    def test_build_after_cancel_does_not_start_packer(self, monkeypatch) -> None:
+        popen = MagicMock()
+        monkeypatch.setattr(packer.subprocess, "Popen", popen)
+        builder = packer.PackerBuilder()
+        builder.cancel()
+
+        with pytest.raises(RuntimeError, match="cancelled"):
+            builder.build("image_dir", base.Image(script="install.sh", name="img"))
+
+        popen.assert_not_called()

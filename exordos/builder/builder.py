@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+from concurrent import futures
 import glob
 import gzip
 import itertools
@@ -62,6 +63,7 @@ class SimpleBuilder:
         logger: tp.Optional[AbstractLogger] = None,
         elements_output_dir: pathlib.Path = pathlib.Path(c.DEF_GEN_OUTPUT_DIR_NAME),
         version: str = "0.0.0",
+        jobs: int = 1,
     ) -> None:
         super().__init__()
         self._deps = deps
@@ -71,6 +73,7 @@ class SimpleBuilder:
         self._logger = logger or DummyLogger()
         self._elements_output_dir = elements_output_dir
         self._version = version
+        self._jobs = jobs
         self._inventories = []
         self._repo_dir = None
 
@@ -249,12 +252,42 @@ class SimpleBuilder:
         developer_keys: str | None = None,
     ) -> list[pathlib.Path]:
         """Build images for the element."""
-        image_paths = []
-        for img in element.images:
-            _paths = self._build_image(img, output_dir, developer_keys)
-            image_paths.extend(_paths)
+        if self._jobs == 1 or len(element.images) < 2:
+            image_paths = []
+            for img in element.images:
+                _paths = self._build_image(img, output_dir, developer_keys)
+                image_paths.extend(_paths)
 
-        return image_paths
+            return image_paths
+
+        self._logger.info(
+            f"Building {len(element.images)} images, {self._jobs} in parallel"
+        )
+        with futures.ThreadPoolExecutor(max_workers=self._jobs) as pool:
+            jobs = [
+                pool.submit(self._build_image, img, output_dir, developer_keys)
+                for img in element.images
+            ]
+            try:
+                done, _ = futures.wait(jobs, return_when=futures.FIRST_EXCEPTION)
+            except BaseException:
+                # Ctrl-C: do not let the pool start the queued images on exit
+                for job in jobs:
+                    job.cancel()
+                raise
+            failed = [j for j in done if j.exception()]
+            if failed:
+                # Stop the remaining builds, the pool waits for them on exit
+                for job in jobs:
+                    job.cancel()
+                self._image_builder.cancel()
+
+        # Raise the original error, not the one caused by the cancellation
+        if failed:
+            raise failed[0].exception()
+
+        # Keep the images order stable
+        return [path for job in jobs for path in job.result()]
 
     def _build_images_dict(
         self,
@@ -600,6 +633,7 @@ class SimpleBuilder:
         elements_output_dir: pathlib.Path,
         version: str = "0.0.0",
         logger: AbstractLogger | None = None,
+        jobs: int = 1,
     ) -> "SimpleBuilder":
         """Create a builder from configuration."""
         # Prepare dependencies entries but do not fetch them
@@ -628,4 +662,5 @@ class SimpleBuilder:
             logger,
             elements_output_dir,
             version,
+            jobs,
         )

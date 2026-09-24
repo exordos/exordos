@@ -155,3 +155,40 @@ def test_clear_build_cache_cmd_missing_dir(monkeypatch, tmp_path) -> None:
 
     assert result.exit_code == 0, result.output
     assert "does not exist" in result.output
+
+
+def test_build_cmd_jobs_passed_to_builder(monkeypatch, tmp_path) -> None:
+    from_config = MagicMock()
+    monkeypatch.setattr(
+        commands.utils,
+        "get_exordos_config",
+        lambda *_: ({"build": {"elements": [{}]}}, tmp_path / "exordos.yaml"),
+    )
+    monkeypatch.setattr(commands.utils, "load_spec", lambda: {})
+    monkeypatch.setattr(commands.schema, "validate_yaml", MagicMock())
+    monkeypatch.setattr(commands, "get_project_version", lambda _: "1.0.0")
+    monkeypatch.setattr(commands, "PackerBuilder", MagicMock())
+    monkeypatch.setattr(
+        commands.simple_builder.SimpleBuilder, "from_config", from_config
+    )
+    monkeypatch.setattr(commands.utils, "get_keys_by_path_or_env", lambda *_: "")
+
+    result = CliRunner().invoke(
+        commands.build_cmd,
+        ["-j", "2", "--output-dir", str(tmp_path / "out"), "."],
+        obj=SimpleNamespace(developer_key_path=None),
+    )
+
+    assert result.exit_code == 0, result.output
+    assert from_config.call_args.args[-1] == 2
+    from_config.return_value.build.assert_called_once()
+
+
+def test_build_cmd_jobs_rejects_zero(tmp_path) -> None:
+    result = CliRunner().invoke(
+        commands.build_cmd,
+        ["--jobs", "0", str(tmp_path)],
+        obj=SimpleNamespace(developer_key_path=None),
+    )
+
+    assert result.exit_code == 2

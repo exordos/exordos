@@ -20,7 +20,9 @@ import importlib.resources as resources
 import os
 import re
 import shutil
+import signal
 import subprocess
+import threading
 import typing as tp
 
 from exordos import constants as c
@@ -152,6 +154,10 @@ class PackerBuilder(base.DummyImageBuilder):
     def __init__(self, logger: AbstractLogger | None = None) -> None:
         super().__init__()
         self._logger = logger or DummyLogger()
+        self._init_lock = threading.Lock()
+        self._procs_lock = threading.Lock()
+        self._procs: set[subprocess.Popen] = set()
+        self._cancelled = False
 
     def _resolve_envs(self, envs: list[str]) -> str:
         if len(envs) == 0:
@@ -286,7 +292,10 @@ class PackerBuilder(base.DummyImageBuilder):
         with open(os.path.join(image_dir, "overrides.auto.pkrvars.hcl"), "w") as f:
             f.write(variables)
 
-        subprocess.run(["packer", "init", image_dir], check=True)
+        # `packer init` installs plugins into a shared directory, so parallel
+        # builds must not run it concurrently.
+        with self._init_lock:
+            subprocess.run(["packer", "init", image_dir], check=True)
 
     def build(
         self,
@@ -296,4 +305,30 @@ class PackerBuilder(base.DummyImageBuilder):
     ) -> None:
         """Actions to build the image."""
         self._logger.important(f"Build image: {image.name}")
-        subprocess.run(["packer", "build", "-parallel-builds=1", image_dir], check=True)
+        with self._procs_lock:
+            if self._cancelled:
+                raise RuntimeError(f"Build of image {image.name} was cancelled")
+            proc = subprocess.Popen(
+                ["packer", "build", "-parallel-builds=1", image_dir]
+            )
+            self._procs.add(proc)
+
+        try:
+            retcode = proc.wait()
+        finally:
+            with self._procs_lock:
+                self._procs.discard(proc)
+
+        if retcode:
+            raise subprocess.CalledProcessError(retcode, proc.args)
+
+    def cancel(self) -> None:
+        """Interrupt running packer builds and prevent new ones.
+
+        Packer handles SIGINT gracefully: it stops the VM and removes
+        temporary files.
+        """
+        with self._procs_lock:
+            self._cancelled = True
+            for proc in self._procs:
+                proc.send_signal(signal.SIGINT)
