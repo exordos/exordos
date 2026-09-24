@@ -23,6 +23,7 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 import click
 from click.testing import CliRunner
 import pytest
@@ -258,6 +259,34 @@ class TestWaitForRepoElement:
             repo_utils.wait_for_repo_element(
                 client, "repo-uuid", "foo", "1.0.0", "AVAILABLE", timeout=-1
             )
+
+
+def _bad_request(text: str) -> bazooka_exc.BadRequestError:
+    cause = MagicMock()
+    cause.response.status_code = 400
+    cause.response.text = text
+    return bazooka_exc.BadRequestError(cause)
+
+
+class TestInstallElement:
+    def test_install_element_success(self) -> None:
+        client = MagicMock()
+        repo_utils.install_element(client, "e1")
+        client.do_action.assert_called_once()
+
+    def test_install_element_already_installed(self) -> None:
+        client = MagicMock()
+        client.do_action.side_effect = _bad_request(
+            '{"type":"ValidateException","code":10000001,'
+            '"message":"validate error: Element must be uninstalled"}'
+        )
+        repo_utils.install_element(client, "e1")
+
+    def test_install_element_other_bad_request(self) -> None:
+        client = MagicMock()
+        client.do_action.side_effect = _bad_request('{"message":"other error"}')
+        with pytest.raises(bazooka_exc.BadRequestError):
+            repo_utils.install_element(client, "e1")
 
 
 class TestWaitForElementActive:

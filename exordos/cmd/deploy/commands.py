@@ -263,12 +263,7 @@ def _deploy_element(
             target=repo_element["uuid"],
         )
     else:
-        base_client.action_entity(
-            client,
-            c.REPOSITORY_ELEMENT_COLLECTION,
-            "install",
-            repo_element["uuid"],
-        )
+        repo_utils.install_element(client, repo_element["uuid"])
 
     with status_lib.status_done(f"Waiting for {e_name} to become ACTIVE..."):
         repo_utils.wait_for_element_active(
