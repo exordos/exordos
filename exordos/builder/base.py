@@ -490,6 +490,10 @@ class AbstractImageBuilder(abc.ABC):
         self.build(image_dir, image, developer_keys)
         self.post_build(image_dir, image)
 
+    def cancel(self) -> None:
+        """Interrupt running and prevent further image builds."""
+        return None
+
 
 class DummyImageBuilder(AbstractImageBuilder):
     """Dummy image builder.

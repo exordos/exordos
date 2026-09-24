@@ -119,6 +119,19 @@ def _prepare_output_dir(output_dir: pathlib.Path, force: bool) -> bool:
     is_flag=True,
     help="Validate the manifest after building",
 )
+@click.option(
+    "-j",
+    "--jobs",
+    default=1,
+    show_default=True,
+    type=click.IntRange(min=1),
+    help=(
+        "Number of images of an element to build in parallel. Every image "
+        "build runs its own VM, so make sure there are enough CPU, memory "
+        "and disk resources. If one image fails, the other builds are "
+        "interrupted"
+    ),
+)
 @click.argument("project_dir", type=click.Path(), default=".")
 @click.pass_context
 def build_cmd(
@@ -131,6 +144,7 @@ def build_cmd(
     element: str | None,
     manifest_var: tuple[str, ...],
     validate: bool,
+    jobs: int,
     project_dir: str,
 ) -> None:
     manifest_vars = utils.convert_input_multiply(manifest_var)
@@ -177,7 +191,13 @@ def build_cmd(
     builders = []
     for _, build_cfg in builds.items():
         builder = simple_builder.SimpleBuilder.from_config(
-            exordos_dir, build_cfg, packer_image_builder, output_dir, version, logger
+            exordos_dir,
+            build_cfg,
+            packer_image_builder,
+            output_dir,
+            version,
+            logger,
+            jobs,
         )
         if element and not builder.select_element(element, manifest_vars):
             continue
