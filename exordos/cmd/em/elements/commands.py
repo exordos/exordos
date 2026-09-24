@@ -951,6 +951,10 @@ def clear(ctx: click.Context, y: bool, timeout: float) -> bool:
             click.echo(f"Waiting for {reported_count} element(s) to be uninstalled")
 
         for element in installed:
+            # Uninstall was already requested, e.g. by an interrupted run,
+            # and core keeps the status ACTIVE until it completes
+            if element.get("installation_state") == "UNINSTALLED":
+                uninstalling.add(element["uuid"])
             if element["uuid"] in uninstalling:
                 continue
             try:

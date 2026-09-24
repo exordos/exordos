@@ -95,3 +95,14 @@ def test_clear_timeout_reports_uninstall_error() -> None:
 
     assert result.exit_code == 1
     assert "Remaining: empty (409 Conflict)" in result.output
+
+
+def test_clear_waits_for_uninstall_requested_earlier() -> None:
+    requested = {**EMPTY, "installation_state": "UNINSTALLED"}
+    result, _, action_entity = _invoke_clear(
+        [[requested], [requested], []],
+        action_side_effect=RuntimeError("Element must be installed"),
+    )
+
+    assert result.exit_code == 0, result.output
+    action_entity.assert_not_called()
