@@ -6362,6 +6362,16 @@
 </ul>
 <p>Validate the manifest after building</p>
 <ul>
+<li><code>jobs</code>:<ul>
+<li>Type: integer range</li>
+<li>Default: <code>1</code></li>
+<li>Usage: <code>-j
+--jobs</code></li>
+</ul>
+</li>
+</ul>
+<p>Number of images of an element to build in parallel. Every image build runs its own VM, so make sure there are enough CPU, memory and disk resources. If one image fails, the other builds are interrupted</p>
+<ul>
 <li>
 <p><code>project_dir</code>:</p>
 <ul>
@@ -6392,15 +6402,16 @@
 <span class="go"> Additional variables can be passed using the --manifest-var options.                                                                                                                                                                                                                                      </span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --exordos-cfg-file        -c  TEXT  Name of the project configuration file                                                                                                                                                                                                                              │</span>
-<span class="go">│ --deps-dir                    TEXT  Directory where dependencies will be fetched                                                                                                                                                                                                                        │</span>
-<span class="go">│ --output-dir              -o  PATH  Directory where output artifacts will be stored                                                                                                                                                                                                                     │</span>
-<span class="go">│ --ssh-public-key          -i  PATH  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                                     │</span>
-<span class="go">│ --force                   -f        Rebuild if the output already exists                                                                                                                                                                                                                                │</span>
-<span class="go">│ --element                 -e  TEXT  Name of the element to build. Builds all elements when omitted                                                                                                                                                                                                      │</span>
-<span class="go">│ --manifest-var                TEXT  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                                │</span>
-<span class="go">│ --validate/--no-validate            Validate the manifest after building [default: validate]                                                                                                                                                                                                            │</span>
-<span class="go">│ --help                              Show this message and exit.                                                                                                                                                                                                                                         │</span>
+<span class="go">│ --exordos-cfg-file        -c  TEXT                  Name of the project configuration file                                                                                                                                                                                                              │</span>
+<span class="go">│ --deps-dir                    TEXT                  Directory where dependencies will be fetched                                                                                                                                                                                                        │</span>
+<span class="go">│ --output-dir              -o  PATH                  Directory where output artifacts will be stored                                                                                                                                                                                                     │</span>
+<span class="go">│ --ssh-public-key          -i  PATH                  Path to a public SSH key file to inject into the VM. Can be specified multiple times. If not provided, no key will be injected.                                                                                                                     │</span>
+<span class="go">│ --force                   -f                        Rebuild if the output already exists                                                                                                                                                                                                                │</span>
+<span class="go">│ --element                 -e  TEXT                  Name of the element to build. Builds all elements when omitted                                                                                                                                                                                      │</span>
+<span class="go">│ --manifest-var                TEXT                  Additional variables to pass to the manifest template. The format is 'key=value'. For example: --manifest-var key1=value1 --manifest-var key2=value2                                                                                                │</span>
+<span class="go">│ --validate/--no-validate                            Validate the manifest after building [default: validate]                                                                                                                                                                                            │</span>
+<span class="go">│ --jobs                    -j  INTEGER RANGE [x&gt;=1]  Number of images of an element to build in parallel. Every image build runs its own VM, so make sure there are enough CPU, memory and disk resources. If one image fails, the other builds are interrupted [default: 1]                             │</span>
+<span class="go">│ --help                                              Show this message and exit.                                                                                                                                                                                                                         │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
