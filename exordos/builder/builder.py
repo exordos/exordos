@@ -268,7 +268,13 @@ class SimpleBuilder:
                 pool.submit(self._build_image, img, output_dir, developer_keys)
                 for img in element.images
             ]
-            done, _ = futures.wait(jobs, return_when=futures.FIRST_EXCEPTION)
+            try:
+                done, _ = futures.wait(jobs, return_when=futures.FIRST_EXCEPTION)
+            except BaseException:
+                # Ctrl-C: do not let the pool start the queued images on exit
+                for job in jobs:
+                    job.cancel()
+                raise
             failed = [j for j in done if j.exception()]
             if failed:
                 # Stop the remaining builds, the pool waits for them on exit

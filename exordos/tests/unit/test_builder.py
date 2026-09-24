@@ -19,6 +19,7 @@ import stat
 import subprocess
 import tarfile
 import threading
+import time
 import typing as tp
 from unittest.mock import MagicMock
 import uuid as sys_uuid
@@ -26,6 +27,7 @@ import uuid as sys_uuid
 import pytest
 
 from exordos.builder import base
+from exordos.builder import builder as builder_module
 from exordos.builder.builder import SimpleBuilder
 from exordos.builder.builder import _urn_artifact
 from exordos.builder.builder import _urn_image
@@ -421,6 +423,32 @@ class TestBuildImagesParallel:
             builder._build_images(element, tmp_path)
 
         image_builder.cancel.assert_called_once()
+
+    def test_build_images_interrupt_skips_queued_builds(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        started = []
+
+        def fake_run(image_dir, image, deps, developer_keys, output_dir):
+            started.append(image.name)
+            time.sleep(0.2)
+            (pathlib.Path(output_dir) / f"{image.name}.raw").write_bytes(b"raw")
+
+        def interrupted_wait(*args, **kwargs):
+            raise KeyboardInterrupt()
+
+        image_builder = MagicMock(spec=base.AbstractImageBuilder)
+        image_builder.run.side_effect = fake_run
+        builder, element = self._builder(tmp_path, image_builder, jobs=2)
+        element.images.append(
+            base.Image(script="install.sh", formats=["raw"], name="third")
+        )
+        monkeypatch.setattr(builder_module.futures, "wait", interrupted_wait)
+
+        with pytest.raises(KeyboardInterrupt):
+            builder._build_images(element, tmp_path)
+
+        assert "third" not in started
 
 
 class TestImageNames:
