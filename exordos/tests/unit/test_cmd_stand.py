@@ -15,6 +15,7 @@
 #    under the License.
 
 import ipaddress
+import multiprocessing
 import os
 import pathlib
 import stat
@@ -23,6 +24,7 @@ from unittest import mock
 import click
 import pytest
 import rich.console
+import yaml
 
 from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.cmd.stand import commands
@@ -87,3 +89,29 @@ class TestResolveHypervisorPlacement:
             commands._resolve_hypervisor_placement(
                 "local", "qemu+tcp://10.0.0.5/system", self._CIDR
             )
+
+
+def _write_realm(args: tuple) -> None:
+    cfg_path, name = args
+    from exordos.cmd.stand import commands as stand_commands
+
+    stand_commands._update_realm_config(
+        name,
+        ipaddress.IPv4Address("10.40.0.2"),
+        ipaddress.IPv4Network("10.40.0.0/22"),
+        "admin",
+        cfg_path,
+    )
+
+
+def test_update_realm_config_keeps_parallel_writes(tmp_path) -> None:
+    cfg_path = str(tmp_path / "exordosctl.yaml")
+    names = [f"test{i}" for i in range(8)]
+
+    with multiprocessing.Pool(len(names)) as pool:
+        pool.map(_write_realm, [(cfg_path, name) for name in names])
+
+    with open(cfg_path) as f:
+        config = yaml.safe_load(f)
+
+    assert sorted(config["realms"]) == sorted(names)

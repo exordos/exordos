@@ -645,12 +645,20 @@ def _update_realm_config(
     """Update the realm entry in exordosctl.yaml after bootstrap."""
     logger = ClickLogger()
 
-    try:
-        with open(cfg_path, "r") as f:
-            config = yaml.safe_load(f) or {}
-    except FileNotFoundError:
-        config = {}
+    with settings_config.locked_config(cfg_path) as config:
+        _set_realm_config(config, realm_name, realm_ip, cidr, admin_password)
 
+    logger.info(f"Realm '{realm_name}' configuration updated in {cfg_path}")
+
+
+def _set_realm_config(
+    config: dict,
+    realm_name: str,
+    realm_ip: ipaddress.IPv4Address,
+    cidr: ipaddress.IPv4Network,
+    admin_password: str,
+) -> None:
+    """Put the realm entry into the given config."""
     if "realms" not in config:
         config["realms"] = {}
 
@@ -678,9 +686,6 @@ def _update_realm_config(
 
     if not config.get("current-realm"):
         config["current-realm"] = realm_name
-
-    settings_config.save_config(config, cfg_path)
-    logger.info(f"Realm '{realm_name}' configuration updated in {cfg_path}")
 
 
 def _resolve_hypervisor_placement(
@@ -1283,8 +1288,7 @@ def bootstrap_cmd(
             realm_domain=realm_domain,
             ssh_public_key=ssh_public_key_content,
             elements=list(elements) if elements else None,
-            cors_allowed_origins=cors_allowed_origins
-
+            cors_allowed_origins=cors_allowed_origins,
         )
 
     if hyper_kind == "exordos_local_hyper":
