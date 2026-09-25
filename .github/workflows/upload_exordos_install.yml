@@ -22,14 +22,14 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        runner: [ github-packer-runner-1, github-packer-runner-2, github-packer-runner-3, genesis-lab0 ]
+        runner: [ github-packer-runner-0, github-packer-runner-1, github-packer-runner-2, github-packer-runner-3, runner-4 ]
     steps:
     - name: update exordos cli
       run: |
         set -eux
 
-        sudo curl --fail --show-error --location --progress-bar https://repo.exordos.com/exordos/latest/exordos-linux --output /usr/local/bin/exordos
-        sudo chmod +x /usr/local/bin/exordos
+        sudo curl --fail --show-error --location --progress-bar https://repo.exordos.com/exordos/latest/exordos-linux --output /usr/local/sbin/exordos
+        sudo chmod +x /usr/local/sbin/exordos
         
         which exordos
         exordos version
