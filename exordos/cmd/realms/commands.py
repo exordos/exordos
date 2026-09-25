@@ -20,6 +20,7 @@ import dataclasses
 import datetime
 import ipaddress
 import os
+import shutil
 import subprocess
 from urllib.parse import urljoin
 import uuid as sys_uuid
@@ -454,11 +455,13 @@ def delete_cmd(ctx: click.Context, name_uuid: str) -> None:
 
     # Local realms go first so a same-named ecosystem realm isn't touched
     infra = libvirt_infra.LibvirtInfraDriver()
-    try:
-        local_stands = infra.list_stands()
-    except Exception as err:
-        warn(f"Unable to list local stands: {err}")
-        local_stands = []
+    local_stands = []
+    # A host without libvirt can't have local realms
+    if shutil.which("virsh"):
+        try:
+            local_stands = infra.list_stands()
+        except Exception as err:
+            warn(f"Unable to list local stands: {err}")
 
     def clear_local_realm(stand: "stand_models.Stand") -> None:
         try:

@@ -142,6 +142,7 @@ def _invoke_delete(
     stands=None,
     list_error=None,
     delete_error=None,
+    virsh_path="/usr/bin/virsh",
 ) -> tuple:
     stand = SimpleNamespace(name="test-core")
     infra = mock.Mock()
@@ -169,6 +170,7 @@ def _invoke_delete(
             commands.libvirt_infra, "LibvirtInfraDriver", return_value=infra
         ),
         mock.patch.object(commands, "get_stand_core_ip", return_value="10.40.0.2"),
+        mock.patch.object(commands.shutil, "which", return_value=virsh_path),
         mock.patch.object(elements_commands, "clear", clear_cmd),
         mock.patch("time.sleep"),
     ):
@@ -309,4 +311,13 @@ def test_delete_cmd_warns_when_stands_cannot_be_listed() -> None:
 
     assert result.exit_code == 0, result.output
     assert "Unable to list local stands: no libvirt" in result.output
+    infra.delete_stand.assert_not_called()
+
+
+def test_delete_cmd_skips_local_stands_without_virsh() -> None:
+    result, infra, _ = _invoke_delete(REALMS_CFG, mock.Mock(), virsh_path=None)
+
+    assert result.exit_code == 0, result.output
+    assert "Unable to list local stands" not in result.output
+    infra.list_stands.assert_not_called()
     infra.delete_stand.assert_not_called()
