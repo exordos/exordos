@@ -50,6 +50,16 @@ def get_published() -> str:
     )
 
 
+def _new_repo_driver(
+    driver_kind: str, exordosctl_cfg_file: str, **params: tp.Any
+) -> base_repo.AbstractRepoDriver:
+    driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
+    # A driver that logs in to a realm reads it from the active settings.
+    if getattr(driver_class, "READS_SETTINGS", False):
+        params.setdefault("cfg_path", exordosctl_cfg_file)
+    return driver_class(**params)
+
+
 def load_repo_driver_from_settings(
     exordosctl_cfg_file: str,
     target: str,
@@ -79,11 +89,10 @@ def load_repo_driver_from_settings(
             f"Driver not specified for repository {target}"
         )
 
-    driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
     params: dict = dict(repo)
     params.pop("driver", None)
     params["name"] = target
-    return driver_class(**params)
+    return _new_repo_driver(driver_kind, exordosctl_cfg_file, **params)
 
 
 def load_repo_driver(
@@ -96,8 +105,7 @@ def load_repo_driver(
 ) -> base_repo.AbstractRepoDriver:
     if driver_kind:
         params = utils.convert_input_multiply(driver_params or ())
-        driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
-        return driver_class(name=target, **params)
+        return _new_repo_driver(driver_kind, exordosctl_cfg_file, name=target, **params)
 
     try:
         gen_config, _ = utils.get_exordos_config(project_dir, exordos_cfg_file)
@@ -131,10 +139,7 @@ def load_repo_driver(
 
     # Load driver from entry points
     driver_kind = push.pop("driver")
-    driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
-    driver: base_repo.AbstractRepoDriver = driver_class(name=target, **push)
-
-    return driver
+    return _new_repo_driver(driver_kind, exordosctl_cfg_file, name=target, **push)
 
 
 def do_push(
