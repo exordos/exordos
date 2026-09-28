@@ -37,6 +37,7 @@ class FakeServer:
     def __init__(self):
         self.files: dict[str, bytes] = {}
         self.auth_headers: list[str | None] = []
+        self.deleted: list[str] = []
 
     def send(self, request, **kwargs):
         self.auth_headers.append(request.headers.get("Authorization"))
@@ -57,6 +58,7 @@ class FakeServer:
                 resp.status_code = 404
                 resp._content = b""
         elif request.method == "DELETE":
+            self.deleted.append(request.url)
             resp.status_code = 204 if self.files.pop(request.url, None) else 404
             resp._content = b""
         return resp
@@ -187,3 +189,14 @@ def test_loader_passes_the_active_settings_to_the_realm_driver(tmp_path):
     assert isinstance(driver, realm.RealmRepoDriver)
     assert driver.name == "orion"
     assert driver._session.auth._authenticator._url.startswith("https://orion.test/")
+
+
+def test_remove_deletes_directories_by_their_collection_uri(driver, server, tmp_path):
+    # nginx WebDAV answers 409 to a DELETE of a directory without the slash.
+    driver.push(_element(tmp_path))
+    driver.remove(_element(tmp_path))
+
+    dirs = [u for u in server.deleted if not u.rsplit("/", 1)[-1].count(".")]
+    assert f"{ELEMENTS}/empty/0.1.0/" in dirs
+    assert f"{ELEMENTS}/empty/0.1.0/manifests/" in dirs
+    assert all(u.endswith("/") for u in dirs)
