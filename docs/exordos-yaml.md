@@ -166,3 +166,58 @@ To push to a specific target, pass the config file with the `-c` flag:
 ```bash
 exordos push -c exordos/exordos.push.yaml
 ```
+
+### Example: push to a realm's element repository
+
+A managed realm serves an element repository from its node, one directory
+per project, at `https://<realm domain>/repo/<project_id>`. Push to it with
+the `realm` driver: it signs every request with a token of the realm's
+login and keeps the repository index the realm core reads.
+
+1. Add the realm to the CLI and log in to it (see [Realms](realms.md)).
+   The login must be able to upload: a user of `<project_id>` (the project
+   `owner` role has `repo.repository.upload`), or an unscoped admin.
+
+2. Add a push target to `exordos/exordos.push.yaml`:
+
+    ```yaml
+    push:
+      my-realm:
+        driver: realm
+        url: https://6def3e.exordos.io/repo/<project_id>
+        realm: my-realm     # optional: the current realm by default
+    ```
+
+3. Build and push:
+
+    ```bash
+    exordos build -f .
+    exordos push -c exordos/exordos.push.yaml -t my-realm
+    ```
+
+    The same without a config file:
+
+    ```bash
+    exordos push --driver realm \
+      --driver-params url=https://6def3e.exordos.io/repo/<project_id> \
+      --driver-params realm=my-realm
+    ```
+
+    `exordos push -f` replaces a version that is already there.
+
+4. Install the element in the realm. Register the repository in the realm
+   core once per project, at the address the realm core reaches it by: the
+   realm node through the nested network gateway (`10.40.0.1` by default).
+
+    ```bash
+    exordos --realm my-realm repo add -p <project_id> -n realm-local \
+      --refresh-rate 60 --sync-mode copy \
+      --repo-url http://10.40.0.1:8081/repo/<project_id>/exordos-elements/
+    exordos --realm my-realm elements install my-element
+    ```
+
+Images are referenced by URN in the built manifest and resolved through the
+repository they come from. A manifest that writes an artifact URL itself,
+such as `{{ repository }}/<element>/{{ version }}/artifacts/site.tar.zst`,
+needs that address at build time:
+`exordos build --manifest-var repository=http://10.40.0.1:8081/repo/<project_id>/exordos-elements`.
