@@ -164,7 +164,7 @@ def test_unknown_realm_is_an_error(tmp_path):
         realm.realm_authenticator("nope", cfg_path=str(cfg))
 
 
-def test_loader_passes_the_active_settings_to_the_realm_driver(tmp_path):
+def test_loader_passes_the_active_settings_to_the_realm_driver(tmp_path, monkeypatch):
     from exordos.repo import utils as repo_utils
 
     cfg = tmp_path / "custom.yaml"
@@ -184,11 +184,40 @@ def test_loader_passes_the_active_settings_to_the_realm_driver(tmp_path):
         )
     )
 
+    logins = []
+    monkeypatch.setattr(
+        realm.base_client.CoreIamAuthenticator,
+        "authenticate",
+        lambda self: logins.append(self._url),
+    )
+
     driver = repo_utils.load_repo_driver_from_settings(str(cfg), "orion")
 
     assert isinstance(driver, realm.RealmRepoDriver)
     assert driver.name == "orion"
     assert driver._session.auth._authenticator._url.startswith("https://orion.test/")
+    # Logged in once up front, so an expired cached token is not reused.
+    assert len(logins) == 1
+
+
+def test_realm_login_can_ask_for_otp(tmp_path):
+    cfg = tmp_path / "exordosctl.yaml"
+    cfg.write_text(
+        yaml.safe_dump(
+            {
+                "current-realm": "orion",
+                "realms": {
+                    "orion": {
+                        "endpoint": "https://orion.test/api/core",
+                        "current-context": "admin",
+                        "contexts": {"admin": {"user": "admin", "password": "p"}},
+                    }
+                },
+            }
+        )
+    )
+
+    assert realm.realm_authenticator(cfg_path=str(cfg))._otp_prompt is not None
 
 
 def test_remove_deletes_directories_by_their_collection_uri(driver, server, tmp_path):

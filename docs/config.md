@@ -35,8 +35,18 @@ repositories:
   local-repo:
     driver: nginx
     url: http://10.20.0.2:8080/repo/
+  realm-repo:
+    driver: realm
+    url: https://<realm domain>/repo/<project_id>
+    realm: production
 developer_key_path: ~/.ssh/id_rsa.pub
 ```
+
+A `realm` repository is the element repository a managed realm serves at
+`https://<realm domain>/repo/<project_id>`. It is pushed to with a token of
+the `realm`'s current context (the current realm when `realm` is omitted):
+scoped to that project, or an unscoped login allowed to upload. The driver
+also keeps the repository index the realm core reads.
 
 You can change the path to the config file by setting the command line argument `--config`.
 
