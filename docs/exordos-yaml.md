@@ -254,15 +254,23 @@ login and keeps the repository index the realm core reads.
 
     `exordos push -f` replaces a version that is already there.
 
-4. Install the element in the realm. Register the repository in the realm
-   core once per project, at the address the realm core reaches it by: the
-   realm node through the nested network gateway (`10.40.0.1` by default).
+4. Install the element in the realm. The project's first push registers
+   its repository in the realm core (`realm-<project_id prefix>`), so the
+   element shows up there within a minute:
+
+    ```bash
+    exordos --realm my-realm elements install my-element
+    ```
+
+    A realm created before the realm core learnt its repository address
+    needs the repository added once per project, at the address the realm
+    core reaches it by: the realm node through the nested network gateway
+    (`10.40.0.1` by default).
 
     ```bash
     exordos --realm my-realm repo add -p <project_id> -n realm-local \
       --refresh-rate 60 --sync-mode copy \
       --repo-url http://10.40.0.1:8081/repo/<project_id>/exordos-elements/
-    exordos --realm my-realm elements install my-element
     ```
 
 Images are referenced by URN in the built manifest and resolved through the
