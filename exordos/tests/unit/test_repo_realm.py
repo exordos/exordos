@@ -229,3 +229,51 @@ def test_remove_deletes_directories_by_their_collection_uri(driver, server, tmp_
     assert f"{ELEMENTS}/empty/0.1.0/" in dirs
     assert f"{ELEMENTS}/empty/0.1.0/manifests/" in dirs
     assert all(u.endswith("/") for u in dirs)
+
+
+@pytest.mark.parametrize("via", ["driver_option", "settings"])
+def test_loader_hands_the_global_otp_code_to_the_realm_login(
+    tmp_path, monkeypatch, via
+):
+    # `exordos --otp-code N push ...` must not prompt: no TTY in CI.
+    from exordos.repo import utils as repo_utils
+
+    cfg = tmp_path / "custom.yaml"
+    cfg.write_text(
+        yaml.safe_dump(
+            {
+                "repositories": {"orion": {"driver": "realm", "url": URL}},
+                "current-realm": "orion",
+                "realms": {
+                    "orion": {
+                        "endpoint": "https://orion.test/api/core",
+                        "current-context": "admin",
+                        "contexts": {"admin": {"user": "admin", "password": "p"}},
+                    }
+                },
+            }
+        )
+    )
+    monkeypatch.setattr(
+        realm.base_client.CoreIamAuthenticator, "authenticate", lambda self: None
+    )
+
+    def otp_prompt():
+        return "123456"
+
+    if via == "settings":
+        driver = repo_utils.load_repo_driver_from_settings(
+            str(cfg), "orion", otp_prompt
+        )
+    else:
+        driver = repo_utils.load_repo_driver(
+            "exordos.yaml",
+            "orion",
+            str(tmp_path),
+            str(cfg),
+            "realm",
+            (f"url={URL}",),
+            otp_prompt=otp_prompt,
+        )
+
+    assert driver._session.auth._authenticator._otp_prompt() == "123456"
