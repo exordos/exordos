@@ -155,3 +155,19 @@ Backups can take a lot of disk space and it can be a reason to crash the whole s
 ```bash
 exordos backup --min-free-space 50
 ```
+
+## ZFS Snapshots
+
+The `snapshot` command creates ZFS snapshots of all zvol disks attached to libvirt domains. All snapshots are created atomically by a single `zfs snapshot` call.
+
+```bash
+exordos snapshot
+```
+
+The snapshot name defaults to `snap-<YYYYmmdd-HHMMSS>`. Use `-s/--snapshot-name` to set it, and `-n/--name` or `--exclude-name/--no` to select domains:
+
+```bash
+exordos snapshot -s before-upgrade --exclude-name "*github-packer-runner-*"
+```
+
+Snapshots are crash-consistent.

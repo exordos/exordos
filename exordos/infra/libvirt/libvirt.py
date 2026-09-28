@@ -480,6 +480,14 @@ def get_domain_disks(name: str) -> tp.List[str]:
     return re.findall(r"<source file='(.*?)'", out)
 
 
+def get_domain_zvols(name: str) -> tp.List[str]:
+    """Return ZFS datasets of zvol disks attached to the domain."""
+    out = subprocess.check_output(["sudo", "virsh", "dumpxml", name])
+    out = out.decode().strip()
+
+    return re.findall(r"<source dev='/dev/zvol/(.*?)'", out)
+
+
 def has_domain(name: str) -> bool:
     return name in list_domains()
 

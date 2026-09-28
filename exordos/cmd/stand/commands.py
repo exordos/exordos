@@ -1632,6 +1632,55 @@ def backup_cmd(
         time.sleep(timeout)
 
 
+@click.command("snapshot", help="Create ZFS snapshots of libvirt domain disks")
+@click.option(
+    "-n",
+    "--name",
+    default=None,
+    multiple=True,
+    help="Name of the libvirt domain, if not provided, all will be snapshotted",
+)
+@click.option(
+    "--no",
+    "--exclude-name",
+    "exclude_name",
+    multiple=True,
+    help="Name or pattern of libvirt domains to exclude from snapshot",
+)
+@click.option(
+    "-s",
+    "--snapshot-name",
+    default=None,
+    help="Snapshot name. Defaults to snap-<YYYYmmdd-HHMMSS>",
+)
+def snapshot_cmd(
+    name: tp.List[str] | None,
+    exclude_name: tp.List[str] | None,
+    snapshot_name: str | None,
+) -> None:
+    if name and exclude_name:
+        raise click.UsageError(
+            "Cannot specify both --name and --no/--exclude-name options at the same time."
+        )
+
+    snapshot_name = snapshot_name or f"snap-{time.strftime('%Y%m%d-%H%M%S')}"
+    domains = _domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
+
+    snapshots = set()
+    for domain in sorted(domains):
+        for zvol in libvirt.get_domain_zvols(domain):
+            click.secho(f"{domain}: {zvol}@{snapshot_name}")
+            snapshots.add(f"{zvol}@{snapshot_name}")
+
+    if not snapshots:
+        click.secho("No zvol disks found", fg="yellow")
+        return
+
+    # A single `zfs snapshot` call creates all snapshots atomically
+    subprocess.check_call(["sudo", "zfs", "snapshot", *sorted(snapshots)])
+    click.secho(f"Created {len(snapshots)} snapshots", fg="green")
+
+
 @click.command("backup-decrypt", help="Decrypt a backup file")
 @click.argument("path", type=click.Path(exists=True))
 def backup_decrypt_cmd(path: str) -> None:

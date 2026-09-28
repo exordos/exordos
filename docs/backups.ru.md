@@ -155,3 +155,19 @@ exordos backup --rotate 10
 ```bash
 exordos backup --min-free-space 50
 ```
+
+## Снапшоты ZFS
+
+Команда `snapshot` создаёт ZFS-снапшоты всех zvol-дисков, подключённых к доменам libvirt. Все снапшоты создаются атомарно одним вызовом `zfs snapshot`.
+
+```bash
+exordos snapshot
+```
+
+По умолчанию имя снапшота — `snap-<YYYYmmdd-HHMMSS>`. Используйте `-s/--snapshot-name`, чтобы задать его, и `-n/--name` или `--exclude-name/--no` для выбора доменов:
+
+```bash
+exordos snapshot -s before-upgrade --exclude-name "*github-packer-runner-*"
+```
+
+Снапшоты консистентны на уровне аварийного отключения (crash-consistent).
