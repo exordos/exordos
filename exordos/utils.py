@@ -77,8 +77,10 @@ def dump_yaml(data, tf) -> tp.Any:
 
 def load_from_entry_point(group: str, name: str) -> tp.Any:
     """Load class from entry points."""
-    for ep in entry_points():
-        if ep.group == group and ep.name == name:
+    # Select by group: before Python 3.12 a bare entry_points() is a dict of
+    # group names, and iterating it yields strings, not entry points.
+    for ep in entry_points(group=group):
+        if ep.name == name:
             return ep.load()
 
     raise RuntimeError(f"No class '{name}' found in entry points {group}")
