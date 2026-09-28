@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 
 import requests
+import rich_click as click
 import yaml
 
 from exordos import constants as c
@@ -63,6 +64,7 @@ def realm_authenticator(
         scope=f"project:{project_id}" if project_id else None,
         realm=realm_name,
         password_prompt=base_client.PasswordPrompt(),
+        otp_prompt=lambda: click.prompt("OTP code", hide_input=False),
     )
 
 
@@ -92,9 +94,12 @@ class RealmRepoDriver(nginx.NginxRepoDriver):
         authenticator: base_client.CoreIamAuthenticator | None = None,
     ):
         super().__init__(url=url, name=name or "realm_repo", logger=logger)
-        self._session.auth = _BearerAuth(
-            authenticator or realm_authenticator(realm, cfg_path)
-        )
+        if authenticator is None:
+            authenticator = realm_authenticator(realm, cfg_path)
+            # A cached token may have expired, and nothing renews it once
+            # requests are signed: log in (or refresh) before the push.
+            authenticator.authenticate()
+        self._session.auth = _BearerAuth(authenticator)
 
     @property
     def index_path(self) -> str:
