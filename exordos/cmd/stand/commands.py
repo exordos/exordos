@@ -526,7 +526,6 @@ def _bootstrap_core(
     ssh_public_key: str | None = None,
     elements: list[str] | None = None,
     cors_allowed_origins: list[str] | None = None,
-    repo_url: str | None = None,
 ) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
@@ -621,7 +620,6 @@ def _bootstrap_core(
             iam=iam,
             elements=elements,
             cors_allowed_origins=cors_allowed_origins,
-            repo_url=repo_url,
         )
         logger.info(f"Launched Exordos installation in `{profile.value}` profile")
 
@@ -1225,7 +1223,6 @@ def bootstrap_cmd(
         realm_id = realm_spec_data.get("realm_id")
         realm_domain = realm_spec_data.get("realm_domain")
         cors_allowed_origins = realm_spec_data.get("cors_allowed_origins")
-        repo_url = realm_spec_data.get("repo_url")
         click.secho(
             "Using pre-assigned realm identity from the realm spec",
             fg="cyan",
@@ -1234,7 +1231,6 @@ def bootstrap_cmd(
         realm_id = None
         realm_domain = None
         cors_allowed_origins = None
-        repo_url = None
         with status_lib.status_done("Registering realm in ecosystem..."):
             realm_uuid, realm_secret, realm_tokens = _register_core(
                 ecosystem_endpoint=ecosystem_endpoint,
@@ -1293,7 +1289,6 @@ def bootstrap_cmd(
             ssh_public_key=ssh_public_key_content,
             elements=list(elements) if elements else None,
             cors_allowed_origins=cors_allowed_origins,
-            repo_url=repo_url,
         )
 
     if hyper_kind == "exordos_local_hyper":
