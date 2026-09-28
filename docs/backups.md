@@ -171,3 +171,13 @@ exordos snapshot -s before-upgrade --exclude-name "*github-packer-runner-*"
 ```
 
 Snapshots are crash-consistent.
+
+### Restore from Snapshots
+
+The `snapshot-restore` command rolls back zvol disks of libvirt domains to the given snapshot. It checks that all snapshots exist before changing anything, asks for confirmation (skip with `-y/--yes`), stops running domains, rolls back their disks and starts them again.
+
+```bash
+exordos snapshot-restore before-upgrade -n o1-a370f746-ecosystem-cp
+```
+
+`zfs rollback` refuses to roll back past newer snapshots of the same zvol; destroy them first if needed.

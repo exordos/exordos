@@ -19,6 +19,7 @@ import pytest
 import rich_click as click
 
 from exordos.cmd.stand.commands import snapshot_cmd
+from exordos.cmd.stand.commands import snapshot_restore_cmd
 from exordos.infra.libvirt import libvirt
 
 DOMAIN_XML = """
@@ -98,4 +99,85 @@ class TestCmdSnapshot:
         with pytest.raises(click.UsageError):
             snapshot_cmd.callback(
                 name=("vm1",), exclude_name=("vm2",), snapshot_name=None
+            )
+
+
+class TestCmdSnapshotRestore:
+    ZVOLS = {"vm1": ["rpool/disks/a", "rpool/disks/b"], "vm2": ["rpool/disks/c"]}
+    SNAPSHOTS = b"rpool/disks/a@snap1\nrpool/disks/b@snap1\nrpool/disks/c@snap1\n"
+
+    def _patches(self, snapshots: bytes = SNAPSHOTS):
+        return (
+            patch(
+                "exordos.cmd.stand.commands._domains_for_backup",
+                return_value=["vm2", "vm1"],
+            ),
+            patch(
+                "exordos.cmd.stand.commands.libvirt.get_domain_zvols",
+                side_effect=self.ZVOLS.__getitem__,
+            ),
+            patch(
+                "exordos.cmd.stand.commands.libvirt.is_active_domain",
+                side_effect=lambda d: d == "vm1",
+            ),
+            patch(
+                "exordos.cmd.stand.commands.subprocess.check_output",
+                return_value=snapshots,
+            ),
+            patch("exordos.cmd.stand.commands.subprocess.check_call"),
+        )
+
+    def test_snapshot_restore_cmd_stops_rolls_back_and_starts_active(self) -> None:
+        p_domains, p_zvols, p_active, p_output, p_call = self._patches()
+        with p_domains, p_zvols, p_active, p_output, p_call as check_call:
+            snapshot_restore_cmd.callback(
+                snapshot_name="snap1", name=(), exclude_name=(), yes=True
+            )
+
+        cmds = [c.args[0] for c in check_call.call_args_list]
+        assert cmds == [
+            ["sudo", "virsh", "destroy", "vm1"],
+            ["sudo", "zfs", "rollback", "rpool/disks/a@snap1"],
+            ["sudo", "zfs", "rollback", "rpool/disks/b@snap1"],
+            ["sudo", "virsh", "start", "vm1"],
+            ["sudo", "zfs", "rollback", "rpool/disks/c@snap1"],
+        ]
+
+    def test_snapshot_restore_cmd_missing_snapshot_changes_nothing(self) -> None:
+        p_domains, p_zvols, p_active, p_output, p_call = self._patches(
+            snapshots=b"rpool/disks/a@snap1\n"
+        )
+        with p_domains, p_zvols, p_active, p_output, p_call as check_call:
+            with pytest.raises(click.UsageError, match="rpool/disks/b@snap1"):
+                snapshot_restore_cmd.callback(
+                    snapshot_name="snap1", name=(), exclude_name=(), yes=True
+                )
+
+        check_call.assert_not_called()
+
+    def test_snapshot_restore_cmd_aborts_without_confirmation(self) -> None:
+        p_domains, p_zvols, p_active, p_output, p_call = self._patches()
+        with (
+            p_domains,
+            p_zvols,
+            p_active,
+            p_output,
+            p_call as check_call,
+            patch(
+                "exordos.cmd.stand.commands.click.confirm",
+                side_effect=click.exceptions.Abort,
+            ) as confirm,
+        ):
+            with pytest.raises(click.exceptions.Abort):
+                snapshot_restore_cmd.callback(
+                    snapshot_name="snap1", name=(), exclude_name=(), yes=False
+                )
+
+        confirm.assert_called_once()
+        check_call.assert_not_called()
+
+    def test_snapshot_restore_cmd_name_and_exclude_name_conflict(self) -> None:
+        with pytest.raises(click.UsageError):
+            snapshot_restore_cmd.callback(
+                snapshot_name="snap1", name=("vm1",), exclude_name=("vm2",), yes=True
             )

@@ -1681,6 +1681,94 @@ def snapshot_cmd(
     click.secho(f"Created {len(snapshots)} snapshots", fg="green")
 
 
+@click.command(
+    "snapshot-restore", help="Restore libvirt domain disks from ZFS snapshots"
+)
+@click.argument("snapshot_name")
+@click.option(
+    "-n",
+    "--name",
+    default=None,
+    multiple=True,
+    help="Name of the libvirt domain, if not provided, all will be restored",
+)
+@click.option(
+    "--no",
+    "--exclude-name",
+    "exclude_name",
+    multiple=True,
+    help="Name or pattern of libvirt domains to exclude from restore",
+)
+@click.option(
+    "-y",
+    "--yes",
+    is_flag=True,
+    default=False,
+    help="Do not ask for confirmation",
+)
+def snapshot_restore_cmd(
+    snapshot_name: str,
+    name: tp.List[str] | None,
+    exclude_name: tp.List[str] | None,
+    yes: bool,
+) -> None:
+    if name and exclude_name:
+        raise click.UsageError(
+            "Cannot specify both --name and --no/--exclude-name options at the same time."
+        )
+
+    domains = _domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
+    domain_zvols = {d: libvirt.get_domain_zvols(d) for d in sorted(domains)}
+    domain_zvols = {d: zvols for d, zvols in domain_zvols.items() if zvols}
+
+    if not domain_zvols:
+        click.secho("No zvol disks found", fg="yellow")
+        return
+
+    # Check all snapshots exist before touching any domain
+    out = subprocess.check_output(
+        ["sudo", "zfs", "list", "-H", "-t", "snapshot", "-o", "name"]
+    )
+    existing = set(out.decode().split())
+    missing = [
+        f"{zvol}@{snapshot_name}"
+        for zvols in domain_zvols.values()
+        for zvol in zvols
+        if f"{zvol}@{snapshot_name}" not in existing
+    ]
+    if missing:
+        raise click.UsageError(f"Snapshots not found: {', '.join(missing)}")
+
+    for domain, zvols in domain_zvols.items():
+        click.secho(f"{domain}: {', '.join(zvols)}")
+
+    if not yes:
+        click.confirm(
+            "Running domains will be stopped and their disks rolled back "
+            f"to '{snapshot_name}'. Continue?",
+            abort=True,
+        )
+
+    for domain, zvols in domain_zvols.items():
+        active = libvirt.is_active_domain(domain)
+        if active:
+            subprocess.check_call(
+                ["sudo", "virsh", "destroy", domain], stdout=subprocess.DEVNULL
+            )
+
+        for zvol in zvols:
+            subprocess.check_call(
+                ["sudo", "zfs", "rollback", f"{zvol}@{snapshot_name}"]
+            )
+
+        if active:
+            subprocess.check_call(
+                ["sudo", "virsh", "start", domain], stdout=subprocess.DEVNULL
+            )
+
+        click.secho(f"{domain}: restored", fg="green")
+
+
 @click.command("backup-decrypt", help="Decrypt a backup file")
 @click.argument("path", type=click.Path(exists=True))
 def backup_decrypt_cmd(path: str) -> None:
