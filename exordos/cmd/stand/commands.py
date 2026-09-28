@@ -39,6 +39,7 @@ from exordos import utils
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
+from exordos.clients import base as base_client
 from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
@@ -462,11 +463,19 @@ def _load_realm_spec(path: str) -> dict:
     return spec
 
 
-def _iam_default_client_settings() -> dict:
+def _iam_default_client_settings(well_known: bool = False) -> dict:
+    if well_known:
+        # The client the CLI logs in with: a managed realm's users reach
+        # its core with the CLI, and nothing hands them a generated secret.
+        client_id = base_client.DEFAULT_CLIENT_ID
+        client_secret = base_client.DEFAULT_CLIENT_SECRET
+    else:
+        client_id = "Exordos"
+        client_secret = secrets.token_urlsafe(32)
     return {
         "default_client_uuid": "00000000-0000-0000-0000-000000000000",
-        "default_client_id": "Exordos",
-        "default_client_secret": secrets.token_urlsafe(32),
+        "default_client_id": client_id,
+        "default_client_secret": client_secret,
     }
 
 
@@ -527,6 +536,7 @@ def _bootstrap_core(
     elements: list[str] | None = None,
     cors_allowed_origins: list[str] | None = None,
     repo_url: str | None = None,
+    well_known_iam_client: bool = False,
 ) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
@@ -598,7 +608,7 @@ def _bootstrap_core(
         infra.delete_stand(dev_stand)
 
     # Prepare IAM settings
-    iam = _iam_default_client_settings()
+    iam = _iam_default_client_settings(well_known=well_known_iam_client)
     iam["admin_password"] = admin_password
 
     try:
@@ -1294,6 +1304,7 @@ def bootstrap_cmd(
             elements=list(elements) if elements else None,
             cors_allowed_origins=cors_allowed_origins,
             repo_url=repo_url,
+            well_known_iam_client=realm_spec_data is not None,
         )
 
     if hyper_kind == "exordos_local_hyper":

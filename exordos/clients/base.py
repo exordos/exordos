@@ -38,6 +38,10 @@ GRANT_TYPE_LOGIN_PASSWORD = "login+password"
 GRANT_TYPE_REFRESH_TOKEN = "refresh_token"
 ENCRYPTED_JSON_CONTENT_TYPE = "application/x-genesis-agent-chacha20-poly1305-encrypted"
 DEFAULT_CLIENT_SLUG = "default"
+# The IAM client the CLI logs in with; a core must have it as its default
+# client for password logins from the CLI to work.
+DEFAULT_CLIENT_ID = "GenesisCoreClientId"
+DEFAULT_CLIENT_SECRET = "GenesisCoreSecret"
 DEFAULT_TTL = 3600 * 4
 DEFAULT_REFRESH_TTL = 3600 * 24
 USER_AGENT_HEADER = {"User-Agent": f"{c.PKG_NAME}/{version.version_info}"}
@@ -134,8 +138,8 @@ class CoreIamAuthenticator(AbstractAuthenticator):
         password: str | None = None,
         access_token: str | None = None,
         refresh_token: str | None = None,
-        client_id: str = "GenesisCoreClientId",
-        client_secret: str = "GenesisCoreSecret",
+        client_id: str = DEFAULT_CLIENT_ID,
+        client_secret: str = DEFAULT_CLIENT_SECRET,
         client_uuid: str = DEFAULT_CLIENT_SLUG,
         scope: str | None = None,
         ttl: int | None = None,
