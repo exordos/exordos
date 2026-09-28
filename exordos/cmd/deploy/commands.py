@@ -472,6 +472,7 @@ def deploy_cmd(
     repo_driver = repo_utils.load_repo_driver_from_settings(
         exordosctl_cfg_file,
         repository,
+        otp_prompt=obj.auth_data.get("otp_prompt"),
     )
     repo_utils.do_push(repo_driver, element_dir, force=force, latest=False)
 

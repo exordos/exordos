@@ -51,18 +51,25 @@ def get_published() -> str:
 
 
 def _new_repo_driver(
-    driver_kind: str, exordosctl_cfg_file: str, **params: tp.Any
+    driver_kind: str,
+    exordosctl_cfg_file: str,
+    otp_prompt: tp.Callable[[], str] | None = None,
+    **params: tp.Any,
 ) -> base_repo.AbstractRepoDriver:
     driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
-    # A driver that logs in to a realm reads it from the active settings.
+    # A driver that logs in to a realm reads it from the active settings,
+    # and asks for an OTP code the way the other commands do.
     if getattr(driver_class, "READS_SETTINGS", False):
         params.setdefault("cfg_path", exordosctl_cfg_file)
+        if otp_prompt is not None:
+            params.setdefault("otp_prompt", otp_prompt)
     return driver_class(**params)
 
 
 def load_repo_driver_from_settings(
     exordosctl_cfg_file: str,
     target: str,
+    otp_prompt: tp.Callable[[], str] | None = None,
 ) -> base_repo.AbstractRepoDriver:
     """Build a repo driver from a repository entry in the settings file.
 
@@ -92,7 +99,7 @@ def load_repo_driver_from_settings(
     params: dict = dict(repo)
     params.pop("driver", None)
     params["name"] = target
-    return _new_repo_driver(driver_kind, exordosctl_cfg_file, **params)
+    return _new_repo_driver(driver_kind, exordosctl_cfg_file, otp_prompt, **params)
 
 
 def load_repo_driver(
@@ -102,18 +109,21 @@ def load_repo_driver(
     exordosctl_cfg_file: str = c.CONFIG_FILE,
     driver_kind: str | None = None,
     driver_params: tuple[str, ...] | None = None,
+    otp_prompt: tp.Callable[[], str] | None = None,
 ) -> base_repo.AbstractRepoDriver:
     if driver_kind:
         params = utils.convert_input_multiply(driver_params or ())
-        return _new_repo_driver(driver_kind, exordosctl_cfg_file, name=target, **params)
+        return _new_repo_driver(
+            driver_kind, exordosctl_cfg_file, otp_prompt, name=target, **params
+        )
 
     try:
         gen_config, _ = utils.get_exordos_config(project_dir, exordos_cfg_file)
     except FileNotFoundError:
-        return load_repo_driver_from_settings(exordosctl_cfg_file, target)
+        return load_repo_driver_from_settings(exordosctl_cfg_file, target, otp_prompt)
 
     if not gen_config or "push" not in gen_config or not gen_config["push"]:
-        return load_repo_driver_from_settings(exordosctl_cfg_file, target)
+        return load_repo_driver_from_settings(exordosctl_cfg_file, target, otp_prompt)
 
     pushes = gen_config["push"]
 
@@ -139,7 +149,9 @@ def load_repo_driver(
 
     # Load driver from entry points
     driver_kind = push.pop("driver")
-    return _new_repo_driver(driver_kind, exordosctl_cfg_file, name=target, **push)
+    return _new_repo_driver(
+        driver_kind, exordosctl_cfg_file, otp_prompt, name=target, **push
+    )
 
 
 def do_push(

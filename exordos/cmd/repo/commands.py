@@ -460,7 +460,13 @@ def push_cmd(
     project_dir: pathlib.Path,
 ) -> None:
     repo_driver = repo_utils.load_repo_driver(
-        exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
+        exordos_cfg_file,
+        target,
+        project_dir,
+        obj.cfg_path,
+        driver,
+        driver_params,
+        otp_prompt=obj.auth_data.get("otp_prompt"),
     )
     repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
 

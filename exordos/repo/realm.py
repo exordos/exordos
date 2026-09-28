@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import typing as tp
 
 import requests
 import rich_click as click
@@ -44,6 +45,7 @@ class _BearerAuth(requests.auth.AuthBase):
 def realm_authenticator(
     realm: str | None = None,
     cfg_path: str = c.CONFIG_FILE,
+    otp_prompt: tp.Callable[[], str] | None = None,
 ) -> base_client.CoreIamAuthenticator:
     """Build an authenticator from a realm's current context in settings."""
     with open(cfg_path) as f:
@@ -64,7 +66,7 @@ def realm_authenticator(
         scope=f"project:{project_id}" if project_id else None,
         realm=realm_name,
         password_prompt=base_client.PasswordPrompt(),
-        otp_prompt=lambda: click.prompt("OTP code", hide_input=False),
+        otp_prompt=otp_prompt or (lambda: click.prompt("OTP code", hide_input=False)),
     )
 
 
@@ -92,10 +94,11 @@ class RealmRepoDriver(nginx.NginxRepoDriver):
         cfg_path: str = c.CONFIG_FILE,
         logger: logger_base.AbstractLogger = logger_base.ClickLogger(),
         authenticator: base_client.CoreIamAuthenticator | None = None,
+        otp_prompt: tp.Callable[[], str] | None = None,
     ):
         super().__init__(url=url, name=name or "realm_repo", logger=logger)
         if authenticator is None:
-            authenticator = realm_authenticator(realm, cfg_path)
+            authenticator = realm_authenticator(realm, cfg_path, otp_prompt)
             # A cached token may have expired, and nothing renews it once
             # requests are signed: log in (or refresh) before the push.
             authenticator.authenticate()
