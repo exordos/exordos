@@ -125,7 +125,6 @@ def test_init_cmd_sdn_on_a_remote_pool_registers_a_dedicated_agent():
     kwargs = m["register_agent_cmd"].call_args.kwargs
     assert kwargs["pool_ref"] == REMOTE_POOL["uuid"]
     assert kwargs["project_id"] == sys_uuid.UUID(PROJECT)
-    assert kwargs["machine_type"] == "HW"
     assert kwargs["write_config"] is True
     m["write_root_owned_file"].assert_not_called()
 

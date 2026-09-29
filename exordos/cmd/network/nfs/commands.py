@@ -78,12 +78,6 @@ nfs_group = create_entity_group(
 @click.option(
     "--lease-seconds", type=int, default=None, help="dhcp: how long a lease is held"
 )
-@click.option(
-    "-a",
-    "--address",
-    default=None,
-    help="fip: the address object (UUID) or a literal IP",
-)
 def nf_set_cmd(
     ctx: click.Context,
     nf: str,
@@ -93,7 +87,6 @@ def nf_set_cmd(
     platform_names: tuple[str, ...],
     filename: str | None,
     lease_seconds: int | None,
-    address: str | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     entity = base_client.get_entity(client, ENTITY_COLLECTION, nf)
@@ -113,8 +106,6 @@ def nf_set_cmd(
         config["filename"] = filename
     if lease_seconds is not None:
         config["lease_seconds"] = lease_seconds
-    if address is not None:
-        config["address"] = address
     if config == (entity.get("config") or {}):
         raise click.ClickException("Nothing to change; pass at least one setting")
     show_data(
