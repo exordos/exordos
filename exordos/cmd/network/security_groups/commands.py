@@ -51,16 +51,6 @@ RULE_HELP = (
 )
 
 
-def _resolve_rule(client, rule: dict) -> dict:
-    """Turn a group named on the command line into the uuid the API wants."""
-    ref = rule.pop("remote_group_ref", None)
-    if ref is not None:
-        rule["remote_group"] = net_common.resolve(
-            client, c.IDENTITY_GROUP_COLLECTION, ref
-        )
-    return rule
-
-
 @security_groups_group.command("add", help="Add a new security group")
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the group")
@@ -85,7 +75,8 @@ def security_group_add_cmd(
         "description": description,
         "project_id": str(project_id),
         "rules": [
-            _resolve_rule(client, net_common.parse_filter_rule(r)) for r in rule_specs
+            net_common.resolve_rule(client, net_common.parse_filter_rule(r))
+            for r in rule_specs
         ],
     }
     show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
@@ -98,7 +89,7 @@ def security_group_add_cmd(
 def rule_add_cmd(ctx: click.Context, group: str, spec: str) -> None:
     """SPEC: <ingress|egress>:<proto>[:<port>][@<remote_cidr>|@<group>]."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    rule = _resolve_rule(client, net_common.parse_filter_rule(spec))
+    rule = net_common.resolve_rule(client, net_common.parse_filter_rule(spec))
     entity = base_client.get_entity(client, ENTITY_COLLECTION, group)
     rules = [r for r in entity.get("rules") or [] if r != rule]
     rules.append(rule)
@@ -114,7 +105,7 @@ def rule_add_cmd(ctx: click.Context, group: str, spec: str) -> None:
 def rule_del_cmd(ctx: click.Context, group: str, spec: str) -> None:
     """SPEC: the rule as `list` shows it, e.g. ingress:tcp:22."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    rule = _resolve_rule(client, net_common.parse_filter_rule(spec))
+    rule = net_common.resolve_rule(client, net_common.parse_filter_rule(spec))
     entity = base_client.get_entity(client, ENTITY_COLLECTION, group)
     rules = entity.get("rules") or []
     kept = [r for r in rules if r != rule]

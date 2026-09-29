@@ -86,6 +86,14 @@ def parse_filter_rule(spec: str) -> dict:
     return rule
 
 
+def resolve_rule(client, rule: dict) -> dict:
+    """Turn a group named on the command line into the uuid the API wants."""
+    ref = rule.pop("remote_group_ref", None)
+    if ref is not None:
+        rule["remote_group"] = resolve(client, c.IDENTITY_GROUP_COLLECTION, ref)
+    return rule
+
+
 def format_rule(rule: dict) -> str:
     """The inverse of :func:`parse_filter_rule`, for listings."""
     text = f"{rule.get('direction')}:{rule.get('protocol', 'any')}"

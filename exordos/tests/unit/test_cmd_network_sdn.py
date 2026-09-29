@@ -171,6 +171,35 @@ def test_nf_set_keeps_the_rest_of_the_config():
     assert data == {"config": {"forwarders": ["9.9.9.9"], "zone_suffix": "internal"}}
 
 
+def test_nf_set_resolves_a_named_group_like_a_security_group_does():
+    """`@<group>` names an identity group; the API takes its uuid under the
+    key security-group rules use, not the CLI's own unresolved reference."""
+    group = "77777777-7777-7777-7777-777777777777"
+
+    def _get(_c, collection, ref):
+        if collection == nfs_commands.c.IDENTITY_GROUP_COLLECTION:
+            assert ref == "db"
+            return {"uuid": group}
+        return {"uuid": SG, "kind": "splitter", "config": {"rules": []}}
+
+    with (
+        mock.patch.object(nfs_commands.base_client, "get_user_api_client"),
+        mock.patch.object(nfs_commands.base_client, "get_entity", side_effect=_get),
+        mock.patch.object(
+            nfs_commands.base_client, "update_entity", return_value={}
+        ) as update_entity,
+    ):
+        result = testing.CliRunner().invoke(
+            nfs_commands.nf_set_cmd,
+            ["some-nf", "-r", "ingress:tcp:5432@db"],
+            obj=mock.MagicMock(),
+        )
+    assert result.exit_code == 0, result.output
+    assert update_entity.call_args[0][3]["config"]["rules"] == [
+        {"direction": "ingress", "protocol": "tcp", "port": 5432, "remote_group": group}
+    ]
+
+
 def test_nf_set_refuses_a_no_op():
     with (
         mock.patch.object(nfs_commands.base_client, "get_user_api_client"),

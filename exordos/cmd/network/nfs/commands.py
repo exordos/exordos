@@ -57,7 +57,7 @@ nfs_group = create_entity_group(
     multiple=True,
     help=(
         "splitter: the allow-list, as <ingress|egress>:<tcp|udp|icmp|any>"
-        "[:<port>][@<remote_cidr>|@<identity-group-uuid>] (repeatable; "
+        "[:<port>][@<remote_cidr>|@<identity_group>] (repeatable; "
         "replaces the whole list)"
     ),
 )
@@ -99,7 +99,10 @@ def nf_set_cmd(
     entity = base_client.get_entity(client, ENTITY_COLLECTION, nf)
     config = dict(entity.get("config") or {})
     if rule_specs:
-        config["rules"] = [net_common.parse_filter_rule(r) for r in rule_specs]
+        config["rules"] = [
+            net_common.resolve_rule(client, net_common.parse_filter_rule(r))
+            for r in rule_specs
+        ]
     if forwarders:
         config["forwarders"] = list(forwarders)
     if zone_suffix is not None:
