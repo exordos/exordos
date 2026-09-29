@@ -18,8 +18,8 @@ from unittest.mock import patch
 import pytest
 import rich_click as click
 
-from exordos.cmd.stand.commands import snapshot_cmd
-from exordos.cmd.stand.commands import snapshot_restore_cmd
+from exordos.cmd.compute.hypervisors.commands import snapshot_cmd
+from exordos.cmd.compute.hypervisors.commands import snapshot_restore_cmd
 from exordos.infra.libvirt import libvirt
 
 DOMAIN_XML = """
@@ -56,14 +56,16 @@ class TestCmdSnapshot:
 
         with (
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.compute.hypervisors.commands._domains_for_backup",
                 return_value=["vm2", "vm1"],
             ) as domains_for_backup,
             patch(
-                "exordos.cmd.stand.commands.libvirt.get_domain_zvols",
+                "exordos.cmd.compute.hypervisors.commands.libvirt.get_domain_zvols",
                 side_effect=zvols.__getitem__,
             ),
-            patch("exordos.cmd.stand.commands.subprocess.check_call") as check_call,
+            patch(
+                "exordos.cmd.compute.hypervisors.commands.subprocess.check_call"
+            ) as check_call,
         ):
             snapshot_cmd.callback(name=(), exclude_name=(), snapshot_name="snap1")
 
@@ -82,14 +84,16 @@ class TestCmdSnapshot:
     def test_snapshot_cmd_skips_when_no_zvols(self) -> None:
         with (
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.compute.hypervisors.commands._domains_for_backup",
                 return_value=["vm1"],
             ),
             patch(
-                "exordos.cmd.stand.commands.libvirt.get_domain_zvols",
+                "exordos.cmd.compute.hypervisors.commands.libvirt.get_domain_zvols",
                 return_value=[],
             ),
-            patch("exordos.cmd.stand.commands.subprocess.check_call") as check_call,
+            patch(
+                "exordos.cmd.compute.hypervisors.commands.subprocess.check_call"
+            ) as check_call,
         ):
             snapshot_cmd.callback(name=(), exclude_name=(), snapshot_name=None)
 
@@ -109,22 +113,22 @@ class TestCmdSnapshotRestore:
     def _patches(self, snapshots: bytes = SNAPSHOTS):
         return (
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.compute.hypervisors.commands._domains_for_backup",
                 return_value=["vm2", "vm1"],
             ),
             patch(
-                "exordos.cmd.stand.commands.libvirt.get_domain_zvols",
+                "exordos.cmd.compute.hypervisors.commands.libvirt.get_domain_zvols",
                 side_effect=self.ZVOLS.__getitem__,
             ),
             patch(
-                "exordos.cmd.stand.commands.libvirt.is_active_domain",
+                "exordos.cmd.compute.hypervisors.commands.libvirt.is_active_domain",
                 side_effect=lambda d: d == "vm1",
             ),
             patch(
-                "exordos.cmd.stand.commands.subprocess.check_output",
+                "exordos.cmd.compute.hypervisors.commands.subprocess.check_output",
                 return_value=snapshots,
             ),
-            patch("exordos.cmd.stand.commands.subprocess.check_call"),
+            patch("exordos.cmd.compute.hypervisors.commands.subprocess.check_call"),
         )
 
     def test_snapshot_restore_cmd_stops_rolls_back_and_starts_active(self) -> None:
@@ -164,7 +168,7 @@ class TestCmdSnapshotRestore:
             p_output,
             p_call as check_call,
             patch(
-                "exordos.cmd.stand.commands.click.confirm",
+                "exordos.cmd.compute.hypervisors.commands.click.confirm",
                 side_effect=click.exceptions.Abort,
             ) as confirm,
         ):

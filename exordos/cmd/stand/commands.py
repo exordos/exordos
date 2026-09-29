@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import fnmatch
 import hashlib
 import ipaddress
 import json
@@ -40,6 +39,7 @@ from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
 from exordos.cmd.compute.hypervisors import commands as hv_commands
+from exordos.cmd.compute.hypervisors.commands import _domains_for_backup
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
@@ -1374,33 +1374,6 @@ def _start_validation_type(start: str | None) -> time.struct_time | None:
         raise click.UsageError("Invalid '--start' format. Use HH:MM:SS, e.g., 16:00:00")
 
 
-def _domains_for_backup(
-    names: tp.List[str] | None = None,
-    exclude_names: tp.List[str] | None = None,
-    raise_on_domain_absence: bool = False,
-) -> tp.List[str]:
-    domains = set(libvirt.list_domains())
-    names = set(names or [])
-    exclude_names = set(exclude_names or [])
-
-    # Check if the specified domains exist
-    if raise_on_domain_absence and (names - domains):
-        diff = ", ".join(names - domains)
-        raise click.UsageError(f"Domains {diff} not found")
-
-    if names:
-        domains &= names
-
-    if exclude_names:
-        domains = {
-            d
-            for d in domains
-            if not any(fnmatch.fnmatch(d, pattern) for pattern in exclude_names)
-        }
-
-    return list(domains)
-
-
 @click.command("backup", help="Backup the current installation")
 @click.option(
     "--config",
@@ -1630,143 +1603,6 @@ def backup_cmd(
         next_ts += period.timeout
 
         time.sleep(timeout)
-
-
-@click.command("snapshot", help="Create ZFS snapshots of libvirt domain disks")
-@click.option(
-    "-n",
-    "--name",
-    default=None,
-    multiple=True,
-    help="Name of the libvirt domain, if not provided, all will be snapshotted",
-)
-@click.option(
-    "--no",
-    "--exclude-name",
-    "exclude_name",
-    multiple=True,
-    help="Name or pattern of libvirt domains to exclude from snapshot",
-)
-@click.option(
-    "-s",
-    "--snapshot-name",
-    default=None,
-    help="Snapshot name. Defaults to snap-<YYYYmmdd-HHMMSS>",
-)
-def snapshot_cmd(
-    name: tp.List[str] | None,
-    exclude_name: tp.List[str] | None,
-    snapshot_name: str | None,
-) -> None:
-    if name and exclude_name:
-        raise click.UsageError(
-            "Cannot specify both --name and --no/--exclude-name options at the same time."
-        )
-
-    snapshot_name = snapshot_name or f"snap-{time.strftime('%Y%m%d-%H%M%S')}"
-    domains = _domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
-
-    snapshots = set()
-    for domain in sorted(domains):
-        for zvol in libvirt.get_domain_zvols(domain):
-            click.secho(f"{domain}: {zvol}@{snapshot_name}")
-            snapshots.add(f"{zvol}@{snapshot_name}")
-
-    if not snapshots:
-        click.secho("No zvol disks found", fg="yellow")
-        return
-
-    # A single `zfs snapshot` call creates all snapshots atomically
-    subprocess.check_call(["sudo", "zfs", "snapshot", *sorted(snapshots)])
-    click.secho(f"Created {len(snapshots)} snapshots", fg="green")
-
-
-@click.command(
-    "snapshot-restore", help="Restore libvirt domain disks from ZFS snapshots"
-)
-@click.argument("snapshot_name")
-@click.option(
-    "-n",
-    "--name",
-    default=None,
-    multiple=True,
-    help="Name of the libvirt domain, if not provided, all will be restored",
-)
-@click.option(
-    "--no",
-    "--exclude-name",
-    "exclude_name",
-    multiple=True,
-    help="Name or pattern of libvirt domains to exclude from restore",
-)
-@click.option(
-    "-y",
-    "--yes",
-    is_flag=True,
-    default=False,
-    help="Do not ask for confirmation",
-)
-def snapshot_restore_cmd(
-    snapshot_name: str,
-    name: tp.List[str] | None,
-    exclude_name: tp.List[str] | None,
-    yes: bool,
-) -> None:
-    if name and exclude_name:
-        raise click.UsageError(
-            "Cannot specify both --name and --no/--exclude-name options at the same time."
-        )
-
-    domains = _domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
-    domain_zvols = {d: libvirt.get_domain_zvols(d) for d in sorted(domains)}
-    domain_zvols = {d: zvols for d, zvols in domain_zvols.items() if zvols}
-
-    if not domain_zvols:
-        click.secho("No zvol disks found", fg="yellow")
-        return
-
-    # Check all snapshots exist before touching any domain
-    out = subprocess.check_output(
-        ["sudo", "zfs", "list", "-H", "-t", "snapshot", "-o", "name"]
-    )
-    existing = set(out.decode().split())
-    missing = [
-        f"{zvol}@{snapshot_name}"
-        for zvols in domain_zvols.values()
-        for zvol in zvols
-        if f"{zvol}@{snapshot_name}" not in existing
-    ]
-    if missing:
-        raise click.UsageError(f"Snapshots not found: {', '.join(missing)}")
-
-    for domain, zvols in domain_zvols.items():
-        click.secho(f"{domain}: {', '.join(zvols)}")
-
-    if not yes:
-        click.confirm(
-            "Running domains will be stopped and their disks rolled back "
-            f"to '{snapshot_name}'. Continue?",
-            abort=True,
-        )
-
-    for domain, zvols in domain_zvols.items():
-        active = libvirt.is_active_domain(domain)
-        if active:
-            subprocess.check_call(
-                ["sudo", "virsh", "destroy", domain], stdout=subprocess.DEVNULL
-            )
-
-        for zvol in zvols:
-            subprocess.check_call(
-                ["sudo", "zfs", "rollback", f"{zvol}@{snapshot_name}"]
-            )
-
-        if active:
-            subprocess.check_call(
-                ["sudo", "virsh", "start", domain], stdout=subprocess.DEVNULL
-            )
-
-        click.secho(f"{domain}: restored", fg="green")
 
 
 @click.command("backup-decrypt", help="Decrypt a backup file")

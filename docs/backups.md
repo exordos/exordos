@@ -158,26 +158,26 @@ exordos backup --min-free-space 50
 
 ## ZFS Snapshots
 
-The `snapshot` command creates ZFS snapshots of all zvol disks attached to libvirt domains. All snapshots are created atomically by a single `zfs snapshot` call.
+The `compute hypervisors snapshot` command creates ZFS snapshots of all zvol disks attached to libvirt domains. All snapshots are created atomically by a single `zfs snapshot` call.
 
 ```bash
-exordos snapshot
+exordos compute hypervisors snapshot
 ```
 
 The snapshot name defaults to `snap-<YYYYmmdd-HHMMSS>`. Use `-s/--snapshot-name` to set it, and `-n/--name` or `--exclude-name/--no` to select domains:
 
 ```bash
-exordos snapshot -s before-upgrade --exclude-name "*github-packer-runner-*"
+exordos compute hypervisors snapshot -s before-upgrade --exclude-name "*github-packer-runner-*"
 ```
 
 Snapshots are crash-consistent.
 
 ### Restore from Snapshots
 
-The `snapshot-restore` command rolls back zvol disks of libvirt domains to the given snapshot. It checks that all snapshots exist before changing anything, asks for confirmation (skip with `-y/--yes`), stops running domains, rolls back their disks and starts them again.
+The `compute hypervisors snapshot-restore` command rolls back zvol disks of libvirt domains to the given snapshot. It checks that all snapshots exist before changing anything, asks for confirmation (skip with `-y/--yes`), stops running domains, rolls back their disks and starts them again.
 
 ```bash
-exordos snapshot-restore before-upgrade -n o1-a370f746-ecosystem-cp
+exordos compute hypervisors snapshot-restore before-upgrade -n o1-a370f746-ecosystem-cp
 ```
 
 `zfs rollback` refuses to roll back past newer snapshots of the same zvol; destroy them first if needed.

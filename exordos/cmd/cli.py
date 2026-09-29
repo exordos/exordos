@@ -66,8 +66,6 @@ COMMANDS_WITHOUT_CONFIG = {
     stand_commands.bootstrap_cmd.name,
     stand_commands.backup_cmd.name,
     stand_commands.backup_decrypt_cmd.name,
-    stand_commands.snapshot_cmd.name,
-    stand_commands.snapshot_restore_cmd.name,
     utils_commands.autocomplete.name,
     utils_commands.autocomplete_help.name,
     utils_commands.hello.name,
@@ -361,8 +359,6 @@ exordos.add_command(version_commands.get_project_version_cmd)
 exordos.add_command(stand_commands.bootstrap_cmd)
 exordos.add_command(stand_commands.backup_cmd)
 exordos.add_command(stand_commands.backup_decrypt_cmd)
-exordos.add_command(stand_commands.snapshot_cmd)
-exordos.add_command(stand_commands.snapshot_restore_cmd)
 
 exordos.add_command(ua_group)
 
