@@ -474,27 +474,6 @@ def _merge_local_pool_into_config(existing_content: str, meta_file: str) -> str:
     return buf.getvalue()
 
 
-def _merge_driver_into_config(existing_content: str, driver: str) -> str:
-    """Add a capability driver to an installed agent's caps_drivers.
-
-    The content comes back unchanged when the driver is already there, so a
-    caller can tell whether the agent needs a restart.
-    """
-    raw = _config_value(existing_content, "universal_agent", "caps_drivers", "")
-    drivers = [d.strip() for d in raw.replace("\n", ",").split(",") if d.strip()]
-    if driver in drivers:
-        return existing_content
-    drivers.append(driver)
-
-    parser = configparser.ConfigParser()
-    parser.read_string(existing_content)
-    parser.set("universal_agent", "caps_drivers", ", ".join(drivers))
-
-    buf = io.StringIO()
-    parser.write(buf)
-    return buf.getvalue()
-
-
 def _agent_systemd_unit_content(exec_path: str, config_path: str) -> str:
     # ExecStart uses exec_path's full path rather than a bare command
     # name: relying on $PATH is fragile if some other
@@ -1399,11 +1378,15 @@ def init_cmd(
     log.important("Hypervisor environment initialized successfully")
 
 
-def _tool(name: str) -> str | None:
-    """Absolute path of an executable, or None."""
-    import shutil
-
-    return shutil.which(name)
+def _only_pool(client, option: str) -> dict:
+    """The installation's only machine pool, or a refusal naming `option`."""
+    pools = base_client.list_entities(client, ENTITY_COLLECTION)
+    if len(pools) != 1:
+        raise click.ClickException(
+            f"{option} cannot be picked on its own: the installation has "
+            f"{len(pools)} pools"
+        )
+    return pools[0]
 
 
 def _install_gobgp(url: str) -> None:
@@ -1473,14 +1456,6 @@ def _install_connector(source: str) -> None:
     )
 
 
-def _build_sdk_venv(source: str) -> None:
-    run_command(["python3", "-m", "venv", compute_common.SDK_VENV])
-    run_command(
-        [f"{compute_common.SDK_VENV}/bin/pip", "install", "--upgrade", "pip", "-q"]
-    )
-    _pip_install_sdk(compute_common.SDK_VENV, source)
-
-
 def _pip_install_sdk(venv_path: str, source: str) -> None:
     run_command(
         [f"{venv_path}/bin/pip", "install", "-q", source],
@@ -1524,7 +1499,11 @@ def _install_sdn_agent(source: str) -> None:
     if os.path.exists(f"{compute_common.SDK_VENV}/bin/exordos-universal-agent"):
         click.echo(f"agent already present in {compute_common.SDK_VENV}")
     else:
-        _build_sdk_venv(source)
+        run_command(["python3", "-m", "venv", compute_common.SDK_VENV])
+        run_command(
+            [f"{compute_common.SDK_VENV}/bin/pip", "install", "--upgrade", "pip", "-q"]
+        )
+        _pip_install_sdk(compute_common.SDK_VENV, source)
     _require_evpn_driver(compute_common.SDK_VENV, source)
     # The unit calls the bare name.
     if os.path.islink(compute_common.AGENT_BIN) or os.path.exists(
@@ -1596,12 +1575,7 @@ def _init_sdn(
     """
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if pool_ref == "auto":
-        pools = base_client.list_entities(client, ENTITY_COLLECTION)
-        if len(pools) != 1:
-            raise click.ClickException(
-                f"--sdn-pool is needed: the installation has {len(pools)} pools"
-            )
-        pool = pools[0]
+        pool = _only_pool(client, "--sdn-pool")
     else:
         pool = base_client.get_entity(client, ENTITY_COLLECTION, pool_ref)
 
@@ -1639,7 +1613,6 @@ def _init_sdn(
             register_agent_cmd,
             name=f"sdn-{_default_hypervisor_name()}",
             project_id=project_id,
-            machine_type="HW",
             pool_ref=str(pool["uuid"]),
             write_config=True,
         )
@@ -1648,9 +1621,11 @@ def _init_sdn(
     log.info("Giving this host's pool agent the overlay...")
     _pip_install_sdk(target.venv_path, sdk)
     _require_evpn_driver(target.venv_path, sdk)
-    merged = _merge_driver_into_config(existing, compute_common.EVPN_DRIVER)
+    merged = compute_common.edit_caps_drivers(
+        existing, compute_common.EVPN_DRIVER, add=True
+    )
     # A re-run on a host that already has it restarts nothing.
-    if merged != existing:
+    if merged is not None:
         write_root_owned_file(merged, target.config_path, mode="644")
         run_command(["systemctl", "restart", target.unit_name])
     _serve_pool_overlay(client, pool["uuid"], local_node, log)
@@ -1679,33 +1654,7 @@ def _init_sdn(
     "node_uuid",
     type=click.UUID,
     default=None,
-    help="Node UUID (generated if omitted)",
-)
-@click.option("-c", "--cores", type=int, default=1, show_default=True)
-@click.option("-r", "--ram", type=int, default=1024, show_default=True)
-@click.option(
-    "--root-disk",
-    type=int,
-    default=10,
-    show_default=True,
-    help="Root disk size in GiB",
-)
-@click.option(
-    "-m",
-    "--machine-type",
-    type=click.Choice(["HW", "VM"], case_sensitive=False),
-    default="HW",
-    show_default=True,
-    help=(
-        "HW registers a bare node identity (no VM is provisioned) for an "
-        "agent running on this host, e.g. the hypervisor's evpn_node agent. "
-        "VM creates a regular compute node."
-    ),
-)
-@click.option(
-    "--image",
-    default=None,
-    help="Image for the node (required for VM; unused for HW)",
+    help="Node UUID (this host's system uuid if omitted)",
 )
 @click.option(
     "--key-path",
@@ -1741,11 +1690,6 @@ def register_agent_cmd(
     name: str,
     project_id: sys_uuid.UUID,
     node_uuid: sys_uuid.UUID | None,
-    cores: int,
-    ram: int,
-    root_disk: int,
-    machine_type: str,
-    image: str | None,
     key_path: str | None,
     pool_ref: str | None,
     write_config: bool,
@@ -1754,30 +1698,19 @@ def register_agent_cmd(
     write it where the local universal agent expects it."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     log = ClickLogger()
-    machine_type = machine_type.upper()
-    if machine_type == "VM" and not image:
-        raise click.ClickException("--image is required for a VM node")
     if key_path is None:
         # Never the host agent's own key: `hypervisors init` registers that
         # one under another node uuid, and overwriting it unregisters the host.
         key_path = compute_common.SDN_AGENT_KEY_PATH
     if node_uuid is None:
-        if machine_type == "HW":
-            # The universal agent's encryptor identifies itself by the
-            # machine's system uuid, so a host agent's node MUST use it.
-            node_uuid = compute_common.read_system_uuid()
-            log.info(f"Using the host system uuid {node_uuid}")
-        else:
-            node_uuid = sys_uuid.uuid4()
+        # The universal agent's encryptor identifies itself by the
+        # machine's system uuid, so a host agent's node MUST use it.
+        node_uuid = compute_common.read_system_uuid()
+        log.info(f"Using the host system uuid {node_uuid}")
 
     pool_uuid: sys_uuid.UUID | None = None
     if pool_ref == "auto":
-        pools = base_client.list_entities(client, c.HYPERVISOR_COLLECTION)
-        if len(pools) != 1:
-            raise click.ClickException(
-                f"--pool auto needs exactly one pool, found {len(pools)}"
-            )
-        pool_uuid = sys_uuid.UUID(pools[0]["uuid"])
+        pool_uuid = sys_uuid.UUID(_only_pool(client, "--pool")["uuid"])
     elif pool_ref is not None:
         # A name is what an operator has in front of them; every other
         # reference in this CLI takes one, and a bare `UUID()` on it is a
@@ -1788,17 +1721,13 @@ def register_agent_cmd(
     data = {
         "uuid": str(node_uuid),
         "project_id": str(project_id),
-        "cores": cores,
-        "ram": ram,
+        # A bare HW identity: no VM is provisioned, so the sizes and the
+        # image are required-but-unused placeholders.
+        "cores": 1,
+        "ram": 1024,
         "name": name,
-        "node_type": machine_type,
-        "disk_spec": {
-            "kind": "root_disk",
-            "size": root_disk,
-            # HW nodes provision no volumes; the image is a required-but-unused
-            # placeholder there.
-            "image": image or "none",
-        },
+        "node_type": "HW",
+        "disk_spec": {"kind": "root_disk", "size": 10, "image": "none"},
     }
     log.info(f"Registering agent node {node_uuid}...")
     try:
@@ -1813,12 +1742,12 @@ def register_agent_cmd(
         # uuid, the node taken may be the host's own agent, and fetching its
         # key would give a second agent the same identity.
         existing = base_client.get_entity(client, c.NODE_COLLECTION, str(node_uuid))
-        existing_type = str(existing.get("node_type") or machine_type).upper()
-        if existing.get("name") != name or existing_type != machine_type:
+        existing_type = str(existing.get("node_type") or "HW").upper()
+        if existing.get("name") != name or existing_type != "HW":
             raise click.ClickException(
                 f"Node {node_uuid} already exists as "
                 f"{existing.get('name')!r} ({existing.get('node_type')}), "
-                f"not as the {machine_type} agent {name!r} this would "
+                f"not as the HW agent {name!r} this would "
                 "register; refusing to take over its identity. Pass --uuid "
                 "for a node of its own"
             )

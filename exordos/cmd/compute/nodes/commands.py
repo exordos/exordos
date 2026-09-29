@@ -539,30 +539,5 @@ def info_cmd(ctx: click.Context, node: str, output: str) -> None:
         show_data({"uuid": details["hypervisor"]}, output=output, msg="Hypervisor")
 
 
-@click.command(
-    "get-key",
-    help="Retrieve a node's universal-agent encryption key",
-)
-@click.pass_context
-@click.argument("node")
-@click.option(
-    "-o",
-    "--output",
-    type=click.Path(),
-    default=None,
-    help="Write the key to this file (mode 0600) instead of printing it",
-)
-def get_key_cmd(ctx: click.Context, node: str, output: str | None) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
-    uuid = base_client._get_entity_uuid(client, ENTITY_COLLECTION, node)
-    key = base_client.get_agent_private_key(client, ENTITY_COLLECTION, uuid)
-    if output:
-        compute_common.write_agent_key(output, key)
-        logger.ClickLogger().important(f"Agent key for node {uuid} written to {output}")
-    else:
-        click.echo(key)
-
-
 cn_group.add_command(add_cmd, aliases=["a"])
 cn_group.add_command(update_cmd, aliases=["u"])
-cn_group.add_command(get_key_cmd, aliases=["gk"])

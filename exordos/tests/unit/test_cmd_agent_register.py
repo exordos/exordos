@@ -62,9 +62,6 @@ def test_register_agent_pool_sets_hypervisor_node(tmp_path):
             return_value={"driver_spec": {"kind": "libvirt"}},
         ),
         mock.patch.object(commands.base_client, "update_entity") as update_entity,
-        # The ROM is a fact of the host, so the assertion below must not
-        # depend on whether the machine running the tests happens to have it.
-        mock.patch.object(commands.os.path, "exists", return_value=False),
     ):
         obj = mock.MagicMock()
         result = testing.CliRunner().invoke(
@@ -210,9 +207,6 @@ def test_register_agent_hw_defaults_to_system_uuid_and_auto_pool(tmp_path):
             "read_system_uuid",
         ) as read_uuid,
         mock.patch.object(compute_common, "write_sdn_agent_service") as write_svc,
-        # The ROM is a fact of the host; the assertion must not depend on
-        # whether the machine running the tests happens to have one.
-        mock.patch.object(commands.os.path, "exists", return_value=False),
     ):
         import uuid as uuid_mod
 
@@ -226,8 +220,6 @@ def test_register_agent_hw_defaults_to_system_uuid_and_auto_pool(tmp_path):
                 "sdn-agent",
                 "-p",
                 "11111111-1111-1111-1111-111111111111",
-                "--machine-type",
-                "HW",
                 "--pool",
                 "auto",
                 "--key-path",
@@ -250,49 +242,6 @@ def test_register_agent_hw_defaults_to_system_uuid_and_auto_pool(tmp_path):
         endpoint="http://192.168.100.2/api/core",
         key_path=str(key_path),
     )
-
-
-def test_register_agent_cmd_leaves_the_pools_rom_alone(tmp_path):
-    """The iPXE ROM an overlay guest netboots from is chosen per port by the
-    agent; the pool's own ROM stays what its flat guests boot from."""
-    from click import testing
-
-    from exordos.cmd.compute.hypervisors import commands
-
-    def _register():
-        with (
-            mock.patch.object(commands.base_client, "get_user_api_client"),
-            mock.patch.object(commands.base_client, "add_entity"),
-            mock.patch.object(
-                commands.base_client, "get_agent_private_key", return_value="K=="
-            ),
-            mock.patch.object(
-                commands.base_client,
-                "get_entity",
-                return_value={"driver_spec": {"kind": "libvirt"}},
-            ),
-            mock.patch.object(commands.base_client, "update_entity") as update_entity,
-        ):
-            result = testing.CliRunner().invoke(
-                commands.register_agent_cmd,
-                [
-                    "--name",
-                    "sdn-agent",
-                    "-p",
-                    "11111111-1111-1111-1111-111111111111",
-                    "-u",
-                    "22222222-2222-2222-2222-222222222222",
-                    "--key-path",
-                    str(tmp_path / "key"),
-                    "--pool",
-                    "33333333-3333-3333-3333-333333333333",
-                ],
-                obj=mock.MagicMock(),
-            )
-        assert result.exit_code == 0, result.output
-        return update_entity.call_args[0][3]["driver_spec"]
-
-    assert _register() == {"kind": "libvirt", "ovs": True}
 
 
 def test_register_agent_refuses_to_take_over_another_nodes_identity(tmp_path):

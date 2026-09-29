@@ -115,6 +115,9 @@ def test_units_are_written_but_not_enabled(tmp_path):
     ):
         commands._write_fabric_units()
     assert "gobgpd -f /etc/gobgp.conf" in gobgpd.read_text()
+    # The unauthenticated gRPC API must not be reachable off the host.
+    assert "--api-hosts 127.0.0.1:50051" in gobgpd.read_text()
     assert "evpn-connector --config-file" in connector.read_text()
+    assert "PrivateTmp=yes" in connector.read_text()
     joined = _calls(run)
     assert joined == ["systemctl daemon-reload"]

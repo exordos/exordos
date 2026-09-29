@@ -27,8 +27,16 @@ capabilities =
 """
 
 
+def _strip(conf):
+    return compute_common.edit_caps_drivers(conf, compute_common.EVPN_DRIVER, add=False)
+
+
+def _add(conf):
+    return compute_common.edit_caps_drivers(conf, compute_common.EVPN_DRIVER, add=True)
+
+
 def test_strip_evpn_driver_leaves_the_rest_of_the_list():
-    out = compute_common.strip_evpn_driver(LIVE_CONF)
+    out = _strip(LIVE_CONF)
     assert "EvpnAgentCapabilityDriver" not in out
     for kept in (
         "BorderCapabilityDriver",
@@ -53,7 +61,7 @@ def test_strip_evpn_driver_leaves_the_rest_of_the_list():
 
 def test_strip_evpn_driver_handles_an_inline_list():
     conf = "[universal_agent]\ncaps_drivers = EvpnAgentCapabilityDriver, RenderAgentDriver\nuuid = x\n"
-    out = compute_common.strip_evpn_driver(conf)
+    out = _strip(conf)
     assert "caps_drivers = RenderAgentDriver\n" in out
     assert "uuid = x" in out
 
@@ -61,10 +69,28 @@ def test_strip_evpn_driver_handles_an_inline_list():
 def test_strip_evpn_driver_reports_nothing_to_do():
     """Idempotence: a config that never carried the driver is left alone,
     so re-running register-agent does not rewrite or restart anything."""
-    assert (
-        compute_common.strip_evpn_driver("caps_drivers = RenderAgentDriver\n") is None
+    assert _strip("caps_drivers = RenderAgentDriver\n") is None
+    assert _strip("[universal_agent]\nuuid = x\n") is None
+
+
+def test_add_driver_keeps_the_list_shape_and_the_rest_of_the_file():
+    conf = LIVE_CONF.replace("    EvpnAgentCapabilityDriver,\n", "")
+    out = _add(conf)
+    assert "    ServiceCapabilityDriver,\n    EvpnAgentCapabilityDriver\n" in out
+    assert out.startswith("[DEFAULT]\nverbose = True\n")
+    assert out.endswith(conf.split("\n\n")[-1])
+    assert _add(out) is None
+
+
+def test_add_driver_to_an_inline_list_or_a_missing_option():
+    conf = "[universal_agent]\ncaps_drivers = LocalPoolAgentDriver\nuuid = x\n"
+    assert "caps_drivers = LocalPoolAgentDriver, EvpnAgentCapabilityDriver\n" in _add(
+        conf
     )
-    assert compute_common.strip_evpn_driver("[universal_agent]\nuuid = x\n") is None
+    out = _add("[universal_agent]\nuuid = x\n")
+    assert out == (
+        "[universal_agent]\ncaps_drivers = EvpnAgentCapabilityDriver\nuuid = x\n"
+    )
 
 
 def test_the_sdn_agent_takes_the_capability_from_the_primary(tmp_path):

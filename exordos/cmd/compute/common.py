@@ -120,27 +120,41 @@ def read_system_uuid():
         )
 
 
-def strip_evpn_driver(content: str) -> str | None:
-    """Drop the evpn driver from a ``caps_drivers`` list, or None if absent.
+def edit_caps_drivers(content: str, driver: str, *, add: bool) -> str | None:
+    """Add a driver to, or drop it from, an agent config's ``caps_drivers``.
 
-    Handles both shapes the option is written in: one driver per indented
-    continuation line (the core's config template) and a single inline
-    list.
+    Returns the new content, or None when there is nothing to do, so a
+    caller can tell whether the agent needs a restart. Only the option's
+    own lines are rewritten, in the shape they are written in: one driver
+    per indented continuation line (the core's config template) or a
+    single inline list. Everything else in the file (comments, other
+    sections, credentials) stays byte-for-byte.
     """
     lines = content.splitlines(keepends=True)
     for start, line in enumerate(lines):
         if re.match(r"\s*caps_drivers\s*=", line):
             break
     else:
-        return None
+        if not add:
+            return None
+        for start, line in enumerate(lines):
+            if line.strip() == "[universal_agent]":
+                break
+        else:
+            raise ValueError("no [universal_agent] section to add a driver to")
+        start += 1
+        lines.insert(start, "caps_drivers =\n")
     end = start + 1
     while end < len(lines) and re.match(r"\s+\S", lines[end]):
         end += 1
     block = "".join(lines[start:end])
     drivers = [d.strip() for d in block.split("=", 1)[1].split(",") if d.strip()]
-    if EVPN_DRIVER not in drivers:
+    if (driver in drivers) == add:
         return None
-    drivers.remove(EVPN_DRIVER)
+    if add:
+        drivers.append(driver)
+    else:
+        drivers.remove(driver)
     if "\n" in block.strip():
         rendered = "caps_drivers =\n" + "".join("    %s,\n" % d for d in drivers)
         rendered = rendered.rstrip(",\n") + "\n"
@@ -170,7 +184,7 @@ def release_evpn_from_primary_agent() -> None:
             content = f.read()
     except FileNotFoundError:
         return
-    stripped = strip_evpn_driver(content)
+    stripped = edit_caps_drivers(content, EVPN_DRIVER, add=False)
     if stripped is None:
         return
     with open(PRIMARY_AGENT_CONF_PATH, "w") as f:
@@ -235,7 +249,10 @@ Wants=network-online.target
 # the evpn_host/bgp_rr target resource; the agent (re)starts this service when
 # the config changes. Not enabled here: without a config gobgpd fail-loops,
 # and a host that never joins an overlay never needs it.
-ExecStart=/usr/local/bin/gobgpd -f /etc/gobgp.conf
+# The gRPC API is unauthenticated and can add or withdraw any EVPN route, so
+# it listens on loopback only (gobgpd's default is every address); the
+# connector and the gobgp CLI both dial localhost:50051.
+ExecStart=/usr/local/bin/gobgpd -f /etc/gobgp.conf --api-hosts 127.0.0.1:50051
 Restart=on-failure
 RestartSec=2
 
@@ -253,6 +270,9 @@ Wants=gobgpd.service
 # /opt/evpn/evpn_connector.cfg is rendered by the universal agent; per-guest
 # client configs land in /opt/evpn/vm_conf. The agent enables and (re)starts
 # this service once it writes the config.
+# The fail-static flow dump defaults to /tmp/evpn_tmp_flow_file and is fed
+# back to ovs-ofctl as root: a private /tmp keeps local users from planting it.
+PrivateTmp=yes
 WorkingDirectory=/opt/evpn
 ExecStart=/opt/evpn/venv/bin/evpn-connector --config-file /opt/evpn/evpn_connector.cfg
 Restart=on-failure

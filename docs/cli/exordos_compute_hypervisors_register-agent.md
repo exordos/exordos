@@ -34,41 +34,7 @@ Register a universal-agent node in the core and install its encryption key local
     * Usage: `-u
 --uuid`
 
-  Node UUID (generated if omitted)
-
-* `cores`:
-    * Type: integer
-    * Default: `1`
-    * Usage: `-c
---cores`
-
-* `ram`:
-    * Type: integer
-    * Default: `1024`
-    * Usage: `-r
---ram`
-
-* `root_disk`:
-    * Type: integer
-    * Default: `10`
-    * Usage: `--root-disk`
-
-  Root disk size in GiB
-
-* `machine_type`:
-    * Type: choice
-    * Default: `hw`
-    * Usage: `-m
---machine-type`
-
-  HW registers a bare node identity (no VM is provisioned) for an agent running on this host, e.g. the hypervisor's evpn_node agent. VM creates a regular compute node.
-
-* `image`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--image`
-
-  Image for the node (required for VM; unused for HW)
+  Node UUID (this host's system uuid if omitted)
 
 * `key_path`:
     * Type: text
