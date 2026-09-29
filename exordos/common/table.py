@@ -20,8 +20,12 @@ import typing as tp
 from rich import print as rprint
 from rich import print_json as rprint_json
 from rich.console import Console
+from rich.table import Column
 from rich.table import Table
 import rich_click as click
+
+# Columns which are never collapsed, other columns are wrapped instead
+NO_WRAP_COLUMNS = {"uuid", "name"}
 
 SHOW_FIELDS = [
     "Field",
@@ -48,7 +52,15 @@ def table_to_list_of_dicts(table: Table) -> tp.List[dict]:
 
 
 def get_table(*args, **kwargs) -> Table:
-    table = Table(show_header=True, *args, **kwargs)
+    columns = [
+        (
+            Column(header, no_wrap=True)
+            if isinstance(header, str) and header.lower() in NO_WRAP_COLUMNS
+            else header
+        )
+        for header in args
+    ]
+    table = Table(*columns, show_header=True, **kwargs)
     return table
 
 
