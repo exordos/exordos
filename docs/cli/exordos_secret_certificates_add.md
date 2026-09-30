@@ -45,6 +45,30 @@ Add a new certificate to the Exordos installation
 
   Description of the certificate
 
+* `email` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-e
+--email`
+
+  Email address to use for the certificate
+
+* `domains` (REQUIRED):
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-d
+--domain`
+
+  Domain of the certificate, wildcards are allowed. Can be repeated
+
+* `method`:
+    * Type: choice
+    * Default: `dns_core`
+    * Usage: `-m
+--method`
+
+  Method (provider) to issue and manage the certificate
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -61,10 +85,13 @@ Add a new certificate to the Exordos installation
  Add a new certificate to the Exordos installation                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID  UUID of the certificate                                                                                                                                                                                                                                                     │
-│ *  --project-id   -p  UUID  Name of the project in which to deploy the certificate [required]                                                                                                                                                                                                           │
-│    --name         -n  TEXT  Name of the certificate                                                                                                                                                                                                                                                     │
-│    --description  -D  TEXT  Description of the certificate                                                                                                                                                                                                                                              │
-│    --help                   Show this message and exit.                                                                                                                                                                                                                                                 │
+│    --uuid         -u  UUID        UUID of the certificate                                                                                                                                                                                                                                               │
+│ *  --project-id   -p  UUID        Name of the project in which to deploy the certificate [required]                                                                                                                                                                                                     │
+│    --name         -n  TEXT        Name of the certificate                                                                                                                                                                                                                                               │
+│    --description  -D  TEXT        Description of the certificate                                                                                                                                                                                                                                        │
+│ *  --email        -e  TEXT        Email address to use for the certificate [required]                                                                                                                                                                                                                   │
+│ *  --domain       -d  TEXT        Domain of the certificate, wildcards are allowed. Can be repeated [required]                                                                                                                                                                                          │
+│    --method       -m  [dns_core]  Method (provider) to issue and manage the certificate [default: dns_core]                                                                                                                                                                                             │
+│    --help                         Show this message and exit.                                                                                                                                                                                                                                           │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

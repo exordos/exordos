@@ -93,17 +93,6 @@ certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     show_default=True,
     help="Method (provider) to issue and manage the certificate",
 )
-@click.option(
-    "--expiration-threshold",
-    type=click.IntRange(min=0),
-    default=None,
-    help="Days before expiration when the certificate should be renewed",
-)
-@click.option(
-    "--overcome-threshold/--no-overcome-threshold",
-    default=None,
-    help="Allow to overcome the expiration threshold, so it won't be renewed",
-)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -113,8 +102,6 @@ def add_cmd(
     email: str,
     domains: tuple[str, ...],
     method: str,
-    expiration_threshold: int | None,
-    overcome_threshold: bool | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -129,11 +116,6 @@ def add_cmd(
         "domains": list(domains),
         "method": {"kind": method},
     }
-    # Left out when not given so the core defaults apply.
-    if expiration_threshold is not None:
-        data["expiration_threshold"] = expiration_threshold
-    if overcome_threshold is not None:
-        data["overcome_threshold"] = overcome_threshold
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(entity)
 
@@ -181,17 +163,6 @@ def add_cmd(
     multiple=True,
     help="Domain of the certificate, replaces the current list. Can be repeated",
 )
-@click.option(
-    "--expiration-threshold",
-    type=click.IntRange(min=0),
-    default=None,
-    help="Days before expiration when the certificate should be renewed",
-)
-@click.option(
-    "--overcome-threshold/--no-overcome-threshold",
-    default=None,
-    help="Allow to overcome the expiration threshold, so it won't be renewed",
-)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
@@ -200,8 +171,6 @@ def update_cmd(
     description: str | None,
     email: str | None,
     domains: tuple[str, ...],
-    expiration_threshold: int | None,
-    overcome_threshold: bool | None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -215,10 +184,6 @@ def update_cmd(
         data["email"] = email
     if domains:
         data["domains"] = list(domains)
-    if expiration_threshold is not None:
-        data["expiration_threshold"] = expiration_threshold
-    if overcome_threshold is not None:
-        data["overcome_threshold"] = overcome_threshold
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 

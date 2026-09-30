@@ -69,35 +69,6 @@ class TestCertificateAdd:
         assert data["method"] == {"kind": "dns_core"}
         assert sys_uuid.UUID(data["uuid"])
 
-    def test_add_cmd_omits_thresholds_by_default(self) -> None:
-        result, add_mock, _ = _invoke(
-            commands.add_cmd, "-p", PROJECT_ID, "-e", "a@b.com", "-d", "a.com"
-        )
-
-        assert result.exit_code == 0, result.output
-        data = add_mock.call_args.args[2]
-        assert "expiration_threshold" not in data
-        assert "overcome_threshold" not in data
-
-    def test_add_cmd_sends_thresholds(self) -> None:
-        result, add_mock, _ = _invoke(
-            commands.add_cmd,
-            "-p",
-            PROJECT_ID,
-            "-e",
-            "a@b.com",
-            "-d",
-            "a.com",
-            "--expiration-threshold",
-            "30",
-            "--overcome-threshold",
-        )
-
-        assert result.exit_code == 0, result.output
-        data = add_mock.call_args.args[2]
-        assert data["expiration_threshold"] == 30
-        assert data["overcome_threshold"] is True
-
     def test_add_cmd_requires_domain(self) -> None:
         result, add_mock, _ = _invoke(
             commands.add_cmd, "-p", PROJECT_ID, "-e", "a@b.com"
@@ -138,7 +109,7 @@ class TestCertificateUpdate:
         assert result.exit_code == 0, result.output
         assert update_mock.call_args.args[3] == {"name": "new"}
 
-    def test_update_cmd_sends_email_domains_and_thresholds(self) -> None:
+    def test_update_cmd_sends_email_and_domains(self) -> None:
         uuid = str(sys_uuid.uuid4())
 
         result, _, update_mock = _invoke(
@@ -150,15 +121,10 @@ class TestCertificateUpdate:
             "a.com",
             "-d",
             "b.com",
-            "--expiration-threshold",
-            "0",
-            "--no-overcome-threshold",
         )
 
         assert result.exit_code == 0, result.output
         assert update_mock.call_args.args[3] == {
             "email": "x@y.com",
             "domains": ["a.com", "b.com"],
-            "expiration_threshold": 0,
-            "overcome_threshold": False,
         }
