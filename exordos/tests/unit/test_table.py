@@ -24,8 +24,12 @@ UUID = "04ae8c93-a744-43fd-be24-94a9a9d1f0e2"
 NAME = "dbaas-dp-6d7cc758-ea58-4ee5-b1c2-0123456789ab"
 
 
+def _console(width: int) -> Console:
+    return Console(file=StringIO(), width=width)
+
+
 def _render(table, width: int) -> str:
-    console = Console(file=StringIO(), width=width)
+    console = _console(width)
     console.print(table)
     return console.file.getvalue()
 
@@ -81,6 +85,65 @@ def test_fill_table_80_columns_other_columns_visible():
 
     assert "Image" in output
     assert "Status" in output
+    columns = _columns_text(output)
+    assert columns[0] == UUID
+    assert columns[1] == NAME
+
+
+def _wide_table():
+    headers = [
+        "UUID",
+        "Name",
+        "Project",
+        "Cores",
+        "RAM",
+        "Status",
+        "IP",
+        "Image",
+        "Created",
+    ]
+    table = table_utils.get_table(*headers)
+    table.add_row(
+        UUID,
+        NAME,
+        "12345678-c625-4fee-81d5-f691897b0000",
+        "4",
+        "2048",
+        "ACTIVE",
+        "10.20.0.24",
+        "https://repo.exordos.com/exordos/images/some-long-image",
+        "2026-09-30T05:00:00",
+    )
+    return table
+
+
+def test_fit_table_to_width_wide_console_keeps_uuid_no_wrap():
+    table = _wide_table()
+
+    table_utils.fit_table_to_width(table, _console(140))
+
+    assert table.columns[0].no_wrap is True
+
+
+def test_fit_table_to_width_narrow_console_folds_uuid():
+    table = _wide_table()
+
+    table_utils.fit_table_to_width(table, _console(60))
+
+    assert table.columns[0].no_wrap is False
+
+
+def test_fit_table_to_width_9_columns_at_100_not_cropped():
+    table = _wide_table()
+
+    table_utils.fit_table_to_width(table, _console(100))
+    output = _render(table, width=100)
+
+    lines = output.splitlines()
+    assert all(len(line) <= 100 for line in lines)
+    # The right border is present, so no column is cropped off
+    assert all(line[-1] in "┓┃┩│┘" for line in lines)
+    assert "Created" in output
     columns = _columns_text(output)
     assert columns[0] == UUID
     assert columns[1] == NAME
