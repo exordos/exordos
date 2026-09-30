@@ -197,6 +197,14 @@ def update_cmd(
         data["condition"] = _build_condition(
             condition, kind, value, pool, backend_protocol, allowed_ips
         )
+    elif any(
+        ctx.get_parameter_source(p) != click.core.ParameterSource.DEFAULT
+        for p in ("kind", "value", "backend_protocol", "allowed_ips")
+    ):
+        raise click.ClickException(
+            "--kind, --value, --backend-protocol and --allowed-ip "
+            "require --pool or --condition"
+        )
     entity = base_client.update_entity(
         client,
         ENTITY_COLLECTION.format(lb_uuid=lb_uuid, vhost_uuid=vhost_uuid),

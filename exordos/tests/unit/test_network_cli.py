@@ -307,3 +307,20 @@ class TestRoutesCli:
                 ],
             }
         }
+
+    def test_update_cmd_condition_option_without_pool(self, client, _show) -> None:
+        result = _invoke(
+            "routes",
+            "update",
+            UUID,
+            "--lb-uuid",
+            LB_UUID,
+            "--vhost-uuid",
+            VHOST_UUID,
+            "--allowed-ip",
+            "10.0.0.0/8",
+        )
+
+        assert result.exit_code != 0
+        assert "require --pool or --condition" in result.output
+        client.update_entity.assert_not_called()
