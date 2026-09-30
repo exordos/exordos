@@ -20,12 +20,14 @@ import typing as tp
 from rich import print as rprint
 from rich import print_json as rprint_json
 from rich.console import Console
-from rich.table import Column
 from rich.table import Table
 import rich_click as click
 
-# Columns which are never collapsed, other columns are wrapped instead
-NO_WRAP_COLUMNS = {"uuid", "name"}
+# Columns which are folded (never truncated); UUID is additionally never split
+NO_WRAP_COLUMNS = {"uuid"}
+FOLD_COLUMNS = {"uuid", "name"}
+# Keeps other columns visible on narrow terminals
+MIN_WRAP_COLUMN_WIDTH = 6
 
 SHOW_FIELDS = [
     "Field",
@@ -52,15 +54,16 @@ def table_to_list_of_dicts(table: Table) -> tp.List[dict]:
 
 
 def get_table(*args, **kwargs) -> Table:
-    columns = [
-        (
-            Column(header, no_wrap=True)
-            if isinstance(header, str) and header.lower() in NO_WRAP_COLUMNS
-            else header
-        )
-        for header in args
-    ]
-    table = Table(*columns, show_header=True, **kwargs)
+    table = Table(*args, show_header=True, **kwargs)
+    for column in table.columns:
+        header = column.header.lower() if isinstance(column.header, str) else None
+        if header in FOLD_COLUMNS:
+            column.overflow = "fold"
+            column.no_wrap = header in NO_WRAP_COLUMNS
+        else:
+            # Short columns (Cores, RAM, ...) must not be padded
+            header_width = len(header) if header else MIN_WRAP_COLUMN_WIDTH
+            column.min_width = min(header_width, MIN_WRAP_COLUMN_WIDTH)
     return table
 
 

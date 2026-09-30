@@ -30,6 +30,16 @@ def _render(table, width: int) -> str:
     return console.file.getvalue()
 
 
+def _columns_text(output: str) -> list:
+    # Folded values are split over lines, so join every column's lines
+    rows = [
+        line.strip("\u2502").split("\u2502")
+        for line in output.splitlines()
+        if line.startswith("\u2502")
+    ]
+    return ["".join(cell.strip() for cell in col) for col in zip(*rows)]
+
+
 def test_fill_table_narrow_terminal_uuid_and_name_not_truncated():
     entities = [
         {
@@ -43,11 +53,34 @@ def test_fill_table_narrow_terminal_uuid_and_name_not_truncated():
 
     output = _render(table_utils.fill_table(entities, fields_map), width=120)
 
-    assert UUID in output
-    assert NAME in output
+    columns = _columns_text(output)
+    assert columns[0] == UUID
+    assert columns[1] == NAME
 
 
 def test_get_table_other_columns_wrap():
     table = table_utils.get_table("UUID", "Name", "Image")
 
-    assert [c.no_wrap for c in table.columns] == [True, True, False]
+    assert [c.overflow for c in table.columns] == ["fold", "fold", "ellipsis"]
+    assert [c.no_wrap for c in table.columns] == [True, False, False]
+    assert table.columns[2].min_width == len("Image")
+
+
+def test_fill_table_80_columns_other_columns_visible():
+    entities = [
+        {
+            "uuid": UUID,
+            "name": NAME,
+            "image": "https://repo.exordos.com/exordos/images/some-long-image",
+            "status": "ACTIVE",
+        }
+    ]
+    fields_map = {"UUID": "uuid", "Name": "name", "Image": "image", "Status": "status"}
+
+    output = _render(table_utils.fill_table(entities, fields_map), width=80)
+
+    assert "Image" in output
+    assert "Status" in output
+    columns = _columns_text(output)
+    assert columns[0] == UUID
+    assert columns[1] == NAME
