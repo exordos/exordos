@@ -272,6 +272,9 @@ def prune_cmd(ctx: click.Context, y: bool) -> None:
     import questionary
 
     client = base_client.get_user_api_client(ctx.obj.auth_data)
+    # List keys before targets, so a key created together with its target
+    # in between is not treated as an orphan
+    keys = base_client.list_entities(client, ENTITY_COLLECTION)
     existing = {
         "node": {
             n["uuid"] for n in base_client.list_entities(client, c.NODE_COLLECTION)
@@ -281,7 +284,7 @@ def prune_cmd(ctx: click.Context, y: bool) -> None:
         },
     }
 
-    for entity in base_client.list_entities(client, ENTITY_COLLECTION):
+    for entity in keys:
         kind = entity["target"]["kind"]
         if kind not in existing or entity["target"][kind] in existing[kind]:
             continue
