@@ -459,6 +459,12 @@ def _load_realm_spec(path: str) -> dict:
             f"Realm spec {path} misses required keys: {', '.join(missing)}"
         )
 
+    elements = spec.get("elements", [])
+    if not isinstance(elements, list) or any(
+        not isinstance(name, str) or not name.strip() for name in elements
+    ):
+        raise click.UsageError("Realm spec elements must be a list of non-empty names")
+
     return spec
 
 
@@ -1090,6 +1096,8 @@ def bootstrap_cmd(
         admin_password = realm_spec_data["admin_password"]
         ecosystem_endpoint = realm_spec_data["ecosystem_endpoint"]
         disable_telemetry = bool(realm_spec_data.get("disable_telemetry", False))
+        if not elements:
+            elements = tuple(realm_spec_data.get("elements", []))
 
     profile = Profile[profile.upper()]
 

@@ -111,3 +111,16 @@ exordos settings set-context <context_name> \
 exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gMjfYDwg" \
   --refresh_token "...bZ1BENYKg" MyTown
 ```
+
+## Элементы при bootstrap управляемого реалма
+
+При `exordos bootstrap --realm-spec /etc/exordos/realm_spec.json` CLI читает
+поле `elements` как список названий и передаёт его в bootstrap:
+
+```json
+{"elements": ["exordos_s3", "exordos_db"]}
+```
+
+Явно заданные параметры `--elements` заменяют список из конфига.
+Если поле отсутствует или содержит пустой список, используется стандартный
+bootstrap.
