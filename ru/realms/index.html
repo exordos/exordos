@@ -6189,6 +6189,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#элементы-при-bootstrap-управляемого-реалма" class="md-nav__link">
+    Элементы при bootstrap управляемого реалма
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6367,6 +6374,14 @@
 <div class="highlight"><pre><span></span><code><span class="go">exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gMjfYDwg" \</span>
 <span class="go">  --refresh_token "...bZ1BENYKg" MyTown</span>
 </code></pre></div>
+<h2 id="элементы-при-bootstrap-управляемого-реалма">Элементы при bootstrap управляемого реалма<a class="headerlink" href="#элементы-при-bootstrap-управляемого-реалма" title="Permanent link">#</a></h2>
+<p>При <code>exordos bootstrap --realm-spec /etc/exordos/realm_spec.json</code> CLI читает
+поле <code>elements</code> как список названий и передаёт его в bootstrap:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"elements"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"exordos_s3"</span><span class="p">,</span><span class="w"> </span><span class="s2">"exordos_db"</span><span class="p">]}</span>
+</code></pre></div>
+<p>Явно заданные параметры <code>--elements</code> заменяют список из конфига.
+Если поле отсутствует или содержит пустой список, используется стандартный
+bootstrap.</p>
 
 
 
