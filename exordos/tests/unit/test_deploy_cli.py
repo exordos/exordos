@@ -172,6 +172,10 @@ class TestFindOrUpdateRepository:
             "url": "http://host:1/exordos-elements/",
         }
         assert data["sync_mode"] == "copy"
+        # The dev repo must not carry a live refresh timer: its driver_spec
+        # points at an ephemeral server, so a non-zero rate becomes a retry
+        # storm against a dead URL. 0 is the core's "disabled" sentinel.
+        assert data["refresh_rate"] == 0
 
     def test_creates_when_missing_with_default_project_id(self) -> None:
         client = MagicMock()
@@ -219,6 +223,8 @@ class TestFindOrUpdateRepository:
         assert args[2] == "existing"
         assert args[3]["priority"] == 100
         assert args[3]["sync_mode"] == "lazy"
+        # Re-pointing an existing dev repo must keep refresh disabled.
+        assert args[3]["refresh_rate"] == 0
 
     def test_multiple_matches_raises(self) -> None:
         client = MagicMock()
