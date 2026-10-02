@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import sys
 import typing as tp
 import uuid as sys_uuid
@@ -371,15 +372,37 @@ exordos.add_command(utils_commands.introduction)
 exordos.add_command(utils_commands.ready_api)
 
 
-if __name__ == "__main__":
+def _explain(status: tp.Any, body: str) -> str:
+    """What the server said, not the envelope it said it in.
+
+    The API answers a refused policy with a readable ``message``; printed
+    raw, a ``PolicyNotAuthorized`` reads as a malformed request instead of
+    a missing permission.
+    """
+    try:
+        payload = json.loads(body)
+    except ValueError:
+        payload = None
+    if isinstance(payload, dict) and payload.get("message"):
+        detail = str(payload["message"])
+        kind = payload.get("type")
+        if kind and str(kind) not in detail:
+            detail = f"{kind}: {detail}"
+    else:
+        detail = body.strip() or "<empty response>"
+    return f"Error: [{status}] {detail}"
+
+
+def main() -> None:
+    """Run the CLI and report server errors with their response details."""
     error_message = ""
     try:
         exordos()
     except bazooka_exc.BaseHTTPException as e:
-        error_message = f"Error: [{e.code}] {e.cause.response.text}"
+        error_message = _explain(e.code, e.cause.response.text)
     except RequestException as e:
         if e.response is not None:
-            error_message = f"Error: [{e.response.status_code}] {e.response.text}"
+            error_message = _explain(e.response.status_code, e.response.text)
         else:
             error_message = f"Error: {e}"
     except (ValueError, FileNotFoundError, exordos_exc.ExordosException) as e:
@@ -390,3 +413,7 @@ if __name__ == "__main__":
         if error_message:
             click.secho(error_message, fg="red")
             sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
