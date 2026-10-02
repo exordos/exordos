@@ -24,6 +24,29 @@ import typing as tp
 from exordos.builder import base
 
 
+def _ignore_matching(
+    root: str, patterns: list[str]
+) -> tp.Callable[[str, list[str]], list[str]]:
+    """Build a `shutil.copytree` ignore callable for the exclude patterns.
+
+    Patterns are matched against the path relative to the copied root, so
+    `.venv` excludes the checkout's own virtualenv and not a nested one.
+    """
+
+    def _ignore(dirpath: str, names: list[str]) -> list[str]:
+        ignored: set[str] = set()
+
+        for pattern in patterns:
+            pattern = pattern.lstrip("/")
+            for name in names:
+                rel_path = os.path.relpath(os.path.join(dirpath, name), root)
+                if fnmatch.fnmatch(rel_path, pattern):
+                    ignored.add(name)
+        return list(ignored)
+
+    return _ignore
+
+
 class LocalPathDependency(base.AbstractDependency):
     """Local path dependency item."""
 
@@ -46,25 +69,15 @@ class LocalPathDependency(base.AbstractDependency):
         """Local path to the dependency."""
         return self._local_path
 
-    def _ignore_func(self, dirpath: str, names: list[str]) -> list[str]:
-        # Ignore files based on the exclude patterns.
-        ignored: set[str] = set()
-
-        for pattern in self._exclude:
-            pattern = pattern.lstrip("/")
-            for name in names:
-                rel_path = os.path.relpath(os.path.join(dirpath, name), self._path)
-                if fnmatch.fnmatch(rel_path, pattern):
-                    ignored.add(name)
-        return list(ignored)
-
     def fetch(self, output_dir: str) -> None:
         """Fetch the dependency."""
         path = os.path.normpath(self._path)
 
         if os.path.isdir(path):
             name = os.path.basename(path)
-            ignore_func = self._ignore_func if self._exclude else None
+            ignore_func = (
+                _ignore_matching(self._path, self._exclude) if self._exclude else None
+            )
             shutil.copytree(path, os.path.join(output_dir, name), ignore=ignore_func)
             self._local_path = os.path.join(output_dir, name)
         else:
@@ -101,6 +114,7 @@ class LocalEnvPathDependency(base.AbstractDependency):
         img_dest: str,
         work_dir: str,
         optional: bool = False,
+        exclude: list[str] | None = None,
     ) -> None:
         super().__init__()
         self._env_path = env_path
@@ -109,6 +123,7 @@ class LocalEnvPathDependency(base.AbstractDependency):
         self._work_dir = work_dir
         self._local_path = None
         self._path = None
+        self._exclude = exclude or []
 
     @property
     def img_dest(self) -> str | None:
@@ -137,7 +152,10 @@ class LocalEnvPathDependency(base.AbstractDependency):
 
         if os.path.isdir(path):
             name = os.path.basename(path)
-            shutil.copytree(path, os.path.join(output_dir, name))
+            ignore_func = (
+                _ignore_matching(path, self._exclude) if self._exclude else None
+            )
+            shutil.copytree(path, os.path.join(output_dir, name), ignore=ignore_func)
             self._local_path = os.path.join(output_dir, name)
         else:
             shutil.copy(path, output_dir)
@@ -159,12 +177,14 @@ class LocalEnvPathDependency(base.AbstractDependency):
         env_path = dep_config["path"]["env"]
         optional = dep_config.get("optional", False)
         img_dest = dep_config["dst"]
+        exclude = dep_config.get("exclude", [])
 
         return cls(
             env_path=env_path,
             img_dest=img_dest,
             optional=optional,
             work_dir=work_dir,
+            exclude=exclude,
         )
 
 
