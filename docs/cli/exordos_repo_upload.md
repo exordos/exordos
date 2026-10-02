@@ -3,6 +3,9 @@
 
 Upload element to repository
 
+Uploading a version already present in the selected repository succeeds without
+uploading it again. A matching version in another repository does not skip upload.
+
 ## Usage
 
 ```console
