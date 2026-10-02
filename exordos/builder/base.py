@@ -224,7 +224,19 @@ class Element:
 
     def name(self, exordos_dir: pathlib.Path) -> str | None:
         with open(exordos_dir / self.manifest, "r") as f:
-            manifest = yaml.safe_load(f)
+            text = f.read()
+        try:
+            manifest = yaml.safe_load(text)
+        except yaml.YAMLError:
+            if not str(self.manifest).endswith((".jinja2", ".j2")):
+                raise
+            # A template with statements (`{% if %}`) is not YAML until it
+            # is rendered; only its name is wanted here, so anything the
+            # template reads may be missing.
+            import jinja2
+
+            env = jinja2.Environment(undefined=jinja2.ChainableUndefined)
+            manifest = yaml.safe_load(env.from_string(text).render())
         return manifest.get("name")
 
     @classmethod
