@@ -136,3 +136,67 @@ push:
 ```bash
 exordos push -c exordos/exordos.push.yaml
 ```
+
+### Пример: push в репозиторий элементов реалма
+
+Управляемый реалм отдаёт репозиторий элементов со своего узла, по каталогу
+на проект, по адресу `https://<домен реалма>/repo/<project_id>`. Push в него
+делается драйвером `realm`: он подписывает каждый запрос токеном входа в
+реалм и ведёт индекс репозитория, который читает core реалма.
+
+1. Добавьте реалм в CLI и войдите в него (см. [Реалмы](realms.ru.md)).
+   Вход должен иметь право загрузки: пользователь проекта `<project_id>`
+   (у роли проекта `owner` есть `repo.repository.upload`) или администратор
+   без проекта.
+
+2. Добавьте цель push в `exordos/exordos.push.yaml`:
+
+    ```yaml
+    push:
+      my-realm:
+        driver: realm
+        url: https://6def3e.exordos.io/repo/<project_id>
+        realm: my-realm     # необязательно: по умолчанию текущий реалм
+    ```
+
+3. Соберите и отправьте:
+
+    ```bash
+    exordos build -f .
+    exordos push -c exordos/exordos.push.yaml -t my-realm
+    ```
+
+    То же без файла конфигурации:
+
+    ```bash
+    exordos push --driver realm \
+      --driver-params url=https://6def3e.exordos.io/repo/<project_id> \
+      --driver-params realm=my-realm
+    ```
+
+    `exordos push -f` заменяет уже загруженную версию.
+
+4. Установите элемент в реалме. Первая загрузка проекта регистрирует
+   его репозиторий в core реалма (`realm-<префикс project_id>`), поэтому
+   элемент появляется там в течение минуты:
+
+    ```bash
+    exordos --realm my-realm elements install my-element
+    ```
+
+    Для реалма, созданного до того, как core реалма стал получать адрес
+    репозитория, репозиторий нужно один раз на проект добавить вручную по
+    адресу, по которому core его видит: узел реалма через шлюз вложенной сети
+    (по умолчанию `10.40.0.1`).
+
+    ```bash
+    exordos --realm my-realm repo add -p <project_id> -n realm-local \
+      --refresh-rate 60 --sync-mode copy \
+      --repo-url http://10.40.0.1:8081/repo/<project_id>/exordos-elements/
+    ```
+
+Образы в собранном манифесте указаны через URN и разрешаются через
+репозиторий, из которого пришёл элемент. Манифесту, который сам пишет URL
+артефакта, например `{{ repository }}/<element>/{{ version }}/artifacts/site.tar.zst`,
+этот адрес нужен при сборке:
+`exordos build --manifest-var repository=http://10.40.0.1:8081/repo/<project_id>/exordos-elements`.

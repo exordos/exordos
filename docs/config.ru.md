@@ -35,8 +35,18 @@ repositories:
   local-repo:
     driver: nginx
     url: http://10.20.0.2:8080/repo/
+  realm-repo:
+    driver: realm
+    url: https://<realm domain>/repo/<project_id>
+    realm: production
 developer_key_path: ~/.ssh/id_rsa.pub
 ```
+
+Репозиторий `realm` — это репозиторий элементов, который управляемый realm
+отдаёт по адресу `https://<домен realm>/repo/<project_id>`. Загрузка идёт с
+токеном текущего контекста реалма `realm` (без `realm` — текущего реалма):
+токеном этого проекта или токеном без проекта с правом загрузки. Драйвер
+также ведёт индекс репозитория, который читает core реалма.
 
 Вы можете изменить путь к файлу конфигурации, установив аргумент командной строки `--config`.
 
