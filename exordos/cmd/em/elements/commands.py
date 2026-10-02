@@ -451,6 +451,15 @@ def install_cmd(
         name = manifest_data.get("name")
         e_version = manifest_data.get("version")
 
+        installed = base_client.list_entities(client, c.ELEMENT_COLLECTION, name=name)
+        if installed:
+            raise click.ClickException(
+                f"Element {name} is already installed ("
+                f"{installed[0].get('version')}) — use "
+                f"`exordos em ee update {uuid_or_name_or_path}` to move it to "
+                f"{e_version}"
+            )
+
         driver_spec = {"kind": "database"}
         repository = repo_utils.ensure_repository(
             client,

@@ -229,16 +229,38 @@ def do_upload(
 
     wait_for_repository_active(client, entity_uuid, timeout)
 
-    base_client.action_entity(
-        client,
-        c.REPOSITORY_COLLECTION,
-        "upload",
-        entity_uuid,
-        element_name=name,
-        element_version=version,
-        manifest=manifest_data,
-        description=description,
-    )
+    def version_exists():
+        elements = base_client.list_entities(
+            client, c.REPOSITORY_ELEMENT_COLLECTION, name=name, version=version
+        )
+        return any(extract_repository_uuid(e) == str(entity_uuid) for e in elements)
+
+    if version_exists():
+        click.echo(
+            f"Element {click.style(f'{name}:{version}', fg='green')} is "
+            "already in the repository"
+        )
+        return
+    try:
+        base_client.action_entity(
+            client,
+            c.REPOSITORY_COLLECTION,
+            "upload",
+            entity_uuid,
+            element_name=name,
+            element_version=version,
+            manifest=manifest_data,
+            description=description,
+        )
+    except bazooka_exc.ConflictError:
+        # Another upload may have published the same version after our check.
+        if not version_exists():
+            raise
+        click.echo(
+            f"Element {click.style(f'{name}:{version}', fg='green')} is "
+            "already in the repository"
+        )
+        return
     click.echo(
         f"Element {click.style(f'{name}:{version}', fg='green')} was uploaded "
         f"successfully to repository {click.style(repository, fg='green')}"

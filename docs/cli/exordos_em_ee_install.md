@@ -3,6 +3,9 @@
 
 Install element
 
+Installing a manifest whose element is already installed stops before upload and
+suggests `exordos em ee update`.
+
 ## Usage
 
 ```console
