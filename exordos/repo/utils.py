@@ -408,6 +408,17 @@ def ensure_repository(
     creating/deleting an ephemeral one each time) so an already-installed
     element's provenance never depends on a repository that no longer
     exists.
+
+    Periodic refresh is disabled (``refresh_rate = 0``). The dev repo's
+    ``driver_spec`` points at a server that only exists for the duration of
+    a deploy -- a temporary local HTTP server in local mode, or a build
+    output that is re-pointed on the next deploy in push mode. A non-zero
+    refresh rate arms a timer that, once due, keeps re-fetching that
+    long-dead URL: the core advances ``next_refresh`` only on a successful
+    refresh, so a dead upstream turns every reconcile tick into a failed
+    fetch and an endless retry storm. The repository is actualized by the
+    deploy itself, so it needs no timer. ``0`` is the core's explicit
+    "disabled" sentinel; a large value is not -- it is a live timer.
     """
     existing = find_repository(client, name)
 
@@ -420,7 +431,7 @@ def ensure_repository(
                 "driver_spec": driver_spec,
                 "priority": priority,
                 "sync_mode": sync_mode,
-                "refresh_rate": 31536000,
+                "refresh_rate": 0,
             },
         )
 
@@ -433,7 +444,7 @@ def ensure_repository(
             "name": name,
             "description": "Managed by `exordos deploy`",
             "priority": priority,
-            "refresh_rate": 31536000,
+            "refresh_rate": 0,
             "sync_mode": sync_mode,
             "driver_spec": driver_spec,
         },
