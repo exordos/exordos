@@ -31,9 +31,10 @@ FIELDS_MAP = {
     "Project": "project_id",
     "Name": "name",
     "Email": "email",
-    "Certificate": "certificate",
+    "Domains": lambda x: ", ".join(x.get("domains") or []),
     "Status": "status",
 }
+CERTIFICATE_METHODS = ("dns_core",)
 
 certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
@@ -68,12 +69,39 @@ certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     default="",
     help="Description of the certificate",
 )
+@click.option(
+    "-e",
+    "--email",
+    type=str,
+    required=True,
+    help="Email address to use for the certificate",
+)
+@click.option(
+    "-d",
+    "--domain",
+    "domains",
+    type=str,
+    multiple=True,
+    required=True,
+    help="Domain of the certificate, wildcards are allowed. Can be repeated",
+)
+@click.option(
+    "-m",
+    "--method",
+    type=click.Choice(CERTIFICATE_METHODS),
+    default=CERTIFICATE_METHODS[0],
+    show_default=True,
+    help="Method (provider) to issue and manage the certificate",
+)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
     name: str,
     description: str,
+    email: str,
+    domains: tuple[str, ...],
+    method: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -84,6 +112,9 @@ def add_cmd(
         "project_id": str(project_id),
         "name": name,
         "description": description,
+        "email": email,
+        "domains": list(domains),
+        "method": {"kind": method},
     }
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(entity)
@@ -117,12 +148,29 @@ def add_cmd(
     default=None,
     help="Description of the certificate",
 )
+@click.option(
+    "-e",
+    "--email",
+    type=str,
+    default=None,
+    help="Email address to use for the certificate",
+)
+@click.option(
+    "-d",
+    "--domain",
+    "domains",
+    type=str,
+    multiple=True,
+    help="Domain of the certificate, replaces the current list. Can be repeated",
+)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
     project_id: sys_uuid.UUID | None,
     name: str | None,
     description: str | None,
+    email: str | None,
+    domains: tuple[str, ...],
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -132,6 +180,10 @@ def update_cmd(
         data["name"] = name
     if description is not None:
         data["description"] = description
+    if email is not None:
+        data["email"] = email
+    if domains:
+        data["domains"] = list(domains)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 
