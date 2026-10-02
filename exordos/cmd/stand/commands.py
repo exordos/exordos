@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import fnmatch
 import hashlib
 import ipaddress
 import json
@@ -40,6 +39,7 @@ from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
 from exordos.cmd.compute.hypervisors import commands as hv_commands
+from exordos.cmd.compute.hypervisors.commands import _domains_for_backup
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile
@@ -1380,33 +1380,6 @@ def _start_validation_type(start: str | None) -> time.struct_time | None:
         return time.strptime(start, "%H:%M:%S")
     except ValueError:
         raise click.UsageError("Invalid '--start' format. Use HH:MM:SS, e.g., 16:00:00")
-
-
-def _domains_for_backup(
-    names: tp.List[str] | None = None,
-    exclude_names: tp.List[str] | None = None,
-    raise_on_domain_absence: bool = False,
-) -> tp.List[str]:
-    domains = set(libvirt.list_domains())
-    names = set(names or [])
-    exclude_names = set(exclude_names or [])
-
-    # Check if the specified domains exist
-    if raise_on_domain_absence and (names - domains):
-        diff = ", ".join(names - domains)
-        raise click.UsageError(f"Domains {diff} not found")
-
-    if names:
-        domains &= names
-
-    if exclude_names:
-        domains = {
-            d
-            for d in domains
-            if not any(fnmatch.fnmatch(d, pattern) for pattern in exclude_names)
-        }
-
-    return list(domains)
 
 
 @click.command("backup", help="Backup the current installation")
