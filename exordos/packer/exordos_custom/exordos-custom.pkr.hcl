@@ -34,6 +34,11 @@ variable img_format {
   default = "raw"
 }
 
+variable ssh_username {
+  type    = string
+  default = "ubuntu"
+}
+
 variable base_image_url {
   type    = string
   default = "https://repo.exordos.com/exordos-base/latest/exordos-base.qcow2"
@@ -69,7 +74,7 @@ source "qemu" "exordos-custom" {
   headless                  = true
   qemu_binary               = "qemu-system-x86_64"
   ssh_timeout               = "30s"
-  ssh_username              = "ubuntu"
+  ssh_username              = var.ssh_username
   ssh_clear_authorized_keys = true
   temporary_key_pair_name   = "packer"
   qemuargs                  = [["-serial", "stdio"]]
@@ -93,8 +98,8 @@ sudo rm -fr /var/log/*
 # sudo rm -f /etc/ssh/*host*key*
 
 # Add developer keys
-sudo mkdir -p /home/ubuntu/.ssh
-[[ -f /tmp/__dev_keys ]] && sudo mv /tmp/__dev_keys /home/ubuntu/.ssh/authorized_keys
+sudo mkdir -p "$HOME/.ssh"
+[[ -f /tmp/__dev_keys ]] && sudo mv /tmp/__dev_keys "$HOME/.ssh/authorized_keys"
 
 # Tmp files
 sudo rm -rf /tmp/* /var/tmp/*
