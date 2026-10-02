@@ -82,6 +82,32 @@ class TestBuilder:
         assert builder.select_element("app2") is True
         assert builder._elements == [app2]
 
+    def test_select_element_reads_the_name_of_a_template_with_statements(
+        self, tmp_path
+    ) -> None:
+        work_dir = tmp_path / "work"
+        output_dir = tmp_path / "output"
+        work_dir.mkdir()
+        output_dir.mkdir()
+        (work_dir / "app.yaml.j2").write_text(
+            "{% set on = flag is defined and flag %}\n"
+            'name: "app"\n'
+            "{% if on %}\n"
+            'image: "{{ images.app }}"\n'
+            "{% endif %}\n"
+        )
+        app = base.Element(manifest=pathlib.Path("app.yaml.j2"))
+        builder = SimpleBuilder(
+            exordos_dir=work_dir,
+            deps=[],
+            elements=[app],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=output_dir,
+        )
+
+        assert builder.select_element("app") is True
+
     def test_select_element_returns_false_for_unknown_name(self, tmp_path) -> None:
         work_dir = tmp_path / "work"
         output_dir = tmp_path / "output"
