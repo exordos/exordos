@@ -53,6 +53,20 @@ Contributing to the project is highly appreciated! However, some rules should be
 - After the changes are completed and **tested**, a Pull Request should be created with a clear description of the new functionality. Add one of the project maintainers as a reviewer.
 - Changes can be merged only after receiving approval from one of the project maintainers.
 
+## Rawstor storage
+
+Run `exordos storages add --name storage1` on the storage host. It installs
+and starts a local OST; the core agent starts that storage's MDS on port 7776.
+For another storage, pass `--mds-port 7778` or enter an unused port when prompted.
+Use `--endpoint ost://<storage-ip>:7777` to override the advertised OST address,
+and `--location file:///data/rawstor` to choose its backing store. Multiple OSTs
+on one host need distinct `--endpoint` ports and backing stores.
+
+`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `37203739770`.
+The same run supplies OST, vhost, librawstor and the Python wheel. For a released
+version, set `RAWSTOR_VERSION=<version>`; `RAWSTOR_ARTIFACT_RUN` becomes empty
+by default. CI artifacts expire; use a release version for long-lived installs.
+
 ## Local test environment on Ubuntu
 
 The test environments require a working Python 3 installation. Check both command names:

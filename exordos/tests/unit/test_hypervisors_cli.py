@@ -725,9 +725,7 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
-        venv_mock.assert_called_once_with(
-            _FAKE_AGENT_TARGET.venv_path, with_rawstor=True
-        )
+        venv_mock.assert_not_called()
         rawstor_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
         group_mock.assert_called_once_with(True)
 
@@ -1032,7 +1030,12 @@ class TestAgentSetup:
         venv_path = tmp_path / "agent-home" / "venv"
         venv_path.mkdir(parents=True)
 
-        with patch.object(hv_commands, "run_command") as run_mock:
+        with (
+            patch.object(hv_commands, "run_command") as run_mock,
+            patch.object(
+                hv_commands, "prepare_rawstor_wheel", return_value="/tmp/rawstor.whl"
+            ),
+        ):
             hv_commands.install_agent_venv(str(venv_path), with_rawstor=True)
 
         run_mock.assert_called_once_with(
@@ -1041,7 +1044,7 @@ class TestAgentSetup:
                 f"{venv_path}/bin/pip",
                 "install",
                 "gcl_sdk[libvirt]",
-                hv_commands.RAWSTOR_WHEEL_URL,
+                "/tmp/rawstor.whl",
             ]
         )
 
@@ -1109,14 +1112,17 @@ class TestAgentSetup:
 
 class TestInstallRawstorPackages:
     """Tests for install_rawstor_packages: downloads and installs the
-    given rawstor .deb packages via dpkg + apt-get -f."""
+    given rawstor .deb packages with dependencies via apt-get."""
 
     def test_downloads_and_installs_each_package(self) -> None:
         version = hv_commands.RAWSTOR_VERSION
         base_url = f"{hv_commands.RAWSTOR_RELEASES_URL}/v{version}"
         deb_dir = "/tmp/rawstor-packages"
 
-        with patch.object(hv_commands, "run_command") as run_mock:
+        with (
+            patch.object(hv_commands, "run_command") as run_mock,
+            patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", ""),
+        ):
             hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"])
 
         assert run_mock.call_args_list == [
@@ -1131,22 +1137,22 @@ class TestInstallRawstorPackages:
             ),
             mock_call(
                 [
-                    "dpkg",
-                    "-i",
+                    "apt-get",
+                    "install",
+                    "-y",
                     f"{deb_dir}/librawstor_{version}_amd64.deb",
                     f"{deb_dir}/rawstor-ost_{version}_amd64.deb",
                 ],
-                sudo=False,
-            ),
-            mock_call(
-                ["apt-get", "install", "-f", "-y"],
                 env=dict(DEBIAN_FRONTEND="noninteractive"),
                 sudo=False,
             ),
         ]
 
     def test_passes_sudo_through(self) -> None:
-        with patch.object(hv_commands, "run_command") as run_mock:
+        with (
+            patch.object(hv_commands, "run_command") as run_mock,
+            patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", ""),
+        ):
             hv_commands.install_rawstor_packages(["librawstor"], add_sudo=True)
 
         assert all(c.kwargs.get("sudo") is True for c in run_mock.call_args_list)
@@ -1251,9 +1257,7 @@ class TestAllowApparmorAccessToRawstorSockets:
         ):
             hv_commands.allow_apparmor_access_to_rawstor_sockets(add_sudo=True)
 
-        run_mock.assert_called_once_with(
-            ["systemctl", "reload", "apparmor"], sudo=True
-        )
+        run_mock.assert_called_once_with(["systemctl", "reload", "apparmor"], sudo=True)
 
 
 class TestReadExistingConfig:
@@ -1533,3 +1537,44 @@ class TestResolveAgentInstallTarget:
                 orch_endpoint="http://10.20.0.2:11011",
                 status_endpoint="http://10.20.0.2:11012",
             )
+
+
+class TestRawstorArtifacts:
+    def test_ci_artifact_packages_use_the_pinned_run_and_install_dependencies(self):
+        with patch.object(hv_commands, "run_command") as run:
+            hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"], True)
+        commands = [c.args[0] for c in run.call_args_list]
+        assert [
+            "wget",
+            f"{hv_commands.RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip",
+            "-O",
+            "/tmp/rawstor-packages/librawstor.deb.zip",
+        ] in commands
+        assert [
+            "python3",
+            "-m",
+            "zipfile",
+            "-e",
+            "/tmp/rawstor-packages/librawstor.deb.zip",
+            "/tmp/rawstor-packages",
+        ] in commands
+        assert commands[-1] == [
+            "apt-get",
+            "install",
+            "-y",
+            "/tmp/rawstor-packages/librawstor_99.0.0_amd64.deb",
+            "/tmp/rawstor-packages/rawstor-ost_99.0.0_amd64.deb",
+        ]
+
+    def test_ci_wheel_is_extracted_before_pip_installs_it(self):
+        with (
+            patch.object(
+                hv_commands.tempfile, "mkdtemp", return_value="/tmp/rawstor-wheel-test"
+            ),
+            patch.object(hv_commands, "run_command") as run,
+        ):
+            wheel = hv_commands.prepare_rawstor_wheel()
+        assert wheel.endswith(
+            "rawstor-99.0.0+0.5ab494a-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+        )
+        assert run.call_args.args[0][:4] == ["python3", "-m", "zipfile", "-e"]
