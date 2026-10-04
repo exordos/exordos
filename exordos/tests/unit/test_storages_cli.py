@@ -13,7 +13,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import json
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -199,24 +198,6 @@ class TestInitCmdRegistration:
         assert result.exit_code != 0
         assert "--type" in result.output
 
-    def test_installs_gcl_sdk_without_the_libvirt_extra(
-        self, _patch_common_init_deps
-    ) -> None:
-        runner = CliRunner()
-        fake_provisioner = MagicMock(return_value=({"kind": "rawstor"}, []))
-        with patch.dict(
-            storages_commands.STORAGE_TYPE_PROVISIONERS, {"rawstor": fake_provisioner}
-        ):
-            result = runner.invoke(
-                storages_commands.init_cmd, ["--type", "rawstor"], obj=_obj()
-            )
-
-        assert result.exit_code == 0, result.output
-        _patch_common_init_deps.assert_called_once_with(
-            _FAKE_AGENT_TARGET.venv_path,
-            packages=["gcl_sdk", hv_commands.RAWSTOR_WHEEL_URL],
-        )
-
     def test_without_add_skips_registration(self, _patch_common_init_deps) -> None:
         runner = CliRunner()
         fake_provisioner = MagicMock(return_value=({"kind": "rawstor"}, []))
@@ -234,7 +215,7 @@ class TestInitCmdRegistration:
         assert result.exit_code == 0, result.output
         add_cmd_mock.assert_not_called()
 
-    def test_add_invokes_add_cmd_with_the_provisioned_spec(
+    def test_add_invokes_add_cmd_to_provision_and_register_once(
         self, _patch_common_init_deps
     ) -> None:
         runner = CliRunner()
@@ -283,14 +264,131 @@ class TestInitCmdRegistration:
         add_cmd_mock.assert_called_once()
         kwargs = add_cmd_mock.call_args.kwargs
         assert "kind=rawstor" in kwargs["driver_spec"]
-        assert "endpoint=ost://10.0.0.5:7777" in kwargs["driver_spec"]
-        assert kwargs["storage_pools"] == json.dumps(storage_pools)
+        assert kwargs["speed"] == "HOT"
+        fake_provisioner.assert_not_called()
 
-        write_config_mock.assert_called_once()
-        assert write_config_mock.call_args.kwargs["driver_name"] == (
-            "StorageClusterAgentDriver"
+        write_config_mock.assert_not_called()
+        register_mock.assert_not_called()
+
+
+class TestAddCmd:
+    def _invoke(self, clusters, args=(), input=None):
+        with (
+            patch.object(storages_commands.base_client, "get_user_api_client"),
+            patch.object(
+                storages_commands.base_client, "list_entities", return_value=clusters
+            ),
+            patch.object(storages_commands.base_client, "add_entity") as add_mock,
+            patch.object(storages_commands, "show_data"),
+            patch.object(storages_commands, "_require_local_privileges"),
+            patch.object(
+                storages_commands,
+                "_detect_local_endpoint",
+                return_value="ost://10.0.0.5:7777",
+            ),
+            patch.object(
+                storages_commands,
+                "provision_rawstor_cluster",
+                return_value=({"kind": "rawstor", "location": "file:///data"}, []),
+            ) as provision_mock,
+        ):
+            result = CliRunner().invoke(
+                storages_commands.add_cmd, list(args), obj=_obj(), input=input
+            )
+        return result, add_mock, provision_mock
+
+    def test_first_storage_provisions_local_ost_and_registers_core_mds(self):
+        result, add_mock, provision_mock = self._invoke([])
+        assert result.exit_code == 0, result.output
+        data = add_mock.call_args.args[2]
+        assert data["driver_spec"]["endpoint"] == "mds://10.20.0.2:7776/"
+        assert data["driver_spec"]["ost_endpoint"] == "ost://10.0.0.5:7777"
+        assert str(provision_mock.call_args.kwargs["cluster_uuid"]) == data["uuid"]
+
+    def test_second_storage_prompts_for_another_mds_port(self):
+        clusters = [
+            {"driver_spec": {"kind": "rawstor", "endpoint": "mds://10.20.0.2:7776/"}}
+        ]
+        result, add_mock, _ = self._invoke(clusters, input="7778\n")
+        assert result.exit_code == 0, result.output
+        assert "MDS port" in result.output
+        assert (
+            add_mock.call_args.args[2]["driver_spec"]["endpoint"]
+            == "mds://10.20.0.2:7778/"
         )
-        register_mock.assert_called_once()
-        assert register_mock.call_args.kwargs["capabilities"] == (
-            storages_commands.STORAGE_CLUSTER_AGENT_CAPABILITIES
+
+    def test_duplicate_port_is_rejected_before_provisioning(self):
+        clusters = [
+            {"driver_spec": {"kind": "rawstor", "endpoint": "mds://core:7776/"}}
+        ]
+        result, add_mock, provision_mock = self._invoke(
+            clusters, ["--mds-port", "7776"]
+        )
+        assert result.exit_code != 0
+        assert "already used" in result.output
+        provision_mock.assert_not_called()
+        add_mock.assert_not_called()
+
+    def test_explicit_port_does_not_prompt(self):
+        clusters = [
+            {"driver_spec": {"kind": "rawstor", "endpoint": "mds://core:7776/"}}
+        ]
+        result, add_mock, _ = self._invoke(clusters, ["--mds-port", "7778"])
+        assert result.exit_code == 0, result.output
+        assert (
+            add_mock.call_args.args[2]["driver_spec"]["endpoint"]
+            == "mds://10.20.0.2:7778/"
+        )
+
+    def test_duplicate_ost_is_rejected_before_provisioning(self):
+        clusters = [
+            {
+                "driver_spec": {
+                    "kind": "rawstor",
+                    "endpoint": "mds://core:7776/",
+                    "ost_endpoint": "ost://10.0.0.5:7777",
+                }
+            }
+        ]
+        result, add_mock, provision_mock = self._invoke(
+            clusters, ["--mds-port", "7778"]
+        )
+        assert result.exit_code != 0
+        assert "already belongs" in result.output
+        provision_mock.assert_not_called()
+        add_mock.assert_not_called()
+
+
+class TestInstancedOST:
+    def test_provision_creates_per_storage_service_and_backing_store(self):
+        import uuid
+
+        cluster_uuid = uuid.uuid4()
+        with (
+            patch.object(hv_commands, "install_rawstor_packages"),
+            patch.object(storages_commands, "write_root_owned_file") as write,
+            patch.object(storages_commands, "run_command") as run,
+            patch.object(
+                storages_commands, "_backing_store_capacity_gb", return_value=100
+            ),
+        ):
+            spec, _ = storages_commands.provision_rawstor_cluster(
+                log=hv_commands.ClickLogger(),
+                add_sudo=True,
+                location=None,
+                speed="HOT",
+                ephemeral=False,
+                endpoint="ost://10.0.0.5:7779",
+                core_endpoint="http://10.20.0.2/api/core",
+                cluster_uuid=cluster_uuid,
+            )
+        assert spec["location"] == f"file:///var/lib/rawstor/{cluster_uuid}"
+        content, path = write.call_args.args
+        assert path == f"/etc/systemd/system/rawstor-ost@{cluster_uuid}.service"
+        assert "--bind=10.0.0.5:7779" in content
+        assert f"ReadWritePaths=/var/lib/rawstor/{cluster_uuid}" in content
+        assert any(
+            c.args[0]
+            == ["systemctl", "enable", "--now", f"rawstor-ost@{cluster_uuid}.service"]
+            for c in run.call_args_list
         )
