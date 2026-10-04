@@ -1340,6 +1340,59 @@ def snapshot_cmd(
     click.secho(f"Created {len(snapshots)} snapshots", fg="green")
 
 
+def _list_zfs_snapshots() -> list[str]:
+    out = subprocess.check_output(
+        ["sudo", "zfs", "list", "-H", "-t", "snapshot", "-o", "name"]
+    )
+    return sorted(out.decode().splitlines())
+
+
+@hypervisors_group.command(
+    "snapshot-list", help="List all ZFS snapshots on the local hypervisor"
+)
+def snapshot_list_cmd() -> None:
+    snapshots = _list_zfs_snapshots()
+    if not snapshots:
+        click.secho("No ZFS snapshots found", fg="yellow")
+        return
+    for snapshot in snapshots:
+        click.echo(snapshot)
+
+
+@hypervisors_group.command(
+    "snapshot-delete", help="Delete ZFS snapshots on the local hypervisor"
+)
+@click.argument("snapshots", nargs=-1)
+@click.option("--all", "delete_all", is_flag=True, help="Delete all ZFS snapshots")
+@click.option("-y", "--yes", is_flag=True, help="Do not ask for confirmation")
+def snapshot_delete_cmd(
+    snapshots: tuple[str, ...], delete_all: bool, yes: bool
+) -> None:
+    if bool(snapshots) == delete_all:
+        raise click.UsageError("Specify full snapshot names or --all, but not both.")
+
+    existing = _list_zfs_snapshots()
+    if delete_all:
+        selected = existing
+    else:
+        missing = sorted(set(snapshots) - set(existing))
+        if missing:
+            raise click.UsageError(f"Snapshots not found: {', '.join(missing)}")
+        selected = sorted(set(snapshots))
+
+    if not selected:
+        click.secho("No ZFS snapshots found", fg="yellow")
+        return
+    for snapshot in selected:
+        click.echo(snapshot)
+    if not yes:
+        click.confirm(f"Delete {len(selected)} ZFS snapshots?", abort=True)
+
+    for snapshot in selected:
+        subprocess.check_call(["sudo", "zfs", "destroy", snapshot])
+        click.secho(f"{snapshot}: deleted", fg="green")
+
+
 @hypervisors_group.command(
     "snapshot-restore", help="Restore libvirt domain disks from ZFS snapshots"
 )

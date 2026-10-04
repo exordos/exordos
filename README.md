@@ -44,6 +44,19 @@ Exordos CLI bridges the gap between your local development environment and the E
 
 > **For a full overview of all commands and configuration options, visit the [documentation](https://exordos.github.io/exordos/).**
 
+## Local hypervisor ZFS snapshots
+
+Run these commands on the hypervisor host (sudo access is required):
+
+```bash
+exordos compute hypervisors snapshot-list
+exordos compute hypervisors snapshot-delete pool/volume@snap-name
+exordos compute hypervisors snapshot-delete --all
+```
+
+Listing includes all ZFS snapshots on the host, including snapshots unrelated to
+libvirt domains. Deletion asks for confirmation; add `--yes` to skip it.
+
 # 💡 Contributing
 
 Contributing to the project is highly appreciated! However, some rules should be followed for successful inclusion of new changes in the project:
