@@ -35,12 +35,6 @@ from exordos.common.run import run_command
 from exordos.common.table import show_data
 from exordos.logger import ClickLogger
 
-# Must match gcl_sdk's StorageClusterAgentDriver.get_capabilities()
-# (MetaCoordinatorAgentDriver's default: the keys of its __model_map__) -
-# pre-declaring it here lets the scheduler place this cluster onto the
-# agent right away, instead of waiting for its first self-registration.
-STORAGE_CLUSTER_AGENT_CAPABILITIES = ["storage_cluster"]
-
 DISK_SPEEDS = ["COLD", "WARM", "HOT"]
 
 # rawstor-ost's own default backing store (systemd/rawstor-ost.service in
@@ -48,6 +42,7 @@ DISK_SPEEDS = ["COLD", "WARM", "HOT"]
 RAWSTOR_DEFAULT_BACKING_STORE = "file:///var/lib/rawstor"
 RAWSTOR_OST_CONF_PATH = "/etc/rawstor-ost.conf"
 RAWSTOR_OST_ENDPOINT_PORT = 7777
+RAWSTOR_MDS_ENDPOINT_PORT = 7776
 
 ENTITY = "storage"
 ENTITY_COLLECTION = c.STORAGE_CLUSTER_COLLECTION
@@ -104,7 +99,7 @@ storages_group = create_entity_group(
     help=(
         "Driver specification key/value pairs, e.g. --driver-spec kind=rawstor "
         "--driver-spec location=file:///var/lib/rawstor --driver-spec "
-        "endpoint=ost://10.0.0.5:7777 --driver-spec speed=HOT "
+        "ost_endpoint=ost://10.0.0.5:7777 --driver-spec speed=HOT "
         "--driver-spec ephemeral=false"
     ),
 )
@@ -119,6 +114,18 @@ storages_group = create_entity_group(
         '"speed": "HOT", "ephemeral": false, "capacity_usable": 100}]\''
     ),
 )
+@click.option("--location", default=None, help="Local OST backing store URI")
+@click.option("--endpoint", default=None, help="Advertised OST URI (ost://host:port)")
+@click.option(
+    "--mds-port",
+    type=click.IntRange(1, 65535),
+    default=None,
+    help="Core MDS port; first storage defaults to 7776",
+)
+@click.option(
+    "--speed", type=click.Choice(DISK_SPEEDS, case_sensitive=False), default="HOT"
+)
+@click.option("--ephemeral/--no-ephemeral", default=False)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -126,15 +133,70 @@ def add_cmd(
     description: str,
     driver_spec: tuple[str, ...],
     storage_pools: str | None,
+    location: str | None,
+    endpoint: str | None,
+    mds_port: int | None,
+    speed: str,
+    ephemeral: bool,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
+    spec = utils.convert_input_multiply(driver_spec)
+    if spec.get("kind", "rawstor") == "rawstor":
+        clusters = base_client.list_entities(client, ENTITY_COLLECTION)
+        used_ports = {
+            urlparse(c["driver_spec"]["endpoint"]).port
+            for c in clusters
+            if c.get("driver_spec", {}).get("kind") == "rawstor"
+            and urlparse(c["driver_spec"].get("endpoint", "")).scheme == "mds"
+        }
+        if mds_port is None:
+            if used_ports:
+                mds_port = click.prompt(
+                    "MDS port for this storage on the core",
+                    type=click.IntRange(1, 65535),
+                )
+            else:
+                mds_port = RAWSTOR_MDS_ENDPOINT_PORT
+        if mds_port in used_ports:
+            raise click.ClickException(
+                f"Core MDS port {mds_port} is already used by another storage"
+            )
+        core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
+        if not core_host:
+            raise click.ClickException("The core API endpoint must include a hostname")
+        core_host = f"[{core_host}]" if ":" in core_host else core_host
+        ost_endpoint = (
+            endpoint
+            or spec.get("ost_endpoint")
+            or _detect_local_endpoint(ctx.obj.auth_data["endpoint"])
+        )
+        for cluster in clusters:
+            if cluster.get("driver_spec", {}).get("ost_endpoint") == ost_endpoint:
+                raise click.ClickException(
+                    f"OST {ost_endpoint} already belongs to another storage"
+                )
+        _require_local_privileges()
+        spec, pools = provision_rawstor_cluster(
+            log=ClickLogger(),
+            add_sudo=not hyper_commands.is_root(),
+            location=location or spec.get("location"),
+            speed=spec.get("speed", speed).upper(),
+            ephemeral=spec.get("ephemeral", ephemeral),
+            endpoint=ost_endpoint,
+            core_endpoint=ctx.obj.auth_data["endpoint"],
+            cluster_uuid=uuid,
+        )
+        if storage_pools is None:
+            storage_pools = json.dumps(pools)
+        spec["ost_endpoint"] = ost_endpoint
+        spec["endpoint"] = f"mds://{core_host}:{mds_port}/"
     data: dict = {
         "uuid": str(uuid),
         "name": name,
         "description": description,
-        "driver_spec": utils.convert_input_multiply(driver_spec),
+        "driver_spec": spec,
     }
     if storage_pools is not None:
         data["storage_pools"] = json.loads(storage_pools)
@@ -204,6 +266,19 @@ def update_cmd(
     show_data(entity)
 
 
+def _require_local_privileges() -> None:
+    if not hyper_commands._check_debian_like():
+        raise click.ClickException(
+            "This command is only supported on Debian-based systems."
+        )
+    if (
+        not hyper_commands.is_root()
+        and subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0
+    ):
+        if subprocess.call(["sudo", "-v"]) != 0:
+            raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
+
+
 def _detect_local_endpoint(
     core_endpoint: str, port: int = RAWSTOR_OST_ENDPOINT_PORT
 ) -> str:
@@ -248,22 +323,77 @@ def provision_rawstor_cluster(
     ephemeral: bool,
     endpoint: str | None,
     core_endpoint: str,
+    cluster_uuid: sys_uuid.UUID | None = None,
 ) -> tuple[dict, list[dict]]:
     """Install and configure a local rawstor-ost, returning
     (driver_spec, storage_pools) ready to register via `storages add`.
     """
+    final_location = location or (
+        f"file:///var/lib/rawstor/{cluster_uuid}"
+        if cluster_uuid
+        else RAWSTOR_DEFAULT_BACKING_STORE
+    )
+    final_endpoint = endpoint or _detect_local_endpoint(core_endpoint)
+
+    parsed_endpoint = urlparse(final_endpoint)
+    if (
+        parsed_endpoint.scheme != "ost"
+        or not parsed_endpoint.hostname
+        or not parsed_endpoint.port
+        or parsed_endpoint.path not in ("", "/")
+        or parsed_endpoint.query
+        or parsed_endpoint.fragment
+        or any(c.isspace() for c in final_endpoint + final_location)
+    ):
+        raise click.ClickException(
+            "Use an OST URI ost://host:port and a backing store URI without whitespace"
+        )
     log.info("Installing rawstor packages...")
     hyper_commands.install_rawstor_packages(["librawstor", "rawstor-ost"], add_sudo)
 
-    final_location = location or RAWSTOR_DEFAULT_BACKING_STORE
-    final_endpoint = endpoint or _detect_local_endpoint(core_endpoint)
-
     log.info("Configuring rawstor-ost's bind address and backing store...")
-    conf_lines = [f"BIND_ADDR={final_endpoint.removeprefix('ost://')}\n"]
-    if location is not None:
-        conf_lines.append(f"LOCATION={location}\n")
-    write_root_owned_file("".join(conf_lines), RAWSTOR_OST_CONF_PATH, mode="644")
-    run_command(["systemctl", "restart", "rawstor-ost"], sudo=add_sudo)
+    if cluster_uuid is None:
+        conf_lines = [f"BIND_ADDR={final_endpoint.removeprefix('ost://')}\n"]
+        if location is not None:
+            conf_lines.append(f"LOCATION={location}\n")
+        write_root_owned_file("".join(conf_lines), RAWSTOR_OST_CONF_PATH, mode="644")
+        run_command(["systemctl", "restart", "rawstor-ost"], sudo=add_sudo)
+    else:
+        # The package's singleton must not take the default instance's port.
+        run_command(["systemctl", "disable", "--now", "rawstor-ost"], sudo=add_sudo)
+        if final_location.startswith("file://"):
+            backing_path = final_location.removeprefix("file://")
+            run_command(["mkdir", "-p", backing_path], sudo=add_sudo)
+            run_command(["chown", "rawstor:rawstor", backing_path], sudo=add_sudo)
+        else:
+            backing_path = "/var/lib/rawstor"
+        unit_name = f"rawstor-ost@{cluster_uuid}.service"
+        unit = f"""[Unit]
+Description=Rawstor OST for Exordos storage {cluster_uuid}
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rawstor
+Group=rawstor
+StateDirectory=rawstor/{cluster_uuid}
+ExecStart=/usr/bin/rawstor-ost --bind={parsed_endpoint.netloc} {final_location}
+Restart=always
+RestartSec=5
+ProtectSystem=strict
+ReadWritePaths={backing_path}
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+"""
+        write_root_owned_file(unit, f"/etc/systemd/system/{unit_name}", mode="644")
+        run_command(["systemctl", "daemon-reload"], sudo=add_sudo)
+        run_command(["systemctl", "enable", "--now", unit_name], sudo=add_sudo)
+        run_command(["systemctl", "restart", unit_name], sudo=add_sudo)
 
     driver_spec = {
         "kind": "rawstor",
@@ -372,16 +502,10 @@ STORAGE_TYPE_PROVISIONERS: dict[str, tp.Callable] = {
     help="Description of the storage cluster",
 )
 @click.option(
-    "--pool-agent-name",
-    "agent_name",
-    type=str,
-    default=hyper_commands.DEFAULT_AGENT_NAME,
-    show_default=True,
-    help=(
-        "Name of the universal agent to run StorageClusterAgentDriver "
-        "under. The default targets the standard agent (merging in if "
-        "this host is also a registered compute node or hypervisor)."
-    ),
+    "--mds-port",
+    type=click.IntRange(1, 65535),
+    default=None,
+    help="Core MDS port used with --add",
 )
 @click.pass_context
 def init_cmd(
@@ -395,93 +519,45 @@ def init_cmd(
     uuid: sys_uuid.UUID | None,
     name: str | None,
     description: str,
-    agent_name: str,
+    mds_port: int | None,
 ) -> None:
     """Initialize a storage node with all required components."""
-    if not hyper_commands._check_debian_like():
-        raise click.ClickException(
-            "This command is only supported on Debian-based systems."
-        )
-
-    if subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0:
-        click.secho("Sudo privileges are required to proceed.", fg="yellow")
-        if subprocess.call(["sudo", "-v"]) != 0:
-            raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
+    _require_local_privileges()
 
     log = ClickLogger()
     add_sudo = not hyper_commands.is_root()
     speed = speed.upper()
 
     core_endpoint = ctx.obj.auth_data["endpoint"]
-    core_host = urlparse(core_endpoint).hostname
-    orch_endpoint = f"http://{core_host}:{hyper_commands.ORCH_API_PORT}"
-    status_endpoint = f"http://{core_host}:{hyper_commands.STATUS_API_PORT}"
-    agent_target = hyper_commands.resolve_agent_install_target(
-        agent_name=agent_name,
-        orch_endpoint=orch_endpoint,
-        status_endpoint=status_endpoint,
-    )
-
-    log.info("Setting up the local universal agent's virtualenv...")
-    hyper_commands.install_agent_venv(
-        agent_target.venv_path,
-        packages=["gcl_sdk", hyper_commands.RAWSTOR_WHEEL_URL],
-    )
-
-    log.info(f"Provisioning storage backend ({storage_type})...")
-    provisioner = STORAGE_TYPE_PROVISIONERS[storage_type]
-    driver_spec, storage_pools = provisioner(
-        log=log,
-        add_sudo=add_sudo,
-        location=location,
-        speed=speed,
-        ephemeral=ephemeral,
-        endpoint=endpoint,
-        core_endpoint=core_endpoint,
-    )
-
+    final_uuid = uuid if uuid is not None else hyper_commands._default_hypervisor_uuid()
     if add:
-        log.info("Registering storage cluster...")
-        final_uuid = (
-            uuid if uuid is not None else hyper_commands._default_hypervisor_uuid()
-        )
-        final_name = (
-            name if name is not None else hyper_commands._default_hypervisor_name()
-        )
-
-        # Same as running `storages add` right after `init`.
+        # Reuse add's port and endpoint checks before touching the local OST.
         ctx.invoke(
             add_cmd,
             uuid=final_uuid,
-            name=final_name,
+            name=name
+            if name is not None
+            else hyper_commands._default_hypervisor_name(),
             description=description,
-            driver_spec=tuple(f"{k}={v}" for k, v in driver_spec.items()),
-            storage_pools=json.dumps(storage_pools),
+            driver_spec=(f"kind={storage_type}",),
+            location=location,
+            endpoint=endpoint,
+            mds_port=mds_port,
+            speed=speed,
+            ephemeral=ephemeral,
         )
-
-        log.info("Setting up the local universal agent...")
-        client = base_client.get_user_api_client(ctx.obj.auth_data)
-        node_uuid = hyper_commands.local_agent_node_uuid()
-        hyper_commands.reset_agent_meta_file(agent_target.meta_file)
-        private_key_path = hyper_commands.write_agent_config(
-            orch_endpoint=orch_endpoint,
-            status_endpoint=status_endpoint,
-            config_path=agent_target.config_path,
-            meta_file=agent_target.meta_file,
-            default_private_key_path=agent_target.default_private_key_path,
-            driver_name="StorageClusterAgentDriver",
-        )
-        base_client.register_agent_and_write_key(
-            client,
-            node_uuid,
-            private_key_path,
-            capabilities=STORAGE_CLUSTER_AGENT_CAPABILITIES,
-        )
-        hyper_commands.install_agent_systemd_unit(
-            exec_path=agent_target.exec_path,
-            config_path=agent_target.config_path,
-            unit_path=agent_target.unit_path,
-            unit_name=agent_target.unit_name,
+    else:
+        log.info(f"Provisioning storage backend ({storage_type})...")
+        provisioner = STORAGE_TYPE_PROVISIONERS[storage_type]
+        provisioner(
+            log=log,
+            add_sudo=add_sudo,
+            location=location,
+            speed=speed,
+            ephemeral=ephemeral,
+            endpoint=endpoint,
+            core_endpoint=core_endpoint,
+            cluster_uuid=final_uuid,
         )
 
     log.important("Storage environment initialized successfully")
