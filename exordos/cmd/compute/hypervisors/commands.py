@@ -22,6 +22,7 @@ import io
 import os
 import secrets
 import socket
+import tempfile
 import typing as tp
 from urllib.parse import urlparse
 import uuid as sys_uuid
@@ -380,7 +381,14 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
-RAWSTOR_VERSION = "0.2.11"
+RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "99.0.0")
+RAWSTOR_ARTIFACT_RUN = os.environ.get(
+    "RAWSTOR_ARTIFACT_RUN", "37203739770" if RAWSTOR_VERSION == "99.0.0" else ""
+)
+RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.5ab494a")
+RAWSTOR_ARTIFACTS_URL = (
+    f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
+)
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 # The bindings' abi3 wheel works unmodified across interpreter versions
 # (unlike the per-interpreter python3.X-rawstor system packages), so one
@@ -390,6 +398,21 @@ RAWSTOR_WHEEL_URL = (
     "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
 )
 
+if RAWSTOR_ARTIFACT_RUN:
+    RAWSTOR_WHEEL_URL = f"{RAWSTOR_ARTIFACTS_URL}/python3-rawstor.whl.zip"
+
+
+def prepare_rawstor_wheel() -> str:
+    if not RAWSTOR_ARTIFACT_RUN:
+        return RAWSTOR_WHEEL_URL
+    artifact_dir = tempfile.mkdtemp(prefix="rawstor-wheel-")
+    run_command(["mkdir", "-p", artifact_dir])
+    archive = f"{artifact_dir}/python3-rawstor.whl.zip"
+    run_command(["wget", RAWSTOR_WHEEL_URL, "-O", archive])
+    run_command(["python3", "-m", "zipfile", "-e", archive, artifact_dir])
+    wheel = f"{artifact_dir}/rawstor-{RAWSTOR_WHEEL_VERSION}-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+    return wheel
+
 
 def install_rawstor_packages(
     packages: tp.Sequence[str], add_sudo: bool = False
@@ -398,16 +421,27 @@ def install_rawstor_packages(
     deb_dir = "/tmp/rawstor-packages"
     run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
 
+    if RAWSTOR_ARTIFACT_RUN:
+        archive = f"{deb_dir}/librawstor.deb.zip"
+        run_command(
+            ["wget", f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip", "-O", archive],
+            sudo=add_sudo,
+        )
+        run_command(["python3", "-m", "zipfile", "-e", archive, deb_dir], sudo=add_sudo)
+
     deb_paths = []
     for package in packages:
         deb_name = f"{package}_{RAWSTOR_VERSION}_amd64.deb"
         url = f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/{deb_name}"
-        run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
+        if not RAWSTOR_ARTIFACT_RUN:
+            run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
         deb_paths.append(os.path.join(deb_dir, deb_name))
 
-    run_command(["dpkg", "-i", *deb_paths], sudo=add_sudo)
-    cmd = ["apt-get", "install", "-f", "-y"]
-    run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
+    run_command(
+        ["apt-get", "install", "-y", *deb_paths],
+        env=dict(DEBIAN_FRONTEND="noninteractive"),
+        sudo=add_sudo,
+    )
 
 
 def generate_node_private_key_base64() -> str:
@@ -625,6 +659,10 @@ def install_agent_venv(
         packages = ["gcl_sdk[libvirt]"]
         if with_rawstor:
             packages = [*packages, RAWSTOR_WHEEL_URL]
+
+    packages = [
+        prepare_rawstor_wheel() if p == RAWSTOR_WHEEL_URL else p for p in packages
+    ]
 
     if os.path.isdir(venv_path):
         run_command(["sudo", f"{venv_path}/bin/pip", "install", *packages])
