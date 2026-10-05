@@ -19,7 +19,7 @@ from unittest.mock import patch
 import pytest
 import rich_click as click
 
-from exordos.cmd.stand.commands import backup_cmd
+from exordos.cmd.backup.commands import backup_cmd
 
 
 class TestCmdBackup:
@@ -33,11 +33,11 @@ class TestCmdBackup:
         # Local backuper constructor should return our mock instance
         with (
             patch(
-                "exordos.cmd.stand.commands.backup_local.LocalQcowBackuper",
+                "exordos.cmd.backup.commands.backup_local.LocalQcowBackuper",
                 return_value=backuper_mock,
             ) as local_backuper_ctor,
             patch(
-                "exordos.cmd.stand.commands.domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=domains,
             ) as domains_for_backup,
             patch("exordos.utils.load_driver") as load_driver,
@@ -86,11 +86,11 @@ class TestCmdBackup:
                 return_value=backuper_mock,
             ) as load_driver,
             patch(
-                "exordos.cmd.stand.commands.domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=domains,
             ) as domains_for_backup,
             patch(
-                "exordos.cmd.stand.commands.backup_local.LocalQcowBackuper"
+                "exordos.cmd.backup.commands.backup_local.LocalQcowBackuper"
             ) as local_backuper_ctor,
         ):
             # Act
@@ -124,11 +124,11 @@ class TestCmdBackup:
 
         with (
             patch(
-                "exordos.cmd.stand.commands.backup_local.LocalQcowBackuper",
+                "exordos.cmd.backup.commands.backup_local.LocalQcowBackuper",
                 return_value=backuper_mock,
             ) as local_backuper_ctor,
             patch(
-                "exordos.cmd.stand.commands.domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=filtered_domains,
             ) as domains_for_backup,
             patch("exordos.utils.load_driver") as load_driver,
@@ -187,11 +187,11 @@ class TestCmdBackup:
         backuper_mock = MagicMock()
         with (
             patch(
-                "exordos.cmd.stand.commands.backup_local.LocalQcowBackuper",
+                "exordos.cmd.backup.commands.backup_local.LocalQcowBackuper",
                 return_value=backuper_mock,
             ),
             patch(
-                "exordos.cmd.stand.commands.backup_base.EncryptionCreds.validate_env",
+                "exordos.cmd.backup.commands.backup_base.EncryptionCreds.validate_env",
                 side_effect=ValueError("invalid env"),
             ),
         ):
@@ -222,19 +222,19 @@ class TestCmdBackup:
 
         with (
             patch(
-                "exordos.cmd.stand.commands.backup_local.LocalQcowBackuper",
+                "exordos.cmd.backup.commands.backup_local.LocalQcowBackuper",
                 return_value=backuper_mock,
             ),
             patch(
-                "exordos.cmd.stand.commands.domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=domains,
             ),
             patch(
-                "exordos.cmd.stand.commands.backup_base.EncryptionCreds.validate_env",
+                "exordos.cmd.backup.commands.backup_base.EncryptionCreds.validate_env",
                 return_value=None,
             ),
             patch(
-                "exordos.cmd.stand.commands.backup_base.EncryptionCreds.from_env",
+                "exordos.cmd.backup.commands.backup_base.EncryptionCreds.from_env",
                 return_value=encryption_obj,
             ),
         ):
@@ -275,22 +275,22 @@ class TestCmdBackup:
 
         with (
             patch(
-                "exordos.cmd.stand.commands.backup_local.LocalQcowBackuper",
+                "exordos.cmd.backup.commands.backup_local.LocalQcowBackuper",
                 return_value=backuper_mock,
             ),
             patch(
-                "exordos.cmd.stand.commands.domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=domains,
             ) as domains_for_backup,
             patch(
-                "exordos.cmd.stand.commands.time.time",
+                "exordos.cmd.backup.commands.time.time",
                 side_effect=[now_ts, now_ts],
             ),
             patch(
-                "exordos.cmd.stand.commands.time.localtime",
+                "exordos.cmd.backup.commands.time.localtime",
                 return_value=now_struct,
             ),
-            patch("exordos.cmd.stand.commands.time.sleep") as sleep_mock,
+            patch("exordos.cmd.backup.commands.time.sleep") as sleep_mock,
         ):
             # Make rotate raise to stop after first iteration
             backuper_mock.rotate.side_effect = SystemExit

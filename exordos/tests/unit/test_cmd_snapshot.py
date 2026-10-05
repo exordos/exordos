@@ -203,7 +203,7 @@ def test_snapshot_list_via_backup_does_not_start_backuper():
             "exordos.cmd.backup.commands.subprocess.check_output",
             return_value=b"pool/disk@snap1\n",
         ),
-        patch("exordos.cmd.stand.commands.backup_local.LocalQcowBackuper") as backuper,
+        patch("exordos.cmd.backup.commands.backup_local.LocalQcowBackuper") as backuper,
     ):
         result = CliRunner().invoke(exordos, ["backup", "snapshot-list"])
 
