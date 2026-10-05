@@ -25,10 +25,10 @@ Install OST packages and prepare the local agent; OSTs are started by reconcilia
 
   Local universal agent service instance to configure
 
-* `rawstor_version`:
+* `version`:
     * Type: text
     * Default: `none`
-    * Usage: `--rawstor-version`
+    * Usage: `--version`
 
   Override RAWSTOR_VERSION for installed packages
 
