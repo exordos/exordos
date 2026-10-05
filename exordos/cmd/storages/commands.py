@@ -364,7 +364,7 @@ def _prepare_local_storage_agent(ctx, agent=None):
 @click.option(
     "--agent",
     default=None,
-    help="Registered agent name or UUID; omit to configure the local agent",
+    help="Local agent service name or registered agent name/UUID; defaults to the local agent",
 )
 @click.option("--name", required=True, help="Storage node resource name")
 @click.option(
@@ -416,8 +416,15 @@ def nodes_add_cmd(
     description,
 ):
     client = _client(ctx)
-    if agent is None:
-        agent_uuid, node_uuid = _prepare_local_storage_agent(ctx)
+    local_agent = agent is None or (
+        not utils.is_valid_uuid(agent)
+        and hyper_commands._read_existing_config(
+            hyper_commands._agent_config_path(agent)
+        )
+        is not None
+    )
+    if local_agent:
+        agent_uuid, node_uuid = _prepare_local_storage_agent(ctx, agent)
         agent_entity = {
             "uuid": agent_uuid,
             "node": node_uuid,
@@ -429,7 +436,7 @@ def nodes_add_cmd(
         "capabilities", []
     ):
         raise click.ClickException(
-            "Agent does not support storage_node; run storages nodes add on that host without --agent"
+            "Agent does not support storage_node; run storages nodes add on that host with its local service name"
         )
     if bind_address is None:
         if endpoint:
