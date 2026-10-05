@@ -22,7 +22,6 @@ import io
 import os
 import secrets
 import socket
-import subprocess
 import typing as tp
 from urllib.parse import urlparse
 import uuid as sys_uuid
@@ -1140,6 +1139,8 @@ def init_cmd(
         raise click.ClickException(
             "This command is only supported on Debian-based systems."
         )
+
+    import subprocess
 
     if subprocess.call(["sudo", "-n", "true"], stderr=subprocess.DEVNULL) != 0:
         click.secho("Sudo privileges are required to proceed.", fg="yellow")
