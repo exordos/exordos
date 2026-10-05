@@ -137,12 +137,10 @@ def _validate_uri(value, scheme):
 @click.option("--name", required=True)
 @click.option("--uuid", type=click.UUID, default=None)
 @click.option("--description", default="")
-@click.option(
-    "--mds-host", default=None, help="Core address reachable from hypervisors"
-)
-@click.option("--mds-port", type=click.IntRange(1, 65535), default=None)
+@click.option("--host", default=None, help="Core address reachable from hypervisors")
+@click.option("--port", type=click.IntRange(1, 65535), default=None)
 @click.pass_context
-def clusters_add_cmd(ctx, storage_type, name, uuid, description, mds_host, mds_port):
+def clusters_add_cmd(ctx, storage_type, name, uuid, description, host, port):
     client = _client(ctx)
     clusters = base_client.list_entities(client, c.STORAGE_CLUSTER_COLLECTION)
     used_ports = {
@@ -150,21 +148,21 @@ def clusters_add_cmd(ctx, storage_type, name, uuid, description, mds_host, mds_p
     }
     if any(cluster["name"] == name for cluster in clusters):
         raise click.ClickException(f"Cluster {name} already exists")
-    if mds_port is None:
-        mds_port = (
+    if port is None:
+        port = (
             click.prompt("MDS port on the core", type=click.IntRange(1, 65535))
             if clusters
             else 7776
         )
-    if mds_port in used_ports:
-        raise click.ClickException(f"MDS port {mds_port} is already used")
-    host = mds_host or urlparse(ctx.obj.auth_data["endpoint"]).hostname
+    if port in used_ports:
+        raise click.ClickException(f"MDS port {port} is already used")
+    host = host or urlparse(ctx.obj.auth_data["endpoint"]).hostname
     if not host:
         raise click.ClickException(
-            "Specify --mds-host or a core API endpoint with a hostname"
+            "Specify --host or a core API endpoint with a hostname"
         )
     host = f"[{host}]" if ":" in host and not host.startswith("[") else host
-    endpoint = f"mds://{host}:{mds_port}/"
+    endpoint = f"mds://{host}:{port}/"
     _validate_uri(endpoint, "mds")
     entity = base_client.add_entity(
         client,
