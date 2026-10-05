@@ -1308,6 +1308,29 @@ class TestReadExistingConfig:
 class TestWriteAgentConfig:
     """Tests for write_agent_config: fresh-install vs merge-into-existing."""
 
+    @pytest.mark.parametrize("existing_payload", [None, "/custom/payload.json"])
+    def test_storage_agent_has_its_own_payload(self, tmp_path, existing_payload):
+        config_path = tmp_path / "agent.conf"
+        content = "[universal_agent]\ncaps_drivers = LocalPoolAgentDriver\n"
+        if existing_payload:
+            content += f"payload_path = {existing_payload}\n"
+        config_path.write_text(content)
+        with patch.object(hv_commands, "write_root_owned_file") as write:
+            hv_commands.write_agent_config(
+                orch_endpoint="http://core:11011",
+                status_endpoint="http://core:11012",
+                config_path=str(config_path),
+                meta_file="/var/lib/exordos/storage-agent/storage_node_meta.json",
+                driver_name="StorageNodeAgentDriver",
+                agent_uuid="11111111-1111-1111-1111-111111111111",
+            )
+        result = write.call_args.args[0]
+        expected = existing_payload or "/var/lib/exordos/storage-agent/payload.json"
+        assert f"payload_path = {expected}" in result
+        assert "uuid = 11111111-1111-1111-1111-111111111111" in result
+        assert "LocalPoolAgentDriver" in result
+        assert "StorageNodeAgentDriver" in result
+
     def test_writes_fresh_config_when_none_exists(self, tmp_path) -> None:
         config_path = str(tmp_path / "exordos_universal_agent.conf")
         written = {}

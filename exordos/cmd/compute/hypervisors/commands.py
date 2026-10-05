@@ -696,6 +696,7 @@ def write_agent_config(
     meta_file: str = AGENT_META_FILE,
     default_private_key_path: str = AGENT_PRIVATE_KEY_PATH,
     driver_name: str = "LocalPoolAgentDriver",
+    agent_uuid: str | None = None,
 ) -> str:
     """Configure the universal agent to (also) run the given capability driver.
 
@@ -720,6 +721,20 @@ def write_agent_config(
             existing, "universal_agent", "private_key_path", default_private_key_path
         )
         content = _merge_driver_into_config(existing, driver_name, meta_file)
+
+    if agent_uuid is not None:
+        parser = configparser.ConfigParser()
+        parser.read_string(content)
+        parser.set("universal_agent", "uuid", agent_uuid)
+        if not parser.has_option("universal_agent", "payload_path"):
+            parser.set(
+                "universal_agent",
+                "payload_path",
+                os.path.join(os.path.dirname(meta_file), "payload.json"),
+            )
+        buf = io.StringIO()
+        parser.write(buf)
+        content = buf.getvalue()
 
     # Explicit mode, not left to `sudo cp`'s default: a brand-new
     # destination inherits the source tempfile's mode (mkstemp -> 0600,
@@ -1113,7 +1128,8 @@ def local_agent_node_uuid(
         "hypervisor can attach rawstor-backed disks. Install rawstor-ost with "
         "`exordos storages nodes init --type rawstor` on this host or a separate "
         "storage node, then register it with "
-        "`exordos storages nodes add --cluster NAME --failure-domain-path PATH`."
+        "`exordos storages nodes add --cluster NAME --agent AGENT --name OST_NAME "
+        "--failure-domain-path PATH`."
     ),
 )
 @click.option(
