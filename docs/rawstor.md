@@ -100,6 +100,8 @@ Python binding and rawstor-vhost.
 ## Manage resources
 
 Clusters, nodes and pools support `add`, `delete`, `list`, `show` and `update`.
+`clusters show` omits the internal per-pool agent report (`storage_pools`);
+the cluster's aggregate capacity remains in `capacity_info`.
 Nodes and pools accept `list --cluster NAME`. Use a UUID where names are
 ambiguous across clusters.
 
