@@ -42,6 +42,22 @@ Update certificate
 
   Description of the certificate
 
+* `email`:
+    * Type: text
+    * Default: `none`
+    * Usage: `-e
+--email`
+
+  Email address to use for the certificate
+
+* `domains`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-d
+--domain`
+
+  Domain of the certificate, replaces the current list. Can be repeated
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -61,6 +77,8 @@ Update certificate
 │ --project-id   -p  UUID  Name of the project in which to deploy the certificate                                                                                                                                                                                                                         │
 │ --name         -n  TEXT  Name of the certificate                                                                                                                                                                                                                                                        │
 │ --description  -D  TEXT  Description of the certificate                                                                                                                                                                                                                                                 │
+│ --email        -e  TEXT  Email address to use for the certificate                                                                                                                                                                                                                                       │
+│ --domain       -d  TEXT  Domain of the certificate, replaces the current list. Can be repeated                                                                                                                                                                                                          │
 │ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
