@@ -371,8 +371,8 @@ class TestInitCmdRegistration:
 
     def test_add_with_rawstor_installs_packages_but_no_local_pool(self) -> None:
         """--with-rawstor only installs the vhost-attaching packages -
-        it doesn't claim a local rawstor pool (that's `storages init`'s
-        job now), so driver_spec must not carry rawstor_pools.
+        it doesn't claim a local rawstor pool (storage nodes are initialized
+        and registered separately), so driver_spec must not carry rawstor_pools.
         """
         runner = CliRunner()
         with (
