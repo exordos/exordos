@@ -24,6 +24,7 @@ import uuid as sys_uuid
 import rich_click as click
 
 from exordos import constants as c
+from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.base import create_entity_group
@@ -95,7 +96,7 @@ pools_group = create_entity_group(
         "Ephemeral": "ephemeral",
         "Mirrors": "mirrors",
         "Failure domain": "failure_domain",
-        "Chunk bytes": "chunk_size",
+        "Chunk size": lambda e: utils.human_readable_size(e["chunk_size"]),
     },
     group_name="pools",
     post_fetch_handler=_filter_cluster,
