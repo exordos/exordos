@@ -20,12 +20,12 @@ Create an OST on the selected agent and reconcile it into the cluster topology
 
   Cluster name or UUID
 
-* `agent` (REQUIRED):
+* `agent`:
     * Type: text
-    * Default: `sentinel.unset`
+    * Default: `none`
     * Usage: `--agent`
 
-  Universal agent name or UUID on the storage host
+  Registered agent name or UUID; omit to configure the local agent
 
 * `name` (REQUIRED):
     * Type: text

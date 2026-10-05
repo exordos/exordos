@@ -255,25 +255,36 @@ def _detect_local_endpoint(
     return f"ost://{local_ip}:{port}"
 
 
-@nodes_group.command(
-    "init",
-    help="Install OST packages and prepare the local agent; OSTs are started by reconciliation after add",
-)
+@nodes_group.command("init", help="Install OST packages on the local host")
 @click.option("--type", "storage_type", type=click.Choice(["rawstor"]), required=True)
 @click.option(
-    "--agent",
-    default=hyper_commands.DEFAULT_AGENT_NAME,
-    show_default=True,
-    help="Local universal agent service instance to configure",
+    "--version", default=None, help="Override RAWSTOR_VERSION for installed packages"
 )
-@click.option(
-    "--version",
-    default=None,
-    help="Override RAWSTOR_VERSION for installed packages",
-)
-@click.pass_context
-def init_cmd(ctx, storage_type, agent, version):
+def init_cmd(storage_type, version):
     _require_local_privileges()
+    add_sudo = not hyper_commands.is_root()
+    hyper_commands.install_rawstor_packages(
+        ["librawstor", "rawstor-ost"], add_sudo, version=version
+    )
+    run_command(
+        [
+            "apt-get",
+            "install",
+            "-y",
+            "python3-venv",
+            "zfsutils-linux",
+            "zfs-dkms",
+            f"linux-headers-{os.uname().release}",
+        ],
+        sudo=add_sudo,
+    )
+    ClickLogger().important("OST packages installed")
+
+
+def _prepare_local_storage_agent(ctx, agent=None):
+    _require_local_privileges()
+    agent = agent or hyper_commands.DEFAULT_AGENT_NAME
+    run_command(["modprobe", "zfs"], sudo=not hyper_commands.is_root())
     core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
     if not core_host:
         raise click.ClickException("Core API endpoint must contain a hostname")
@@ -298,29 +309,7 @@ def init_cmd(ctx, storage_type, agent, version):
         )
     elif agent != hyper_commands.DEFAULT_AGENT_NAME:
         agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent))
-    add_sudo = not hyper_commands.is_root()
-    hyper_commands.install_rawstor_packages(
-        ["librawstor", "rawstor-ost"], add_sudo, version=version
-    )
-    run_command(
-        [
-            "apt-get",
-            "install",
-            "-y",
-            "python3-venv",
-            "zfsutils-linux",
-            "zfs-dkms",
-            f"linux-headers-{os.uname().release}",
-        ],
-        sudo=add_sudo,
-    )
-    run_command(["modprobe", "zfs"], sudo=add_sudo)
     wheel = hyper_commands.RAWSTOR_WHEEL_URL
-    if version and version != hyper_commands.RAWSTOR_VERSION:
-        wheel = (
-            f"{hyper_commands.RAWSTOR_RELEASES_URL}/v{version}/rawstor-{version}"
-            "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
-        )
     hyper_commands.install_agent_venv(
         target.venv_path,
         packages=[os.environ.get("LOCAL_GENESIS_SDK_PATH", "gcl_sdk"), wheel],
@@ -343,15 +332,23 @@ def init_cmd(ctx, storage_type, agent, version):
         agent_uuid=str(agent_uuid),
         capabilities=["storage_node"],
     )
+    client = _client(ctx)
+    registered = base_client.get_entity(client, c.AGENT_COLLECTION, str(agent_uuid))
+    capabilities = registered.get("capabilities", {}).get("capabilities", [])
+    if "storage_node" not in capabilities:
+        base_client.update_entity(
+            client,
+            c.AGENT_COLLECTION,
+            str(agent_uuid),
+            {"capabilities": {"capabilities": [*capabilities, "storage_node"]}},
+        )
     hyper_commands.install_agent_systemd_unit(
         exec_path=target.exec_path,
         config_path=target.config_path,
         unit_path=target.unit_path,
         unit_name=target.unit_name,
     )
-    ClickLogger().important(
-        f"Storage host initialized; use nodes add --agent {agent_uuid} to create OSTs"
-    )
+    return str(agent_uuid), node_uuid
 
 
 @nodes_group.command(
@@ -360,7 +357,9 @@ def init_cmd(ctx, storage_type, agent, version):
 )
 @click.option("--cluster", required=True, help="Cluster name or UUID")
 @click.option(
-    "--agent", required=True, help="Universal agent name or UUID on the storage host"
+    "--agent",
+    default=None,
+    help="Registered agent name or UUID; omit to configure the local agent",
 )
 @click.option("--name", required=True, help="Storage node resource name")
 @click.option(
@@ -412,12 +411,20 @@ def nodes_add_cmd(
     description,
 ):
     client = _client(ctx)
-    agent_entity = base_client.get_entity(client, c.AGENT_COLLECTION, agent)
+    if agent is None:
+        agent_uuid, node_uuid = _prepare_local_storage_agent(ctx)
+        agent_entity = {
+            "uuid": agent_uuid,
+            "node": node_uuid,
+            "capabilities": {"capabilities": ["storage_node"]},
+        }
+    else:
+        agent_entity = base_client.get_entity(client, c.AGENT_COLLECTION, agent)
     if "storage_node" not in agent_entity.get("capabilities", {}).get(
         "capabilities", []
     ):
         raise click.ClickException(
-            "Agent does not support storage_node; run storages nodes init on that host"
+            "Agent does not support storage_node; run storages nodes add on that host without --agent"
         )
     if bind_address is None:
         if endpoint:
