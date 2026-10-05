@@ -395,7 +395,15 @@ def _select_current_element_by_name(
     return active_elements[0]
 
 
-@click.command("install", help="Install element")
+@click.command(
+    "install",
+    help=(
+        "Install element.\n\n"
+        "Installing an already installed element stops before upload and "
+        "suggests `exordos em ee update`. Repository installation state takes "
+        "precedence over runtime rows that remain during asynchronous uninstall."
+    ),
+)
 @click.option(
     "-v",
     "--version",
@@ -426,7 +434,7 @@ def install_cmd(
     timeout: float,
     uuid_or_name_or_path: str | None,
 ) -> None:
-    """Install element from repository API by UUID, name, or manifest path"""
+    """Install element from repository API by UUID, name, or manifest path."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if not uuid_or_name_or_path:
@@ -451,7 +459,14 @@ def install_cmd(
         name = manifest_data.get("name")
         e_version = manifest_data.get("version")
 
-        installed = base_client.list_entities(client, c.ELEMENT_COLLECTION, name=name)
+        catalog = base_client.list_entities(
+            client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
+        )
+        installed = [e for e in catalog if e.get("installation_state") == "INSTALLED"]
+        if not catalog:
+            installed = base_client.list_entities(
+                client, c.ELEMENT_COLLECTION, name=name
+            )
         if installed:
             raise click.ClickException(
                 f"Element {name} is already installed ("

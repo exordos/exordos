@@ -1,10 +1,9 @@
 
 # exordos_em_ee_install
 
-Install element
+Install element.
 
-Installing a manifest whose element is already installed stops before upload and
-suggests `exordos em ee update`.
+Installing an already installed element stops before upload and suggests `exordos em ee update`. Repository installation state takes precedence over runtime rows that remain during asynchronous uninstall.
 
 ## Usage
 
