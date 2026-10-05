@@ -283,9 +283,19 @@ def init_cmd(ctx, storage_type, agent_name, rawstor_version):
     hyper_commands.install_rawstor_packages(
         ["librawstor", "rawstor-ost"], add_sudo, version=rawstor_version
     )
-    # The package's standalone daemon is not an Exordos-managed OST.
-    run_command(["systemctl", "disable", "--now", "rawstor-ost"], sudo=add_sudo)
-    run_command(["apt-get", "install", "-y", "python3-venv"], sudo=add_sudo)
+    run_command(
+        [
+            "apt-get",
+            "install",
+            "-y",
+            "python3-venv",
+            "zfsutils-linux",
+            "zfs-dkms",
+            f"linux-headers-{os.uname().release}",
+        ],
+        sudo=add_sudo,
+    )
+    run_command(["modprobe", "zfs"], sudo=add_sudo)
     wheel = hyper_commands.RAWSTOR_WHEEL_URL
     if rawstor_version and rawstor_version != hyper_commands.RAWSTOR_VERSION:
         wheel = (

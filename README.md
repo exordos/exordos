@@ -64,8 +64,8 @@ Each cluster gets WARM persistent (two mirrors) and ephemeral (one mirror) pools
 sharing its physical capacity. Local qcow2 disks default to HOT ephemeral.
 See [Rawstor storage](docs/rawstor.md) for ports, policy CRUD and space accounting.
 
-`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `37239522275`.
-The same run supplies OST, vhost, librawstor and binding `99.0.0+0.4e3d1f3`.
+`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `37329790134`.
+The same run supplies OST, vhost, librawstor and binding `99.0.0+0.fe3340e`.
 
 ## Local test environment on Ubuntu
 
@@ -90,3 +90,10 @@ Tox uses `uv` for environment creation. In a sandbox or another restricted envir
 ```bash
 UV_CACHE_DIR="${TMPDIR:-/tmp}/uv-cache" tox -e develop
 ```
+
+OST and MDS instances use the rawstor package's systemd templates and per-instance
+configs under `/etc/rawstor/ost` and `/etc/rawstor/mds`. `storages nodes init`
+installs ZFS support; select an existing native backing with
+`nodes add --location zfs://POOL/DATASET`. Pools and datasets are provisioned
+separately. See the Rawstor storage guide above for service permissions and
+capacity isolation.
