@@ -827,7 +827,7 @@ def install_and_configure_rawstor(add_sudo: bool = False) -> None:
 
     Only librawstor + rawstor-vhost - this hypervisor attaches rawstor-backed
     vhost disks, it doesn't run a backing store of its own. rawstor-ost (and
-    everything about where the bytes actually live) is `storages init`'s job,
+    everything about where the bytes actually live) is `storages nodes init`'s job,
     whether that's this same host or a separate storage node.
     """
     install_rawstor_packages(["librawstor", "rawstor-vhost"], add_sudo)
@@ -1108,9 +1108,10 @@ def local_agent_node_uuid(
     default=False,
     help=(
         "Install rawstor packages (librawstor + rawstor-vhost) so this "
-        "hypervisor can attach rawstor-backed disks. Doesn't run a backing "
-        "store of its own - pair with `storages init` (on this host or a "
-        "separate storage node) for somewhere to actually schedule them onto."
+        "hypervisor can attach rawstor-backed disks. Install rawstor-ost with "
+        "`exordos storages nodes init --type rawstor` on this host or a separate "
+        "storage node, then register it with "
+        "`exordos storages nodes add --cluster NAME --failure-domain-path PATH`."
     ),
 )
 @click.option(
