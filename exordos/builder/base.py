@@ -20,6 +20,7 @@ import dataclasses
 import json
 import os
 import pathlib
+import re
 import typing as tp
 import uuid
 
@@ -224,8 +225,50 @@ class Element:
 
     def name(self, exordos_dir: pathlib.Path) -> str | None:
         with open(exordos_dir / self.manifest, "r") as f:
-            manifest = yaml.safe_load(f)
-        return manifest.get("name")
+            text = f.read()
+        if not str(self.manifest).endswith((".jinja2", ".j2")):
+            return yaml.safe_load(text).get("name")
+
+        import jinja2
+
+        template = jinja2.Environment().parse(text)
+        static_text = "".join(
+            "".join(
+                child.data if isinstance(child, jinja2.nodes.TemplateData) else "\0"
+                for child in node.nodes
+            )
+            if isinstance(node, jinja2.nodes.Output)
+            else "\0"
+            for node in template.body
+        )
+        pattern = r"(?m)^name[ \t]*:[^\r\n]*$"
+        source_names = re.findall(pattern, text)
+        names = re.findall(pattern, static_text)
+        if len(names) != 1 or names != source_names or "\0" in names[0]:
+            raise ValueError(
+                "Specify a static manifest name or use --manifest-var name=value"
+            )
+        following_line = next(
+            (
+                line
+                for line in text[re.search(pattern, text).end() :].splitlines()
+                if line.strip()
+                and not line.lstrip().startswith("#")
+                and not re.fullmatch(r"\{%.*?%\}|\{#.*?#\}", line.strip())
+            ),
+            "",
+        )
+        if following_line[:1].isspace():
+            raise ValueError(
+                "Specify a static single-line manifest name or use --manifest-var name=value"
+            )
+        manifest = yaml.safe_load(names[0])
+        name = manifest.get("name")
+        if not isinstance(name, str) or not name:
+            raise ValueError(
+                "Specify a static single-line manifest name or use --manifest-var name=value"
+            )
+        return name
 
     @classmethod
     def from_config(

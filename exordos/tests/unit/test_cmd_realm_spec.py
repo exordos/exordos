@@ -14,10 +14,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import json
+import pathlib
+from unittest import mock
 
+from click.testing import CliRunner
 import pytest
 import rich_click as click
 
+from exordos.cmd.stand import commands
 from exordos.cmd.stand.commands import _load_realm_spec
 
 
@@ -117,3 +121,63 @@ class TestLoadRealmSpec:
 
         with pytest.raises(click.ClickException, match="Failed to read"):
             _load_realm_spec(str(path))
+
+
+@pytest.mark.parametrize("elements", [None, "app", [1], [""], ["  "]])
+def test_load_realm_spec_rejects_invalid_elements(
+    tmp_path: pathlib.Path, elements: object
+) -> None:
+    spec = _valid_spec() | {"elements": elements}
+    path = tmp_path / "realm_spec.json"
+    path.write_text(json.dumps(spec))
+    with pytest.raises(click.UsageError, match="elements"):
+        _load_realm_spec(str(path))
+
+
+@pytest.mark.parametrize(
+    ("spec_elements", "cli_elements", "expected"),
+    [
+        (["exordos_s3", "exordos_db"], [], ["exordos_s3", "exordos_db"]),
+        (["exordos_s3"], ["exordos_db"], ["exordos_db"]),
+        ([], [], None),
+    ],
+)
+def test_bootstrap_uses_realm_spec_elements_unless_cli_overrides(
+    tmp_path: pathlib.Path,
+    spec_elements: list[str],
+    cli_elements: list[str],
+    expected: list[str] | None,
+) -> None:
+    spec = _valid_spec() | {
+        "elements": spec_elements,
+        "ssh_public_key": "ssh-ed25519 AAAA test",
+    }
+    path = tmp_path / "realm_spec.json"
+    path.write_text(json.dumps(spec))
+    inventory = mock.Mock(images=["core.raw"], manifests=["core.yaml"], version="1.0.0")
+    args = [
+        "--inventory",
+        "1.0.0",
+        "--launch-mode",
+        "core",
+        "--realm-spec",
+        str(path),
+        "--no-update-realm",
+        "--no-start",
+    ]
+    for name in cli_elements:
+        args.extend(["--elements", name])
+    with (
+        mock.patch.object(
+            commands, "get_element_inventory_from_url", return_value=inventory
+        ),
+        mock.patch.object(
+            commands, "_get_core_image_uri_from_manifest", return_value=None
+        ),
+        mock.patch.object(commands.subprocess, "call", return_value=0),
+        mock.patch.object(commands, "_bootstrap_core", return_value=None) as bootstrap,
+        mock.patch.object(commands, "_print_bootstrap_summary"),
+    ):
+        result = CliRunner().invoke(commands.bootstrap_cmd, args)
+    assert result.exit_code == 0, result.output
+    assert bootstrap.call_args.kwargs["elements"] == expected

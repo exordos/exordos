@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import sys
 import typing as tp
 import uuid as sys_uuid
@@ -85,7 +86,13 @@ def _get_otp_prompt(otp_code: str | None) -> str:
 @click.group(
     cls=ClickAliasedGroup,
     invoke_without_command=True,
-    help="Provides all the necessary tools for work with Exordos Platform",
+    help=(
+        "Provides all the necessary tools for work with Exordos Platform\n\n"
+        "API failures print to stderr the HTTP status and the server's error "
+        "type and message, then exit with a nonzero status. Responses without "
+        "a JSON error envelope print their response text. Terminal control "
+        "characters are escaped."
+    ),
 )
 @click.option(
     "--config",
@@ -371,22 +378,46 @@ exordos.add_command(utils_commands.introduction)
 exordos.add_command(utils_commands.ready_api)
 
 
-if __name__ == "__main__":
+def _explain(status: tp.Any, body: str) -> str:
+    """Format the HTTP status and response error details."""
+    try:
+        payload = json.loads(body)
+    except ValueError:
+        payload = None
+    if isinstance(payload, dict) and payload.get("message"):
+        detail = str(payload["message"])
+        kind = payload.get("type")
+        if kind and str(kind) not in detail:
+            detail = f"{kind}: {detail}"
+    else:
+        detail = body.strip() or "<empty response>"
+    return f"Error: [{status}] {detail}"
+
+
+def main() -> None:
+    """Run the CLI and report server errors with their response details."""
     error_message = ""
     try:
         exordos()
     except bazooka_exc.BaseHTTPException as e:
-        error_message = f"Error: [{e.code}] {e.cause.response.text}"
+        error_message = _explain(e.code, e.cause.response.text)
     except RequestException as e:
         if e.response is not None:
-            error_message = f"Error: [{e.response.status_code}] {e.response.text}"
+            error_message = _explain(e.response.status_code, e.response.text)
         else:
             error_message = f"Error: {e}"
     except (ValueError, FileNotFoundError, exordos_exc.ExordosException) as e:
         error_message = f"Error: {e}"
     except KeyboardInterrupt:
         error_message = "Error: Interrupted by user"
-    finally:
-        if error_message:
-            click.secho(error_message, fg="red")
-            sys.exit(1)
+    if error_message:
+        error_message = "".join(
+            char if char.isprintable() or char in "\n\t" else ascii(char)[1:-1]
+            for char in error_message
+        )
+        click.secho(error_message, fg="red", err=True)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
