@@ -420,7 +420,7 @@ def _prepare_local_storage_agent(ctx, agent=None, version=None):
 )
 @click.option(
     "--weight",
-    type=click.FloatRange(min=0, min_open=True),
+    type=click.IntRange(min=1, max=(1 << 64) - 1),
     default=1.0,
     show_default=True,
 )
@@ -491,7 +491,7 @@ def nodes_add_cmd(
 @click.option("--endpoint", default=None)
 @click.option("--bind", "bind_address", default=None)
 @click.option("--failure-domain-path", default=None)
-@click.option("--weight", type=click.FloatRange(min=0, min_open=True), default=None)
+@click.option("--weight", type=click.IntRange(min=1, max=(1 << 64) - 1), default=None)
 @click.pass_context
 def nodes_update_cmd(ctx, identifier, **kwargs):
     data = {key: value for key, value in kwargs.items() if value is not None}

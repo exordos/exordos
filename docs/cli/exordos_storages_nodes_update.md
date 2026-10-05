@@ -44,7 +44,7 @@ None
     * Usage: `--failure-domain-path`
 
 * `weight`:
-    * Type: float range
+    * Type: integer range
     * Default: `none`
     * Usage: `--weight`
 
