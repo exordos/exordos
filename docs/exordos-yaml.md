@@ -74,6 +74,7 @@ build:
             base_image_url: "https://example.com/my-image.qcow2"
             base_image_checksum: "file:https://example.com/SHA256SUMS"
             disk_size: "10G"
+            ssh_username: "ubuntu"
 
       manifest: manifests/my-element.yaml
 ```
@@ -84,8 +85,9 @@ as `base_image_checksum: "sha256:<image-sha256>"`. Set `disk_size` to at least
 the virtual size of the base image.
 
 The base image must support cloud-init's NoCloud datasource and SSH access for
-the `ubuntu` user. The profile injects a temporary SSH key through cloud-init
-and runs provisioning commands over SSH.
+the user specified by `override.ssh_username` (default: `ubuntu`). This user
+must have passwordless sudo. The profile injects a temporary SSH key through
+cloud-init and runs provisioning commands over SSH.
 
 Create `exordos/images/install.sh` with your provisioning commands. If no
 additional provisioning is needed, use:

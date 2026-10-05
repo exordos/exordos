@@ -74,6 +74,7 @@ build:
             base_image_url: "https://example.com/my-image.qcow2"
             base_image_checksum: "file:https://example.com/SHA256SUMS"
             disk_size: "10G"
+            ssh_username: "ubuntu"
 
       manifest: manifests/my-element.yaml
 ```
@@ -84,8 +85,10 @@ build:
 должно быть не меньше виртуального размера исходного образа.
 
 Исходный образ должен поддерживать источник данных NoCloud в cloud-init и
-доступ по SSH для пользователя `ubuntu`. Профиль передаёт временный SSH-ключ
-через cloud-init и выполняет команды настройки по SSH.
+доступ по SSH для пользователя, указанного в `override.ssh_username`
+(по умолчанию: `ubuntu`). Этот пользователь должен иметь возможность выполнять
+команды через sudo без пароля. Профиль передаёт временный SSH-ключ через
+cloud-init и выполняет команды настройки по SSH.
 
 Создайте `exordos/images/install.sh` с командами настройки. Если дополнительная
 настройка не требуется, достаточно:
