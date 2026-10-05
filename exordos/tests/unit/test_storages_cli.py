@@ -130,10 +130,11 @@ def test_cluster_ipv6_advertised_host(api):
         ),
     ],
 )
-def test_nodes_init_prepares_agent_without_starting_an_ost(
+def test_nodes_add_prepares_agent_without_starting_an_ost(
     api, monkeypatch, agent_name, existing, expected
 ):
     monkeypatch.setenv("LOCAL_GENESIS_SDK_PATH", "/source/gcl_sdk")
+    api.get.return_value = {"uuid": expected, "capabilities": {"capabilities": ["hypervisor"]}}
     target = SimpleNamespace(
         venv_path="/venv",
         exec_path="/venv/bin/agent",
@@ -166,9 +167,15 @@ def test_nodes_init_prepares_agent_without_starting_an_ost(
         patch.object(storage.base_client, "register_agent_and_write_key") as register,
         patch.object(storage, "run_command") as run,
     ):
-        result = invoke(["nodes", "init", "--type", "rawstor", "--agent", agent_name])
-    assert result.exit_code == 0, result.output
-    packages.assert_called_once_with(["librawstor", "rawstor-ost"], False, version=None)
+        storage._prepare_local_storage_agent(
+            SimpleNamespace(
+                obj=SimpleNamespace(
+                    auth_data={"endpoint": "http://10.100.0.2/api/core"}
+                )
+            ),
+            agent_name,
+        )
+    packages.assert_not_called()
     assert venv.call_args.kwargs["packages"] == [
         "/source/gcl_sdk",
         storage.hyper_commands.RAWSTOR_WHEEL_URL,
@@ -178,15 +185,12 @@ def test_nodes_init_prepares_agent_without_starting_an_ost(
     assert register.call_args.kwargs["agent_uuid"] == expected
     assert config.call_args.kwargs["agent_uuid"] == expected
     assert register.call_args.kwargs["capabilities"] == ["storage_node"]
+    api.update.assert_called_once()
+    assert api.update.call_args.args[3] == {
+        "capabilities": {"capabilities": ["hypervisor", "storage_node"]}
+    }
     agent_unit.assert_called_once()
     commands = [call.args[0] for call in run.call_args_list]
-    assert any(
-        command[:3] == ["apt-get", "install", "-y"]
-        and "zfsutils-linux" in command
-        and "zfs-dkms" in command
-        and any(arg.startswith("linux-headers-") for arg in command)
-        for command in commands
-    )
     assert ["modprobe", "zfs"] in commands
     assert all(
         not any("rawstor-ost@" in arg for arg in call.args[0])
@@ -348,3 +352,59 @@ def test_storage_groups_have_full_crud(group):
     assert result.exit_code == 0
     for command in ("add", "delete", "list", "show", "update"):
         assert command in result.output
+
+
+def test_nodes_init_only_installs_packages_without_core_configuration():
+    with (
+        patch.object(storage, "_require_local_privileges"),
+        patch.object(storage.hyper_commands, "is_root", return_value=True),
+        patch.object(storage.hyper_commands, "install_rawstor_packages") as packages,
+        patch.object(storage.hyper_commands, "resolve_agent_install_target") as target,
+        patch.object(storage.base_client, "get_user_api_client") as client,
+        patch.object(storage, "run_command") as run,
+    ):
+        result = CliRunner().invoke(
+            storage.storages_group,
+            ["nodes", "init", "--type", "rawstor", "--version", "1.2.3"],
+        )
+    assert result.exit_code == 0, result.output
+    packages.assert_called_once_with(
+        ["librawstor", "rawstor-ost"], False, version="1.2.3"
+    )
+    client.assert_not_called()
+    target.assert_not_called()
+    command = run.call_args.args[0]
+    assert command[:3] == ["apt-get", "install", "-y"]
+    assert "zfsutils-linux" in command
+    assert "zfs-dkms" in command
+    assert any(arg.startswith("linux-headers-") for arg in command)
+    run.assert_called_once()
+
+
+def test_nodes_add_configures_local_agent_when_omitted(api):
+    with (
+        patch.object(
+            storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
+        ) as prepare,
+        patch.object(
+            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
+        ),
+        patch.object(
+            storage, "_detect_local_endpoint", return_value="ost://10.100.0.1:7777"
+        ),
+    ):
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--name",
+                "ost1",
+                "--failure-domain-path",
+                "dc/server",
+            ]
+        )
+    assert result.exit_code == 0, result.output
+    prepare.assert_called_once()
+    assert api.add.call_args.args[2]["agent"] == NODE_UUID

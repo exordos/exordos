@@ -1,7 +1,7 @@
 
 # exordos_storages_nodes_init
 
-Install OST packages and prepare the local agent; OSTs are started by reconciliation after add
+Install OST packages on the local host
 
 ## Usage
 
@@ -17,13 +17,6 @@ Install OST packages and prepare the local agent; OSTs are started by reconcilia
     * Type: choice
     * Default: `sentinel.unset`
     * Usage: `--type`
-
-* `agent`:
-    * Type: text
-    * Default: `universal_agent`
-    * Usage: `--agent`
-
-  Local universal agent service instance to configure
 
 * `version`:
     * Type: text
