@@ -72,6 +72,27 @@ def _patch_common_init_deps():
         yield
 
 
+class TestPool0:
+    """Tests for exordos.cmd.compute.hypervisors.commands._pool0, which
+    backs the Speed/Ephemeral/Total/Available columns in `hypervisors list`.
+    """
+
+    def test_extracts_the_first_pool_field(self) -> None:
+        entity = {
+            "storage_pools": [
+                {"speed": "HOT", "ephemeral": False, "capacity_usable": 100},
+                {"speed": "COLD", "ephemeral": True, "capacity_usable": 50},
+            ]
+        }
+
+        assert hv_commands._pool0(entity, "speed") == "HOT"
+        assert hv_commands._pool0(entity, "capacity_usable") == 100
+
+    def test_defaults_to_unknown_without_storage_pools(self) -> None:
+        assert hv_commands._pool0({}, "speed") == "Unknown"
+        assert hv_commands._pool0({"storage_pools": []}, "speed") == "Unknown"
+
+
 class TestDetectLocalResources:
     """Tests for exordos.cmd.compute.hypervisors.commands._detect_local_cores
     and _detect_local_ram_mb.
@@ -347,6 +368,47 @@ class TestInitCmdRegistration:
         assert kwargs["avail_cores"] == 8
         assert kwargs["avail_ram"] == 16384
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
+
+    def test_add_with_rawstor_installs_packages_but_no_local_pool(self) -> None:
+        """--with-rawstor only installs the vhost-attaching packages -
+        it doesn't claim a local rawstor pool (storage nodes are initialized
+        and registered separately), so driver_spec must not carry rawstor_pools.
+        """
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+            patch.object(hv_commands, "add_libvirt_qemu_to_rawstor_group"),
+            patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
+            patch.object(hv_commands, "_detect_local_cores", return_value=8),
+            patch.object(hv_commands, "_detect_local_ram_mb", return_value=16384),
+            patch.object(
+                hv_commands, "local_agent_node_uuid", return_value="node-uuid"
+            ),
+            patch.object(hv_commands, "add_cmd") as add_cmd_mock,
+            patch.object(hv_commands.base_client, "get_user_api_client"),
+            patch.object(hv_commands, "reset_agent_meta_file"),
+            patch.object(hv_commands, "write_agent_config"),
+            patch.object(hv_commands.base_client, "register_agent_and_write_key"),
+            patch.object(hv_commands, "install_agent_systemd_unit"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--add", "--with-rawstor"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        rawstor_mock.assert_called_once()
+        kwargs = add_cmd_mock.call_args.kwargs
+        assert not any(f.startswith("rawstor_pools=") for f in kwargs["driver_spec"])
 
     def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
         """A local hypervisor's `init --add` must register this host's
@@ -638,6 +700,57 @@ class TestInitCmdRegistration:
         for call in get_client_mock.call_args_list:
             assert call.args[0] == auth_data
 
+    def test_with_rawstor_installs_hypervisor_package_set(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv") as venv_mock,
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "is_root", return_value=False),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+            patch.object(
+                hv_commands, "add_libvirt_qemu_to_rawstor_group"
+            ) as group_mock,
+            patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                ["--with-rawstor"],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        venv_mock.assert_not_called()
+        rawstor_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
+        group_mock.assert_called_once_with(True)
+
+    def test_without_with_rawstor_skips_rawstor_install(self) -> None:
+        runner = CliRunner()
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "install_agent_venv"),
+            patch.object(
+                hv_commands,
+                "resolve_agent_install_target",
+                return_value=_FAKE_AGENT_TARGET,
+            ),
+            patch.object(hv_commands, "_configure_libvirt"),
+            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
+        ):
+            result = runner.invoke(
+                hv_commands.init_cmd,
+                [],
+                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
+            )
+
+        assert result.exit_code == 0, result.output
+        rawstor_mock.assert_not_called()
+
 
 class TestAgentConfigContent:
     """Tests for the pure content-building helpers:
@@ -908,6 +1021,33 @@ class TestAgentSetup:
             ["sudo", f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"]
         )
 
+    def test_install_agent_venv_adds_rawstor_wheel_when_with_rawstor(
+        self, tmp_path
+    ) -> None:
+        """--with-rawstor pulls in rawstor's abi3 wheel alongside
+        gcl_sdk[libvirt], so the exordos_local_hyper driver can
+        `import rawstor` straight out of the venv."""
+        venv_path = tmp_path / "agent-home" / "venv"
+        venv_path.mkdir(parents=True)
+
+        with (
+            patch.object(hv_commands, "run_command") as run_mock,
+            patch.object(
+                hv_commands, "prepare_rawstor_wheel", return_value="/tmp/rawstor.whl"
+            ),
+        ):
+            hv_commands.install_agent_venv(str(venv_path), with_rawstor=True)
+
+        run_mock.assert_called_once_with(
+            [
+                "sudo",
+                f"{venv_path}/bin/pip",
+                "install",
+                "gcl_sdk[libvirt]",
+                "/tmp/rawstor.whl",
+            ]
+        )
+
     def test_install_agent_systemd_unit_writes_enables_and_restarts(
         self, tmp_path
     ) -> None:
@@ -970,6 +1110,167 @@ class TestAgentSetup:
         ]
 
 
+class TestInstallRawstorPackages:
+    """Tests for install_rawstor_packages: downloads and installs the
+    given rawstor .deb packages with dependencies via apt-get."""
+
+    def test_downloads_and_installs_each_package(self) -> None:
+        version = hv_commands.RAWSTOR_VERSION
+        base_url = f"{hv_commands.RAWSTOR_RELEASES_URL}/v{version}"
+        deb_dir = "/tmp/rawstor-packages"
+
+        with (
+            patch.object(hv_commands, "run_command") as run_mock,
+            patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", ""),
+        ):
+            hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"])
+
+        assert run_mock.call_args_list == [
+            mock_call(["mkdir", "-p", deb_dir], sudo=False),
+            mock_call(
+                [
+                    "wget",
+                    f"{base_url}/librawstor_{version}_amd64.deb",
+                    "-O",
+                    f"{deb_dir}/librawstor_{version}_amd64.deb",
+                ],
+                sudo=False,
+            ),
+            mock_call(
+                [
+                    "wget",
+                    f"{base_url}/rawstor-ost_{version}_amd64.deb",
+                    "-O",
+                    f"{deb_dir}/rawstor-ost_{version}_amd64.deb",
+                ],
+                sudo=False,
+            ),
+            mock_call(
+                [
+                    "apt-get",
+                    "install",
+                    "--reinstall",
+                    "-y",
+                    f"{deb_dir}/librawstor_{version}_amd64.deb",
+                    f"{deb_dir}/rawstor-ost_{version}_amd64.deb",
+                ],
+                env=dict(DEBIAN_FRONTEND="noninteractive"),
+                sudo=False,
+            ),
+        ]
+
+    def test_passes_sudo_through(self) -> None:
+        with (
+            patch.object(hv_commands, "run_command") as run_mock,
+            patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", ""),
+        ):
+            hv_commands.install_rawstor_packages(["librawstor"], add_sudo=True)
+
+        assert all(c.kwargs.get("sudo") is True for c in run_mock.call_args_list)
+
+
+class TestAddLibvirtQemuToRawstorGroup:
+    """Tests for add_libvirt_qemu_to_rawstor_group: lets QEMU (always run
+    by libvirt as the libvirt-qemu user) connect to rawstor-vhost's
+    group-owned, mode-0660 vhost-user sockets."""
+
+    def test_adds_libvirt_qemu_to_the_rawstor_group(self) -> None:
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.add_libvirt_qemu_to_rawstor_group()
+
+        run_mock.assert_called_once_with(
+            ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"], sudo=False
+        )
+
+    def test_passes_sudo_through(self) -> None:
+        with patch.object(hv_commands, "run_command") as run_mock:
+            hv_commands.add_libvirt_qemu_to_rawstor_group(add_sudo=True)
+
+        run_mock.assert_called_once_with(
+            ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"], sudo=True
+        )
+
+
+class TestInstallAndConfigureRawstor:
+    """Tests for install_and_configure_rawstor: `hypervisors init
+    --with-rawstor`'s job of installing rawstor's packages and granting
+    QEMU access to them."""
+
+    def test_installs_packages_then_grants_qemu_access(self) -> None:
+        with (
+            patch.object(hv_commands, "install_rawstor_packages") as install_mock,
+            patch.object(
+                hv_commands, "add_libvirt_qemu_to_rawstor_group"
+            ) as group_mock,
+            patch.object(
+                hv_commands, "allow_apparmor_access_to_rawstor_sockets"
+            ) as apparmor_mock,
+        ):
+            hv_commands.install_and_configure_rawstor(add_sudo=True)
+
+        install_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
+        group_mock.assert_called_once_with(True)
+        apparmor_mock.assert_called_once_with(True)
+
+
+class TestStoragePoolExists:
+    def test_true_when_pool_name_is_in_the_listing(self) -> None:
+        result = MagicMock(output="default\ndefault-pool\n")
+        with patch.object(hv_commands, "runsh") as runsh_mock:
+            runsh_mock.return_value.raise_on_result.return_value = result
+            assert hv_commands.storage_pool_exists("default-pool") is True
+
+    def test_false_when_pool_name_is_not_in_the_listing(self) -> None:
+        result = MagicMock(output="default\n")
+        with patch.object(hv_commands, "runsh") as runsh_mock:
+            runsh_mock.return_value.raise_on_result.return_value = result
+            assert hv_commands.storage_pool_exists("default-pool") is False
+
+
+class TestAgentVenvExists:
+    def test_true_when_the_venv_directory_exists(self, tmp_path) -> None:
+        with patch.object(hv_commands, "_agent_venv_path", return_value=str(tmp_path)):
+            assert hv_commands.agent_venv_exists("exordos-agent") is True
+
+    def test_false_when_the_venv_directory_is_missing(self, tmp_path) -> None:
+        with patch.object(
+            hv_commands, "_agent_venv_path", return_value=str(tmp_path / "missing")
+        ):
+            assert hv_commands.agent_venv_exists("exordos-agent") is False
+
+
+class TestAllowApparmorAccessToRawstorSockets:
+    """Tests for allow_apparmor_access_to_rawstor_sockets: libvirt's
+    per-domain AppArmor profile has no rule for a vhostuser disk's unix
+    socket, so QEMU's connect() to it is denied unless this drop-in
+    grants it explicitly."""
+
+    def test_writes_the_dropin_and_reloads_apparmor(self) -> None:
+        with (
+            patch.object(hv_commands, "write_root_owned_file") as write_mock,
+            patch.object(hv_commands, "run_command") as run_mock,
+        ):
+            hv_commands.allow_apparmor_access_to_rawstor_sockets()
+
+        write_mock.assert_called_once_with(
+            "/run/rawstor/*.sock rw,\n",
+            hv_commands.APPARMOR_RAWSTOR_DROPIN_PATH,
+            mode="644",
+        )
+        run_mock.assert_called_once_with(
+            ["systemctl", "reload", "apparmor"], sudo=False
+        )
+
+    def test_passes_sudo_through(self) -> None:
+        with (
+            patch.object(hv_commands, "write_root_owned_file"),
+            patch.object(hv_commands, "run_command") as run_mock,
+        ):
+            hv_commands.allow_apparmor_access_to_rawstor_sockets(add_sudo=True)
+
+        run_mock.assert_called_once_with(["systemctl", "reload", "apparmor"], sudo=True)
+
+
 class TestReadExistingConfig:
     """Tests for _read_existing_config: missing vs present vs root-only
     readable (falls back to sudo cat, matching local_agent_node_uuid's
@@ -1006,6 +1307,29 @@ class TestReadExistingConfig:
 
 class TestWriteAgentConfig:
     """Tests for write_agent_config: fresh-install vs merge-into-existing."""
+
+    @pytest.mark.parametrize("existing_payload", [None, "/custom/payload.json"])
+    def test_storage_agent_has_its_own_payload(self, tmp_path, existing_payload):
+        config_path = tmp_path / "agent.conf"
+        content = "[universal_agent]\ncaps_drivers = LocalPoolAgentDriver\n"
+        if existing_payload:
+            content += f"payload_path = {existing_payload}\n"
+        config_path.write_text(content)
+        with patch.object(hv_commands, "write_root_owned_file") as write:
+            hv_commands.write_agent_config(
+                orch_endpoint="http://core:11011",
+                status_endpoint="http://core:11012",
+                config_path=str(config_path),
+                meta_file="/var/lib/exordos/storage-agent/storage_node_meta.json",
+                driver_name="StorageNodeAgentDriver",
+                agent_uuid="11111111-1111-1111-1111-111111111111",
+            )
+        result = write.call_args.args[0]
+        expected = existing_payload or "/var/lib/exordos/storage-agent/payload.json"
+        assert f"payload_path = {expected}" in result
+        assert "uuid = 11111111-1111-1111-1111-111111111111" in result
+        assert "LocalPoolAgentDriver" in result
+        assert "StorageNodeAgentDriver" in result
 
     def test_writes_fresh_config_when_none_exists(self, tmp_path) -> None:
         config_path = str(tmp_path / "exordos_universal_agent.conf")
@@ -1247,3 +1571,45 @@ class TestResolveAgentInstallTarget:
                 orch_endpoint="http://10.20.0.2:11011",
                 status_endpoint="http://10.20.0.2:11012",
             )
+
+
+class TestRawstorArtifacts:
+    def test_ci_artifact_packages_use_the_pinned_run_and_install_dependencies(self):
+        with patch.object(hv_commands, "run_command") as run:
+            hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"], True)
+        commands = [c.args[0] for c in run.call_args_list]
+        assert [
+            "wget",
+            f"{hv_commands.RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip",
+            "-O",
+            "/tmp/rawstor-packages/librawstor.deb.zip",
+        ] in commands
+        assert [
+            "python3",
+            "-m",
+            "zipfile",
+            "-e",
+            "/tmp/rawstor-packages/librawstor.deb.zip",
+            "/tmp/rawstor-packages",
+        ] in commands
+        assert commands[-1] == [
+            "apt-get",
+            "install",
+            "--reinstall",
+            "-y",
+            "/tmp/rawstor-packages/librawstor_99.0.0_amd64.deb",
+            "/tmp/rawstor-packages/rawstor-ost_99.0.0_amd64.deb",
+        ]
+
+    def test_ci_wheel_is_extracted_before_pip_installs_it(self):
+        with (
+            patch.object(
+                hv_commands.tempfile, "mkdtemp", return_value="/tmp/rawstor-wheel-test"
+            ),
+            patch.object(hv_commands, "run_command") as run,
+        ):
+            wheel = hv_commands.prepare_rawstor_wheel()
+        assert wheel.endswith(
+            "rawstor-99.0.0+0.fe3340e-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+        )
+        assert run.call_args.args[0][:4] == ["python3", "-m", "zipfile", "-e"]

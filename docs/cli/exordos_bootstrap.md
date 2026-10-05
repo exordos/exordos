@@ -6,9 +6,9 @@ Bootstrap exordos locally
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos bootstrap [OPTIONS]                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos bootstrap [OPTIONS]
+
 ```
 
 ## Options
@@ -19,7 +19,7 @@ Bootstrap exordos locally
     * Usage: `-i
 --inventory`
 
-  Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to <https://repo.exordos.com/exordos-elements/core/><version>/. Examples: 0.0.6  /path/to/core/0.0.6  <https://repository.example.com/exordos-elements/core/0.0.6/>  
+  Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to <https://repo.exordos.com/exordos-elements/core/><version>/. Examples: 0.0.6  /path/to/core/0.0.6  <https://repository.example.com/exordos-elements/core/0.0.6/>
 
 * `profile`:
     * Type: choice
@@ -142,7 +142,7 @@ Bootstrap exordos locally
     * Default: `core`
     * Usage: `--pool-agent-placement`
 
-  Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' installs a dedicated universal agent on this host that talks to the local libvirt socket directly (matching `exordos compute hypervisors init`); --hyper-connection-uri is not supported in this mode.
+  Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' wires up a dedicated universal agent on this host that talks to the local libvirt socket directly - this host must already be provisioned as a hypervisor via `exordos compute hypervisors init` first (add --with-rawstor there for rawstor-backed disks); --hyper-connection-uri is not supported in this mode.
 
 * `hyper_connection_uri`:
     * Type: text
@@ -266,51 +266,210 @@ Bootstrap exordos locally
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos bootstrap [OPTIONS]                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
- Bootstrap exordos locally                                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --inventory                 -i  TEXT                                 Path to the inventory directory containing inventory.json, or an HTTP(S) URL pointing to an Nginx-served directory. When a URL is given, inventory.json and all referenced artefacts are downloaded and cached under               │
-│                                                                      ~/.cache/exordos/<name>/<version>/. Trailing /inventory.json in the URL is accepted and treated identically to the bare directory URL. A bare version string (e.g. '0.0.6') is expanded automatically to                           │
-│                                                                      https://repo.exordos.com/exordos-elements/core/<version>/. Examples: 0.0.6  /path/to/core/0.0.6  https://repository.example.com/exordos-elements/core/0.0.6/                                                                       │
-│ --profile                       [develop|small|medium|large|legacy]  Profile for the installation. [default: small]                                                                                                                                                                                     │
-│ --root-disk-size                INTEGER                              Root disk size in GB [default: 10]                                                                                                                                                                                                 │
-│ --data-disk-size                INTEGER                              Data disk size in GB [default: 10]                                                                                                                                                                                                 │
-│ --name                          TEXT                                 Name of the installation                                                                                                                                                                                                           │
-│ --launch-mode               -m  [core|element|custom]                Launch mode for start element, core or custom configuration [default: element]                                                                                                                                                     │
-│ --stand-spec                -s  PATH                                 Additional stand specification for core mode.                                                                                                                                                                                      │
-│ --cidr                          IPV4NETWORK                          The main network CIDR [default: 10.20.0.0/22]                                                                                                                                                                                      │
-│ --core-ip                       IPV4ADDRESS                          The IP address for the core VM. If `None` is provided, second IP address from the main network will be used.                                                                                                                       │
-│ --bridge                        TEXT                                 Name of the linux bridge for the main network, it will be created if not set.                                                                                                                                                      │
-│ --boot-cidr                     IPV4NETWORK                          The bootstrap network CIDR [default: 10.30.0.0/24]                                                                                                                                                                                 │
-│ --boot-bridge                   TEXT                                 Name of the linux bridge for the bootstrap network, it will be created if not set.                                                                                                                                                 │
-│ --force                     -f                                       Rebuild if the output already exists                                                                                                                                                                                               │
-│ --no-wait                                                            Cancel waiting for the installation to start                                                                                                                                                                                       │
-│ --repository                -r  TEXT                                 Default element repository (can be specified multiple times) [default: https://repo.exordos.com/exordos-elements/]                                                                                                                 │
-│ --admin-password                TEXT                                 A password for the admin user in. If not provided, the password will be generated.                                                                                                                                                 │
-│ --save-admin-password-file      TEXT                                 If the option is specified the admin password is saved to the file. Otherwise it's printed to the console.                                                                                                                         │
-│ --pool-agent-placement          [core|local]                         Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' installs a dedicated universal agent on this    │
-│                                                                      host that talks to the local libvirt socket directly (matching `exordos compute hypervisors init`); --hyper-connection-uri is not supported in this mode. [default: core]                                                          │
-│ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. Only used with --pool-agent-placement=core; if not set there, the main network's first address is used (qemu+tcp).      │
-│ --hyper-storage-pool            TEXT                                 Storage pool for the hypervisor. [default: default]                                                                                                                                                                                │
-│ --hyper-machine-prefix          TEXT                                 A prefix for new VMs. [default: vm-]                                                                                                                                                                                               │
-│ --hyper-iface-rom-file          TEXT                                 A path to the custom ROM file of a network interface. [default: /usr/share/qemu/1af41041.rom]                                                                                                                                      │
-│ --no-start                                                           Do not start the stand after creation                                                                                                                                                                                              │
-│ --no-registration                                                    Don't register in ecosystem.                                                                                                                                                                                                       │
-│ --disable-telemetry                                                  Disable telemetry. Anonymized data only is sent by default.                                                                                                                                                                        │
-│ --org-token                     TEXT                                 Organization token, used to register stand in ecosystem                                                                                                                                                                            │
-│ --ecosystem-endpoint            TEXT                                 Ecosystem's endpoint to connect to                                                                                                                                                                                                 │
-│ --realm-spec                    PATH                                 Path to a realm spec file (realm_spec.json) delivered by the exordos ecosystem to managed realm nodes. Provides a pre-assigned realm identity (uuid, secret, tokens), the ecosystem endpoint and the admin password;               │
-│                                                                      self-registration is skipped.                                                                                                                                                                                                      │
-│ --download-only                                                      Only resolve and download the element inventories (populating the local cache), then exit without bootstrapping.                                                                                                                   │
-│ --settings                                                           Interactively create a exordos settings file                                                                                                                                                                                       │
-│ --ssh-public-key                FILE                                 Path to a public SSH key file to inject into the VM after bootstrap. Can be specified multiple times. If not provided, a key pair is generated in ~/.ssh/.                                                                         │
-│ --elements                      TEXT                                 Elements to install. Can be specified multiple times. Example: --elements empty --elements dbaas                                                                                                                                   │
-│ --no-update-realm                                                    Do not update the realm configuration in exordosctl.yaml after bootstrap                                                                                                                                                           │
-│ --pool-agent-name               TEXT                                 Name of the universal agent to run LocalPoolAgentDriver under on this host. The default targets the standard agent (merging in if this host is also a registered compute node). Use a different name to run a separate, dedicated  │
-│                                                                      agent instead - required if the standard agent here is already configured for a different core. [default: universal_agent]                                                                                                         │
-│ --help                                                               Show this message and exit.                                                                                                                                                                                                        │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos bootstrap [OPTIONS]
+
+ Bootstrap exordos locally
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --inventory              -i  TEXT                    Path to the inventory   │
+│                                                      directory containing    │
+│                                                      inventory.json, or an   │
+│                                                      HTTP(S) URL pointing to │
+│                                                      an Nginx-served         │
+│                                                      directory. When a URL   │
+│                                                      is given,               │
+│                                                      inventory.json and all  │
+│                                                      referenced artefacts    │
+│                                                      are downloaded and      │
+│                                                      cached under            │
+│                                                      ~/.cache/exordos/<name> │
+│                                                      /<version>/. Trailing   │
+│                                                      /inventory.json in the  │
+│                                                      URL is accepted and     │
+│                                                      treated identically to  │
+│                                                      the bare directory URL. │
+│                                                      A bare version string   │
+│                                                      (e.g. '0.0.6') is       │
+│                                                      expanded automatically  │
+│                                                      to                      │
+│                                                      https://repo.exordos.co │
+│                                                      m/exordos-elements/core │
+│                                                      /<version>/. Examples:  │
+│                                                      0.0.6                   │
+│                                                      /path/to/core/0.0.6     │
+│                                                      https://repository.exam │
+│                                                      ple.com/exordos-element │
+│                                                      s/core/0.0.6/           │
+│ --profile                    [develop|small|medium|  Profile for the         │
+│                              large|legacy]           installation. [default: │
+│                                                      small]                  │
+│ --root-disk-size             INTEGER                 Root disk size in GB    │
+│                                                      [default: 10]           │
+│ --data-disk-size             INTEGER                 Data disk size in GB    │
+│                                                      [default: 10]           │
+│ --name                       TEXT                    Name of the             │
+│                                                      installation            │
+│ --launch-mode            -m  [core|element|custom]   Launch mode for start   │
+│                                                      element, core or custom │
+│                                                      configuration [default: │
+│                                                      element]                │
+│ --stand-spec             -s  PATH                    Additional stand        │
+│                                                      specification for core  │
+│                                                      mode.                   │
+│ --cidr                       IPV4NETWORK             The main network CIDR   │
+│                                                      [default: 10.20.0.0/22] │
+│ --core-ip                    IPV4ADDRESS             The IP address for the  │
+│                                                      core VM. If `None` is   │
+│                                                      provided, second IP     │
+│                                                      address from the main   │
+│                                                      network will be used.   │
+│ --bridge                     TEXT                    Name of the linux       │
+│                                                      bridge for the main     │
+│                                                      network, it will be     │
+│                                                      created if not set.     │
+│ --boot-cidr                  IPV4NETWORK             The bootstrap network   │
+│                                                      CIDR [default:          │
+│                                                      10.30.0.0/24]           │
+│ --boot-bridge                TEXT                    Name of the linux       │
+│                                                      bridge for the          │
+│                                                      bootstrap network, it   │
+│                                                      will be created if not  │
+│                                                      set.                    │
+│ --force                  -f                          Rebuild if the output   │
+│                                                      already exists          │
+│ --no-wait                                            Cancel waiting for the  │
+│                                                      installation to start   │
+│ --repository             -r  TEXT                    Default element         │
+│                                                      repository (can be      │
+│                                                      specified multiple      │
+│                                                      times) [default:        │
+│                                                      https://repo.exordos.co │
+│                                                      m/exordos-elements/]    │
+│ --admin-password             TEXT                    A password for the      │
+│                                                      admin user in. If not   │
+│                                                      provided, the password  │
+│                                                      will be generated.      │
+│ --save-admin-password-…      TEXT                    If the option is        │
+│                                                      specified the admin     │
+│                                                      password is saved to    │
+│                                                      the file. Otherwise     │
+│                                                      it's printed to the     │
+│                                                      console.                │
+│ --pool-agent-placement       [core|local]            Where the pool agent    │
+│                                                      that drives the         │
+│                                                      hypervisor's libvirt    │
+│                                                      runs. 'core' runs it    │
+│                                                      inside core's own       │
+│                                                      services, reaching      │
+│                                                      libvirt over the        │
+│                                                      network (see            │
+│                                                      --hyper-connection-uri) │
+│                                                      . 'local' wires up a    │
+│                                                      dedicated universal     │
+│                                                      agent on this host that │
+│                                                      talks to the local      │
+│                                                      libvirt socket directly │
+│                                                      - this host must        │
+│                                                      already be provisioned  │
+│                                                      as a hypervisor via     │
+│                                                      `exordos compute        │
+│                                                      hypervisors init` first │
+│                                                      (add --with-rawstor     │
+│                                                      there for               │
+│                                                      rawstor-backed disks);  │
+│                                                      --hyper-connection-uri  │
+│                                                      is not supported in     │
+│                                                      this mode. [default:    │
+│                                                      core]                   │
+│ --hyper-connection-uri       TEXT                    Connection URI for the  │
+│                                                      hypervisor, e.g.        │
+│                                                      'qemu+tcp://10.0.0.1/sy │
+│                                                      stem' or                │
+│                                                      'qemu+ssh://user@10.0.0 │
+│                                                      .1/system'. Only used   │
+│                                                      with                    │
+│                                                      --pool-agent-placement= │
+│                                                      core; if not set there, │
+│                                                      the main network's      │
+│                                                      first address is used   │
+│                                                      (qemu+tcp).             │
+│ --hyper-storage-pool         TEXT                    Storage pool for the    │
+│                                                      hypervisor. [default:   │
+│                                                      default]                │
+│ --hyper-machine-prefix       TEXT                    A prefix for new VMs.   │
+│                                                      [default: vm-]          │
+│ --hyper-iface-rom-file       TEXT                    A path to the custom    │
+│                                                      ROM file of a network   │
+│                                                      interface. [default:    │
+│                                                      /usr/share/qemu/1af4104 │
+│                                                      1.rom]                  │
+│ --no-start                                           Do not start the stand  │
+│                                                      after creation          │
+│ --no-registration                                    Don't register in       │
+│                                                      ecosystem.              │
+│ --disable-telemetry                                  Disable telemetry.      │
+│                                                      Anonymized data only is │
+│                                                      sent by default.        │
+│ --org-token                  TEXT                    Organization token,     │
+│                                                      used to register stand  │
+│                                                      in ecosystem            │
+│ --ecosystem-endpoint         TEXT                    Ecosystem's endpoint to │
+│                                                      connect to              │
+│ --realm-spec                 PATH                    Path to a realm spec    │
+│                                                      file (realm_spec.json)  │
+│                                                      delivered by the        │
+│                                                      exordos ecosystem to    │
+│                                                      managed realm nodes.    │
+│                                                      Provides a pre-assigned │
+│                                                      realm identity (uuid,   │
+│                                                      secret, tokens), the    │
+│                                                      ecosystem endpoint and  │
+│                                                      the admin password;     │
+│                                                      self-registration is    │
+│                                                      skipped.                │
+│ --download-only                                      Only resolve and        │
+│                                                      download the element    │
+│                                                      inventories (populating │
+│                                                      the local cache), then  │
+│                                                      exit without            │
+│                                                      bootstrapping.          │
+│ --settings                                           Interactively create a  │
+│                                                      exordos settings file   │
+│ --ssh-public-key             FILE                    Path to a public SSH    │
+│                                                      key file to inject into │
+│                                                      the VM after bootstrap. │
+│                                                      Can be specified        │
+│                                                      multiple times. If not  │
+│                                                      provided, a key pair is │
+│                                                      generated in ~/.ssh/.   │
+│ --elements                   TEXT                    Elements to install.    │
+│                                                      Can be specified        │
+│                                                      multiple times.         │
+│                                                      Example: --elements     │
+│                                                      empty --elements dbaas  │
+│ --no-update-realm                                    Do not update the realm │
+│                                                      configuration in        │
+│                                                      exordosctl.yaml after   │
+│                                                      bootstrap               │
+│ --pool-agent-name            TEXT                    Name of the universal   │
+│                                                      agent to run            │
+│                                                      LocalPoolAgentDriver    │
+│                                                      under on this host. The │
+│                                                      default targets the     │
+│                                                      standard agent (merging │
+│                                                      in if this host is also │
+│                                                      a registered compute    │
+│                                                      node). Use a different  │
+│                                                      name to run a separate, │
+│                                                      dedicated agent instead │
+│                                                      - required if the       │
+│                                                      standard agent here is  │
+│                                                      already configured for  │
+│                                                      a different core.       │
+│                                                      [default:               │
+│                                                      universal_agent]        │
+│ --help                                               Show this message and   │
+│                                                      exit.                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

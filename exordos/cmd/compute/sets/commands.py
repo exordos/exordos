@@ -96,6 +96,19 @@ sets_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     help="Name of the image to deploy",
 )
 @click.option(
+    "--speed",
+    type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
+    default="HOT",
+    show_default=True,
+    help="Speed tier to schedule the root disk onto",
+)
+@click.option(
+    "--ephemeral/--no-ephemeral",
+    default=True,
+    show_default=True,
+    help="Whether the root disk is ephemeral storage",
+)
+@click.option(
     "-n",
     "--name",
     type=str,
@@ -131,6 +144,8 @@ def add_cmd(
     ram: int,
     root_disk: int,
     image: str,
+    speed: str,
+    ephemeral: bool,
     name: str,
     description: str,
     replicas: int,
@@ -152,6 +167,8 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
+            "speed": speed,
+            "ephemeral": ephemeral,
         },
     }
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)

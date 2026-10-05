@@ -720,6 +720,33 @@ def _resolve_hypervisor_placement(
     return hyper_connection_uri or f"qemu+tcp://{cidr[1]}/system", "libvirt"
 
 
+def _require_local_hypervisor_provisioned(
+    agent_name: str, storage_pool: str, add_sudo: bool
+) -> None:
+    """Fail fast unless `hypervisors init` has already provisioned this host.
+
+    --pool-agent-placement=local makes this machine a hypervisor too, but
+    bootstrap only wires it up (private key, agent config, stand spec) -
+    all the actual host provisioning (packages, the agent's venv, the
+    storage pool, rawstor if wanted) is `hypervisors init`'s job, run
+    beforehand. Catching a missing prerequisite here, before spending time
+    creating the core VM, beats failing later with a broken agent.
+    """
+    if not hv_commands.agent_venv_exists(agent_name):
+        raise click.UsageError(
+            "--pool-agent-placement=local requires this host to already be "
+            "provisioned as a hypervisor - run `exordos compute hypervisors "
+            "init` first (add --with-rawstor there for rawstor-backed disks)."
+        )
+
+    if not hv_commands.storage_pool_exists(storage_pool, add_sudo):
+        raise click.UsageError(
+            f"Storage pool {storage_pool!r} not found on this host - run "
+            "`exordos compute hypervisors init` first, or pass a "
+            "--hyper-storage-pool that already exists."
+        )
+
+
 @click.command("bootstrap", help="Bootstrap exordos locally")
 @click.option(
     "-i",
@@ -872,10 +899,12 @@ def _resolve_hypervisor_placement(
     help=(
         "Where the pool agent that drives the hypervisor's libvirt runs. "
         "'core' runs it inside core's own services, reaching libvirt over "
-        "the network (see --hyper-connection-uri). 'local' installs a "
+        "the network (see --hyper-connection-uri). 'local' wires up a "
         "dedicated universal agent on this host that talks to the local "
-        "libvirt socket directly (matching `exordos compute hypervisors "
-        "init`); --hyper-connection-uri is not supported in this mode."
+        "libvirt socket directly - this host must already be provisioned "
+        "as a hypervisor via `exordos compute hypervisors init` first "
+        "(add --with-rawstor there for rawstor-backed disks); "
+        "--hyper-connection-uri is not supported in this mode."
     ),
 )
 @click.option(
@@ -1194,6 +1223,8 @@ def bootstrap_cmd(
         if subprocess.call(["sudo", "-v"]) != 0:
             raise click.ClickException("Failed to obtain sudo privileges. Aborting.")
 
+    add_sudo = not hv_commands.is_root()
+
     hypervisors = []
 
     hyper_connection_uri, hyper_kind = _resolve_hypervisor_placement(
@@ -1203,6 +1234,8 @@ def bootstrap_cmd(
     hyper_node = None
     hyper_private_key = None
     if hyper_kind == "exordos_local_hyper":
+        _require_local_hypervisor_provisioned(agent_name, hyper_storage_pool, add_sudo)
+
         # This machine is the hypervisor, reachable over the local
         # libvirt socket by the local universal agent (LocalPoolAgentDriver)
         # only, matched by node uuid.
@@ -1326,7 +1359,6 @@ def bootstrap_cmd(
                 orch_endpoint=orch_endpoint,
                 status_endpoint=status_endpoint,
             )
-            hv_commands.install_agent_venv(agent_target.venv_path)
             hv_commands.reset_agent_meta_file(agent_target.meta_file)
             private_key_path = hv_commands.write_agent_config(
                 orch_endpoint=orch_endpoint,

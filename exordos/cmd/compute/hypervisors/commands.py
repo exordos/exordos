@@ -22,6 +22,7 @@ import io
 import os
 import secrets
 import socket
+import tempfile
 import typing as tp
 from urllib.parse import urlparse
 import uuid as sys_uuid
@@ -111,6 +112,20 @@ STATUS_API_PORT = 11012
 ENTITY = "hypervisor"
 ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION
 
+
+def _pool0(entity: dict, field: str, default: str = "Unknown"):
+    """First storage pool's value for `field`, e.g. "Speed"/"Total".
+
+    A hypervisor can self-report more than one pool (its own qcow2 pool
+    plus any --with-rawstor ones), same as a storage cluster - showing
+    just the first one keeps this table matching `exordos storages
+    list`'s, at the cost of hiding the rest; see `hypervisors info` for
+    the full list.
+    """
+    pools = entity.get("storage_pools") or [{}]
+    return pools[0].get(field, default)
+
+
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
@@ -119,6 +134,10 @@ FIELDS_MAP = {
     "Avail cores": "avail_cores",
     "All ram": "all_ram",
     "Avail ram": "avail_ram",
+    "Speed": lambda e: _pool0(e, "speed"),
+    "Ephemeral": lambda e: _pool0(e, "ephemeral"),
+    "Total": lambda e: _pool0(e, "capacity_usable"),
+    "Available": lambda e: _pool0(e, "available_actual"),
     "Status": "status",
 }
 
@@ -362,6 +381,73 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
+RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "99.0.0")
+RAWSTOR_ARTIFACT_RUN = os.environ.get(
+    "RAWSTOR_ARTIFACT_RUN", "37329790134" if RAWSTOR_VERSION == "99.0.0" else ""
+)
+RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.fe3340e")
+RAWSTOR_ARTIFACTS_URL = (
+    f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
+)
+RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
+# The bindings' abi3 wheel works unmodified across interpreter versions
+# (unlike the per-interpreter python3.X-rawstor system packages), so one
+# URL covers whichever version `python3 -m venv` (install_agent_venv) uses.
+RAWSTOR_WHEEL_URL = (
+    f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/rawstor-{RAWSTOR_VERSION}"
+    "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+)
+
+if RAWSTOR_ARTIFACT_RUN:
+    RAWSTOR_WHEEL_URL = f"{RAWSTOR_ARTIFACTS_URL}/python3-rawstor.whl.zip"
+
+
+def prepare_rawstor_wheel() -> str:
+    if not RAWSTOR_ARTIFACT_RUN:
+        return RAWSTOR_WHEEL_URL
+    artifact_dir = tempfile.mkdtemp(prefix="rawstor-wheel-")
+    run_command(["mkdir", "-p", artifact_dir])
+    archive = f"{artifact_dir}/python3-rawstor.whl.zip"
+    run_command(["wget", RAWSTOR_WHEEL_URL, "-O", archive])
+    run_command(["python3", "-m", "zipfile", "-e", archive, artifact_dir])
+    wheel = f"{artifact_dir}/rawstor-{RAWSTOR_WHEEL_VERSION}-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+    return wheel
+
+
+def install_rawstor_packages(
+    packages: tp.Sequence[str], add_sudo: bool = False, version: str | None = None
+) -> None:
+    """Download and install the given rawstor .deb packages."""
+    version = version or RAWSTOR_VERSION
+    artifact_run = RAWSTOR_ARTIFACT_RUN if version == RAWSTOR_VERSION else ""
+    deb_dir = "/tmp/rawstor-packages"
+    run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
+
+    if artifact_run:
+        archive = f"{deb_dir}/librawstor.deb.zip"
+        run_command(
+            ["wget", f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip", "-O", archive],
+            sudo=add_sudo,
+        )
+        run_command(["python3", "-m", "zipfile", "-e", archive, deb_dir], sudo=add_sudo)
+
+    deb_paths = []
+    for package in packages:
+        deb_name = f"{package}_{version}_amd64.deb"
+        url = f"{RAWSTOR_RELEASES_URL}/v{version}/{deb_name}"
+        deb_path = os.path.join(deb_dir, deb_name)
+        if not artifact_run:
+            run_command(["wget", url, "-O", deb_path], sudo=add_sudo)
+        deb_paths.append(deb_path)
+
+    # CI builds share a Debian version, so an installed package may be older.
+    run_command(
+        ["apt-get", "install", "--reinstall", "-y", *deb_paths],
+        env=dict(DEBIAN_FRONTEND="noninteractive"),
+        sudo=add_sudo,
+    )
+
+
 def generate_node_private_key_base64() -> str:
     """Generate a node encryption key for the local agent.
 
@@ -377,16 +463,17 @@ def _agent_config_content(
     status_endpoint: str,
     meta_file: str,
     private_key_path: str,
+    driver_name: str = "LocalPoolAgentDriver",
 ) -> str:
     return f"""[universal_agent]
 orch_secure_communication = True
 orch_endpoint = {orch_endpoint}
 status_endpoint = {status_endpoint}
 private_key_path = {private_key_path}
-caps_drivers = LocalPoolAgentDriver
+caps_drivers = {driver_name}
 verify_node_on_register = False
 
-[LocalPoolAgentDriver]
+[{driver_name}]
 meta_file = {meta_file}
 """
 
@@ -418,27 +505,29 @@ def _config_value(content: str, section: str, option: str, fallback: str) -> str
     return parser.get(section, option, fallback=fallback)
 
 
-def _merge_local_pool_into_config(existing_content: str, meta_file: str) -> str:
-    """Add LocalPoolAgentDriver to an already-installed agent's config.
+def _merge_driver_into_config(
+    existing_content: str, driver_name: str, meta_file: str
+) -> str:
+    """Add a capability driver to an already-installed agent's config.
 
     This host already runs the standard universal agent (it's also a
     registered compute node, provisioned from the exordos-base image),
-    so the pool capability is appended to its existing caps_drivers and
+    so the capability is appended to its existing caps_drivers and
     everything else (orch_endpoint, its own private_key_path, other
     drivers) is left untouched - one shared agent identity, not a
     second, competing one.
     """
     raw = _config_value(existing_content, "universal_agent", "caps_drivers", "")
     drivers = [d.strip() for d in raw.replace("\n", ",").split(",") if d.strip()]
-    if "LocalPoolAgentDriver" not in drivers:
-        drivers.append("LocalPoolAgentDriver")
+    if driver_name not in drivers:
+        drivers.append(driver_name)
 
     parser = configparser.ConfigParser()
     parser.read_string(existing_content)
     parser.set("universal_agent", "caps_drivers", ", ".join(drivers))
-    if not parser.has_section("LocalPoolAgentDriver"):
-        parser.add_section("LocalPoolAgentDriver")
-    parser.set("LocalPoolAgentDriver", "meta_file", meta_file)
+    if not parser.has_section(driver_name):
+        parser.add_section(driver_name)
+    parser.set(driver_name, "meta_file", meta_file)
 
     buf = io.StringIO()
     parser.write(buf)
@@ -541,28 +630,53 @@ def resolve_agent_install_target(
     )
 
 
-def install_agent_venv(venv_path: str = STANDARD_AGENT_VENV_PATH) -> None:
-    """Install (or extend) the universal agent's venv with gcl_sdk[libvirt].
+def install_agent_venv(
+    venv_path: str = STANDARD_AGENT_VENV_PATH,
+    with_rawstor: bool = False,
+    packages: tp.Sequence[str] | None = None,
+) -> None:
+    """Install (or extend) the universal agent's venv.
+
+    Defaults to gcl_sdk[libvirt] (this hypervisor's own use), plus
+    rawstor's python bindings when with_rawstor is set. Pass an explicit
+    `packages` list to install something else entirely instead (e.g. a
+    storage-only node needs gcl_sdk without the libvirt extra).
 
     A venv may already exist at this path - either the standard agent's
     (this host is also a registered compute node, provisioned from the
     exordos-base image) or a previous isolated install - in which case
-    libvirt-python just needs adding, via sudo since the standard venv
+    the packages just need adding, via sudo since the standard venv
     is root-owned. Otherwise a fresh one is created, owned by the
     current (non-root) user so future pip runs don't need elevation.
     The /usr/bin symlink is only (re)pointed at it when installing to
     the standard path - an isolated install must not hijack it, since
     it may belong to an agent this code isn't managing.
+
+    rawstor's python bindings are installed from their own abi3 wheel
+    (RAWSTOR_WHEEL_URL) rather than PyPI, since rawstor isn't published
+    there - the exordos_local_hyper driver can then `import rawstor`
+    straight out of the venv. librawstor itself, which the bindings
+    dynamically link against, still comes from
+    install_and_configure_rawstor's system packages.
     """
+    if packages is None:
+        packages = ["gcl_sdk[libvirt]"]
+        if with_rawstor:
+            packages = [*packages, RAWSTOR_WHEEL_URL]
+
+    packages = [
+        prepare_rawstor_wheel() if p == RAWSTOR_WHEEL_URL else p for p in packages
+    ]
+
     if os.path.isdir(venv_path):
-        run_command(["sudo", f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
+        run_command(["sudo", f"{venv_path}/bin/pip", "install", *packages])
         return
 
     agent_home = os.path.dirname(venv_path)
     run_command(["sudo", "mkdir", "-p", agent_home])
     run_command(["sudo", "chown", getpass.getuser(), agent_home])
     run_command(["python3", "-m", "venv", venv_path])
-    run_command([f"{venv_path}/bin/pip", "install", "gcl_sdk[libvirt]"])
+    run_command([f"{venv_path}/bin/pip", "install", *packages])
     if venv_path == STANDARD_AGENT_VENV_PATH:
         run_command(
             [
@@ -581,14 +695,16 @@ def write_agent_config(
     config_path: str = AGENT_CONFIG_PATH,
     meta_file: str = AGENT_META_FILE,
     default_private_key_path: str = AGENT_PRIVATE_KEY_PATH,
+    driver_name: str = "LocalPoolAgentDriver",
+    agent_uuid: str | None = None,
 ) -> str:
-    """Configure the universal agent to (also) run LocalPoolAgentDriver.
+    """Configure the universal agent to (also) run the given capability driver.
 
     If a config already exists here (this host already runs an agent
-    for the same core), LocalPoolAgentDriver is merged into its
-    caps_drivers instead of replacing the file. Otherwise a fresh,
-    pool-only config is written; `verify_node_on_register` is disabled
-    since a bare hypervisor host isn't itself a registered compute node.
+    for the same core), the driver is merged into its caps_drivers
+    instead of replacing the file. Otherwise a fresh, single-driver
+    config is written; `verify_node_on_register` is disabled since a
+    bare hypervisor/storage host isn't itself a registered compute node.
 
     Returns the private_key_path this config ends up using, so the
     caller writes the key to the right place.
@@ -598,13 +714,27 @@ def write_agent_config(
     if existing is None:
         private_key_path = default_private_key_path
         content = _agent_config_content(
-            orch_endpoint, status_endpoint, meta_file, private_key_path
+            orch_endpoint, status_endpoint, meta_file, private_key_path, driver_name
         )
     else:
         private_key_path = _config_value(
             existing, "universal_agent", "private_key_path", default_private_key_path
         )
-        content = _merge_local_pool_into_config(existing, meta_file)
+        content = _merge_driver_into_config(existing, driver_name, meta_file)
+
+    if agent_uuid is not None:
+        parser = configparser.ConfigParser()
+        parser.read_string(content)
+        parser.set("universal_agent", "uuid", agent_uuid)
+        if not parser.has_option("universal_agent", "payload_path"):
+            parser.set(
+                "universal_agent",
+                "payload_path",
+                os.path.join(os.path.dirname(meta_file), "payload.json"),
+            )
+        buf = io.StringIO()
+        parser.write(buf)
+        content = buf.getvalue()
 
     # Explicit mode, not left to `sudo cp`'s default: a brand-new
     # destination inherits the source tempfile's mode (mkstemp -> 0600,
@@ -669,11 +799,72 @@ def _add_user_to_groups(user: str | None, add_sudo: bool = False) -> None:
         run_command(cmd, sudo=add_sudo)
 
 
+def add_libvirt_qemu_to_rawstor_group(add_sudo: bool = False) -> None:
+    """Let QEMU (which libvirt always runs as the libvirt-qemu user) connect
+    to rawstor-vhost's vhost-user sockets.
+
+    rawstor-vhost chmod()s each socket to 0660, owned by the rawstor
+    user/group, so anything outside that group gets a silent connect()
+    EACCES (the guest just retries via reconnect-ms and never boots).
+    """
+    cmd = ["usermod", "-a", "-G", "rawstor", "libvirt-qemu"]
+    run_command(cmd, sudo=add_sudo)
+
+
+APPARMOR_RAWSTOR_DROPIN_PATH = "/etc/apparmor.d/abstractions/libvirt-qemu.d/rawstor"
+APPARMOR_RAWSTOR_SOCKET_RULE = "/run/rawstor/*.sock rw,\n"
+
+
+def allow_apparmor_access_to_rawstor_sockets(add_sudo: bool = False) -> None:
+    """Let libvirt's per-domain AppArmor profile reach rawstor-vhost's sockets.
+
+    libvirt derives each domain's AppArmor profile from its disk XML, but has
+    no rule generator for a vhostuser disk's arbitrary unix socket path - so
+    QEMU's connect() to it is silently denied regardless of the socket's own
+    file permissions, and the guest never leaves "paused (starting up)".
+    `abstractions/libvirt-qemu.d/` is the drop-in directory libvirt's own
+    shipped profile (`include if exists <abstractions/libvirt-qemu.d>`) is
+    written to include, meant for exactly this kind of local addition -
+    unlike the older `local/abstractions/libvirt-qemu` override, which the
+    shipped profile only keeps around deprecated for backward compatibility.
+    """
+    write_root_owned_file(
+        APPARMOR_RAWSTOR_SOCKET_RULE, APPARMOR_RAWSTOR_DROPIN_PATH, mode="644"
+    )
+    run_command(["systemctl", "reload", "apparmor"], sudo=add_sudo)
+
+
+def install_and_configure_rawstor(add_sudo: bool = False) -> None:
+    """Install rawstor's hypervisor-side packages and let QEMU use them.
+
+    `hypervisors init --with-rawstor`'s job - a hypervisor set up via
+    `bootstrap --pool-agent-placement=local` must already have this done
+    beforehand (bootstrap only wires up an already-provisioned host, it
+    doesn't provision one itself).
+
+    Only librawstor + rawstor-vhost - this hypervisor attaches rawstor-backed
+    vhost disks, it doesn't run a backing store of its own. rawstor-ost (and
+    everything about where the bytes actually live) is `storages nodes init`'s job,
+    whether that's this same host or a separate storage node.
+    """
+    install_rawstor_packages(["librawstor", "rawstor-vhost"], add_sudo)
+    add_libvirt_qemu_to_rawstor_group(add_sudo)
+    allow_apparmor_access_to_rawstor_sockets(add_sudo)
+
+
+def storage_pool_exists(pool_name: str, add_sudo: bool = False) -> bool:
+    result = runsh("virsh pool-list --all", sudo=add_sudo).raise_on_result()
+    return pool_name in result.output
+
+
+def agent_venv_exists(agent_name: str) -> bool:
+    """Whether install_agent_venv has already set up this agent's venv."""
+    return os.path.isdir(_agent_venv_path(agent_name))
+
+
 def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
     """Create libvirt storage pool if it doesn't exist."""
-    # Check if pool exists
-    result = runsh("virsh pool-list --all", sudo=add_sudo).raise_on_result()
-    if pool_name not in result.output:
+    if not storage_pool_exists(pool_name, add_sudo):
         # Create storage pool
         cmd = [
             "virsh",
@@ -928,6 +1119,20 @@ def local_agent_node_uuid(
     help="Install packer",
 )
 @click.option(
+    "--with-rawstor",
+    show_default=True,
+    is_flag=True,
+    default=False,
+    help=(
+        "Install rawstor packages (librawstor + rawstor-vhost) so this "
+        "hypervisor can attach rawstor-backed disks. Install rawstor-ost with "
+        "`exordos storages nodes init --type rawstor` on this host or a separate "
+        "storage node, then register it with "
+        "`exordos storages nodes add --cluster NAME --agent AGENT --name OST_NAME "
+        "--failure-domain-path PATH`."
+    ),
+)
+@click.option(
     "--user",
     type=str,
     required=False,
@@ -1113,6 +1318,7 @@ def init_cmd(
     romfile_version: str,
     pool_name: str,
     packer: bool,
+    with_rawstor: bool,
     user: str | None,
     add: bool,
     uuid: sys_uuid.UUID | None,
@@ -1174,6 +1380,10 @@ def init_cmd(
         log.info("Configuring packer...")
         _install_packer()
 
+    if with_rawstor:
+        log.info("Installing rawstor packages...")
+        install_and_configure_rawstor(add_sudo)
+
     if add:
         log.info("Setting up the local boot network...")
         _ensure_local_networks(
@@ -1232,7 +1442,7 @@ def init_cmd(
                 status_endpoint=status_endpoint,
             )
             log.info("Setting up the local universal agent's virtualenv...")
-            install_agent_venv(agent_target.venv_path)
+            install_agent_venv(agent_target.venv_path, with_rawstor=with_rawstor)
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             node_uuid = local_agent_node_uuid()
             reset_agent_meta_file(agent_target.meta_file)

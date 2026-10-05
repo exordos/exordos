@@ -6,9 +6,9 @@ Initialize hypervisor
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute hypervisors init [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute hypervisors init [OPTIONS]
+
 ```
 
 ## Options
@@ -35,6 +35,13 @@ Initialize hypervisor
 
   Install packer
 
+* `with_rawstor`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--with-rawstor`
+
+  Install rawstor packages (librawstor + rawstor-vhost) so this hypervisor can attach rawstor-backed disks. Install rawstor-ost with `exordos storages nodes init --type rawstor` on this host or a separate storage node, then register it with `exordos storages nodes add --cluster NAME --agent AGENT --name OST_NAME --failure-domain-path PATH`.
+
 * `user`:
     * Type: text
     * Default: `sentinel.unset`
@@ -55,7 +62,7 @@ Initialize hypervisor
     * Usage: `-u
 --uuid`
 
-  UUID of the hypervisor. Defaults to a UUID derived from /etc/machine-id, so re-running this command with --add updates the same hypervisor instead of registering a new one each time.
+  UUID of the hypervisor. Defaults to a UUID derived from /etc/machine-id, so this machine always registers under the same hypervisor UUID.
 
 * `name`:
     * Type: text
@@ -176,7 +183,7 @@ Initialize hypervisor
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute hypervisors init [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute hypervisors init [OPTIONS]
+
 ```

@@ -91,6 +91,39 @@ class TestResolveHypervisorPlacement:
             )
 
 
+class TestRequireLocalHypervisorProvisioned:
+    def test_raises_if_agent_venv_is_missing(self):
+        with (
+            mock.patch.object(hv_commands, "agent_venv_exists", return_value=False),
+            mock.patch.object(hv_commands, "storage_pool_exists") as pool_exists_mock,
+            pytest.raises(click.UsageError, match="hypervisors init"),
+        ):
+            commands._require_local_hypervisor_provisioned(
+                "exordos-agent", "default", add_sudo=False
+            )
+
+        pool_exists_mock.assert_not_called()
+
+    def test_raises_if_storage_pool_is_missing(self):
+        with (
+            mock.patch.object(hv_commands, "agent_venv_exists", return_value=True),
+            mock.patch.object(hv_commands, "storage_pool_exists", return_value=False),
+            pytest.raises(click.UsageError, match="Storage pool 'default'"),
+        ):
+            commands._require_local_hypervisor_provisioned(
+                "exordos-agent", "default", add_sudo=False
+            )
+
+    def test_passes_when_both_are_present(self):
+        with (
+            mock.patch.object(hv_commands, "agent_venv_exists", return_value=True),
+            mock.patch.object(hv_commands, "storage_pool_exists", return_value=True),
+        ):
+            commands._require_local_hypervisor_provisioned(
+                "exordos-agent", "default", add_sudo=False
+            )
+
+
 def _write_realm(args: tuple) -> None:
     cfg_path, name = args
     from exordos.cmd.stand import commands as stand_commands
