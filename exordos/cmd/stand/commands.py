@@ -572,7 +572,7 @@ def _bootstrap_core(
                 b.image = image_path
 
     if not dev_stand.is_valid():
-        logger.error(f"Invalid stand {dev_stand} from spec {stand_spec}")
+        logger.error(f"Invalid stand {dev_stand.name}")
         return None
 
     infra = libvirt_infra.LibvirtInfraDriver()
@@ -1107,6 +1107,9 @@ def bootstrap_cmd(
 
     if core_ip not in cidr:
         raise click.UsageError("Core IP is not in the main network")
+
+    if stand_spec is None and cidr.overlaps(boot_cidr):
+        raise click.UsageError(f"Boot network {boot_cidr} overlaps main network {cidr}")
 
     # Generate admin password if not provided
     if not admin_password:
