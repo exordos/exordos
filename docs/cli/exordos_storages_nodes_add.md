@@ -70,8 +70,8 @@ Create an OST resource for a registered agent to reconcile
   dc/row/rack/server; outer levels may be omitted
 
 * `weight`:
-    * Type: float range
-    * Default: `1.0`
+    * Type: integer range
+    * Default: `1`
     * Usage: `--weight`
 
 * `description`:
