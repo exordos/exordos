@@ -95,7 +95,7 @@ cn_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "cn")
 @click.option(
     "--speed",
     type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
-    default="WARM",
+    default="HOT",
     show_default=True,
     help="Speed tier to schedule the root disk onto",
 )
@@ -344,7 +344,7 @@ def update_cmd(
 @click.option(
     "--speed",
     type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
-    default="WARM",
+    default="HOT",
     show_default=True,
     help="Speed tier to schedule the root disk onto",
 )

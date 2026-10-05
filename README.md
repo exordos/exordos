@@ -55,17 +55,15 @@ Contributing to the project is highly appreciated! However, some rules should be
 
 ## Rawstor storage
 
-Run `exordos storages add --name storage1` on the storage host. It installs
-and starts a local OST; the core agent starts that storage's MDS on port 7776.
-For another storage, pass `--mds-port 7778` or enter an unused port when prompted.
-Use `--endpoint ost://<storage-ip>:7777` to override the advertised OST address,
-and `--location file:///data/rawstor` to choose its backing store. Multiple OSTs
-on one host need distinct `--endpoint` ports and backing stores.
+Create a cluster with `exordos storages clusters add --type rawstor --name NAME`.
+Initialize OSTs on storage hosts with `storages nodes init --type rawstor`, then
+register them with `storages nodes add --cluster NAME --failure-domain-path dc/row/rack/server`.
+Each cluster gets WARM persistent (two mirrors) and ephemeral (one mirror) pools
+sharing its physical capacity. Local qcow2 disks default to HOT ephemeral.
+See [Rawstor storage](docs/rawstor.md) for ports, policy CRUD and space accounting.
 
-`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `37203739770`.
-The same run supplies OST, vhost, librawstor and the Python wheel. For a released
-version, set `RAWSTOR_VERSION=<version>`; `RAWSTOR_ARTIFACT_RUN` becomes empty
-by default. CI artifacts expire; use a release version for long-lived installs.
+`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `37239522275`.
+The same run supplies OST, vhost, librawstor and binding `99.0.0+0.4e3d1f3`.
 
 ## Local test environment on Ubuntu
 

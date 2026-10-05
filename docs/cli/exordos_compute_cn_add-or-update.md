@@ -6,9 +6,9 @@ Add a new node or update an existing one
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute cn add-or-update [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute cn add-or-update [OPTIONS]
+
 ```
 
 ## Options
@@ -61,6 +61,20 @@ Add a new node or update an existing one
 
   Name of the image to deploy
 
+* `speed`:
+    * Type: choice
+    * Default: `hot`
+    * Usage: `--speed`
+
+  Speed tier to schedule the root disk onto
+
+* `ephemeral`:
+    * Type: boolean
+    * Default: `true`
+    * Usage: `--ephemeral`
+
+  Whether the root disk is ephemeral storage
+
 * `name`:
     * Type: text
     * Default: `node`
@@ -94,7 +108,7 @@ Add a new node or update an existing one
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute cn add-or-update [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute cn add-or-update [OPTIONS]
+
 ```
