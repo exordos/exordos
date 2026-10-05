@@ -166,9 +166,7 @@ def test_nodes_init_prepares_agent_without_starting_an_ost(
         patch.object(storage.base_client, "register_agent_and_write_key") as register,
         patch.object(storage, "run_command") as run,
     ):
-        result = invoke(
-            ["nodes", "init", "--type", "rawstor", "--agent-name", agent_name]
-        )
+        result = invoke(["nodes", "init", "--type", "rawstor", "--agent", agent_name])
     assert result.exit_code == 0, result.output
     packages.assert_called_once_with(["librawstor", "rawstor-ost"], False, version=None)
     assert venv.call_args.kwargs["packages"] == [

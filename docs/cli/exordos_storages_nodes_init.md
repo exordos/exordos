@@ -18,10 +18,10 @@ Install OST packages and prepare the local agent; OSTs are started by reconcilia
     * Default: `sentinel.unset`
     * Usage: `--type`
 
-* `agent_name`:
+* `agent`:
     * Type: text
     * Default: `universal_agent`
-    * Usage: `--agent-name`
+    * Usage: `--agent`
 
   Local universal agent service instance to configure
 
