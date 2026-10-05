@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import base64
 import configparser
-import fnmatch
 import getpass
 import io
 import os
@@ -1257,33 +1256,6 @@ def init_cmd(
             )
 
     log.important("Hypervisor environment initialized successfully")
-
-
-def _domains_for_backup(
-    names: tp.List[str] | None = None,
-    exclude_names: tp.List[str] | None = None,
-    raise_on_domain_absence: bool = False,
-) -> tp.List[str]:
-    domains = set(libvirt.list_domains())
-    names = set(names or [])
-    exclude_names = set(exclude_names or [])
-
-    # Check if the specified domains exist
-    if raise_on_domain_absence and (names - domains):
-        diff = ", ".join(names - domains)
-        raise click.UsageError(f"Domains {diff} not found")
-
-    if names:
-        domains &= names
-
-    if exclude_names:
-        domains = {
-            d
-            for d in domains
-            if not any(fnmatch.fnmatch(d, pattern) for pattern in exclude_names)
-        }
-
-    return list(domains)
 
 
 hypervisors_group.add_command(add_cmd, aliases=["a"])

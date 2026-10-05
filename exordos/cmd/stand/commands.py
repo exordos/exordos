@@ -38,8 +38,8 @@ from exordos import utils
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
+from exordos.cmd.backup.commands import _domains_for_backup
 from exordos.cmd.compute.hypervisors import commands as hv_commands
-from exordos.cmd.compute.hypervisors.commands import _domains_for_backup
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
 from exordos.cmd.stand.constants import Profile

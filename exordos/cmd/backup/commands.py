@@ -13,14 +13,41 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import fnmatch
 import subprocess
 import time
 import typing as tp
 
 import rich_click as click
 
-from exordos.cmd.compute.hypervisors.commands import _domains_for_backup
 from exordos.infra.libvirt import libvirt
+
+
+def _domains_for_backup(
+    names: tp.List[str] | None = None,
+    exclude_names: tp.List[str] | None = None,
+    raise_on_domain_absence: bool = False,
+) -> tp.List[str]:
+    domains = set(libvirt.list_domains())
+    names = set(names or [])
+    exclude_names = set(exclude_names or [])
+
+    # Check if the specified domains exist
+    if raise_on_domain_absence and (names - domains):
+        diff = ", ".join(names - domains)
+        raise click.UsageError(f"Domains {diff} not found")
+
+    if names:
+        domains &= names
+
+    if exclude_names:
+        domains = {
+            d
+            for d in domains
+            if not any(fnmatch.fnmatch(d, pattern) for pattern in exclude_names)
+        }
+
+    return list(domains)
 
 
 @click.command("snapshot", help="Create ZFS snapshots of libvirt domain disks")
