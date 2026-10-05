@@ -37,7 +37,7 @@ class TestCmdBackup:
                 return_value=backuper_mock,
             ) as local_backuper_ctor,
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.stand.commands.domains_for_backup",
                 return_value=domains,
             ) as domains_for_backup,
             patch("exordos.utils.load_driver") as load_driver,
@@ -86,7 +86,7 @@ class TestCmdBackup:
                 return_value=backuper_mock,
             ) as load_driver,
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.stand.commands.domains_for_backup",
                 return_value=domains,
             ) as domains_for_backup,
             patch(
@@ -128,7 +128,7 @@ class TestCmdBackup:
                 return_value=backuper_mock,
             ) as local_backuper_ctor,
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.stand.commands.domains_for_backup",
                 return_value=filtered_domains,
             ) as domains_for_backup,
             patch("exordos.utils.load_driver") as load_driver,
@@ -226,7 +226,7 @@ class TestCmdBackup:
                 return_value=backuper_mock,
             ),
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.stand.commands.domains_for_backup",
                 return_value=domains,
             ),
             patch(
@@ -279,7 +279,7 @@ class TestCmdBackup:
                 return_value=backuper_mock,
             ),
             patch(
-                "exordos.cmd.stand.commands._domains_for_backup",
+                "exordos.cmd.stand.commands.domains_for_backup",
                 return_value=domains,
             ) as domains_for_backup,
             patch(

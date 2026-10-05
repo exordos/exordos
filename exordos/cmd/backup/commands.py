@@ -23,7 +23,7 @@ import rich_click as click
 from exordos.infra.libvirt import libvirt
 
 
-def _domains_for_backup(
+def domains_for_backup(
     names: tp.List[str] | None = None,
     exclude_names: tp.List[str] | None = None,
     raise_on_domain_absence: bool = False,
@@ -82,7 +82,7 @@ def snapshot_cmd(
         )
 
     snapshot_name = snapshot_name or f"snap-{time.strftime('%Y%m%d-%H%M%S')}"
-    domains = _domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
+    domains = domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
 
     snapshots = set()
     for domain in sorted(domains):
@@ -184,7 +184,7 @@ def snapshot_restore_cmd(
             "Cannot specify both --name and --no/--exclude-name options at the same time."
         )
 
-    domains = _domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
+    domains = domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
     domain_zvols = {d: libvirt.get_domain_zvols(d) for d in sorted(domains)}
     domain_zvols = {d: zvols for d, zvols in domain_zvols.items() if zvols}
 

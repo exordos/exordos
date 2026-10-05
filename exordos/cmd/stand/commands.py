@@ -38,7 +38,7 @@ from exordos import utils
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
 from exordos.builder import base as base_builder
-from exordos.cmd.backup.commands import _domains_for_backup
+from exordos.cmd.backup.commands import domains_for_backup
 from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.cmd.settings import config as settings_config
 from exordos.cmd.stand.constants import BackupPeriod
@@ -1540,7 +1540,7 @@ def backup_cmd(
 
     # Do a single backup and exit
     if oneshot:
-        domains = _domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
+        domains = domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
         backuper.backup(domains, compress, encryption)
         return
 
@@ -1592,7 +1592,7 @@ def backup_cmd(
     # Do periodic backups
     while True:
         # Need to refresh the list of domains since it could have changed
-        domains = _domains_for_backup(name, exclude_name)
+        domains = domains_for_backup(name, exclude_name)
 
         click.secho(f"Backup started at {time.strftime('%Y-%m-%d %H:%M:%S')}")
         backuper.backup(domains, compress, encryption)

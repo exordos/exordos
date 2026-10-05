@@ -57,7 +57,7 @@ class TestCmdSnapshot:
 
         with (
             patch(
-                "exordos.cmd.backup.commands._domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=["vm2", "vm1"],
             ) as domains_for_backup,
             patch(
@@ -83,7 +83,7 @@ class TestCmdSnapshot:
     def test_snapshot_cmd_skips_when_no_zvols(self) -> None:
         with (
             patch(
-                "exordos.cmd.backup.commands._domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=["vm1"],
             ),
             patch(
@@ -110,7 +110,7 @@ class TestCmdSnapshotRestore:
     def _patches(self, snapshots: bytes = SNAPSHOTS):
         return (
             patch(
-                "exordos.cmd.backup.commands._domains_for_backup",
+                "exordos.cmd.backup.commands.domains_for_backup",
                 return_value=["vm2", "vm1"],
             ),
             patch(
