@@ -134,10 +134,13 @@ def test_nodes_add_prepares_agent_without_starting_an_ost(
     api, monkeypatch, agent_name, existing, expected
 ):
     monkeypatch.setenv("LOCAL_GENESIS_SDK_PATH", "/source/gcl_sdk")
-    api.get.return_value = {
-        "uuid": expected,
-        "capabilities": {"capabilities": ["hypervisor"]},
-    }
+    api.get.side_effect = [
+        {"uuid": expected, "capabilities": {"capabilities": ["hypervisor"]}},
+        {
+            "uuid": expected,
+            "capabilities": {"capabilities": ["hypervisor", "storage_node"]},
+        },
+    ]
     target = SimpleNamespace(
         venv_path="/venv",
         exec_path="/venv/bin/agent",
@@ -149,6 +152,7 @@ def test_nodes_add_prepares_agent_without_starting_an_ost(
     )
     with (
         patch.object(storage, "_require_local_privileges"),
+        patch.object(storage.time, "sleep"),
         patch.object(storage.hyper_commands, "is_root", return_value=True),
         patch.object(
             storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
@@ -188,10 +192,8 @@ def test_nodes_add_prepares_agent_without_starting_an_ost(
     assert register.call_args.kwargs["agent_uuid"] == expected
     assert config.call_args.kwargs["agent_uuid"] == expected
     assert register.call_args.kwargs["capabilities"] == ["storage_node"]
-    api.update.assert_called_once()
-    assert api.update.call_args.args[3] == {
-        "capabilities": {"capabilities": ["hypervisor", "storage_node"]}
-    }
+    api.update.assert_not_called()
+    assert api.get.call_count == 2
     agent_unit.assert_called_once()
     commands = [call.args[0] for call in run.call_args_list]
     assert ["modprobe", "zfs"] in commands
