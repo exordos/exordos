@@ -1,7 +1,7 @@
 
 # exordos_storages_nodes_init
 
-Install and start a local OST without registering it in a cluster
+Install OST packages and prepare the local agent; OSTs are started by reconciliation after add
 
 ## Usage
 
@@ -18,38 +18,12 @@ Install and start a local OST without registering it in a cluster
     * Default: `sentinel.unset`
     * Usage: `--type`
 
-* `name`:
+* `agent_name`:
     * Type: text
-    * Default: `none`
-    * Usage: `--name`
+    * Default: `universal_agent`
+    * Usage: `--agent-name`
 
-  Local OST instance name; defaults to hostname
-
-* `uuid`:
-    * Type: uuid
-    * Default: `none`
-    * Usage: `--uuid`
-
-  Stable OST identity
-
-* `location`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--location`
-
-  Backing URI; defaults to file:///var/lib/rawstor/UUID
-
-* `bind_address`:
-    * Type: text
-    * Default: `0.0.0.0:7777`
-    * Usage: `--bind`
-
-* `endpoint`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--endpoint`
-
-  Advertised ost://host:port; auto-detected if omitted
+  Local universal agent service instance to configure
 
 * `rawstor_version`:
     * Type: text
