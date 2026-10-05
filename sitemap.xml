@@ -2031,6 +2031,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_routes/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_network_routes_add/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_routes_add/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_routes_add/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_network_routes_delete/</loc>
         <lastmod>2026-10-05</lastmod>
         <changefreq>daily</changefreq>
@@ -2052,11 +2059,25 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_routes_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_network_routes_update/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_routes_update/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_routes_update/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_network_vhosts/</loc>
         <lastmod>2026-10-05</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_network_vhosts_add/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts_add/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_add/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_network_vhosts_clear/</loc>
@@ -2085,6 +2106,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_network_vhosts_update/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts_update/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_update/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_openapi/</loc>
@@ -4971,6 +4999,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_routes/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_routes_add/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_routes_add/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_routes_add/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_routes_delete/</loc>
         <lastmod>2026-10-05</lastmod>
         <changefreq>daily</changefreq>
@@ -4992,11 +5027,25 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_routes_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_routes_update/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_routes_update/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_routes_update/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts/</loc>
         <lastmod>2026-10-05</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_add/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_add/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts_add/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_clear/</loc>
@@ -5025,6 +5074,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_update/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_vhosts_update/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_vhosts_update/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_openapi/</loc>
