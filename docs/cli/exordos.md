@@ -3,9 +3,9 @@
 
 Provides all the necessary tools for work with Exordos Platform
 
-API failures print the HTTP status and the server's error type and message,
+API failures print to stderr the HTTP status and the server's error type and message,
 then exit with a nonzero status. Responses without a JSON error envelope print
-their response text.
+their response text. Terminal control characters are escaped.
 
 ## Usage
 

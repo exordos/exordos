@@ -86,7 +86,13 @@ def _get_otp_prompt(otp_code: str | None) -> str:
 @click.group(
     cls=ClickAliasedGroup,
     invoke_without_command=True,
-    help="Provides all the necessary tools for work with Exordos Platform",
+    help=(
+        "Provides all the necessary tools for work with Exordos Platform\n\n"
+        "API failures print to stderr the HTTP status and the server's error "
+        "type and message, then exit with a nonzero status. Responses without "
+        "a JSON error envelope print their response text. Terminal control "
+        "characters are escaped."
+    ),
 )
 @click.option(
     "--config",
@@ -373,12 +379,7 @@ exordos.add_command(utils_commands.ready_api)
 
 
 def _explain(status: tp.Any, body: str) -> str:
-    """What the server said, not the envelope it said it in.
-
-    The API answers a refused policy with a readable ``message``; printed
-    raw, a ``PolicyNotAuthorized`` reads as a malformed request instead of
-    a missing permission.
-    """
+    """Format the HTTP status and response error details."""
     try:
         payload = json.loads(body)
     except ValueError:
@@ -409,10 +410,13 @@ def main() -> None:
         error_message = f"Error: {e}"
     except KeyboardInterrupt:
         error_message = "Error: Interrupted by user"
-    finally:
-        if error_message:
-            click.secho(error_message, fg="red")
-            sys.exit(1)
+    if error_message:
+        error_message = "".join(
+            char if char.isprintable() or char in "\n\t" else ascii(char)[1:-1]
+            for char in error_message
+        )
+        click.secho(error_message, fg="red", err=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

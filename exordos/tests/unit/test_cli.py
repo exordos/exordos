@@ -13,6 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import json
 import pathlib
 from unittest.mock import MagicMock
 
@@ -82,11 +83,7 @@ def test_explain_says_so_when_there_is_no_body() -> None:
 
 
 def test_main_reports_an_http_error_instead_of_raising_it(monkeypatch, capsys) -> None:
-    """The reason has to survive the trip to the user's terminal.
-
-    Before, this handling sat under `if __name__ == "__main__"` — which the
-    console script does not execute — and the user got a traceback.
-    """
+    """HTTP failures print their reason and exit with status 1."""
     response = MagicMock(status_code=400, text=POLICY_REFUSAL)
     failing = MagicMock(side_effect=RequestException(response=response))
     monkeypatch.setattr(cli, "exordos", failing)
@@ -95,7 +92,9 @@ def test_main_reports_an_http_error_instead_of_raising_it(monkeypatch, capsys) -
         cli.main()
 
     assert exit_code.value.code == 1
-    assert "is disallowed" in capsys.readouterr().out
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "is disallowed" in captured.err
 
 
 def test_the_console_script_goes_through_the_error_handling() -> None:
@@ -105,3 +104,20 @@ def test_the_console_script_goes_through_the_error_handling() -> None:
         scripts = tomllib.load(f)["project"]["scripts"]
 
     assert scripts["exordos"] == "exordos.cmd.cli:main"
+
+
+@pytest.mark.parametrize("structured", [False, True])
+def test_main_escapes_terminal_controls(monkeypatch, capsys, structured) -> None:
+    detail = "denied\x1b[2J\x1b]52;c;payload\x07\r\b\x9b"
+    body = json.dumps({"message": detail}) if structured else detail
+    response = MagicMock(status_code=400, text=body)
+    monkeypatch.setattr(
+        cli, "exordos", MagicMock(side_effect=RequestException(response=response))
+    )
+    with pytest.raises(SystemExit):
+        cli.main()
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "denied" in captured.err
+    assert "\\x1b" in captured.err
+    assert not any(char in captured.err for char in "\x1b\x07\r\b\x9b")
