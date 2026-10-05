@@ -182,6 +182,13 @@ class Stand:
         if all(b.image is None for b in self.bootstraps):
             return False
 
+        # Overlapping networks put the same subnet on both core interfaces,
+        # so replies leave via the isolated boot network and are lost.
+        if not self.boot_network.is_dummy and self.network.cidr.overlaps(
+            self.boot_network.cidr
+        ):
+            return False
+
         for h in self.hypervisors:
             if not h.is_valid(self.network):
                 return False
