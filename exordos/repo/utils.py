@@ -236,7 +236,7 @@ def do_upload(
         for element in elements:
             if extract_repository_uuid(element).lower() != str(entity_uuid).lower():
                 continue
-            if "manifest" not in element:
+            if not element.get("manifest"):
                 element = base_client.get_entity(
                     client, c.REPOSITORY_ELEMENT_COLLECTION, element["uuid"]
                 )

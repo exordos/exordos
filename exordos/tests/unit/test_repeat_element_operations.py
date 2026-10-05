@@ -38,7 +38,20 @@ def _error(error_type, status):
     return error_type(cause)
 
 
-def test_repeated_manifest_install_stops_before_upload(tmp_path):
+@pytest.mark.parametrize(
+    "catalog",
+    [
+        [],
+        [
+            {
+                "uuid": "catalog-id",
+                "manifest": {"name": "app"},
+                "installation_state": "UNINSTALLED",
+            }
+        ],
+    ],
+)
+def test_repeated_manifest_install_stops_before_upload(tmp_path, catalog):
     manifest = _manifest(tmp_path)
     client = mock.Mock()
     context = ContextObject({}, "", "", {}, False)
@@ -49,7 +62,10 @@ def test_repeated_manifest_install_stops_before_upload(tmp_path):
         mock.patch.object(
             commands.base_client,
             "list_entities",
-            side_effect=[[], [{"version": "1.0"}]],
+            side_effect=[
+                catalog,
+                [{"version": "1.0", "manifest": "/v1/em/manifests/direct-id"}],
+            ],
         ) as listing,
         mock.patch.object(commands.repo_utils, "ensure_repository") as ensure,
         mock.patch.object(commands.repo_utils, "do_upload") as upload,
@@ -232,7 +248,11 @@ def test_duplicate_upload_ignores_repository_uuid_case(tmp_path):
     upload.assert_not_called()
 
 
-def test_manifest_reinstall_uses_repository_state_during_teardown(tmp_path):
+@pytest.mark.parametrize("lazy", [False, True])
+@pytest.mark.parametrize("manifest_uuid", [None, "custom-id"])
+def test_manifest_reinstall_uses_repository_state_during_teardown(
+    tmp_path, manifest_uuid, lazy
+):
     manifest = _manifest(tmp_path)
     client = mock.Mock()
     context = ContextObject({}, "", "", {}, False)
@@ -243,12 +263,32 @@ def test_manifest_reinstall_uses_repository_state_during_teardown(tmp_path):
         mock.patch.object(
             commands.base_client,
             "list_entities",
-            return_value=[{"version": "1.0", "installation_state": "UNINSTALLED"}],
+            side_effect=[
+                [
+                    {
+                        "uuid": "catalog-id",
+                        "version": "1.0",
+                        "manifest": {} if lazy else {"uuid": manifest_uuid},
+                        "installation_state": "UNINSTALLED",
+                    }
+                ],
+                [
+                    {
+                        "version": "1.0",
+                        "manifest": f"/v1/em/manifests/{manifest_uuid or 'catalog-id'}",
+                    }
+                ],
+            ],
         ) as listing,
         mock.patch.object(
             commands.repo_utils, "ensure_repository", return_value={"uuid": "repo-id"}
         ),
         mock.patch.object(commands.repo_utils, "do_upload") as upload,
+        mock.patch.object(
+            commands.base_client,
+            "get_entity",
+            return_value={"uuid": "catalog-id", "manifest": {"uuid": manifest_uuid}},
+        ) as get,
         mock.patch.object(
             commands.repo_utils,
             "wait_for_repo_element",
@@ -258,8 +298,40 @@ def test_manifest_reinstall_uses_repository_state_during_teardown(tmp_path):
     ):
         result = CliRunner().invoke(commands.install_cmd, [str(manifest)], obj=context)
     assert result.exit_code == 0, result.output
-    listing.assert_called_once_with(
-        client, constants.REPOSITORY_ELEMENT_COLLECTION, name="app"
-    )
+    assert listing.call_args_list == [
+        mock.call(client, constants.REPOSITORY_ELEMENT_COLLECTION, name="app"),
+        mock.call(client, constants.ELEMENT_COLLECTION, name="app"),
+    ]
     upload.assert_called_once()
     install.assert_called_once_with(client, "element-id")
+    assert get.call_count == int(lazy)
+
+
+@pytest.mark.parametrize("placeholder", [None, {}])
+@pytest.mark.parametrize("different", [False, True])
+def test_upload_loads_lazy_manifest_before_comparison(tmp_path, placeholder, different):
+    manifest = _manifest(tmp_path)
+    row = {"uuid": "element-id", "repository": "/v1/repo/repositories/repo-id"}
+    if placeholder is not None:
+        row["manifest"] = placeholder
+    content = {"name": "app", "version": 1.0}
+    if different:
+        content["description"] = "different"
+    with (
+        mock.patch.object(
+            utils.base_client, "_get_entity_uuid", return_value="repo-id"
+        ),
+        mock.patch.object(utils, "wait_for_repository_active"),
+        mock.patch.object(utils.base_client, "list_entities", return_value=[row]),
+        mock.patch.object(
+            utils.base_client, "get_entity", return_value={**row, "manifest": content}
+        ) as get,
+        mock.patch.object(utils.base_client, "action_entity") as upload,
+    ):
+        if different:
+            with pytest.raises(Exception, match="different manifest content"):
+                utils.do_upload(mock.Mock(), "repo", manifest)
+        else:
+            utils.do_upload(mock.Mock(), "repo", manifest)
+    get.assert_called_once()
+    upload.assert_not_called()

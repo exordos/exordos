@@ -463,10 +463,28 @@ def install_cmd(
             client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
         )
         installed = [e for e in catalog if e.get("installation_state") == "INSTALLED"]
-        if not catalog:
-            installed = base_client.list_entities(
+        if not installed:
+            runtime_elements = base_client.list_entities(
                 client, c.ELEMENT_COLLECTION, name=name
             )
+            if runtime_elements:
+                repository_manifests = set()
+                for element in catalog:
+                    if not element.get("manifest"):
+                        element = base_client.get_entity(
+                            client, c.REPOSITORY_ELEMENT_COLLECTION, element["uuid"]
+                        )
+                    manifest_uuid = element["manifest"].get("uuid") or element["uuid"]
+                    repository_manifests.add(str(manifest_uuid).lower())
+                installed = [
+                    element
+                    for element in runtime_elements
+                    if (element.get("manifest") or "")
+                    .rstrip("/")
+                    .split("/")[-1]
+                    .lower()
+                    not in repository_manifests
+                ]
         if installed:
             raise click.ClickException(
                 f"Element {name} is already installed ("
