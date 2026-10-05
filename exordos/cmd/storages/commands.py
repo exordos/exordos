@@ -271,6 +271,8 @@ def init_cmd(storage_type, version):
     log.info("[2/2] Installing storage dependencies (this may take several minutes)...")
     run_command(
         [
+            "env",
+            "DEBIAN_FRONTEND=noninteractive",
             "apt-get",
             "install",
             "-y",

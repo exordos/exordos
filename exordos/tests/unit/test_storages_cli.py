@@ -134,7 +134,10 @@ def test_nodes_add_prepares_agent_without_starting_an_ost(
     api, monkeypatch, agent_name, existing, expected
 ):
     monkeypatch.setenv("LOCAL_GENESIS_SDK_PATH", "/source/gcl_sdk")
-    api.get.return_value = {"uuid": expected, "capabilities": {"capabilities": ["hypervisor"]}}
+    api.get.return_value = {
+        "uuid": expected,
+        "capabilities": {"capabilities": ["hypervisor"]},
+    }
     target = SimpleNamespace(
         venv_path="/venv",
         exec_path="/venv/bin/agent",
@@ -374,7 +377,13 @@ def test_nodes_init_only_installs_packages_without_core_configuration():
     client.assert_not_called()
     target.assert_not_called()
     command = run.call_args.args[0]
-    assert command[:3] == ["apt-get", "install", "-y"]
+    assert command[:5] == [
+        "env",
+        "DEBIAN_FRONTEND=noninteractive",
+        "apt-get",
+        "install",
+        "-y",
+    ]
     assert "zfsutils-linux" in command
     assert "zfs-dkms" in command
     assert any(arg.startswith("linux-headers-") for arg in command)
