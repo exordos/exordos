@@ -383,9 +383,9 @@ def _install_packages(add_sudo: bool = False) -> None:
 
 RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "99.0.0")
 RAWSTOR_ARTIFACT_RUN = os.environ.get(
-    "RAWSTOR_ARTIFACT_RUN", "37203739770" if RAWSTOR_VERSION == "99.0.0" else ""
+    "RAWSTOR_ARTIFACT_RUN", "37239522275" if RAWSTOR_VERSION == "99.0.0" else ""
 )
-RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.5ab494a")
+RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.4e3d1f3")
 RAWSTOR_ARTIFACTS_URL = (
     f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
 )
@@ -415,13 +415,15 @@ def prepare_rawstor_wheel() -> str:
 
 
 def install_rawstor_packages(
-    packages: tp.Sequence[str], add_sudo: bool = False
+    packages: tp.Sequence[str], add_sudo: bool = False, version: str | None = None
 ) -> None:
     """Download and install the given rawstor .deb packages."""
+    version = version or RAWSTOR_VERSION
+    artifact_run = RAWSTOR_ARTIFACT_RUN if version == RAWSTOR_VERSION else ""
     deb_dir = "/tmp/rawstor-packages"
     run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
 
-    if RAWSTOR_ARTIFACT_RUN:
+    if artifact_run:
         archive = f"{deb_dir}/librawstor.deb.zip"
         run_command(
             ["wget", f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip", "-O", archive],
@@ -431,9 +433,9 @@ def install_rawstor_packages(
 
     deb_paths = []
     for package in packages:
-        deb_name = f"{package}_{RAWSTOR_VERSION}_amd64.deb"
-        url = f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/{deb_name}"
-        if not RAWSTOR_ARTIFACT_RUN:
+        deb_name = f"{package}_{version}_amd64.deb"
+        url = f"{RAWSTOR_RELEASES_URL}/v{version}/{deb_name}"
+        if not artifact_run:
             run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
         deb_paths.append(os.path.join(deb_dir, deb_name))
 
