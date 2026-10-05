@@ -57,6 +57,54 @@ build:
         - path: templates/my-template.yaml
 ```
 
+### Сборка из собственного образа по URL
+
+Для сборки элемента из готового дискового образа используйте профиль
+`exordos_custom`. Укажите URL образа и контрольную сумму в `override`:
+
+```yaml
+build:
+  elements:
+    - images:
+        - name: my-custom-image
+          profile: exordos_custom
+          format: qcow2
+          script: images/install.sh
+          override:
+            base_image_url: "https://example.com/my-image.qcow2"
+            base_image_checksum: "file:https://example.com/SHA256SUMS"
+            disk_size: "10G"
+            ssh_username: "ubuntu"
+
+      manifest: manifests/my-element.yaml
+```
+
+Замените URL на адреса вашего дискового образа и файла контрольных сумм, а
+`manifest` — на путь к манифесту элемента. Контрольную сумму можно указать
+напрямую: `base_image_checksum: "sha256:<image-sha256>"`. Значение `disk_size`
+должно быть не меньше виртуального размера исходного образа.
+
+Исходный образ должен поддерживать источник данных NoCloud в cloud-init и
+доступ по SSH для пользователя, указанного в `override.ssh_username`
+(по умолчанию: `ubuntu`). Этот пользователь должен иметь возможность выполнять
+команды через sudo без пароля. Профиль передаёт временный SSH-ключ через
+cloud-init и выполняет команды настройки по SSH.
+
+Создайте `exordos/images/install.sh` с командами настройки. Если дополнительная
+настройка не требуется, достаточно:
+
+```bash
+#!/bin/bash
+set -eu
+```
+
+Пути к скрипту и манифесту указываются относительно `exordos/exordos.yaml`.
+Запустите сборку из корня проекта:
+
+```bash
+exordos build .
+```
+
 ### Артефакты, полученные скриптом
 
 Вместо прямого указания на файл артефакт может запускать скрипт (или любой
