@@ -1,77 +1,71 @@
 
-# storages_list
+# exordos_storages_clusters_list
 
-List storages
+List storage clusters
 
 ## Usage
 
 ```console
-                                                                                
- Usage: exordos storages list [OPTIONS]                                         
-                                                                                
+
+ Usage: exordos storages clusters list [OPTIONS]
+
 ```
 
 ## Options
-* `filters`: 
-  * Type: text 
-  * Default: `sentinel.unset`
-  * Usage: `-f
+
+* `filters`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-f
 --filters`
 
   Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW
 
-
-* `fields`: 
-  * Type: text 
-  * Default: `sentinel.unset`
-  * Usage: `--fields`
+* `fields`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--fields`
 
   fields to show, defaults to all, for example: --fields name --fields status
 
-
-* `output`: 
-  * Type: choice 
-  * Default: `table`
-  * Usage: `--output
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
 -o`
 
   the output format, defaults to table
 
-
-* `watch`: 
-  * Type: boolean 
-  * Default: `false`
-  * Usage: `-w
+* `watch`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `-w
 --watch`
 
-  Watch the list of storages
+  Watch the list of storage clusters
 
-
-* `interval`: 
-  * Type: float range 
-  * Default: `0.5`
-  * Usage: `--interval`
+* `interval`:
+    * Type: float range
+    * Default: `0.5`
+    * Usage: `--interval`
 
   Refresh interval in seconds.
 
-
-* `help`: 
-  * Type: boolean 
-  * Default: `false`
-  * Usage: `--help`
+* `help`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--help`
 
   Show this message and exit.
-
-
 
 ## CLI Help
 
 ```console
-                                                                                
- Usage: exordos storages list [OPTIONS]                                         
-                                                                                
- List storages                                                                  
-                                                                                
+
+ Usage: exordos storages clusters list [OPTIONS]
+
+ List storage clusters
+
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --filters   -f  TEXT                    Additional filters to pass to the    │
 │                                         api. The format is 'key=value'. For  │
@@ -82,9 +76,8 @@ List storages
 │                                         example: --fields name --fields      │
 │                                         status                               │
 │ --output    -o  [json|html|table|yaml]  the output format, defaults to table │
-│ --watch     -w                          Watch the list of storages           │
+│ --watch     -w                          Watch the list of storage clusters   │
 │ --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.         │
 │ --help                                  Show this message and exit.          │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```
-

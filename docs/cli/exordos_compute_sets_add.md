@@ -69,6 +69,20 @@ Add a new set to the Exordos installation
 
   Name of the image to deploy
 
+* `speed`:
+    * Type: choice
+    * Default: `hot`
+    * Usage: `--speed`
+
+  Speed tier to schedule the root disk onto
+
+* `ephemeral`:
+    * Type: boolean
+    * Default: `true`
+    * Usage: `--ephemeral`
+
+  Whether the root disk is ephemeral storage
+
 * `name`:
     * Type: text
     * Default: `set`
@@ -98,13 +112,6 @@ Add a new set to the Exordos installation
     * Usage: `--wait`
 
   Wait until the set is active
-
-* `tags`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--tag`
-
-  Set the complete tag list. Repeat for each tag.
 
 * `help`:
     * Type: boolean
