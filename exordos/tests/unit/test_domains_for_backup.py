@@ -15,18 +15,18 @@
 #    under the License.
 from unittest.mock import patch
 
-from exordos.cmd.stand.commands import _domains_for_backup
+from exordos.cmd.backup.commands import domains_for_backup
 
 
 def test_domains_for_backup_exclude_patterns():
     all_domains = {"vm1", "vm2", "stand-01", "stand-02"}
 
     with patch(
-        "exordos.cmd.stand.commands.libvirt.list_domains",
+        "exordos.cmd.backup.commands.libvirt.list_domains",
         return_value=all_domains,
     ):
         # Case 1: exclude multiple exact names
-        result = _domains_for_backup(
+        result = domains_for_backup(
             names=None,
             exclude_names=("vm1", "vm2"),
             raise_on_domain_absence=True,
@@ -34,7 +34,7 @@ def test_domains_for_backup_exclude_patterns():
         assert set(result) == {"stand-01", "stand-02"}
 
         # Case 2: exclude exact name and wildcard pattern
-        result = _domains_for_backup(
+        result = domains_for_backup(
             names=None,
             exclude_names=("vm2", "stand-*"),
             raise_on_domain_absence=True,
@@ -42,7 +42,7 @@ def test_domains_for_backup_exclude_patterns():
         assert set(result) == {"vm1"}
 
         # Case 3: exclude a pattern that matches nothing
-        result = _domains_for_backup(
+        result = domains_for_backup(
             names=None,
             exclude_names=("nonexistent-*",),
             raise_on_domain_absence=True,
@@ -50,7 +50,7 @@ def test_domains_for_backup_exclude_patterns():
         assert set(result) == all_domains
 
         # Case 4: exclude all domains
-        result = _domains_for_backup(
+        result = domains_for_backup(
             names=None,
             exclude_names=("vm*", "stand-*"),
             raise_on_domain_absence=True,
