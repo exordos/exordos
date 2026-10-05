@@ -166,3 +166,5 @@ To push to a specific target, pass the config file with the `-c` flag:
 ```bash
 exordos push -c exordos/exordos.push.yaml
 ```
+
+Manifest name discovery does not render Jinja templates. Use a static single-line top-level `name` or pass `--manifest-var name=value` for names that depend on template variables or conditions.
