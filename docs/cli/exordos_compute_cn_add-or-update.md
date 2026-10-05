@@ -77,6 +77,13 @@ Add a new node or update an existing one
 
   Description of the node
 
+* `hostname`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--hostname`
+
+  Hostname of the node
+
 * `wait`:
     * Type: boolean
     * Default: `false`

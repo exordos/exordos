@@ -20,6 +20,7 @@ import io
 import itertools
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -428,6 +429,18 @@ def is_valid_uuid(uuid_to_test: tp.Any, version: int = 4) -> bool:
         return True
     except (ValueError, AttributeError):
         return False
+
+
+_HOSTNAME_RE = re.compile(
+    r"(?=^.{1,253}$)(^((?![-])[a-zA-Z0-9-]{1,63}(?<![-])\.){0,}"
+    r"((?!-)[a-zA-Z0-9-]{1,63}(?<!-))$)"
+)
+
+
+def is_valid_hostname(hostname: tp.Any) -> bool:
+    if not isinstance(hostname, str):
+        return False
+    return _HOSTNAME_RE.match(hostname) is not None
 
 
 def get_project_path() -> str:

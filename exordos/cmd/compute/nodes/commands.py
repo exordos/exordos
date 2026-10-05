@@ -23,6 +23,7 @@ import rich_click as click
 
 from exordos import constants as c
 from exordos import logger
+from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.compute import common as compute_common
@@ -43,6 +44,11 @@ FIELDS_MAP = {
 }
 
 cn_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "cn")
+
+
+def _validate_hostname(hostname: str) -> None:
+    if not utils.is_valid_hostname(hostname):
+        raise click.ClickException(f"Invalid hostname: {hostname}")
 
 
 @click.command("add", help="Add a new node to the Exordos installation")
@@ -107,6 +113,12 @@ cn_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "cn")
     help="Description of the node",
 )
 @click.option(
+    "--hostname",
+    type=str,
+    default=None,
+    help="Hostname of the node",
+)
+@click.option(
     "--wait",
     type=bool,
     is_flag=True,
@@ -123,6 +135,7 @@ def add_cmd(
     image: str,
     name: str,
     description: str,
+    hostname: str | None,
     wait: bool,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -142,6 +155,9 @@ def add_cmd(
             "image": image,
         },
     }
+    if hostname is not None:
+        _validate_hostname(hostname)
+        data["hostname"] = hostname
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
         show_data(entity)
@@ -339,6 +355,12 @@ def update_cmd(
     help="Description of the node",
 )
 @click.option(
+    "--hostname",
+    type=str,
+    default=None,
+    help="Hostname of the node",
+)
+@click.option(
     "--wait",
     type=bool,
     is_flag=True,
@@ -355,6 +377,7 @@ def add_or_update_node_cmd(
     image: str,
     name: str,
     description: str,
+    hostname: str | None,
     wait: bool,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -369,6 +392,7 @@ def add_or_update_node_cmd(
             image=image,
             name=name,
             description=description,
+            hostname=hostname,
             wait=wait,
         )
 
@@ -385,6 +409,7 @@ def add_or_update_node_cmd(
             image=image,
             name=name,
             description=description,
+            hostname=hostname,
             wait=wait,
         )
 
@@ -399,6 +424,9 @@ def add_or_update_node_cmd(
             "image": image,
         },
     }
+    if hostname is not None:
+        _validate_hostname(hostname)
+        data["hostname"] = hostname
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     if not wait:
         show_data(entity)
