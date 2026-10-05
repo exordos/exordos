@@ -427,6 +427,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot-delete/" class="md-nav__link">
+        exordos_backup_snapshot-delete
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot-list/" class="md-nav__link">
+        exordos_backup_snapshot-list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot-restore/" class="md-nav__link">
+        exordos_backup_snapshot-restore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot/" class="md-nav__link">
+        exordos_backup_snapshot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cli/exordos_bootstrap/" class="md-nav__link">
         exordos_bootstrap
       </a>
@@ -6353,6 +6409,26 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#снапшоты-zfs" class="md-nav__link">
+    Снапшоты ZFS
+  </a>
+  
+    <nav class="md-nav" aria-label="Снапшоты ZFS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#восстановление-из-снапшотов" class="md-nav__link">
+    Восстановление из снапшотов
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6472,6 +6548,19 @@ virsh<span class="w"> </span>start<span class="w"> </span>foo
 <p>Резервные копии могут занимать много места на диске, что может привести к падению всей системы, если диск заполнится. Чтобы предотвратить такую ситуацию, можно установить порог свободного места на диске. Если в процессе резервного копирования будет достигнут этот порог, процесс резервного копирования остановится. Используйте опцию <code>--min-free-space</code> для установки порога в ГБ.</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>--min-free-space<span class="w"> </span><span class="m">50</span>
 </code></pre></div>
+<h2 id="снапшоты-zfs">Снапшоты ZFS<a class="headerlink" href="#снапшоты-zfs" title="Permanent link">#</a></h2>
+<p>Команда <code>backup snapshot</code> создаёт ZFS-снапшоты всех zvol-дисков, подключённых к доменам libvirt. Все снапшоты создаются атомарно одним вызовом <code>zfs snapshot</code>.</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot
+</code></pre></div>
+<p>По умолчанию имя снапшота — <code>snap-&lt;YYYYmmdd-HHMMSS&gt;</code>. Используйте <code>-s/--snapshot-name</code>, чтобы задать его, и <code>-n/--name</code> или <code>--exclude-name/--no</code> для выбора доменов:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot<span class="w"> </span>-s<span class="w"> </span>before-upgrade<span class="w"> </span>--exclude-name<span class="w"> </span><span class="s2">"*github-packer-runner-*"</span>
+</code></pre></div>
+<p>Снапшоты консистентны на уровне аварийного отключения (crash-consistent).</p>
+<h3 id="восстановление-из-снапшотов">Восстановление из снапшотов<a class="headerlink" href="#восстановление-из-снапшотов" title="Permanent link">#</a></h3>
+<p>Команда <code>backup snapshot-restore</code> откатывает zvol-диски доменов libvirt к указанному снапшоту. Перед изменениями она проверяет, что все снапшоты существуют, запрашивает подтверждение (пропустить можно флагом <code>-y/--yes</code>), останавливает запущенные домены, откатывает их диски и запускает домены снова.</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot-restore<span class="w"> </span>before-upgrade<span class="w"> </span>-n<span class="w"> </span>o1-a370f746-ecosystem-cp
+</code></pre></div>
+<p><code>zfs rollback</code> не откатывает диск, если у zvol есть более новые снапшоты; при необходимости удалите их заранее.</p>
 
 
 

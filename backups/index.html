@@ -427,6 +427,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot-delete/" class="md-nav__link">
+        exordos_backup_snapshot-delete
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot-list/" class="md-nav__link">
+        exordos_backup_snapshot-list
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot-restore/" class="md-nav__link">
+        exordos_backup_snapshot-restore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot/" class="md-nav__link">
+        exordos_backup_snapshot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cli/exordos_bootstrap/" class="md-nav__link">
         exordos_bootstrap
       </a>
@@ -6353,6 +6409,26 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#zfs-snapshots" class="md-nav__link">
+    ZFS Snapshots
+  </a>
+  
+    <nav class="md-nav" aria-label="ZFS Snapshots">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restore-from-snapshots" class="md-nav__link">
+    Restore from Snapshots
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6472,6 +6548,19 @@ virsh<span class="w"> </span>start<span class="w"> </span>foo
 <p>Backups can take a lot of disk space and it can be a reason to crash the whole system if a disk will be full. To prevent such a situation you can set a threshold for disk space that should be free. If during a backup process this threshold will be reached, the backup process will stop. Use the <code>--min-free-space</code> option to set the threshold in GB.</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>--min-free-space<span class="w"> </span><span class="m">50</span>
 </code></pre></div>
+<h2 id="zfs-snapshots">ZFS Snapshots<a class="headerlink" href="#zfs-snapshots" title="Permanent link">#</a></h2>
+<p>The <code>backup snapshot</code> command creates ZFS snapshots of all zvol disks attached to libvirt domains. All snapshots are created atomically by a single <code>zfs snapshot</code> call.</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot
+</code></pre></div>
+<p>The snapshot name defaults to <code>snap-&lt;YYYYmmdd-HHMMSS&gt;</code>. Use <code>-s/--snapshot-name</code> to set it, and <code>-n/--name</code> or <code>--exclude-name/--no</code> to select domains:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot<span class="w"> </span>-s<span class="w"> </span>before-upgrade<span class="w"> </span>--exclude-name<span class="w"> </span><span class="s2">"*github-packer-runner-*"</span>
+</code></pre></div>
+<p>Snapshots are crash-consistent.</p>
+<h3 id="restore-from-snapshots">Restore from Snapshots<a class="headerlink" href="#restore-from-snapshots" title="Permanent link">#</a></h3>
+<p>The <code>backup snapshot-restore</code> command rolls back zvol disks of libvirt domains to the given snapshot. It checks that all snapshots exist before changing anything, asks for confirmation (skip with <code>-y/--yes</code>), stops running domains, rolls back their disks and starts them again.</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot-restore<span class="w"> </span>before-upgrade<span class="w"> </span>-n<span class="w"> </span>o1-a370f746-ecosystem-cp
+</code></pre></div>
+<p><code>zfs rollback</code> refuses to roll back past newer snapshots of the same zvol; destroy them first if needed.</p>
 
 
 
