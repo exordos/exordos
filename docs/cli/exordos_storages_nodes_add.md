@@ -1,7 +1,7 @@
 
 # exordos_storages_nodes_add
 
-Create an OST on the selected agent and reconcile it into the cluster topology
+Configure the local agent, create an OST and reconcile it into the cluster topology
 
 ## Usage
 
@@ -22,10 +22,10 @@ Create an OST on the selected agent and reconcile it into the cluster topology
 
 * `agent`:
     * Type: text
-    * Default: `none`
+    * Default: `universal_agent`
     * Usage: `--agent`
 
-  Local agent service name or registered agent name/UUID; defaults to the local agent
+  Local universal agent service instance to create or configure
 
 * `name` (REQUIRED):
     * Type: text
@@ -60,7 +60,7 @@ Create an OST on the selected agent and reconcile it into the cluster topology
     * Default: `none`
     * Usage: `--endpoint`
 
-  Advertised ost://host:port; auto-detected only when adding an OST on this host
+  Advertised ost://host:port; auto-detected if omitted
 
 * `failure_domain_path` (REQUIRED):
     * Type: text
