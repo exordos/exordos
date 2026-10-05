@@ -1,7 +1,7 @@
 
 # exordos_storages_nodes_init
 
-Install OST packages on the local host
+Install OST packages and configure the local agent
 
 ## Usage
 
@@ -17,6 +17,13 @@ Install OST packages on the local host
     * Type: choice
     * Default: `sentinel.unset`
     * Usage: `--type`
+
+* `pool_agent_name`:
+    * Type: text
+    * Default: `universal_agent`
+    * Usage: `--pool-agent-name`
+
+  Local universal agent service instance to create or configure
 
 * `version`:
     * Type: text

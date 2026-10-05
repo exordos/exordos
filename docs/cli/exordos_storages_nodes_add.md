@@ -1,7 +1,7 @@
 
 # exordos_storages_nodes_add
 
-Configure the local agent, create an OST and reconcile it into the cluster topology
+Create an OST resource for the initialized local agent to reconcile
 
 ## Usage
 
@@ -25,7 +25,7 @@ Configure the local agent, create an OST and reconcile it into the cluster topol
     * Default: `universal_agent`
     * Usage: `--pool-agent-name`
 
-  Local universal agent service instance to create or configure
+  Initialized local universal agent service instance
 
 * `name` (REQUIRED):
     * Type: text
