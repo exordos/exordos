@@ -181,6 +181,15 @@ def test_nodes_init_prepares_agent_without_starting_an_ost(
     assert config.call_args.kwargs["agent_uuid"] == expected
     assert register.call_args.kwargs["capabilities"] == ["storage_node"]
     agent_unit.assert_called_once()
+    commands = [call.args[0] for call in run.call_args_list]
+    assert any(
+        command[:3] == ["apt-get", "install", "-y"]
+        and "zfsutils-linux" in command
+        and "zfs-dkms" in command
+        and any(arg.startswith("linux-headers-") for arg in command)
+        for command in commands
+    )
+    assert ["modprobe", "zfs"] in commands
     assert all(
         not any("rawstor-ost@" in arg for arg in call.args[0])
         for call in run.call_args_list
