@@ -6442,6 +6442,7 @@ would be ambiguous.</p>
 <p>To push to a specific target, pass the config file with the <code>-c</code> flag:</p>
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>push<span class="w"> </span>-c<span class="w"> </span>exordos/exordos.push.yaml
 </code></pre></div>
+<p>Manifest name discovery does not render Jinja templates. Use a static single-line top-level <code>name</code> or pass <code>--manifest-var name=value</code> for names that depend on template variables or conditions.</p>
 
 
 
