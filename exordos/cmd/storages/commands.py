@@ -247,12 +247,12 @@ def _detect_local_endpoint(
     help="Local universal agent service instance to configure",
 )
 @click.option(
-    "--rawstor-version",
+    "--version",
     default=None,
     help="Override RAWSTOR_VERSION for installed packages",
 )
 @click.pass_context
-def init_cmd(ctx, storage_type, agent_name, rawstor_version):
+def init_cmd(ctx, storage_type, agent_name, version):
     _require_local_privileges()
     core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
     if not core_host:
@@ -280,7 +280,7 @@ def init_cmd(ctx, storage_type, agent_name, rawstor_version):
         agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent_name))
     add_sudo = not hyper_commands.is_root()
     hyper_commands.install_rawstor_packages(
-        ["librawstor", "rawstor-ost"], add_sudo, version=rawstor_version
+        ["librawstor", "rawstor-ost"], add_sudo, version=version
     )
     run_command(
         [
@@ -296,9 +296,9 @@ def init_cmd(ctx, storage_type, agent_name, rawstor_version):
     )
     run_command(["modprobe", "zfs"], sudo=add_sudo)
     wheel = hyper_commands.RAWSTOR_WHEEL_URL
-    if rawstor_version and rawstor_version != hyper_commands.RAWSTOR_VERSION:
+    if version and version != hyper_commands.RAWSTOR_VERSION:
         wheel = (
-            f"{hyper_commands.RAWSTOR_RELEASES_URL}/v{rawstor_version}/rawstor-{rawstor_version}"
+            f"{hyper_commands.RAWSTOR_RELEASES_URL}/v{version}/rawstor-{version}"
             "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
         )
     hyper_commands.install_agent_venv(
