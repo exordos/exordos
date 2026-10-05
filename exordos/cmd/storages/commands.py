@@ -263,9 +263,12 @@ def _detect_local_endpoint(
 def init_cmd(storage_type, version):
     _require_local_privileges()
     add_sudo = not hyper_commands.is_root()
+    log = ClickLogger()
+    log.info("[1/2] Downloading and installing rawstor packages...")
     hyper_commands.install_rawstor_packages(
         ["librawstor", "rawstor-ost"], add_sudo, version=version
     )
+    log.info("[2/2] Installing storage dependencies (this may take several minutes)...")
     run_command(
         [
             "apt-get",
@@ -278,7 +281,7 @@ def init_cmd(storage_type, version):
         ],
         sudo=add_sudo,
     )
-    ClickLogger().important("OST packages installed")
+    log.important("OST packages installed successfully")
 
 
 def _prepare_local_storage_agent(ctx, agent=None):
