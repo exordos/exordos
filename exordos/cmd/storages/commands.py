@@ -55,7 +55,27 @@ clusters_group = create_entity_group(
         "Available bytes": lambda e: e.get("capacity_info", {}).get("available", 0),
     },
     group_name="clusters",
+    add_show_command=False,
 )
+
+
+@click.command("show", help="Show storage cluster")
+@click.argument("uuid", type=str, required=True)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+@click.pass_context
+def clusters_show_cmd(ctx, uuid, output):
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    cluster = base_client.get_entity(client, c.STORAGE_CLUSTER_COLLECTION, uuid)
+    show_data({k: v for k, v in cluster.items() if k != "storage_pools"}, output)
+
+
+clusters_group.add_command(clusters_show_cmd, aliases=["get", "g"])
 
 
 def _filter_cluster(entities, kwargs):
