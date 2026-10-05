@@ -77,6 +77,13 @@ Add a new node to the Exordos installation
 
   Description of the node
 
+* `hostname`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--hostname`
+
+  Hostname of the node
+
 * `wait`:
     * Type: boolean
     * Default: `false`
@@ -108,6 +115,7 @@ Add a new node to the Exordos installation
 │ *  --image        -i  TEXT     Name of the image to deploy [required]                                                                                                                                                                                                                                   │
 │    --name         -n  TEXT     Name of the node                                                                                                                                                                                                                                                         │
 │    --description  -D  TEXT     Description of the node                                                                                                                                                                                                                                                  │
+│    --hostname                  Hostname of the node                                                                                                                                                                                                                                                     │
 │    --wait                      Wait until the node is running                                                                                                                                                                                                                                           │
 │    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
