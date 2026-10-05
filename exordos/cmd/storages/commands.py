@@ -18,6 +18,7 @@ from __future__ import annotations
 import os
 import socket
 import subprocess
+import time
 from urllib.parse import urlparse
 import uuid as sys_uuid
 
@@ -337,22 +338,25 @@ def _prepare_local_storage_agent(ctx, agent=None):
         agent_uuid=str(agent_uuid),
         capabilities=["storage_node"],
     )
-    client = _client(ctx)
-    registered = base_client.get_entity(client, c.AGENT_COLLECTION, str(agent_uuid))
-    capabilities = registered.get("capabilities", {}).get("capabilities", [])
-    if "storage_node" not in capabilities:
-        base_client.update_entity(
-            client,
-            c.AGENT_COLLECTION,
-            str(agent_uuid),
-            {"capabilities": {"capabilities": [*capabilities, "storage_node"]}},
-        )
     hyper_commands.install_agent_systemd_unit(
         exec_path=target.exec_path,
         config_path=target.config_path,
         unit_path=target.unit_path,
         unit_name=target.unit_name,
     )
+    ClickLogger().info("Waiting for the local agent to register OST support...")
+    client = _client(ctx)
+    deadline = time.monotonic() + 30
+    while True:
+        registered = base_client.get_entity(client, c.AGENT_COLLECTION, str(agent_uuid))
+        if "storage_node" in registered.get("capabilities", {}).get("capabilities", []):
+            break
+        if time.monotonic() >= deadline:
+            raise click.ClickException(
+                f"Agent {agent_uuid} has not registered OST support; "
+                f"check systemctl status {target.unit_name} and retry nodes add"
+            )
+        time.sleep(1)
     return str(agent_uuid), node_uuid
 
 
