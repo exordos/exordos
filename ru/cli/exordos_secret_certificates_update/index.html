@@ -6313,6 +6313,26 @@
 </ul>
 <p>Description of the certificate</p>
 <ul>
+<li><code>email</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-e
+--email</code></li>
+</ul>
+</li>
+</ul>
+<p>Email address to use for the certificate</p>
+<ul>
+<li><code>domains</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>-d
+--domain</code></li>
+</ul>
+</li>
+</ul>
+<p>Domain of the certificate, replaces the current list. Can be repeated</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -6331,6 +6351,8 @@
 <span class="go">│ --project-id   -p  UUID  Name of the project in which to deploy the certificate                                                                                                                                                                                                                         │</span>
 <span class="go">│ --name         -n  TEXT  Name of the certificate                                                                                                                                                                                                                                                        │</span>
 <span class="go">│ --description  -D  TEXT  Description of the certificate                                                                                                                                                                                                                                                 │</span>
+<span class="go">│ --email        -e  TEXT  Email address to use for the certificate                                                                                                                                                                                                                                       │</span>
+<span class="go">│ --domain       -d  TEXT  Domain of the certificate, replaces the current list. Can be repeated                                                                                                                                                                                                          │</span>
 <span class="go">│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │</span>
 <span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
