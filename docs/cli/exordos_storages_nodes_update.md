@@ -33,6 +33,11 @@ None
     * Default: `none`
     * Usage: `--endpoint`
 
+* `bind_address`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--bind`
+
 * `failure_domain_path`:
     * Type: text
     * Default: `none`

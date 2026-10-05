@@ -15,8 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
-import json
-from pathlib import Path
+import os
 import socket
 import subprocess
 from urllib.parse import urlparse
@@ -29,14 +28,12 @@ from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.compute.hypervisors import commands as hyper_commands
-from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.table import show_data
 from exordos.logger import ClickLogger
 
 DISK_SPEEDS = ["COLD", "WARM", "HOT"]
 RAWSTOR_OST_ENDPOINT_PORT = 7777
-LOCAL_CONFIG_DIR = Path("/etc/rawstor-ost/instances")
 NODE_COLLECTION = "v1/storage/nodes/"
 POOL_COLLECTION = "v1/storage/pools/"
 
@@ -80,6 +77,8 @@ nodes_group = create_entity_group(
         "Endpoint": "endpoint",
         "Failure domain path": "failure_domain_path",
         "Weight": "weight",
+        "Agent": "agent",
+        "Status": "status",
     },
     group_name="nodes",
     post_fetch_handler=_filter_cluster,
@@ -237,50 +236,16 @@ def _detect_local_endpoint(
     return f"ost://{local_ip}:{port}"
 
 
-def _instance_path(name):
-    if (
-        not name
-        or any(
-            ch
-            not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-"
-            for ch in name
-        )
-        or name in (".", "..")
-    ):
-        raise click.ClickException(
-            "OST instance name may contain letters, digits, dots, underscores and hyphens"
-        )
-    return LOCAL_CONFIG_DIR / f"{name}.json"
-
-
-def _read_instance(name):
-    path = _instance_path(name)
-    try:
-        return json.loads(hyper_commands.read_with_sudo(str(path)))
-    except (OSError, hyper_commands.exceptions.RunException):
-        raise click.ClickException(
-            f"OST {name} is not initialized; run storages nodes init first or pass --endpoint and --uuid"
-        )
-
-
 @nodes_group.command(
-    "init", help="Install and start a local OST without registering it in a cluster"
+    "init",
+    help="Install OST packages and prepare the local agent; OSTs are started by reconciliation after add",
 )
 @click.option("--type", "storage_type", type=click.Choice(["rawstor"]), required=True)
 @click.option(
-    "--name", default=None, help="Local OST instance name; defaults to hostname"
-)
-@click.option("--uuid", type=click.UUID, default=None, help="Stable OST identity")
-@click.option(
-    "--location",
-    default=None,
-    help="Backing URI; defaults to file:///var/lib/rawstor/UUID",
-)
-@click.option("--bind", "bind_address", default="0.0.0.0:7777", show_default=True)
-@click.option(
-    "--endpoint",
-    default=None,
-    help="Advertised ost://host:port; auto-detected if omitted",
+    "--agent-name",
+    default=hyper_commands.DEFAULT_AGENT_NAME,
+    show_default=True,
+    help="Local universal agent service instance to configure",
 )
 @click.option(
     "--rawstor-version",
@@ -288,93 +253,108 @@ def _read_instance(name):
     help="Override RAWSTOR_VERSION for installed packages",
 )
 @click.pass_context
-def init_cmd(
-    ctx, storage_type, name, uuid, location, bind_address, endpoint, rawstor_version
-):
-    name = name or socket.gethostname()
-    path = _instance_path(name)
-    bind_uri = _validate_uri(f"ost://{bind_address}", "ost")
-    endpoint = endpoint or _detect_local_endpoint(
-        ctx.obj.auth_data["endpoint"], bind_uri.port
-    )
-    _validate_uri(endpoint, "ost")
-    if path.exists():
-        existing = _read_instance(name)
-        if uuid is not None and str(uuid) != existing["uuid"]:
-            raise click.ClickException("An initialized OST's UUID cannot be changed")
-        uuid = sys_uuid.UUID(existing["uuid"])
-        location = location or existing["location"]
-    uuid = uuid or sys_uuid.uuid5(hyper_commands._default_hypervisor_uuid(), name)
-    location = location or f"file:///var/lib/rawstor/{uuid}"
-    if any(ch.isspace() for ch in location) or not location.startswith("file:///"):
-        raise click.ClickException(
-            "Backing store must be an absolute file:/// URI without whitespace"
-        )
+def init_cmd(ctx, storage_type, agent_name, rawstor_version):
     _require_local_privileges()
+    core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
+    if not core_host:
+        raise click.ClickException("Core API endpoint must contain a hostname")
+    core_host = f"[{core_host}]" if ":" in core_host else core_host
+    orch_endpoint = f"http://{core_host}:{hyper_commands.ORCH_API_PORT}"
+    status_endpoint = f"http://{core_host}:{hyper_commands.STATUS_API_PORT}"
+    target = hyper_commands.resolve_agent_install_target(
+        agent_name, orch_endpoint, status_endpoint
+    )
+    node_uuid = hyper_commands.local_agent_node_uuid()
+    existing = hyper_commands._read_existing_config(target.config_path)
+    agent_uuid = node_uuid
+    if existing is not None:
+        explicit = hyper_commands._config_value(existing, "universal_agent", "uuid", "")
+        uuid5_name = hyper_commands._config_value(
+            existing, "universal_agent", "uuid5_name", ""
+        )
+        agent_uuid = explicit or (
+            str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), uuid5_name))
+            if uuid5_name
+            else node_uuid
+        )
+    elif agent_name != hyper_commands.DEFAULT_AGENT_NAME:
+        agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent_name))
     add_sudo = not hyper_commands.is_root()
     hyper_commands.install_rawstor_packages(
         ["librawstor", "rawstor-ost"], add_sudo, version=rawstor_version
     )
+    # The package's standalone daemon is not an Exordos-managed OST.
     run_command(["systemctl", "disable", "--now", "rawstor-ost"], sudo=add_sudo)
-    backing = location.removeprefix("file://")
-    run_command(["mkdir", "-p", backing], sudo=add_sudo)
-    run_command(["chown", "rawstor:rawstor", backing], sudo=add_sudo)
-    unit_name = f"rawstor-ost@{uuid}.service"
-    unit = f"""[Unit]
-Description=Rawstor OST {name}
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=rawstor
-Group=rawstor
-StateDirectory=rawstor/{uuid}
-ExecStart=/usr/bin/rawstor-ost --bind={bind_address} {location}
-Restart=always
-RestartSec=5
-ProtectSystem=strict
-ReadWritePaths={backing}
-ProtectHome=true
-PrivateTmp=true
-NoNewPrivileges=true
-
-[Install]
-WantedBy=multi-user.target
-"""
-    write_root_owned_file(unit, f"/etc/systemd/system/{unit_name}", mode="644")
-    write_root_owned_file(
-        json.dumps(
-            {
-                "uuid": str(uuid),
-                "name": name,
-                "kind": storage_type,
-                "endpoint": endpoint.rstrip("/"),
-                "location": location,
-                "bind": bind_address,
-            },
-            indent=2,
+    run_command(["apt-get", "install", "-y", "python3-venv"], sudo=add_sudo)
+    wheel = hyper_commands.RAWSTOR_WHEEL_URL
+    if rawstor_version and rawstor_version != hyper_commands.RAWSTOR_VERSION:
+        wheel = (
+            f"{hyper_commands.RAWSTOR_RELEASES_URL}/v{rawstor_version}/rawstor-{rawstor_version}"
+            "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
         )
-        + "\n",
-        str(path),
-        mode="644",
+    hyper_commands.install_agent_venv(
+        target.venv_path,
+        packages=[os.environ.get("LOCAL_GENESIS_SDK_PATH", "gcl_sdk"), wheel],
     )
-    run_command(["systemctl", "daemon-reload"], sudo=add_sudo)
-    run_command(["systemctl", "enable", "--now", unit_name], sudo=add_sudo)
-    run_command(["systemctl", "restart", unit_name], sudo=add_sudo)
-    ClickLogger().important(f"OST {name} initialized: {endpoint}, UUID {uuid}")
+    private_key_path = hyper_commands.write_agent_config(
+        orch_endpoint=orch_endpoint,
+        status_endpoint=status_endpoint,
+        config_path=target.config_path,
+        meta_file=str(target.meta_file).replace(
+            "pool_meta.json", "storage_node_meta.json"
+        ),
+        default_private_key_path=target.default_private_key_path,
+        driver_name="StorageNodeAgentDriver",
+        agent_uuid=str(agent_uuid),
+    )
+    base_client.register_agent_and_write_key(
+        _client(ctx),
+        node_uuid,
+        private_key_path,
+        agent_uuid=str(agent_uuid),
+        capabilities=["storage_node"],
+    )
+    hyper_commands.install_agent_systemd_unit(
+        exec_path=target.exec_path,
+        config_path=target.config_path,
+        unit_path=target.unit_path,
+        unit_name=target.unit_name,
+    )
+    ClickLogger().important(
+        f"Storage host initialized; use nodes add --agent {agent_uuid} to create OSTs"
+    )
 
 
 @nodes_group.command(
-    "add", help="Register an initialized OST in a cluster's MDS topology"
+    "add",
+    help="Create an OST on the selected agent and reconcile it into the cluster topology",
 )
 @click.option("--cluster", required=True, help="Cluster name or UUID")
-@click.option("--name", default=None, help="Local instance name; defaults to hostname")
-@click.option("--uuid", type=click.UUID, default=None)
+@click.option(
+    "--agent", required=True, help="Universal agent name or UUID on the storage host"
+)
+@click.option("--name", required=True, help="Storage node resource name")
+@click.option(
+    "--uuid",
+    type=click.UUID,
+    default=None,
+    help="Optional resource UUID; generated by core if omitted",
+)
+@click.option(
+    "--location",
+    default=None,
+    help="Backing URI; defaults to file:///var/lib/rawstor/UUID",
+)
+@click.option(
+    "--bind",
+    "bind_address",
+    default=None,
+    help="Bind IP:port; defaults to 0.0.0.0 and an unused port starting at 7777",
+)
 @click.option(
     "--endpoint",
     default=None,
-    help="OST URI; read from local init configuration if omitted",
+    help="Advertised ost://host:port; auto-detected only when adding an OST on this host",
 )
 @click.option(
     "--failure-domain-path",
@@ -390,31 +370,66 @@ WantedBy=multi-user.target
 @click.option("--description", default="")
 @click.pass_context
 def nodes_add_cmd(
-    ctx, cluster, name, uuid, endpoint, failure_domain_path, weight, description
+    ctx,
+    cluster,
+    agent,
+    name,
+    uuid,
+    location,
+    bind_address,
+    endpoint,
+    failure_domain_path,
+    weight,
+    description,
 ):
-    name = name or socket.gethostname()
-    if endpoint is None:
-        local = _read_instance(name)
-        endpoint = local["endpoint"]
-        if uuid is not None and str(uuid) != local["uuid"]:
-            raise click.ClickException("UUID must match the initialized OST")
-        uuid = sys_uuid.UUID(local["uuid"])
-    elif uuid is None:
-        raise click.ClickException(
-            "Remote registration requires --uuid to preserve OST identity"
-        )
-    _validate_uri(endpoint, "ost")
     client = _client(ctx)
+    agent_entity = base_client.get_entity(client, c.AGENT_COLLECTION, agent)
+    if "storage_node" not in agent_entity.get("capabilities", {}).get(
+        "capabilities", []
+    ):
+        raise click.ClickException(
+            "Agent does not support storage_node; run storages nodes init on that host"
+        )
+    if bind_address is None:
+        if endpoint:
+            port = _validate_uri(endpoint, "ost").port
+        else:
+            agents = base_client.list_entities(client, c.AGENT_COLLECTION)
+            host_agents = {
+                a["uuid"] for a in agents if a["node"] == agent_entity["node"]
+            }
+            host_agents.add(agent_entity["uuid"])
+            nodes = base_client.list_entities(client, NODE_COLLECTION)
+            used = {
+                urlparse("ost://" + n["bind_address"]).port
+                for n in nodes
+                if n.get("agent") in host_agents and n.get("bind_address")
+            }
+            port = next((p for p in range(7777, 65536) if p not in used), None)
+            if port is None:
+                raise click.ClickException("No free OST port in range 7777..65535")
+        bind_address = f"0.0.0.0:{port}"
+    bind_uri = _validate_uri(f"ost://{bind_address}", "ost")
+    if endpoint is None:
+        if agent_entity["node"] != hyper_commands.local_agent_node_uuid():
+            raise click.ClickException("Specify --endpoint for an OST on another host")
+        endpoint = _detect_local_endpoint(ctx.obj.auth_data["endpoint"], bind_uri.port)
+    _validate_uri(endpoint, "ost")
     data = {
-        "uuid": str(uuid),
         "name": name,
         "description": description,
         "cluster": _cluster_uuid(client, cluster),
         "kind": "rawstor",
+        "agent": agent_entity["uuid"],
+        "bind_address": bind_address,
         "endpoint": endpoint.rstrip("/"),
         "failure_domain_path": failure_domain_path,
         "weight": weight,
     }
+    if uuid is not None:
+        data["uuid"] = str(uuid)
+    if location is not None:
+        data["location"] = location
     show_data(base_client.add_entity(client, NODE_COLLECTION, data))
 
 
@@ -423,6 +438,7 @@ def nodes_add_cmd(
 @click.option("--name", default=None)
 @click.option("--description", default=None)
 @click.option("--endpoint", default=None)
+@click.option("--bind", "bind_address", default=None)
 @click.option("--failure-domain-path", default=None)
 @click.option("--weight", type=click.FloatRange(min=0, min_open=True), default=None)
 @click.pass_context
