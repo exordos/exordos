@@ -416,4 +416,41 @@ def test_nodes_add_configures_local_agent_when_omitted(api):
         )
     assert result.exit_code == 0, result.output
     prepare.assert_called_once()
+    assert prepare.call_args.args[1] is None
+    assert api.add.call_args.args[2]["agent"] == NODE_UUID
+
+
+def test_nodes_add_uses_existing_local_service_name(api):
+    with (
+        patch.object(
+            storage.hyper_commands,
+            "_read_existing_config",
+            return_value="[universal_agent]\nuuid=" + NODE_UUID,
+        ),
+        patch.object(
+            storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
+        ) as prepare,
+        patch.object(
+            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
+        ),
+        patch.object(
+            storage, "_detect_local_endpoint", return_value="ost://10.100.0.1:7777"
+        ),
+    ):
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--agent",
+                "my_universal_agent",
+                "--name",
+                "ost1",
+                "--failure-domain-path",
+                "node",
+            ]
+        )
+    assert result.exit_code == 0, result.output
+    assert prepare.call_args.args[1] == "my_universal_agent"
     assert api.add.call_args.args[2]["agent"] == NODE_UUID

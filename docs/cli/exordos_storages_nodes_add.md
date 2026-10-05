@@ -25,7 +25,7 @@ Create an OST on the selected agent and reconcile it into the cluster topology
     * Default: `none`
     * Usage: `--agent`
 
-  Registered agent name or UUID; omit to configure the local agent
+  Local agent service name or registered agent name/UUID; defaults to the local agent
 
 * `name` (REQUIRED):
     * Type: text
