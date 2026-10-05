@@ -22,6 +22,7 @@ import threading
 import time
 import typing as tp
 from unittest.mock import MagicMock
+from unittest.mock import patch
 import uuid as sys_uuid
 
 import pytest
@@ -107,6 +108,54 @@ class TestBuilder:
         )
 
         assert builder.select_element("app") is True
+
+    @pytest.mark.parametrize(
+        "expression",
+        [
+            "cycler.__init__.__globals__.os.popen('printf executed').read()",
+            "'x' * 1000000000",
+        ],
+    )
+    def test_name_discovery_does_not_render_template(self, tmp_path, expression):
+        path = tmp_path / "app.yaml.j2"
+        path.write_text("{% set unused = " + expression + " %}\nname: app\n")
+        element = base.Element(manifest=pathlib.Path(path.name))
+        with patch(
+            "jinja2.Template.render",
+            side_effect=AssertionError("Name discovery must not render templates"),
+        ):
+            assert element.name(tmp_path) == "app"
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "{% if channel == 'prod' %}\nname: prod\n{% else %}\nname: staging\n{% endif %}\n",
+            "{% set suffix = 'prod' %}\nname: app{{ suffix }}\n",
+            "name: app{{ suffix }}\n",
+            "{% if flag %}prefix{% endif %}name: app\n",
+            "{% if flag %}prefix{% endif -%}\nname: app\n",
+            "outer:\n{% if flag %}  {% endif -%}\nname: app\n",
+            "name: |\n  app\n",
+            "name: >\n  app\n",
+            "name: app\n  suffix\n",
+            "name: app\n{% if flag %}\n  suffix\n{% endif %}\n",
+        ],
+    )
+    def test_template_with_dynamic_name_requires_explicit_name(self, tmp_path, text):
+        path = tmp_path / "app.yaml.j2"
+        path.write_text(text)
+        element = base.Element(manifest=pathlib.Path(path.name))
+        with pytest.raises(ValueError, match="--manifest-var name=value"):
+            element.name(tmp_path)
+        builder = SimpleBuilder(
+            exordos_dir=tmp_path,
+            deps=[],
+            elements=[element],
+            image_builder=MagicMock(spec=base.AbstractImageBuilder),
+            logger=DummyLogger(),
+            elements_output_dir=tmp_path,
+        )
+        assert builder.select_element("prod", manifest_vars={"name": "prod"})
 
     def test_select_element_returns_false_for_unknown_name(self, tmp_path) -> None:
         work_dir = tmp_path / "work"
