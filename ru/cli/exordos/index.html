@@ -6266,6 +6266,9 @@
 
 <h1 id="exordos">exordos<a class="headerlink" href="#exordos" title="Permanent link">#</a></h1>
 <p>Provides all the necessary tools for work with Exordos Platform</p>
+<p>API failures print to stderr the HTTP status and the server's error type and message,
+then exit with a nonzero status. Responses without a JSON error envelope print
+their response text. Terminal control characters are escaped.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go"> Usage: exordos [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                                </span>
