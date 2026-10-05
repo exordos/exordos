@@ -6,9 +6,9 @@ Manage hypervisors in the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute hypervisors [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute hypervisors [OPTIONS] COMMAND [ARGS]...
+
 ```
 
 ## Options
@@ -23,7 +23,7 @@ Manage hypervisors in the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute hypervisors [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute hypervisors [OPTIONS] COMMAND [ARGS]...
+
 ```

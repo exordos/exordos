@@ -1374,7 +1374,9 @@ def _start_validation_type(start: str | None) -> time.struct_time | None:
         raise click.UsageError("Invalid '--start' format. Use HH:MM:SS, e.g., 16:00:00")
 
 
-@click.command("backup", help="Backup the current installation")
+@click.group(
+    "backup", invoke_without_command=True, help="Backup the current installation"
+)
 @click.option(
     "--config",
     default=None,
@@ -1493,6 +1495,10 @@ def backup_cmd(
     min_free_space: int,
     rotate: int,
 ) -> None:
+    ctx = click.get_current_context(silent=True)
+    if ctx is not None and ctx.invoked_subcommand is not None:
+        return
+
     period = BackupPeriod(period)
     if offset:
         offset = BackupPeriod(offset)

@@ -6,16 +6,16 @@ Provides all the necessary tools for work with Exordos Platform
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos [OPTIONS] COMMAND [ARGS]...
+
 ```
 
 ## Options
 
 * `config`:
     * Type: file
-    * Default: `/home/user/.exordos/exordosctl.yaml`
+    * Default: `/home/burygin/.exordos/exordosctl.yaml`
     * Usage: `--config`
 
   Path to YAML config file
@@ -160,7 +160,7 @@ Provides all the necessary tools for work with Exordos Platform
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos [OPTIONS] COMMAND [ARGS]...
+
 ```

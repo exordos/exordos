@@ -25,6 +25,7 @@ import click
 from click.testing import CliRunner
 import pytest
 
+from exordos.cmd.backup import commands as backup_commands
 from exordos.cmd.compute.hypervisors import commands as hv_commands
 from exordos.common import crypto
 from exordos.common.cmd_context import ContextObject
@@ -1253,9 +1254,9 @@ class TestZfsSnapshotCommands:
     @pytest.mark.parametrize("output", [b"pool/b@s2\npool/a@s1\n", b""])
     def test_snapshot_list_lists_all_snapshots(self, output):
         with patch.object(
-            hv_commands.subprocess, "check_output", return_value=output
+            backup_commands.subprocess, "check_output", return_value=output
         ) as listing:
-            result = CliRunner().invoke(hv_commands.snapshot_list_cmd)
+            result = CliRunner().invoke(backup_commands.snapshot_list_cmd)
         assert result.exit_code == 0
         listing.assert_called_once_with(
             ["sudo", "zfs", "list", "-H", "-t", "snapshot", "-o", "name"]
@@ -1267,8 +1268,8 @@ class TestZfsSnapshotCommands:
 
     @pytest.mark.parametrize("args", [[], ["--all", "pool/a@s1"]])
     def test_snapshot_delete_rejects_invalid_selection(self, args):
-        with patch.object(hv_commands.subprocess, "check_output") as listing:
-            result = CliRunner().invoke(hv_commands.snapshot_delete_cmd, args)
+        with patch.object(backup_commands.subprocess, "check_output") as listing:
+            result = CliRunner().invoke(backup_commands.snapshot_delete_cmd, args)
         assert result.exit_code == 2
         listing.assert_not_called()
 
@@ -1287,14 +1288,14 @@ class TestZfsSnapshotCommands:
     ):
         with (
             patch.object(
-                hv_commands.subprocess,
+                backup_commands.subprocess,
                 "check_output",
                 return_value=b"pool/b@s2\npool/a@s1\n",
             ),
-            patch.object(hv_commands.subprocess, "check_call") as destroy,
+            patch.object(backup_commands.subprocess, "check_call") as destroy,
         ):
             result = CliRunner().invoke(
-                hv_commands.snapshot_delete_cmd, args, input=answer
+                backup_commands.snapshot_delete_cmd, args, input=answer
             )
         assert result.exit_code == (
             0 if expected else (2 if "pool/missing@s1" in args else 1)
@@ -1305,10 +1306,10 @@ class TestZfsSnapshotCommands:
 
     def test_snapshot_delete_all_handles_empty_list(self):
         with (
-            patch.object(hv_commands.subprocess, "check_output", return_value=b""),
-            patch.object(hv_commands.subprocess, "check_call") as destroy,
+            patch.object(backup_commands.subprocess, "check_output", return_value=b""),
+            patch.object(backup_commands.subprocess, "check_call") as destroy,
         ):
-            result = CliRunner().invoke(hv_commands.snapshot_delete_cmd, ["--all"])
+            result = CliRunner().invoke(backup_commands.snapshot_delete_cmd, ["--all"])
         assert result.exit_code == 0
         assert "No ZFS snapshots found" in result.output
         destroy.assert_not_called()

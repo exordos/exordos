@@ -158,26 +158,26 @@ exordos backup --min-free-space 50
 
 ## Снапшоты ZFS
 
-Команда `compute hypervisors snapshot` создаёт ZFS-снапшоты всех zvol-дисков, подключённых к доменам libvirt. Все снапшоты создаются атомарно одним вызовом `zfs snapshot`.
+Команда `backup snapshot` создаёт ZFS-снапшоты всех zvol-дисков, подключённых к доменам libvirt. Все снапшоты создаются атомарно одним вызовом `zfs snapshot`.
 
 ```bash
-exordos compute hypervisors snapshot
+exordos backup snapshot
 ```
 
 По умолчанию имя снапшота — `snap-<YYYYmmdd-HHMMSS>`. Используйте `-s/--snapshot-name`, чтобы задать его, и `-n/--name` или `--exclude-name/--no` для выбора доменов:
 
 ```bash
-exordos compute hypervisors snapshot -s before-upgrade --exclude-name "*github-packer-runner-*"
+exordos backup snapshot -s before-upgrade --exclude-name "*github-packer-runner-*"
 ```
 
 Снапшоты консистентны на уровне аварийного отключения (crash-consistent).
 
 ### Восстановление из снапшотов
 
-Команда `compute hypervisors snapshot-restore` откатывает zvol-диски доменов libvirt к указанному снапшоту. Перед изменениями она проверяет, что все снапшоты существуют, запрашивает подтверждение (пропустить можно флагом `-y/--yes`), останавливает запущенные домены, откатывает их диски и запускает домены снова.
+Команда `backup snapshot-restore` откатывает zvol-диски доменов libvirt к указанному снапшоту. Перед изменениями она проверяет, что все снапшоты существуют, запрашивает подтверждение (пропустить можно флагом `-y/--yes`), останавливает запущенные домены, откатывает их диски и запускает домены снова.
 
 ```bash
-exordos compute hypervisors snapshot-restore before-upgrade -n o1-a370f746-ecosystem-cp
+exordos backup snapshot-restore before-upgrade -n o1-a370f746-ecosystem-cp
 ```
 
 `zfs rollback` не откатывает диск, если у zvol есть более новые снапшоты; при необходимости удалите их заранее.

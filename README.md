@@ -49,9 +49,9 @@ Exordos CLI bridges the gap between your local development environment and the E
 Run these commands on the hypervisor host (sudo access is required):
 
 ```bash
-exordos compute hypervisors snapshot-list
-exordos compute hypervisors snapshot-delete pool/volume@snap-name
-exordos compute hypervisors snapshot-delete --all
+exordos backup snapshot-list
+exordos backup snapshot-delete pool/volume@snap-name
+exordos backup snapshot-delete --all
 ```
 
 Listing includes all ZFS snapshots on the host, including snapshots unrelated to

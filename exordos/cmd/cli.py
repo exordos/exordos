@@ -26,6 +26,7 @@ from exordos import exceptions as exordos_exc
 from exordos.clients.base import PasswordPrompt
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.auth import commands as auth_commands
+from exordos.cmd.backup import commands as backup_commands
 from exordos.cmd.builds import commands as builds_commands
 from exordos.cmd.compute import compute_group
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
@@ -357,6 +358,10 @@ exordos.add_command(version_commands.latest_cmd)
 exordos.add_command(version_commands.get_project_version_cmd)
 
 exordos.add_command(stand_commands.bootstrap_cmd)
+stand_commands.backup_cmd.add_command(backup_commands.snapshot_cmd)
+stand_commands.backup_cmd.add_command(backup_commands.snapshot_list_cmd)
+stand_commands.backup_cmd.add_command(backup_commands.snapshot_delete_cmd)
+stand_commands.backup_cmd.add_command(backup_commands.snapshot_restore_cmd)
 exordos.add_command(stand_commands.backup_cmd)
 exordos.add_command(stand_commands.backup_decrypt_cmd)
 
