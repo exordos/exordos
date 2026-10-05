@@ -53,6 +53,7 @@ clusters_group = create_entity_group(
         "Name": "name",
         "MDS": lambda e: e["driver_spec"]["endpoint"],
         "Status": "status",
+        "Total bytes": lambda e: e.get("capacity_info", {}).get("total", 0),
         "Available bytes": lambda e: e.get("capacity_info", {}).get("available", 0),
     },
     group_name="clusters",
