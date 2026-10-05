@@ -20,10 +20,10 @@ Configure the local agent, create an OST and reconcile it into the cluster topol
 
   Cluster name or UUID
 
-* `agent`:
+* `pool_agent_name`:
     * Type: text
     * Default: `universal_agent`
-    * Usage: `--agent`
+    * Usage: `--pool-agent-name`
 
   Local universal agent service instance to create or configure
 
