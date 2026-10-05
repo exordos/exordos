@@ -13,10 +13,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import json
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from unittest.mock import patch
+import uuid as sys_uuid
 
 from click.testing import CliRunner
 import pytest
@@ -113,50 +113,127 @@ def test_cluster_ipv6_advertised_host(api):
     )
 
 
-def test_nodes_init_installs_ost_and_keeps_advertised_address_separate(api, tmp_path):
+@pytest.mark.parametrize(
+    "agent_name,existing,expected",
+    [
+        ("universal_agent", None, NODE_UUID),
+        (
+            "storage_agent",
+            None,
+            str(sys_uuid.uuid5(sys_uuid.UUID(NODE_UUID), "storage_agent")),
+        ),
+        ("storage_agent", "[universal_agent]\nuuid=" + CLUSTER_UUID, CLUSTER_UUID),
+        (
+            "storage_agent",
+            "[universal_agent]\ncaps_drivers=LocalPoolAgentDriver",
+            NODE_UUID,
+        ),
+    ],
+)
+def test_nodes_init_prepares_agent_without_starting_an_ost(
+    api, monkeypatch, agent_name, existing, expected
+):
+    monkeypatch.setenv("LOCAL_GENESIS_SDK_PATH", "/source/gcl_sdk")
+    target = SimpleNamespace(
+        venv_path="/venv",
+        exec_path="/venv/bin/agent",
+        config_path="/agent.conf",
+        meta_file="/work/pool_meta.json",
+        default_private_key_path="/work/key",
+        unit_path="/etc/systemd/system/agent.service",
+        unit_name="agent.service",
+    )
     with (
         patch.object(storage, "_require_local_privileges"),
-        patch.object(storage, "LOCAL_CONFIG_DIR", tmp_path),
         patch.object(storage.hyper_commands, "is_root", return_value=True),
+        patch.object(
+            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
+        ),
+        patch.object(
+            storage.hyper_commands, "resolve_agent_install_target", return_value=target
+        ),
+        patch.object(
+            storage.hyper_commands, "_read_existing_config", return_value=existing
+        ),
         patch.object(storage.hyper_commands, "install_rawstor_packages") as packages,
+        patch.object(storage.hyper_commands, "install_agent_venv") as venv,
+        patch.object(
+            storage.hyper_commands, "write_agent_config", return_value="/work/key"
+        ) as config,
+        patch.object(
+            storage.hyper_commands, "install_agent_systemd_unit"
+        ) as agent_unit,
+        patch.object(storage.base_client, "register_agent_and_write_key") as register,
         patch.object(storage, "run_command") as run,
-        patch.object(storage, "write_root_owned_file") as write,
     ):
         result = invoke(
-            [
-                "nodes",
-                "init",
-                "--type",
-                "rawstor",
-                "--name",
-                "ost1",
-                "--uuid",
-                NODE_UUID,
-                "--endpoint",
-                "ost://10.100.0.1:7777",
-                "--location",
-                "file:///data/ost1",
-            ]
+            ["nodes", "init", "--type", "rawstor", "--agent-name", agent_name]
         )
     assert result.exit_code == 0, result.output
     packages.assert_called_once_with(["librawstor", "rawstor-ost"], False, version=None)
-    unit = write.call_args_list[0].args[0]
-    assert "--bind=0.0.0.0:7777 file:///data/ost1" in unit
-    assert (
-        json.loads(write.call_args_list[1].args[0])["endpoint"]
-        == "ost://10.100.0.1:7777"
-    )
-    assert ["systemctl", "enable", "--now", f"rawstor-ost@{NODE_UUID}.service"] in [
-        c.args[0] for c in run.call_args_list
+    assert venv.call_args.kwargs["packages"] == [
+        "/source/gcl_sdk",
+        storage.hyper_commands.RAWSTOR_WHEEL_URL,
     ]
+    assert config.call_args.kwargs["driver_name"] == "StorageNodeAgentDriver"
+    assert config.call_args.kwargs["meta_file"] == "/work/storage_node_meta.json"
+    assert register.call_args.kwargs["agent_uuid"] == expected
+    assert config.call_args.kwargs["agent_uuid"] == expected
+    assert register.call_args.kwargs["capabilities"] == ["storage_node"]
+    agent_unit.assert_called_once()
+    assert all(
+        not any("rawstor-ost@" in arg for arg in call.args[0])
+        for call in run.call_args_list
+    )
     api.add.assert_not_called()
 
 
-def test_nodes_add_reads_stable_local_ost_identity(api):
+def _agent(api):
+    api.get.side_effect = lambda client, collection, identifier: (
+        {
+            "uuid": NODE_UUID,
+            "node": NODE_UUID,
+            "capabilities": {"capabilities": ["storage_node"]},
+        }
+        if collection == storage.c.AGENT_COLLECTION
+        else {"uuid": CLUSTER_UUID}
+    )
+
+
+def test_nodes_add_declares_remote_ost_without_local_files(api):
+    _agent(api)
+    result = invoke(
+        [
+            "nodes",
+            "add",
+            "--cluster",
+            "storage1",
+            "--agent",
+            NODE_UUID,
+            "--name",
+            "ost1",
+            "--endpoint",
+            "ost://host:7777",
+            "--location",
+            "file:///data/ost1",
+            "--failure-domain-path",
+            "dc1/row1/rack1/host1",
+        ]
+    )
+    assert result.exit_code == 0, result.output
+    data = api.add.call_args.args[2]
+    assert data["cluster"] == CLUSTER_UUID
+    assert data["agent"] == NODE_UUID
+    assert "uuid" not in data  # Core generates the resource identity.
+    assert data["location"] == "file:///data/ost1"
+    assert data["bind_address"] == "0.0.0.0:7777"
+    assert data["failure_domain_path"] == "dc1/row1/rack1/host1"
+
+
+def test_remote_node_without_endpoint_is_rejected(api):
+    _agent(api)
     with patch.object(
-        storage,
-        "_read_instance",
-        return_value={"uuid": NODE_UUID, "endpoint": "ost://host:7777"},
+        storage.hyper_commands, "local_agent_node_uuid", return_value=CLUSTER_UUID
     ):
         result = invoke(
             [
@@ -164,34 +241,54 @@ def test_nodes_add_reads_stable_local_ost_identity(api):
                 "add",
                 "--cluster",
                 "storage1",
+                "--agent",
+                NODE_UUID,
                 "--name",
                 "ost1",
                 "--failure-domain-path",
-                "dc1/row1/rack1/host1",
+                "host1",
+            ]
+        )
+    assert result.exit_code != 0
+    assert "Specify --endpoint" in result.output
+    api.add.assert_not_called()
+
+
+def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
+    _agent(api)
+    api.list.side_effect = lambda client, collection: (
+        [{"uuid": CLUSTER_UUID, "node": NODE_UUID}]
+        if collection == storage.c.AGENT_COLLECTION
+        else [{"agent": CLUSTER_UUID, "bind_address": "0.0.0.0:7777"}]
+    )
+    with (
+        patch.object(
+            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
+        ),
+        patch.object(
+            storage,
+            "_detect_local_endpoint",
+            side_effect=lambda core, port: f"ost://host:{port}",
+        ),
+    ):
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--agent",
+                NODE_UUID,
+                "--name",
+                "ost2",
+                "--failure-domain-path",
+                "host1",
             ]
         )
     assert result.exit_code == 0, result.output
     data = api.add.call_args.args[2]
-    assert data["cluster"] == CLUSTER_UUID
-    assert data["uuid"] == NODE_UUID
-    assert data["failure_domain_path"] == "dc1/row1/rack1/host1"
-
-
-def test_remote_node_registration_requires_identity(api):
-    result = invoke(
-        [
-            "nodes",
-            "add",
-            "--cluster",
-            "storage1",
-            "--endpoint",
-            "ost://host:7777",
-            "--failure-domain-path",
-            "host1",
-        ]
-    )
-    assert result.exit_code != 0
-    api.add.assert_not_called()
+    assert data["endpoint"] == "ost://host:7778"
+    assert data["bind_address"] == "0.0.0.0:7778"
 
 
 def test_pool_add_accepts_replication_and_chunk_policy(api):
