@@ -61,6 +61,20 @@ Add a new node to the Exordos installation
 
   Name of the image to deploy
 
+* `speed`:
+    * Type: choice
+    * Default: `hot`
+    * Usage: `--speed`
+
+  Speed tier to schedule the root disk onto
+
+* `ephemeral`:
+    * Type: boolean
+    * Default: `true`
+    * Usage: `--ephemeral`
+
+  Whether the root disk is ephemeral storage
+
 * `name`:
     * Type: text
     * Default: `node`
@@ -76,13 +90,6 @@ Add a new node to the Exordos installation
 --description`
 
   Description of the node
-
-* `hostname`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--hostname`
-
-  Hostname of the node
 
 * `wait`:
     * Type: boolean

@@ -102,7 +102,7 @@ def _validate_hostname(hostname: str) -> None:
 @click.option(
     "--speed",
     type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
-    default="WARM",
+    default="HOT",
     show_default=True,
     help="Speed tier to schedule the root disk onto",
 )
@@ -388,7 +388,7 @@ def update_cmd(
 @click.option(
     "--speed",
     type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
-    default="WARM",
+    default="HOT",
     show_default=True,
     help="Speed tier to schedule the root disk onto",
 )
