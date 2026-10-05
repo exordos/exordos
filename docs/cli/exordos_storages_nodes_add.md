@@ -1,7 +1,7 @@
 
 # exordos_storages_nodes_add
 
-Create an OST resource for the initialized local agent to reconcile
+Create an OST resource for a registered agent to reconcile
 
 ## Usage
 
@@ -20,12 +20,12 @@ Create an OST resource for the initialized local agent to reconcile
 
   Cluster name or UUID
 
-* `pool_agent_name`:
+* `agent` (REQUIRED):
     * Type: text
-    * Default: `universal_agent`
-    * Usage: `--pool-agent-name`
+    * Default: `sentinel.unset`
+    * Usage: `--agent`
 
-  Initialized local universal agent service instance
+  Registered universal agent name or UUID on the storage host
 
 * `name` (REQUIRED):
     * Type: text
@@ -60,7 +60,7 @@ Create an OST resource for the initialized local agent to reconcile
     * Default: `none`
     * Usage: `--endpoint`
 
-  Advertised ost://host:port; auto-detected if omitted
+  Advertised ost://host:port; required for an OST on another host
 
 * `failure_domain_path` (REQUIRED):
     * Type: text
