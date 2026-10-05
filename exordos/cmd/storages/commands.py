@@ -381,14 +381,13 @@ def _prepare_local_storage_agent(ctx, agent=None, version=None):
 
 @nodes_group.command(
     "add",
-    help="Create an OST resource for the initialized local agent to reconcile",
+    help="Create an OST resource for a registered agent to reconcile",
 )
 @click.option("--cluster", required=True, help="Cluster name or UUID")
 @click.option(
-    "--pool-agent-name",
-    default=hyper_commands.DEFAULT_AGENT_NAME,
-    show_default=True,
-    help="Initialized local universal agent service instance",
+    "--agent",
+    required=True,
+    help="Registered universal agent name or UUID on the storage host",
 )
 @click.option("--name", required=True, help="Storage node resource name")
 @click.option(
@@ -411,7 +410,7 @@ def _prepare_local_storage_agent(ctx, agent=None, version=None):
 @click.option(
     "--endpoint",
     default=None,
-    help="Advertised ost://host:port; auto-detected if omitted",
+    help="Advertised ost://host:port; required for an OST on another host",
 )
 @click.option(
     "--failure-domain-path",
@@ -429,7 +428,7 @@ def _prepare_local_storage_agent(ctx, agent=None, version=None):
 def nodes_add_cmd(
     ctx,
     cluster,
-    pool_agent_name,
+    agent,
     name,
     uuid,
     location,
@@ -440,17 +439,7 @@ def nodes_add_cmd(
     description,
 ):
     client = _client(ctx)
-    existing = hyper_commands._read_existing_config(
-        hyper_commands._agent_config_path(pool_agent_name)
-    )
-    if existing is None:
-        raise click.ClickException(
-            f"Local agent {pool_agent_name} is not initialized; run storages nodes init "
-            f"--type rawstor --pool-agent-name {pool_agent_name}"
-        )
-    node_uuid = hyper_commands.local_agent_node_uuid()
-    agent_uuid = _storage_agent_uuid(pool_agent_name, node_uuid, existing)
-    agent_entity = {"uuid": agent_uuid, "node": node_uuid}
+    agent_entity = base_client.get_entity(client, c.AGENT_COLLECTION, agent)
     if bind_address is None:
         if endpoint:
             port = _validate_uri(endpoint, "ost").port
@@ -472,6 +461,8 @@ def nodes_add_cmd(
         bind_address = f"0.0.0.0:{port}"
     bind_uri = _validate_uri(f"ost://{bind_address}", "ost")
     if endpoint is None:
+        if agent_entity["node"] != hyper_commands.local_agent_node_uuid():
+            raise click.ClickException("Specify --endpoint for an OST on another host")
         endpoint = _detect_local_endpoint(ctx.obj.auth_data["endpoint"], bind_uri.port)
     _validate_uri(endpoint, "ost")
     data = {
