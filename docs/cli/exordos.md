@@ -15,7 +15,7 @@ Provides all the necessary tools for work with Exordos Platform
 
 * `config`:
     * Type: file
-    * Default: `/home/burygin/.exordos/exordosctl.yaml`
+    * Default: `~/.exordos/exordosctl.yaml`
     * Usage: `--config`
 
   Path to YAML config file

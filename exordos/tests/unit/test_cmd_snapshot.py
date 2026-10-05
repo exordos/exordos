@@ -123,7 +123,15 @@ class TestCmdSnapshotRestore:
             ),
             patch(
                 "exordos.cmd.backup.commands.subprocess.check_output",
-                return_value=snapshots,
+                side_effect=lambda args: (
+                    snapshots
+                    if "-s" not in args
+                    else b"\n".join(
+                        s
+                        for s in snapshots.splitlines()
+                        if s.startswith((args[-1] + "@").encode())
+                    )
+                ),
             ),
             patch("exordos.cmd.backup.commands.subprocess.check_call"),
         )
@@ -182,6 +190,54 @@ class TestCmdSnapshotRestore:
             snapshot_restore_cmd.callback(
                 snapshot_name="snap1", name=("vm1",), exclude_name=("vm2",), yes=True
             )
+
+    @pytest.mark.parametrize("yes", [True, False])
+    def test_snapshot_restore_cmd_newer_snapshot_changes_nothing(self, yes) -> None:
+        patches = self._patches(self.SNAPSHOTS + b"rpool/disks/c@snap2\n")
+        p_domains, p_zvols, p_active, p_output, p_call = patches
+        with (
+            p_domains,
+            p_zvols,
+            p_active as active,
+            p_output as output,
+            p_call as check_call,
+            patch("exordos.cmd.backup.commands.click.confirm") as confirm,
+        ):
+            with pytest.raises(click.UsageError, match="not the newest snapshot"):
+                snapshot_restore_cmd.callback(
+                    snapshot_name="snap1", name=(), exclude_name=(), yes=yes
+                )
+        assert output.call_args_list[-1].args[0] == [
+            "sudo",
+            "zfs",
+            "list",
+            "-H",
+            "-t",
+            "snapshot",
+            "-o",
+            "name",
+            "-s",
+            "createtxg",
+            "-d",
+            "1",
+            "rpool/disks/c",
+        ]
+        active.assert_not_called()
+        confirm.assert_not_called()
+        check_call.assert_not_called()
+
+
+@pytest.mark.parametrize("flag", ["--name", "--no", "--exclude-name"])
+def test_snapshot_restore_cmd_rejects_parent_filters(flag):
+    from exordos.cmd.cli import exordos
+
+    with patch("exordos.cmd.backup.commands.domains_for_backup") as domains:
+        result = CliRunner().invoke(
+            exordos, ["backup", flag, "vm1", "snapshot-restore", "snap1", "-y"]
+        )
+    assert result.exit_code == 2
+    assert "Pass domain filters after the snapshot subcommand" in result.output
+    domains.assert_not_called()
 
 
 @pytest.mark.parametrize(

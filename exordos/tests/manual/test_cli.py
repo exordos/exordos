@@ -14,8 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from pathlib import Path
+
 from click.testing import CliRunner
 
+from exordos import utils
 from exordos.cmd import cli
 
 
@@ -26,3 +29,6 @@ class TestCli:
     def test_dumphelp(self):
         result = self.runner.invoke(cli.exordos, ["dumphelp"])
         assert result.exit_code == 0
+        docs = (Path(utils.PROJECT_PATH) / "docs/cli/exordos.md").read_text()
+        assert "Default: `~/.exordos/exordosctl.yaml`" in docs
+        assert str(Path.home()) not in docs

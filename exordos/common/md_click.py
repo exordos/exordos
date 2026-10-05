@@ -90,6 +90,10 @@ def dump_helper(base_command):
             default = getattr(opt, "default", None)
             if callable(default):
                 default = default()
+            if isinstance(default, str) and default.startswith(
+                os.path.expanduser("~/")
+            ):
+                default = "~/" + default[len(os.path.expanduser("~/")) :]
             prop = {
                 "usage": "\n".join(opt.opts),
                 "prompt": getattr(opt, "prompt", None),

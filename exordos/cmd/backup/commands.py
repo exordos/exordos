@@ -211,6 +211,31 @@ def snapshot_restore_cmd(
     if missing:
         raise click.UsageError(f"Snapshots not found: {', '.join(missing)}")
 
+    # Reject blocked rollbacks before stopping or changing any domain.
+    for zvol in sorted({zvol for zvols in domain_zvols.values() for zvol in zvols}):
+        out = subprocess.check_output(
+            [
+                "sudo",
+                "zfs",
+                "list",
+                "-H",
+                "-t",
+                "snapshot",
+                "-o",
+                "name",
+                "-s",
+                "createtxg",
+                "-d",
+                "1",
+                zvol,
+            ]
+        )
+        snapshots = out.decode().split()
+        if not snapshots or snapshots[-1] != f"{zvol}@{snapshot_name}":
+            raise click.UsageError(
+                f"Snapshot {zvol}@{snapshot_name} is not the newest snapshot"
+            )
+
     for domain, zvols in domain_zvols.items():
         click.secho(f"{domain}: {', '.join(zvols)}")
 
@@ -374,6 +399,8 @@ def backup_cmd(
 ) -> None:
     ctx = click.get_current_context(silent=True)
     if ctx is not None and ctx.invoked_subcommand is not None:
+        if name or exclude_name:
+            raise click.UsageError("Pass domain filters after the snapshot subcommand.")
         return
 
     period = BackupPeriod(period)
