@@ -256,5 +256,49 @@ def update_cmd(
     show_data(entity)
 
 
+@click.command(
+    "prune",
+    help=f"Delete {ENTITY}s whose target node or node_set no longer exists",
+)
+@click.option(
+    "--yes",
+    "-y",
+    "y",
+    help="Automatically answer yes for all questions",
+    is_flag=True,
+)
+@click.pass_context
+def prune_cmd(ctx: click.Context, y: bool) -> None:
+    import questionary
+
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    # List keys before targets, so a key created together with its target
+    # in between is not treated as an orphan
+    keys = base_client.list_entities(client, ENTITY_COLLECTION)
+    existing = {
+        "node": {
+            n["uuid"] for n in base_client.list_entities(client, c.NODE_COLLECTION)
+        },
+        "node_set": {
+            s["uuid"] for s in base_client.list_entities(client, c.SET_COLLECTION)
+        },
+    }
+
+    for entity in keys:
+        kind = entity["target"]["kind"]
+        if kind not in existing or entity["target"][kind] in existing[kind]:
+            continue
+        if (
+            y
+            or questionary.confirm(
+                f"Delete {ENTITY} {entity['uuid']} ({entity.get('name', '')}), "
+                f"{kind} {entity['target'][kind]} not found?"
+            ).ask()
+        ):
+            base_client.delete_entity(client, ENTITY_COLLECTION, entity["uuid"])
+            click.echo(f"{ENTITY} {entity['uuid']} deleted")
+
+
 ssh_keys_group.add_command(add_cmd, aliases=["a"])
 ssh_keys_group.add_command(update_cmd, aliases=["u"])
+ssh_keys_group.add_command(prune_cmd, aliases=["p"])
