@@ -51,7 +51,7 @@ clusters_group = create_entity_group(
     {
         "UUID": "uuid",
         "Name": "name",
-        "MDS": lambda e: e["driver_spec"]["endpoint"],
+        "Endpoint": lambda e: e["driver_spec"]["endpoint"],
         "Status": "status",
         "Total": lambda e: e.get("capacity_info", {}).get("total", 0) >> 30,
         "Available": lambda e: e.get("capacity_info", {}).get("available", 0) >> 30,
