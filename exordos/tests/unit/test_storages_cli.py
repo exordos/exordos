@@ -212,13 +212,7 @@ def _agent(api):
     )
 
 
-@patch.object(
-    storage.hyper_commands,
-    "_read_existing_config",
-    return_value="[universal_agent]\nuuid=" + NODE_UUID,
-)
-@patch.object(storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID)
-def test_nodes_add_declares_local_ost(node_uuid, config, api):
+def test_nodes_add_declares_ost_via_api(api):
     _agent(api)
     result = invoke(
         [
@@ -226,7 +220,7 @@ def test_nodes_add_declares_local_ost(node_uuid, config, api):
             "add",
             "--cluster",
             "storage1",
-            "--pool-agent-name",
+            "--agent",
             NODE_UUID,
             "--name",
             "ost1",
@@ -276,7 +270,7 @@ def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
                 "add",
                 "--cluster",
                 "storage1",
-                "--pool-agent-name",
+                "--agent",
                 NODE_UUID,
                 "--name",
                 "ost2",
@@ -372,81 +366,28 @@ def test_nodes_init_passes_version_to_package_and_agent_setup(api):
     run.assert_called_once()
 
 
-def test_nodes_add_uses_initialized_default_agent(api):
+def test_nodes_add_requires_registered_agent_argument(api):
+    result = invoke(
+        [
+            "nodes",
+            "add",
+            "--cluster",
+            "storage1",
+            "--name",
+            "ost1",
+            "--failure-domain-path",
+            "node",
+        ]
+    )
+    assert result.exit_code != 0
+    assert "--agent" in result.output
+    api.add.assert_not_called()
+
+
+def test_nodes_add_selects_agent_by_name_without_local_setup(api):
+    _agent(api)
     with (
-        patch.object(
-            storage.hyper_commands,
-            "_read_existing_config",
-            return_value="[universal_agent]\nuuid=" + NODE_UUID,
-        ),
-        patch.object(
-            storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
-        ) as prepare,
-        patch.object(
-            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
-        ),
-        patch.object(
-            storage, "_detect_local_endpoint", return_value="ost://10.100.0.1:7777"
-        ),
-    ):
-        result = invoke(
-            [
-                "nodes",
-                "add",
-                "--cluster",
-                "storage1",
-                "--name",
-                "ost1",
-                "--failure-domain-path",
-                "dc/server",
-            ]
-        )
-    assert result.exit_code == 0, result.output
-    prepare.assert_not_called()
-    assert api.add.call_args.args[2]["agent"] == NODE_UUID
-
-
-def test_nodes_add_uses_initialized_named_service(api):
-    with (
-        patch.object(
-            storage.hyper_commands,
-            "_read_existing_config",
-            return_value="[universal_agent]\nuuid=" + NODE_UUID,
-        ),
-        patch.object(
-            storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
-        ) as prepare,
-        patch.object(
-            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
-        ),
-        patch.object(
-            storage, "_detect_local_endpoint", return_value="ost://10.100.0.1:7777"
-        ),
-    ):
-        result = invoke(
-            [
-                "nodes",
-                "add",
-                "--cluster",
-                "storage1",
-                "--pool-agent-name",
-                "my_universal_agent",
-                "--name",
-                "ost1",
-                "--failure-domain-path",
-                "node",
-            ]
-        )
-    assert result.exit_code == 0, result.output
-    prepare.assert_not_called()
-    assert api.add.call_args.args[2]["agent"] == NODE_UUID
-
-
-def test_nodes_add_requires_init_without_configuring_services(api):
-    with (
-        patch.object(
-            storage.hyper_commands, "_read_existing_config", return_value=None
-        ),
+        patch.object(storage.hyper_commands, "_read_existing_config") as config,
         patch.object(storage, "_prepare_local_storage_agent") as prepare,
         patch.object(storage, "run_command") as run,
     ):
@@ -456,6 +397,37 @@ def test_nodes_add_requires_init_without_configuring_services(api):
                 "add",
                 "--cluster",
                 "storage1",
+                "--agent",
+                "registered_storage_agent",
+                "--name",
+                "ost1",
+                "--endpoint",
+                "ost://host:7777",
+                "--failure-domain-path",
+                "node",
+            ]
+        )
+    assert result.exit_code == 0, result.output
+    config.assert_not_called()
+    prepare.assert_not_called()
+    run.assert_not_called()
+    assert api.get.call_args_list[0].args[2] == "registered_storage_agent"
+    assert api.add.call_args.args[2]["agent"] == NODE_UUID
+
+
+def test_nodes_add_requires_endpoint_for_remote_agent(api):
+    _agent(api)
+    with patch.object(
+        storage.hyper_commands, "local_agent_node_uuid", return_value=CLUSTER_UUID
+    ):
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--agent",
+                NODE_UUID,
                 "--name",
                 "ost1",
                 "--failure-domain-path",
@@ -463,7 +435,5 @@ def test_nodes_add_requires_init_without_configuring_services(api):
             ]
         )
     assert result.exit_code != 0
-    assert "run storages nodes init" in result.output
-    prepare.assert_not_called()
-    run.assert_not_called()
+    assert "Specify --endpoint" in result.output
     api.add.assert_not_called()
