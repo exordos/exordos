@@ -358,13 +358,14 @@ def _prepare_local_storage_agent(ctx, agent=None):
 
 @nodes_group.command(
     "add",
-    help="Create an OST on the selected agent and reconcile it into the cluster topology",
+    help="Configure the local agent, create an OST and reconcile it into the cluster topology",
 )
 @click.option("--cluster", required=True, help="Cluster name or UUID")
 @click.option(
     "--agent",
-    default=None,
-    help="Local agent service name or registered agent name/UUID; defaults to the local agent",
+    default=hyper_commands.DEFAULT_AGENT_NAME,
+    show_default=True,
+    help="Local universal agent service instance to create or configure",
 )
 @click.option("--name", required=True, help="Storage node resource name")
 @click.option(
@@ -387,7 +388,7 @@ def _prepare_local_storage_agent(ctx, agent=None):
 @click.option(
     "--endpoint",
     default=None,
-    help="Advertised ost://host:port; auto-detected only when adding an OST on this host",
+    help="Advertised ost://host:port; auto-detected if omitted",
 )
 @click.option(
     "--failure-domain-path",
@@ -416,28 +417,8 @@ def nodes_add_cmd(
     description,
 ):
     client = _client(ctx)
-    local_agent = agent is None or (
-        not utils.is_valid_uuid(agent)
-        and hyper_commands._read_existing_config(
-            hyper_commands._agent_config_path(agent)
-        )
-        is not None
-    )
-    if local_agent:
-        agent_uuid, node_uuid = _prepare_local_storage_agent(ctx, agent)
-        agent_entity = {
-            "uuid": agent_uuid,
-            "node": node_uuid,
-            "capabilities": {"capabilities": ["storage_node"]},
-        }
-    else:
-        agent_entity = base_client.get_entity(client, c.AGENT_COLLECTION, agent)
-    if "storage_node" not in agent_entity.get("capabilities", {}).get(
-        "capabilities", []
-    ):
-        raise click.ClickException(
-            "Agent does not support storage_node; run storages nodes add on that host with its local service name"
-        )
+    agent_uuid, node_uuid = _prepare_local_storage_agent(ctx, agent)
+    agent_entity = {"uuid": agent_uuid, "node": node_uuid}
     if bind_address is None:
         if endpoint:
             port = _validate_uri(endpoint, "ost").port
@@ -459,8 +440,6 @@ def nodes_add_cmd(
         bind_address = f"0.0.0.0:{port}"
     bind_uri = _validate_uri(f"ost://{bind_address}", "ost")
     if endpoint is None:
-        if agent_entity["node"] != hyper_commands.local_agent_node_uuid():
-            raise click.ClickException("Specify --endpoint for an OST on another host")
         endpoint = _detect_local_endpoint(ctx.obj.auth_data["endpoint"], bind_uri.port)
     _validate_uri(endpoint, "ost")
     data = {

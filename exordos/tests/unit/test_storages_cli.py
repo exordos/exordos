@@ -214,7 +214,10 @@ def _agent(api):
     )
 
 
-def test_nodes_add_declares_remote_ost_without_local_files(api):
+@patch.object(
+    storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
+)
+def test_nodes_add_declares_local_ost(prepare, api):
     _agent(api)
     result = invoke(
         [
@@ -244,30 +247,6 @@ def test_nodes_add_declares_remote_ost_without_local_files(api):
     assert data["failure_domain_path"] == "dc1/row1/rack1/host1"
 
 
-def test_remote_node_without_endpoint_is_rejected(api):
-    _agent(api)
-    with patch.object(
-        storage.hyper_commands, "local_agent_node_uuid", return_value=CLUSTER_UUID
-    ):
-        result = invoke(
-            [
-                "nodes",
-                "add",
-                "--cluster",
-                "storage1",
-                "--agent",
-                NODE_UUID,
-                "--name",
-                "ost1",
-                "--failure-domain-path",
-                "host1",
-            ]
-        )
-    assert result.exit_code != 0
-    assert "Specify --endpoint" in result.output
-    api.add.assert_not_called()
-
-
 def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
     _agent(api)
     api.list.side_effect = lambda client, collection: (
@@ -276,6 +255,9 @@ def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
         else [{"agent": CLUSTER_UUID, "bind_address": "0.0.0.0:7777"}]
     )
     with (
+        patch.object(
+            storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
+        ),
         patch.object(
             storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
         ),
@@ -416,11 +398,11 @@ def test_nodes_add_configures_local_agent_when_omitted(api):
         )
     assert result.exit_code == 0, result.output
     prepare.assert_called_once()
-    assert prepare.call_args.args[1] is None
+    assert prepare.call_args.args[1] == "universal_agent"
     assert api.add.call_args.args[2]["agent"] == NODE_UUID
 
 
-def test_nodes_add_uses_existing_local_service_name(api):
+def test_nodes_add_configures_named_local_service(api):
     with (
         patch.object(
             storage.hyper_commands,
