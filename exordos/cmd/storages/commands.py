@@ -261,7 +261,7 @@ def _detect_local_endpoint(
 )
 @click.option("--type", "storage_type", type=click.Choice(["rawstor"]), required=True)
 @click.option(
-    "--agent-name",
+    "--agent",
     default=hyper_commands.DEFAULT_AGENT_NAME,
     show_default=True,
     help="Local universal agent service instance to configure",
@@ -272,7 +272,7 @@ def _detect_local_endpoint(
     help="Override RAWSTOR_VERSION for installed packages",
 )
 @click.pass_context
-def init_cmd(ctx, storage_type, agent_name, version):
+def init_cmd(ctx, storage_type, agent, version):
     _require_local_privileges()
     core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
     if not core_host:
@@ -281,7 +281,7 @@ def init_cmd(ctx, storage_type, agent_name, version):
     orch_endpoint = f"http://{core_host}:{hyper_commands.ORCH_API_PORT}"
     status_endpoint = f"http://{core_host}:{hyper_commands.STATUS_API_PORT}"
     target = hyper_commands.resolve_agent_install_target(
-        agent_name, orch_endpoint, status_endpoint
+        agent, orch_endpoint, status_endpoint
     )
     node_uuid = hyper_commands.local_agent_node_uuid()
     existing = hyper_commands._read_existing_config(target.config_path)
@@ -296,8 +296,8 @@ def init_cmd(ctx, storage_type, agent_name, version):
             if uuid5_name
             else node_uuid
         )
-    elif agent_name != hyper_commands.DEFAULT_AGENT_NAME:
-        agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent_name))
+    elif agent != hyper_commands.DEFAULT_AGENT_NAME:
+        agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent))
     add_sudo = not hyper_commands.is_root()
     hyper_commands.install_rawstor_packages(
         ["librawstor", "rawstor-ost"], add_sudo, version=version
