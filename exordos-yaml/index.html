@@ -6201,6 +6201,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#building-from-a-custom-image-url" class="md-nav__link">
+    Building from a custom image URL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#script-generated-artifacts" class="md-nav__link">
     Script-generated artifacts
   </a>
@@ -6364,6 +6371,41 @@
 <span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/my-config.yaml</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/my-template.yaml</span>
+</code></pre></div>
+<h3 id="building-from-a-custom-image-url">Building from a custom image URL<a class="headerlink" href="#building-from-a-custom-image-url" title="Permanent link">#</a></h3>
+<p>Use the <code>exordos_custom</code> profile to build an element from an existing disk
+image. Set the image URL and checksum in <code>override</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">build</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">elements</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">images</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-custom-image</span>
+<span class="w">          </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exordos_custom</span>
+<span class="w">          </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qcow2</span>
+<span class="w">          </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images/install.sh</span>
+<span class="w">          </span><span class="nt">override</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">base_image_url</span><span class="p">:</span><span class="w"> </span><span class="s">"https://example.com/my-image.qcow2"</span>
+<span class="w">            </span><span class="nt">base_image_checksum</span><span class="p">:</span><span class="w"> </span><span class="s">"file:https://example.com/SHA256SUMS"</span>
+<span class="w">            </span><span class="nt">disk_size</span><span class="p">:</span><span class="w"> </span><span class="s">"10G"</span>
+<span class="w">            </span><span class="nt">ssh_username</span><span class="p">:</span><span class="w"> </span><span class="s">"ubuntu"</span>
+
+<span class="w">      </span><span class="nt">manifest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifests/my-element.yaml</span>
+</code></pre></div>
+<p>Replace the example URLs with your disk image and its checksum file, and point
+<code>manifest</code> to your element's manifest. You can also provide a checksum directly
+as <code>base_image_checksum: "sha256:&lt;image-sha256&gt;"</code>. Set <code>disk_size</code> to at least
+the virtual size of the base image.</p>
+<p>The base image must support cloud-init's NoCloud datasource and SSH access for
+the user specified by <code>override.ssh_username</code> (default: <code>ubuntu</code>). This user
+must have passwordless sudo. The profile injects a temporary SSH key through
+cloud-init and runs provisioning commands over SSH.</p>
+<p>Create <code>exordos/images/install.sh</code> with your provisioning commands. If no
+additional provisioning is needed, use:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nb">set</span><span class="w"> </span>-eu
+</code></pre></div>
+<p>Paths to the script and manifest are relative to <code>exordos/exordos.yaml</code>.
+Build the element from the project root:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>build<span class="w"> </span>.
 </code></pre></div>
 <h3 id="script-generated-artifacts">Script-generated artifacts<a class="headerlink" href="#script-generated-artifacts" title="Permanent link">#</a></h3>
 <p>An artifact entry may also run a script (or any executable) instead of pointing

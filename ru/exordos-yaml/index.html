@@ -6201,6 +6201,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#сборка-из-собственного-образа-по-url" class="md-nav__link">
+    Сборка из собственного образа по URL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#артефакты-полученные-скриптом" class="md-nav__link">
     Артефакты, полученные скриптом
   </a>
@@ -6351,6 +6358,42 @@
 <span class="w">      </span><span class="nt">artifacts</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/my-config.yaml</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/my-template.yaml</span>
+</code></pre></div>
+<h3 id="сборка-из-собственного-образа-по-url">Сборка из собственного образа по URL<a class="headerlink" href="#сборка-из-собственного-образа-по-url" title="Permanent link">#</a></h3>
+<p>Для сборки элемента из готового дискового образа используйте профиль
+<code>exordos_custom</code>. Укажите URL образа и контрольную сумму в <code>override</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">build</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">elements</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">images</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-custom-image</span>
+<span class="w">          </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exordos_custom</span>
+<span class="w">          </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qcow2</span>
+<span class="w">          </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images/install.sh</span>
+<span class="w">          </span><span class="nt">override</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">base_image_url</span><span class="p">:</span><span class="w"> </span><span class="s">"https://example.com/my-image.qcow2"</span>
+<span class="w">            </span><span class="nt">base_image_checksum</span><span class="p">:</span><span class="w"> </span><span class="s">"file:https://example.com/SHA256SUMS"</span>
+<span class="w">            </span><span class="nt">disk_size</span><span class="p">:</span><span class="w"> </span><span class="s">"10G"</span>
+<span class="w">            </span><span class="nt">ssh_username</span><span class="p">:</span><span class="w"> </span><span class="s">"ubuntu"</span>
+
+<span class="w">      </span><span class="nt">manifest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifests/my-element.yaml</span>
+</code></pre></div>
+<p>Замените URL на адреса вашего дискового образа и файла контрольных сумм, а
+<code>manifest</code> — на путь к манифесту элемента. Контрольную сумму можно указать
+напрямую: <code>base_image_checksum: "sha256:&lt;image-sha256&gt;"</code>. Значение <code>disk_size</code>
+должно быть не меньше виртуального размера исходного образа.</p>
+<p>Исходный образ должен поддерживать источник данных NoCloud в cloud-init и
+доступ по SSH для пользователя, указанного в <code>override.ssh_username</code>
+(по умолчанию: <code>ubuntu</code>). Этот пользователь должен иметь возможность выполнять
+команды через sudo без пароля. Профиль передаёт временный SSH-ключ через
+cloud-init и выполняет команды настройки по SSH.</p>
+<p>Создайте <code>exordos/images/install.sh</code> с командами настройки. Если дополнительная
+настройка не требуется, достаточно:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nb">set</span><span class="w"> </span>-eu
+</code></pre></div>
+<p>Пути к скрипту и манифесту указываются относительно <code>exordos/exordos.yaml</code>.
+Запустите сборку из корня проекта:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>build<span class="w"> </span>.
 </code></pre></div>
 <h3 id="артефакты-полученные-скриптом">Артефакты, полученные скриптом<a class="headerlink" href="#артефакты-полученные-скриптом" title="Permanent link">#</a></h3>
 <p>Вместо прямого указания на файл артефакт может запускать скрипт (или любой
