@@ -57,6 +57,51 @@ build:
         - path: templates/my-template.yaml
 ```
 
+### Building from a custom image URL
+
+Use the `exordos_custom` profile to build an element from an existing disk
+image. Set the image URL and checksum in `override`:
+
+```yaml
+build:
+  elements:
+    - images:
+        - name: my-custom-image
+          profile: exordos_custom
+          format: qcow2
+          script: images/install.sh
+          override:
+            base_image_url: "https://example.com/my-image.qcow2"
+            base_image_checksum: "file:https://example.com/SHA256SUMS"
+            disk_size: "10G"
+
+      manifest: manifests/my-element.yaml
+```
+
+Replace the example URLs with your disk image and its checksum file, and point
+`manifest` to your element's manifest. You can also provide a checksum directly
+as `base_image_checksum: "sha256:<image-sha256>"`. Set `disk_size` to at least
+the virtual size of the base image.
+
+The base image must support cloud-init's NoCloud datasource and SSH access for
+the `ubuntu` user. The profile injects a temporary SSH key through cloud-init
+and runs provisioning commands over SSH.
+
+Create `exordos/images/install.sh` with your provisioning commands. If no
+additional provisioning is needed, use:
+
+```bash
+#!/bin/bash
+set -eu
+```
+
+Paths to the script and manifest are relative to `exordos/exordos.yaml`.
+Build the element from the project root:
+
+```bash
+exordos build .
+```
+
 ### Script-generated artifacts
 
 An artifact entry may also run a script (or any executable) instead of pointing
