@@ -2542,6 +2542,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_list/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_prune/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_prune/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_prune/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_show/</loc>
         <lastmod>2026-10-05</lastmod>
         <changefreq>daily</changefreq>
@@ -5508,6 +5515,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_list/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_list/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_prune/</loc>
+        <lastmod>2026-10-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_prune/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_prune/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_show/</loc>
