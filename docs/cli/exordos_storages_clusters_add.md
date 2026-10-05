@@ -33,17 +33,17 @@ Create a core MDS with persistent and ephemeral WARM pools
     * Default: ``
     * Usage: `--description`
 
-* `mds_host`:
+* `host`:
     * Type: text
     * Default: `none`
-    * Usage: `--mds-host`
+    * Usage: `--host`
 
   Core address reachable from hypervisors
 
-* `mds_port`:
+* `port`:
     * Type: integer range
     * Default: `none`
-    * Usage: `--mds-port`
+    * Usage: `--port`
 
 * `help`:
     * Type: boolean

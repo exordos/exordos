@@ -85,7 +85,7 @@ def test_cluster_rejects_duplicate_port(api):
             "rawstor",
             "--name",
             "storage2",
-            "--mds-port",
+            "--port",
             "7776",
         ]
     )
@@ -102,7 +102,7 @@ def test_cluster_ipv6_advertised_host(api):
             "rawstor",
             "--name",
             "storage1",
-            "--mds-host",
+            "--host",
             "2001:db8::1",
         ]
     )
