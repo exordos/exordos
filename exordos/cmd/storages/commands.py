@@ -362,7 +362,7 @@ def _prepare_local_storage_agent(ctx, agent=None):
 )
 @click.option("--cluster", required=True, help="Cluster name or UUID")
 @click.option(
-    "--agent",
+    "--pool-agent-name",
     default=hyper_commands.DEFAULT_AGENT_NAME,
     show_default=True,
     help="Local universal agent service instance to create or configure",
@@ -406,7 +406,7 @@ def _prepare_local_storage_agent(ctx, agent=None):
 def nodes_add_cmd(
     ctx,
     cluster,
-    agent,
+    pool_agent_name,
     name,
     uuid,
     location,
@@ -417,7 +417,7 @@ def nodes_add_cmd(
     description,
 ):
     client = _client(ctx)
-    agent_uuid, node_uuid = _prepare_local_storage_agent(ctx, agent)
+    agent_uuid, node_uuid = _prepare_local_storage_agent(ctx, pool_agent_name)
     agent_entity = {"uuid": agent_uuid, "node": node_uuid}
     if bind_address is None:
         if endpoint:
