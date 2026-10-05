@@ -256,20 +256,27 @@ def _detect_local_endpoint(
     return f"ost://{local_ip}:{port}"
 
 
-@nodes_group.command("init", help="Install OST packages on the local host")
+@nodes_group.command("init", help="Install OST packages and configure the local agent")
 @click.option("--type", "storage_type", type=click.Choice(["rawstor"]), required=True)
+@click.option(
+    "--pool-agent-name",
+    default=hyper_commands.DEFAULT_AGENT_NAME,
+    show_default=True,
+    help="Local universal agent service instance to create or configure",
+)
 @click.option(
     "--version", default=None, help="Override RAWSTOR_VERSION for installed packages"
 )
-def init_cmd(storage_type, version):
+@click.pass_context
+def init_cmd(ctx, storage_type, pool_agent_name, version):
     _require_local_privileges()
     add_sudo = not hyper_commands.is_root()
     log = ClickLogger()
-    log.info("[1/2] Downloading and installing rawstor packages...")
+    log.info("[1/3] Downloading and installing rawstor packages...")
     hyper_commands.install_rawstor_packages(
         ["librawstor", "rawstor-ost"], add_sudo, version=version
     )
-    log.info("[2/2] Installing storage dependencies (this may take several minutes)...")
+    log.info("[2/3] Installing storage dependencies (this may take several minutes)...")
     run_command(
         [
             "env",
@@ -284,10 +291,29 @@ def init_cmd(storage_type, version):
         ],
         sudo=add_sudo,
     )
-    log.important("OST packages installed successfully")
+    log.info("[3/3] Configuring the local universal agent...")
+    agent_uuid, _ = _prepare_local_storage_agent(ctx, pool_agent_name, version)
+    log.important(f"Storage host initialized; agent UUID: {agent_uuid}")
 
 
-def _prepare_local_storage_agent(ctx, agent=None):
+def _storage_agent_uuid(agent, node_uuid, existing):
+    agent_uuid = node_uuid
+    if existing is not None:
+        explicit = hyper_commands._config_value(existing, "universal_agent", "uuid", "")
+        uuid5_name = hyper_commands._config_value(
+            existing, "universal_agent", "uuid5_name", ""
+        )
+        agent_uuid = explicit or (
+            str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), uuid5_name))
+            if uuid5_name
+            else node_uuid
+        )
+    elif agent != hyper_commands.DEFAULT_AGENT_NAME:
+        agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent))
+    return str(agent_uuid)
+
+
+def _prepare_local_storage_agent(ctx, agent=None, version=None):
     _require_local_privileges()
     agent = agent or hyper_commands.DEFAULT_AGENT_NAME
     run_command(["modprobe", "zfs"], sudo=not hyper_commands.is_root())
@@ -302,20 +328,13 @@ def _prepare_local_storage_agent(ctx, agent=None):
     )
     node_uuid = hyper_commands.local_agent_node_uuid()
     existing = hyper_commands._read_existing_config(target.config_path)
-    agent_uuid = node_uuid
-    if existing is not None:
-        explicit = hyper_commands._config_value(existing, "universal_agent", "uuid", "")
-        uuid5_name = hyper_commands._config_value(
-            existing, "universal_agent", "uuid5_name", ""
-        )
-        agent_uuid = explicit or (
-            str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), uuid5_name))
-            if uuid5_name
-            else node_uuid
-        )
-    elif agent != hyper_commands.DEFAULT_AGENT_NAME:
-        agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent))
+    agent_uuid = _storage_agent_uuid(agent, node_uuid, existing)
     wheel = hyper_commands.RAWSTOR_WHEEL_URL
+    if version and version != hyper_commands.RAWSTOR_VERSION:
+        wheel = (
+            f"{hyper_commands.RAWSTOR_RELEASES_URL}/v{version}/rawstor-{version}"
+            "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+        )
     hyper_commands.install_agent_venv(
         target.venv_path,
         packages=[os.environ.get("LOCAL_GENESIS_SDK_PATH", "gcl_sdk"), wheel],
@@ -354,7 +373,7 @@ def _prepare_local_storage_agent(ctx, agent=None):
         if time.monotonic() >= deadline:
             raise click.ClickException(
                 f"Agent {agent_uuid} has not registered OST support; "
-                f"check systemctl status {target.unit_name} and retry nodes add"
+                f"check systemctl status {target.unit_name} and retry nodes init"
             )
         time.sleep(1)
     return str(agent_uuid), node_uuid
@@ -362,14 +381,14 @@ def _prepare_local_storage_agent(ctx, agent=None):
 
 @nodes_group.command(
     "add",
-    help="Configure the local agent, create an OST and reconcile it into the cluster topology",
+    help="Create an OST resource for the initialized local agent to reconcile",
 )
 @click.option("--cluster", required=True, help="Cluster name or UUID")
 @click.option(
     "--pool-agent-name",
     default=hyper_commands.DEFAULT_AGENT_NAME,
     show_default=True,
-    help="Local universal agent service instance to create or configure",
+    help="Initialized local universal agent service instance",
 )
 @click.option("--name", required=True, help="Storage node resource name")
 @click.option(
@@ -421,7 +440,16 @@ def nodes_add_cmd(
     description,
 ):
     client = _client(ctx)
-    agent_uuid, node_uuid = _prepare_local_storage_agent(ctx, pool_agent_name)
+    existing = hyper_commands._read_existing_config(
+        hyper_commands._agent_config_path(pool_agent_name)
+    )
+    if existing is None:
+        raise click.ClickException(
+            f"Local agent {pool_agent_name} is not initialized; run storages nodes init "
+            f"--type rawstor --pool-agent-name {pool_agent_name}"
+        )
+    node_uuid = hyper_commands.local_agent_node_uuid()
+    agent_uuid = _storage_agent_uuid(pool_agent_name, node_uuid, existing)
     agent_entity = {"uuid": agent_uuid, "node": node_uuid}
     if bind_address is None:
         if endpoint:

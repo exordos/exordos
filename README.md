@@ -57,8 +57,11 @@ Contributing to the project is highly appreciated! However, some rules should be
 
 Create a cluster with `exordos storages clusters add --type rawstor --name NAME`.
 Initialize OSTs on storage hosts with `storages nodes init --type rawstor`, then
-create OST resources with `storages nodes add --cluster NAME --agent AGENT_UUID --name OST_NAME`
-and `--failure-domain-path dc/row/rack/server`. The host agent starts each OST;
+create OST resources with `storages nodes add --cluster NAME --name OST_NAME`
+and `--failure-domain-path dc/row/rack/server`. Use the same `--pool-agent-name`
+in `init` and `add` for a named local agent (default: `universal_agent`).
+`init` installs and configures the agent; `add` only creates the desired resource.
+The host agent starts each OST;
 core admits it into the MDS topology after readiness confirmation.
 Each cluster gets WARM persistent (two mirrors) and ephemeral (one mirror) pools
 sharing its physical capacity. Local qcow2 disks default to HOT ephemeral.

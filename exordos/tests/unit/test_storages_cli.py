@@ -130,7 +130,7 @@ def test_cluster_ipv6_advertised_host(api):
         ),
     ],
 )
-def test_nodes_add_prepares_agent_without_starting_an_ost(
+def test_nodes_init_prepares_agent_without_starting_an_ost(
     api, monkeypatch, agent_name, existing, expected
 ):
     monkeypatch.setenv("LOCAL_GENESIS_SDK_PATH", "/source/gcl_sdk")
@@ -174,15 +174,11 @@ def test_nodes_add_prepares_agent_without_starting_an_ost(
         patch.object(storage.base_client, "register_agent_and_write_key") as register,
         patch.object(storage, "run_command") as run,
     ):
-        storage._prepare_local_storage_agent(
-            SimpleNamespace(
-                obj=SimpleNamespace(
-                    auth_data={"endpoint": "http://10.100.0.2/api/core"}
-                )
-            ),
-            agent_name,
+        result = invoke(
+            ["nodes", "init", "--type", "rawstor", "--pool-agent-name", agent_name]
         )
-    packages.assert_not_called()
+    assert result.exit_code == 0, result.output
+    packages.assert_called_once_with(["librawstor", "rawstor-ost"], False, version=None)
     assert venv.call_args.kwargs["packages"] == [
         "/source/gcl_sdk",
         storage.hyper_commands.RAWSTOR_WHEEL_URL,
@@ -217,9 +213,12 @@ def _agent(api):
 
 
 @patch.object(
-    storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
+    storage.hyper_commands,
+    "_read_existing_config",
+    return_value="[universal_agent]\nuuid=" + NODE_UUID,
 )
-def test_nodes_add_declares_local_ost(prepare, api):
+@patch.object(storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID)
+def test_nodes_add_declares_local_ost(node_uuid, config, api):
     _agent(api)
     result = invoke(
         [
@@ -258,7 +257,9 @@ def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
     )
     with (
         patch.object(
-            storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
+            storage.hyper_commands,
+            "_read_existing_config",
+            return_value="[universal_agent]\nuuid=" + NODE_UUID,
         ),
         patch.object(
             storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
@@ -341,25 +342,22 @@ def test_storage_groups_have_full_crud(group):
         assert command in result.output
 
 
-def test_nodes_init_only_installs_packages_without_core_configuration():
+def test_nodes_init_passes_version_to_package_and_agent_setup(api):
     with (
         patch.object(storage, "_require_local_privileges"),
         patch.object(storage.hyper_commands, "is_root", return_value=True),
         patch.object(storage.hyper_commands, "install_rawstor_packages") as packages,
-        patch.object(storage.hyper_commands, "resolve_agent_install_target") as target,
-        patch.object(storage.base_client, "get_user_api_client") as client,
+        patch.object(
+            storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
+        ) as prepare,
         patch.object(storage, "run_command") as run,
     ):
-        result = CliRunner().invoke(
-            storage.storages_group,
-            ["nodes", "init", "--type", "rawstor", "--version", "1.2.3"],
-        )
+        result = invoke(["nodes", "init", "--type", "rawstor", "--version", "1.2.3"])
     assert result.exit_code == 0, result.output
     packages.assert_called_once_with(
         ["librawstor", "rawstor-ost"], False, version="1.2.3"
     )
-    client.assert_not_called()
-    target.assert_not_called()
+    assert prepare.call_args.args[1:] == ("universal_agent", "1.2.3")
     command = run.call_args.args[0]
     assert command[:5] == [
         "env",
@@ -374,8 +372,13 @@ def test_nodes_init_only_installs_packages_without_core_configuration():
     run.assert_called_once()
 
 
-def test_nodes_add_configures_local_agent_when_omitted(api):
+def test_nodes_add_uses_initialized_default_agent(api):
     with (
+        patch.object(
+            storage.hyper_commands,
+            "_read_existing_config",
+            return_value="[universal_agent]\nuuid=" + NODE_UUID,
+        ),
         patch.object(
             storage, "_prepare_local_storage_agent", return_value=(NODE_UUID, NODE_UUID)
         ) as prepare,
@@ -399,12 +402,11 @@ def test_nodes_add_configures_local_agent_when_omitted(api):
             ]
         )
     assert result.exit_code == 0, result.output
-    prepare.assert_called_once()
-    assert prepare.call_args.args[1] == "universal_agent"
+    prepare.assert_not_called()
     assert api.add.call_args.args[2]["agent"] == NODE_UUID
 
 
-def test_nodes_add_configures_named_local_service(api):
+def test_nodes_add_uses_initialized_named_service(api):
     with (
         patch.object(
             storage.hyper_commands,
@@ -436,5 +438,32 @@ def test_nodes_add_configures_named_local_service(api):
             ]
         )
     assert result.exit_code == 0, result.output
-    assert prepare.call_args.args[1] == "my_universal_agent"
+    prepare.assert_not_called()
     assert api.add.call_args.args[2]["agent"] == NODE_UUID
+
+
+def test_nodes_add_requires_init_without_configuring_services(api):
+    with (
+        patch.object(
+            storage.hyper_commands, "_read_existing_config", return_value=None
+        ),
+        patch.object(storage, "_prepare_local_storage_agent") as prepare,
+        patch.object(storage, "run_command") as run,
+    ):
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--name",
+                "ost1",
+                "--failure-domain-path",
+                "node",
+            ]
+        )
+    assert result.exit_code != 0
+    assert "run storages nodes init" in result.output
+    prepare.assert_not_called()
+    run.assert_not_called()
+    api.add.assert_not_called()
