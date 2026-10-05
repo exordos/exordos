@@ -17,11 +17,19 @@
 from io import StringIO
 import typing as tp
 
+from rich import get_console
 from rich import print as rprint
 from rich import print_json as rprint_json
 from rich.console import Console
 from rich.table import Table
 import rich_click as click
+
+# Columns which are folded (never truncated); UUID is kept on one line
+# unless the table does not fit the console otherwise (see fit_table_to_width)
+NO_WRAP_COLUMNS = {"uuid"}
+FOLD_COLUMNS = {"uuid", "name"}
+# Keeps other columns visible on narrow terminals
+MIN_WRAP_COLUMN_WIDTH = 6
 
 SHOW_FIELDS = [
     "Field",
@@ -48,8 +56,34 @@ def table_to_list_of_dicts(table: Table) -> tp.List[dict]:
 
 
 def get_table(*args, **kwargs) -> Table:
-    table = Table(show_header=True, *args, **kwargs)
+    table = Table(*args, show_header=True, **kwargs)
+    for column in table.columns:
+        header = column.header.lower() if isinstance(column.header, str) else None
+        if header in FOLD_COLUMNS:
+            column.overflow = "fold"
+            column.no_wrap = header in NO_WRAP_COLUMNS
+        else:
+            # Short columns (Cores, RAM, ...) must not be padded
+            header_width = len(header) if header else MIN_WRAP_COLUMN_WIDTH
+            column.min_width = min(header_width, MIN_WRAP_COLUMN_WIDTH)
     return table
+
+
+def fit_table_to_width(table: Table, console: Console) -> None:
+    """Relax column constraints until the table fits the console width."""
+
+    def overflows() -> bool:
+        max_width = console.width - table._extra_width
+        options = console.options.update_width(max_width)
+        return sum(table._calculate_column_widths(console, options)) > max_width
+
+    # Fold UUID first, then drop min widths as the last resort
+    if overflows():
+        for column in table.columns:
+            column.no_wrap = False
+    if overflows():
+        for column in table.columns:
+            column.min_width = None
 
 
 def fill_table(
@@ -93,12 +127,14 @@ def print_table(
             click.secho(msg, fg=fg)
         else:
             click.echo(msg)
+        fit_table_to_width(table, get_console())
         rprint(table)
     elif output == "json":
         data = table_to_list_of_dicts(table)
         rprint_json(data=data)
     elif output == "html":
         console = Console(file=StringIO(), record=True)
+        fit_table_to_width(table, console)
         console.print(table)
         data = console.export_html()
         click.echo(data)
@@ -106,6 +142,7 @@ def print_table(
         objects = table_to_list_of_dicts(table)
         click.echo(dump_yaml_ruamel_to_str(objects))
     else:
+        fit_table_to_width(table, get_console())
         rprint(table)
 
 
