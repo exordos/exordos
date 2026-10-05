@@ -1128,17 +1128,28 @@ class TestInstallRawstorPackages:
         assert run_mock.call_args_list == [
             mock_call(["mkdir", "-p", deb_dir], sudo=False),
             mock_call(
-                ["wget", f"{base_url}/librawstor_{version}_amd64.deb", "-P", deb_dir],
+                [
+                    "wget",
+                    f"{base_url}/librawstor_{version}_amd64.deb",
+                    "-O",
+                    f"{deb_dir}/librawstor_{version}_amd64.deb",
+                ],
                 sudo=False,
             ),
             mock_call(
-                ["wget", f"{base_url}/rawstor-ost_{version}_amd64.deb", "-P", deb_dir],
+                [
+                    "wget",
+                    f"{base_url}/rawstor-ost_{version}_amd64.deb",
+                    "-O",
+                    f"{deb_dir}/rawstor-ost_{version}_amd64.deb",
+                ],
                 sudo=False,
             ),
             mock_call(
                 [
                     "apt-get",
                     "install",
+                    "--reinstall",
                     "-y",
                     f"{deb_dir}/librawstor_{version}_amd64.deb",
                     f"{deb_dir}/rawstor-ost_{version}_amd64.deb",
@@ -1561,6 +1572,7 @@ class TestRawstorArtifacts:
         assert commands[-1] == [
             "apt-get",
             "install",
+            "--reinstall",
             "-y",
             "/tmp/rawstor-packages/librawstor_99.0.0_amd64.deb",
             "/tmp/rawstor-packages/rawstor-ost_99.0.0_amd64.deb",

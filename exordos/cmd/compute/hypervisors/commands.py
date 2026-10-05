@@ -435,12 +435,14 @@ def install_rawstor_packages(
     for package in packages:
         deb_name = f"{package}_{version}_amd64.deb"
         url = f"{RAWSTOR_RELEASES_URL}/v{version}/{deb_name}"
+        deb_path = os.path.join(deb_dir, deb_name)
         if not artifact_run:
-            run_command(["wget", url, "-P", deb_dir], sudo=add_sudo)
-        deb_paths.append(os.path.join(deb_dir, deb_name))
+            run_command(["wget", url, "-O", deb_path], sudo=add_sudo)
+        deb_paths.append(deb_path)
 
+    # CI builds share a Debian version, so an installed package may be older.
     run_command(
-        ["apt-get", "install", "-y", *deb_paths],
+        ["apt-get", "install", "--reinstall", "-y", *deb_paths],
         env=dict(DEBIAN_FRONTEND="noninteractive"),
         sudo=add_sudo,
     )
