@@ -102,7 +102,7 @@ sets_group = create_entity_group(
 @click.option(
     "--speed",
     type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
-    default="WARM",
+    default="HOT",
     show_default=True,
     help="Speed tier to schedule the root disk onto",
 )
