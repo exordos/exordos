@@ -380,6 +380,12 @@ def _prepare_local_storage_agent(ctx, agent=None, version=None):
     return str(agent_uuid), node_uuid
 
 
+def _weight(ctx, param, value):
+    if value is not None and not 1 <= value <= (1 << 63) - 1:
+        raise click.BadParameter("Weight must be a positive integer")
+    return value
+
+
 @nodes_group.command(
     "add",
     help="Create an OST resource for a registered agent to reconcile",
@@ -420,8 +426,9 @@ def _prepare_local_storage_agent(ctx, agent=None, version=None):
 )
 @click.option(
     "--weight",
-    type=click.IntRange(min=1, max=(1 << 64) - 1),
-    default=1.0,
+    type=int,
+    callback=_weight,
+    default=100,
     show_default=True,
 )
 @click.option("--description", default="")
@@ -491,7 +498,7 @@ def nodes_add_cmd(
 @click.option("--endpoint", default=None)
 @click.option("--bind", "bind_address", default=None)
 @click.option("--failure-domain-path", default=None)
-@click.option("--weight", type=click.IntRange(min=1, max=(1 << 64) - 1), default=None)
+@click.option("--weight", type=int, callback=_weight, default=None)
 @click.pass_context
 def nodes_update_cmd(ctx, identifier, **kwargs):
     data = {key: value for key, value in kwargs.items() if value is not None}

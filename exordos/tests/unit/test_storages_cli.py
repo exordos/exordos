@@ -240,6 +240,7 @@ def test_nodes_add_declares_ost_via_api(api):
     assert data["location"] == "file:///data/ost1"
     assert data["bind_address"] == "0.0.0.0:7777"
     assert data["failure_domain_path"] == "dc1/row1/rack1/host1"
+    assert data["weight"] == 100
 
 
 def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
