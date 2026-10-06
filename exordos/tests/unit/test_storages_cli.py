@@ -238,7 +238,7 @@ def test_nodes_add_declares_ost_via_api(api):
     assert data["agent"] == NODE_UUID
     assert "uuid" not in data  # Core generates the resource identity.
     assert data["location"] == "file:///data/ost1"
-    assert data["bind_address"] == "0.0.0.0:7777"
+    assert data["bind_address"] == "host:7777"
     assert data["failure_domain_path"] == "dc1/row1/rack1/host1"
     assert data["weight"] == 100
 
@@ -282,7 +282,7 @@ def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
     assert result.exit_code == 0, result.output
     data = api.add.call_args.args[2]
     assert data["endpoint"] == "ost://host:7778"
-    assert data["bind_address"] == "0.0.0.0:7778"
+    assert data["bind_address"] == "host:7778"
 
 
 def test_pool_add_accepts_replication_and_chunk_policy(api):
