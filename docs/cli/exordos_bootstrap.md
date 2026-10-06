@@ -142,7 +142,7 @@ Bootstrap exordos locally
     * Default: `core`
     * Usage: `--pool-agent-placement`
 
-  Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' wires up a dedicated universal agent on this host that talks to the local libvirt socket directly - this host must already be provisioned as a hypervisor via `exordos compute hypervisors init` first (add --with-rawstor there for rawstor-backed disks); --hyper-connection-uri is not supported in this mode.
+  Where the pool agent that drives the hypervisor's libvirt runs. 'core' runs it inside core's own services, reaching libvirt over the network (see --hyper-connection-uri). 'local' wires up a dedicated universal agent on this host that talks to the local libvirt socket directly - this host must already be provisioned as a hypervisor via `exordos compute hypervisors init` first; --hyper-connection-uri is not supported in this mode.
 
 * `hyper_connection_uri`:
     * Type: text
@@ -374,10 +374,8 @@ Bootstrap exordos locally
 │                                                      already be provisioned  │
 │                                                      as a hypervisor via     │
 │                                                      `exordos compute        │
-│                                                      hypervisors init` first │
-│                                                      (add --with-rawstor     │
-│                                                      there for               │
-│                                                      rawstor-backed disks);  │
+│                                                      hypervisors init`       │
+│                                                      first;                  │
 │                                                      --hyper-connection-uri  │
 │                                                      is not supported in     │
 │                                                      this mode. [default:    │

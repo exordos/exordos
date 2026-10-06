@@ -35,13 +35,6 @@ Initialize hypervisor
 
   Install packer
 
-* `with_rawstor`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `--with-rawstor`
-
-  Install rawstor packages (librawstor + rawstor-vhost) so this hypervisor can attach rawstor-backed disks. Install rawstor-ost with `exordos storages nodes init --type rawstor` on this host or a separate storage node, then register it with `exordos storages nodes add --cluster NAME --agent AGENT --name OST_NAME --failure-domain-path PATH`.
-
 * `user`:
     * Type: text
     * Default: `sentinel.unset`
