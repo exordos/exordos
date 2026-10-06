@@ -437,7 +437,7 @@ def _weight(ctx, param, value):
 @click.option(
     "--location",
     default=None,
-    help="Backing URI; defaults to file:///var/lib/rawstor/UUID",
+    help="Backing URI; defaults to file:///var/lib/rawstor/ost/UUID",
 )
 @click.option(
     "--bind",

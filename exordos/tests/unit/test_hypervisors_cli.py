@@ -1591,6 +1591,6 @@ class TestRawstorArtifacts:
         ):
             wheel = hv_commands.prepare_rawstor_wheel()
         assert wheel.endswith(
-            "rawstor-99.0.0+0.fe3340e-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+            "rawstor-99.0.0+0.d914ffb-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
         )
         assert run.call_args.args[0][:4] == ["python3", "-m", "zipfile", "-e"]
