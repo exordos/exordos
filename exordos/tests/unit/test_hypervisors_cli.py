@@ -60,6 +60,9 @@ def _patch_common_init_deps():
         patch.object(hv_commands, "_check_debian_like", return_value=True),
         patch("subprocess.call", return_value=0),
         patch.object(hv_commands, "_install_packages"),
+        patch.object(hv_commands, "install_rawstor_packages"),
+        patch.object(hv_commands, "add_libvirt_qemu_to_rawstor_group"),
+        patch.object(hv_commands, "allow_apparmor_access_to_rawstor_sockets"),
         patch.object(hv_commands, "_add_user_to_groups"),
         patch.object(hv_commands, "_create_storage_pool"),
         patch.object(hv_commands, "_ensure_local_networks"),
@@ -369,8 +372,8 @@ class TestInitCmdRegistration:
         assert kwargs["avail_ram"] == 16384
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
 
-    def test_add_with_rawstor_installs_packages_but_no_local_pool(self) -> None:
-        """--with-rawstor only installs the vhost-attaching packages -
+    def test_add_installs_rawstor_packages_but_no_local_pool(self) -> None:
+        """Rawstor initialization only installs the vhost-attaching packages -
         it doesn't claim a local rawstor pool (storage nodes are initialized
         and registered separately), so driver_spec must not carry rawstor_pools.
         """
@@ -401,7 +404,7 @@ class TestInitCmdRegistration:
         ):
             result = runner.invoke(
                 hv_commands.init_cmd,
-                ["--add", "--with-rawstor"],
+                ["--add"],
                 obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
             )
 
@@ -700,7 +703,7 @@ class TestInitCmdRegistration:
         for call in get_client_mock.call_args_list:
             assert call.args[0] == auth_data
 
-    def test_with_rawstor_installs_hypervisor_package_set(self) -> None:
+    def test_init_always_installs_rawstor_hypervisor_package_set(self) -> None:
         runner = CliRunner()
         with (
             _patch_common_init_deps(),
@@ -720,7 +723,7 @@ class TestInitCmdRegistration:
         ):
             result = runner.invoke(
                 hv_commands.init_cmd,
-                ["--with-rawstor"],
+                [],
                 obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
             )
 
@@ -728,28 +731,6 @@ class TestInitCmdRegistration:
         venv_mock.assert_not_called()
         rawstor_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
         group_mock.assert_called_once_with(True)
-
-    def test_without_with_rawstor_skips_rawstor_install(self) -> None:
-        runner = CliRunner()
-        with (
-            _patch_common_init_deps(),
-            patch.object(hv_commands, "install_agent_venv"),
-            patch.object(
-                hv_commands,
-                "resolve_agent_install_target",
-                return_value=_FAKE_AGENT_TARGET,
-            ),
-            patch.object(hv_commands, "_configure_libvirt"),
-            patch.object(hv_commands, "install_rawstor_packages") as rawstor_mock,
-        ):
-            result = runner.invoke(
-                hv_commands.init_cmd,
-                [],
-                obj=_obj(auth_data={"endpoint": "http://10.20.0.2/api/core"}),
-            )
-
-        assert result.exit_code == 0, result.output
-        rawstor_mock.assert_not_called()
 
 
 class TestAgentConfigContent:
@@ -1024,7 +1005,7 @@ class TestAgentSetup:
     def test_install_agent_venv_adds_rawstor_wheel_when_with_rawstor(
         self, tmp_path
     ) -> None:
-        """--with-rawstor pulls in rawstor's abi3 wheel alongside
+        """The rawstor option pulls in rawstor's abi3 wheel alongside
         gcl_sdk[libvirt], so the exordos_local_hyper driver can
         `import rawstor` straight out of the venv."""
         venv_path = tmp_path / "agent-home" / "venv"
@@ -1193,8 +1174,8 @@ class TestAddLibvirtQemuToRawstorGroup:
 
 class TestInstallAndConfigureRawstor:
     """Tests for install_and_configure_rawstor: `hypervisors init
-    --with-rawstor`'s job of installing rawstor's packages and granting
-    QEMU access to them."""
+    `'s job of installing rawstor's packages and granting
+        QEMU access to them."""
 
     def test_installs_packages_then_grants_qemu_access(self) -> None:
         with (

@@ -728,7 +728,7 @@ def _require_local_hypervisor_provisioned(
     --pool-agent-placement=local makes this machine a hypervisor too, but
     bootstrap only wires it up (private key, agent config, stand spec) -
     all the actual host provisioning (packages, the agent's venv, the
-    storage pool, rawstor if wanted) is `hypervisors init`'s job, run
+    storage pool, rawstor) is `hypervisors init`'s job, run
     beforehand. Catching a missing prerequisite here, before spending time
     creating the core VM, beats failing later with a broken agent.
     """
@@ -736,7 +736,7 @@ def _require_local_hypervisor_provisioned(
         raise click.UsageError(
             "--pool-agent-placement=local requires this host to already be "
             "provisioned as a hypervisor - run `exordos compute hypervisors "
-            "init` first (add --with-rawstor there for rawstor-backed disks)."
+            "init` first."
         )
 
     if not hv_commands.storage_pool_exists(storage_pool, add_sudo):
@@ -902,8 +902,7 @@ def _require_local_hypervisor_provisioned(
         "the network (see --hyper-connection-uri). 'local' wires up a "
         "dedicated universal agent on this host that talks to the local "
         "libvirt socket directly - this host must already be provisioned "
-        "as a hypervisor via `exordos compute hypervisors init` first "
-        "(add --with-rawstor there for rawstor-backed disks); "
+        "as a hypervisor via `exordos compute hypervisors init` first; "
         "--hyper-connection-uri is not supported in this mode."
     ),
 )
