@@ -1,4 +1,3 @@
-
 # exordos_configs_add-from-env
 
 Add configuration from environment variables
@@ -6,9 +5,9 @@ Add configuration from environment variables
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos configs add-from-env [OPTIONS] NODE                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos configs add-from-env [OPTIONS] NODE
+
 ```
 
 ## Options
@@ -69,6 +68,13 @@ Add configuration from environment variables
     * Default: `sentinel.unset`
     * Usage: `node`
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -79,7 +85,7 @@ Add configuration from environment variables
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos configs add-from-env [OPTIONS] NODE                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos configs add-from-env [OPTIONS] NODE
+
 ```

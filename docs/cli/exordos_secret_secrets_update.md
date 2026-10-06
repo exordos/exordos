@@ -1,4 +1,3 @@
-
 # exordos_secret_secrets_update
 
 Update secret
@@ -6,9 +5,9 @@ Update secret
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret secrets update [OPTIONS] UUID                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos secret secrets update [OPTIONS] UUID
+
 ```
 
 ## Options
@@ -58,6 +57,20 @@ Update secret
 
   New value of the secret to fall back on while the value is unset
 
+* `clear_tags`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--clear-tags`
+
+  Remove all tags.
+
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -68,17 +81,20 @@ Update secret
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret secrets update [OPTIONS] UUID                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
- Update secret                                                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --project-id     -p  UUID  Name of the project in which to deploy the secret                                                                                                                                                                                                                            │
-│ --name           -n  TEXT  Name of the secret                                                                                                                                                                                                                                                           │
-│ --description    -D  TEXT  Description of the secret                                                                                                                                                                                                                                                    │
-│ --value          -v  TEXT  New value of the secret                                                                                                                                                                                                                                                      │
-│ --default-value  -d  TEXT  New value of the secret to fall back on while the value is unset                                                                                                                                                                                                             │
-│ --help                     Show this message and exit.                                                                                                                                                                                                                                                  │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos secret secrets update [OPTIONS] UUID
+
+ Update secret
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --project-id     -p  UUID  Name of the project in which to deploy the secret │
+│ --name           -n  TEXT  Name of the secret                                │
+│ --description    -D  TEXT  Description of the secret                         │
+│ --value          -v  TEXT  New value of the secret                           │
+│ --default-value  -d  TEXT  New value of the secret to fall back on while the │
+│                            value is unset                                    │
+│ --clear-tags               Remove all tags.                                  │
+│ --tag                TEXT  Set the complete tag list. Repeat for each tag.   │
+│ --help                     Show this message and exit.                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

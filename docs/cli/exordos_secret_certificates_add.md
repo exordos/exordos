@@ -1,4 +1,3 @@
-
 # exordos_secret_certificates_add
 
 Add a new certificate to the Exordos installation
@@ -6,9 +5,9 @@ Add a new certificate to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret certificates add [OPTIONS]                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos secret certificates add [OPTIONS]
+
 ```
 
 ## Options
@@ -69,6 +68,13 @@ Add a new certificate to the Exordos installation
 
   Method (provider) to issue and manage the certificate
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -79,19 +85,25 @@ Add a new certificate to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret certificates add [OPTIONS]                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
- Add a new certificate to the Exordos installation                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID        UUID of the certificate                                                                                                                                                                                                                                               │
-│ *  --project-id   -p  UUID        Name of the project in which to deploy the certificate [required]                                                                                                                                                                                                     │
-│    --name         -n  TEXT        Name of the certificate                                                                                                                                                                                                                                               │
-│    --description  -D  TEXT        Description of the certificate                                                                                                                                                                                                                                        │
-│ *  --email        -e  TEXT        Email address to use for the certificate [required]                                                                                                                                                                                                                   │
-│ *  --domain       -d  TEXT        Domain of the certificate, wildcards are allowed. Can be repeated [required]                                                                                                                                                                                          │
-│    --method       -m  [dns_core]  Method (provider) to issue and manage the certificate [default: dns_core]                                                                                                                                                                                             │
-│    --help                         Show this message and exit.                                                                                                                                                                                                                                           │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos secret certificates add [OPTIONS]
+
+ Add a new certificate to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│    --uuid         -u  UUID        UUID of the certificate                    │
+│ *  --project-id   -p  UUID        Name of the project in which to deploy the │
+│                                   certificate [required]                     │
+│    --name         -n  TEXT        Name of the certificate                    │
+│    --description  -D  TEXT        Description of the certificate             │
+│ *  --email        -e  TEXT        Email address to use for the certificate   │
+│                                   [required]                                 │
+│ *  --domain       -d  TEXT        Domain of the certificate, wildcards are   │
+│                                   allowed. Can be repeated [required]        │
+│    --method       -m  [dns_core]  Method (provider) to issue and manage the  │
+│                                   certificate [default: dns_core]            │
+│    --tag              TEXT        Set the complete tag list. Repeat for each │
+│                                   tag.                                       │
+│    --help                         Show this message and exit.                │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

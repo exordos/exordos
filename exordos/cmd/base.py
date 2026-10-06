@@ -29,6 +29,30 @@ from exordos.common.table import print_table
 from exordos.common.table import show_data
 
 
+def tag_options(update: bool = False):
+    """Add tag options to a resource create or update command."""
+
+    def decorator(f):
+        f = click.option(
+            "--tag",
+            "tags",
+            multiple=True,
+            help="Set the complete tag list. Repeat for each tag.",
+        )(f)
+        if update:
+            f = click.option("--clear-tags", is_flag=True, help="Remove all tags.")(f)
+        return f
+
+    return decorator
+
+
+def tags_payload(tags: tuple[str, ...], clear_tags: bool = False) -> dict:
+    """Omit tags unless explicitly supplied or cleared."""
+    if tags and clear_tags:
+        raise click.UsageError("Use either --tag or --clear-tags, not both.")
+    return {"tags": list(tags)} if tags or clear_tags else {}
+
+
 def add_dynamic_parents(parents: list[str] | None = None):
     """Add required parent UUID options for nested collections.
 
@@ -75,6 +99,7 @@ def create_entity_group(
     extra_options: list[click.Option] | None = None,
     lookup_field: str | None = None,
     no_auth: bool = False,
+    add_tags_command: bool = False,
 ) -> ClickAliasedGroup:
     """Create a universal click group for entity management."""
     entity_plural = entity_plural or f"{entity_name}s"
@@ -285,5 +310,37 @@ def create_entity_group(
                     click.echo(f"{entity_name} {entity['uuid']} deleted")
 
         entity_group.add_command(clear_cmd, aliases=["c"])
+
+    if add_tags_command:
+
+        @click.command("tags", help=f"Replace or clear tags on {entity_name}")
+        @click.argument("uuid", type=str, required=True)
+        @click.option(
+            "--tag",
+            "tags",
+            multiple=True,
+            help="Replace all tags with these values. Repeat for each tag.",
+        )
+        @click.option("--clear", is_flag=True, help="Remove all tags.")
+        @add_dynamic_parents(parents)
+        @click.pass_context
+        def tags_cmd(
+            ctx: click.Context,
+            uuid: str,
+            tags: tuple[str, ...],
+            clear: bool,
+            **kwargs,
+        ) -> None:
+            if clear and tags:
+                raise click.UsageError("Use either --tag or --clear, not both.")
+            if not clear and not tags:
+                raise click.UsageError("Provide at least one --tag or use --clear.")
+            client = base_client.get_user_api_client(ctx.obj.auth_data)
+            entity = base_client.update_entity(
+                client, entity_collection.format(**kwargs), uuid, {"tags": list(tags)}
+            )
+            show_data(entity)
+
+        entity_group.add_command(tags_cmd)
 
     return entity_group

@@ -25,6 +25,8 @@ from exordos import constants as c
 from exordos import logger
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.cmd.compute import common as compute_common
 from exordos.common.table import show_data
 
@@ -45,7 +47,9 @@ FIELDS_MAP = {
 }
 
 
-sets_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+sets_group = create_entity_group(
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_tags_command=True
+)
 
 
 @click.command("add", help="Add a new set to the Exordos installation")
@@ -123,6 +127,7 @@ sets_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     default=False,
     help="Wait until the set is active",
 )
+@tag_options()
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -135,7 +140,9 @@ def add_cmd(
     description: str,
     replicas: int,
     wait: bool,
+    tags: tuple[str, ...] = (),
 ) -> None:
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     log = logger.ClickLogger()
     if uuid is None:
@@ -154,6 +161,7 @@ def add_cmd(
             "image": image,
         },
     }
+    data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
         show_data(entity)
@@ -216,6 +224,7 @@ def add_cmd(
     default=None,
     help="Name of the image to deploy",
 )
+@tag_options(update=True)
 def update_cmd(
     ctx: click.Context,
     uuid_or_name: str,
@@ -225,7 +234,10 @@ def update_cmd(
     description: str | None,
     root_disk: int | None,
     image: str | None,
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
+    tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     try:
@@ -264,6 +276,7 @@ def update_cmd(
                 f"Unsupported disk spec kind: {update_data['disk_spec']['kind']}"
             )
 
+    update_data.update(tag_data)
     if not update_data:
         raise click.ClickException("No updates provided")
 

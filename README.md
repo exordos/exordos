@@ -40,9 +40,22 @@ Exordos CLI bridges the gap between your local development environment and the E
 - **Bootstrap installations** — spin up local virtual machine environments from built images for development and testing. Managed realm specs can provide an `elements` list; explicit `--elements` options override it.
 - **Manage installations** — connect via SSH, list, and remove running Exordos instances.
 - **Interact with the platform** — manage elements, IAM, secrets, compute nodes, realms, and more through a rich set of subcommands.
+- **Manage resource tags** — set tags with `add --tag`, replace them with `update --tag`, or remove them with `update --clear-tags`. Supported Core entities also provide the dedicated `tags` subcommand.
 - **Automate backups** — run periodic or one-shot backups of installations with compression, encryption, rotation, and disk-overflow protection.
 
 > **For a full overview of all commands and configuration options, visit the [documentation](https://exordos.github.io/exordos/).**
+
+To replace all tags on a domain, repeat `--tag` for each value. Use `--clear`
+to remove all tags:
+
+```bash
+exordos dns domains tags DOMAIN_UUID --tag env:prod --tag team:platform
+exordos dns domains tags DOMAIN_UUID --clear
+```
+
+The same command is available for compute sets, configs, EM services, IAM
+identity providers and permissions, load balancers, secrets, passwords,
+certificates, RSA keys, SSH keys, and VS values. See [resource tags](docs/usage/tags.md).
 
 # 💡 Contributing
 

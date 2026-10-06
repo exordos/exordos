@@ -24,6 +24,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.common import compute
 from exordos.common.table import show_data
 
@@ -39,7 +41,7 @@ FIELDS_MAP = {
 }
 
 ssh_keys_group = create_entity_group(
-    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_clear_command=True
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_clear_command=True, add_tags_command=True
 )
 
 
@@ -117,6 +119,7 @@ ssh_keys_group = create_entity_group(
     required=False,
     help="key or path to it, for example: /home/user/.ssh/id_rsa.pub",
 )
+@tag_options()
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -129,13 +132,16 @@ def add_cmd(
     node_set: list[str] | None,
     user: str,
     target_public_key: str | None,
+    tags: tuple[str, ...] = (),
 ) -> None:
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     data: dict[str, tp.Any] = {
         "description": description,
         "user": user,
     }
+    data.update(tag_data)
     if uuid is not None:
         data["uuid"] = str(uuid)
     if name is not None:
@@ -236,13 +242,17 @@ def add_cmd(
     default=None,
     help=f"Description of the {ENTITY}",
 )
+@tag_options(update=True)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
     project_id: sys_uuid.UUID | None,
     name: str | None,
     description: str | None,
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
+    tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
     if project_id is not None:
@@ -252,6 +262,7 @@ def update_cmd(
     if description is not None:
         data["description"] = description
 
+    data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 

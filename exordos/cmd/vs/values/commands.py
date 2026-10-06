@@ -23,6 +23,8 @@ from exordos import constants as c
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.common.table import show_data
 
 ENTITY = "value"
@@ -38,7 +40,9 @@ FIELDS_MAP = {
 }
 
 
-values_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+values_group = create_entity_group(
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_tags_command=True
+)
 
 
 @click.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
@@ -84,6 +88,7 @@ values_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     default="",
     help="value",
 )
+@tag_options()
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -92,7 +97,9 @@ def add_cmd(
     description: str,
     var: str | None,
     value: str,
+    tags: tuple[str, ...] = (),
 ) -> None:
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -113,6 +120,7 @@ def add_cmd(
             raise click.ClickException(f"Variable {var} is not a valid UUID")
         data["variable"] = f"{c.VARIABLE_COLLECTION}{var}"
 
+    data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(entity)
 
@@ -159,6 +167,7 @@ def add_cmd(
     default=None,
     help="uuid of the variable",
 )
+@tag_options(update=True)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
@@ -167,7 +176,10 @@ def update_cmd(
     description: str | None,
     value: str | None,
     variable: str | None,
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
+    tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
     if project_id is not None:
@@ -180,6 +192,7 @@ def update_cmd(
         data["value"] = utils.convert_to_nearest_type(value)
     if variable is not None:
         data["variable"] = variable
+    data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 
