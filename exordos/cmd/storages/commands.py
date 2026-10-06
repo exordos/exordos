@@ -412,7 +412,7 @@ def _weight(ctx, param, value):
     "--bind",
     "bind_address",
     default=None,
-    help="Bind IP:port; defaults to 0.0.0.0 and an unused port starting at 7777",
+    help="Bind IP:port; defaults to the advertised endpoint address",
 )
 @click.option(
     "--endpoint",
@@ -466,13 +466,14 @@ def nodes_add_cmd(
             port = next((p for p in range(7777, 65536) if p not in used), None)
             if port is None:
                 raise click.ClickException("No free OST port in range 7777..65535")
-        bind_address = f"0.0.0.0:{port}"
-    bind_uri = _validate_uri(f"ost://{bind_address}", "ost")
+    else:
+        port = _validate_uri(f"ost://{bind_address}", "ost").port
     if endpoint is None:
         if agent_entity["node"] != hyper_commands.local_agent_node_uuid():
             raise click.ClickException("Specify --endpoint for an OST on another host")
-        endpoint = _detect_local_endpoint(ctx.obj.auth_data["endpoint"], bind_uri.port)
-    _validate_uri(endpoint, "ost")
+        endpoint = _detect_local_endpoint(ctx.obj.auth_data["endpoint"], port)
+    endpoint_uri = _validate_uri(endpoint, "ost")
+    bind_address = bind_address or endpoint_uri.netloc
     data = {
         "name": name,
         "description": description,
