@@ -1,4 +1,3 @@
-
 # exordos_secret_certificates_add
 
 Add a new certificate to the Exordos installation
@@ -82,6 +81,12 @@ Add a new certificate to the Exordos installation
     * Usage: `--key`
 
   Unencrypted PEM private key file
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
 
 * `help`:
     * Type: boolean

@@ -1,4 +1,3 @@
-
 # exordos_secret_rsa_keys_add
 
 Add a new rsa_key to the Exordos installation
@@ -6,9 +5,9 @@ Add a new rsa_key to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret rsa_keys add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos secret rsa_keys add [OPTIONS]
+
 ```
 
 ## Options
@@ -45,6 +44,13 @@ Add a new rsa_key to the Exordos installation
 
   Description of the rsa_key
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -55,16 +61,18 @@ Add a new rsa_key to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret rsa_keys add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Add a new rsa_key to the Exordos installation                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID  UUID of the rsa_key                                                                                                                                                                                                                                                         │
-│ *  --project-id   -p  UUID  Name of the project in which to deploy the rsa_key [required]                                                                                                                                                                                                               │
-│    --name         -n  TEXT  Name of the rsa_key                                                                                                                                                                                                                                                         │
-│    --description  -D  TEXT  Description of the rsa_key                                                                                                                                                                                                                                                  │
-│    --help                   Show this message and exit.                                                                                                                                                                                                                                                 │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos secret rsa_keys add [OPTIONS]
+
+ Add a new rsa_key to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│    --uuid         -u  UUID  UUID of the rsa_key                              │
+│ *  --project-id   -p  UUID  Name of the project in which to deploy the       │
+│                             rsa_key [required]                               │
+│    --name         -n  TEXT  Name of the rsa_key                              │
+│    --description  -D  TEXT  Description of the rsa_key                       │
+│    --tag              TEXT  Set the complete tag list. Repeat for each tag.  │
+│    --help                   Show this message and exit.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

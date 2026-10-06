@@ -1,4 +1,3 @@
-
 # exordos_vs_values_update
 
 Update value
@@ -6,9 +5,9 @@ Update value
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos vs values update [OPTIONS] UUID
+
 ```
 
 ## Options
@@ -58,6 +57,20 @@ Update value
 
   uuid of the variable
 
+* `clear_tags`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--clear-tags`
+
+  Remove all tags.
+
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -68,17 +81,19 @@ Update value
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
- Update value                                                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID  Name of the project in which to deploy the value                                                                                                                                                                                                                               │
-│ --name         -n  TEXT  Name of the value                                                                                                                                                                                                                                                              │
-│ --description  -D  TEXT  Description of the value                                                                                                                                                                                                                                                       │
-│ --value        -V  TEXT  value                                                                                                                                                                                                                                                                          │
-│ --variable     -v  TEXT  uuid of the variable                                                                                                                                                                                                                                                           │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos vs values update [OPTIONS] UUID
+
+ Update value
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --project-id   -p  UUID  Name of the project in which to deploy the value    │
+│ --name         -n  TEXT  Name of the value                                   │
+│ --description  -D  TEXT  Description of the value                            │
+│ --value        -V  TEXT  value                                               │
+│ --variable     -v  TEXT  uuid of the variable                                │
+│ --clear-tags             Remove all tags.                                    │
+│ --tag              TEXT  Set the complete tag list. Repeat for each tag.     │
+│ --help                   Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

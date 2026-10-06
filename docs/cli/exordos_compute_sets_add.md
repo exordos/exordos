@@ -1,4 +1,3 @@
-
 # exordos_compute_sets_add
 
 Add a new set to the Exordos installation
@@ -6,9 +5,9 @@ Add a new set to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute sets add [OPTIONS]
+
 ```
 
 ## Options
@@ -91,6 +90,13 @@ Add a new set to the Exordos installation
 
   Wait until the set is active
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -101,22 +107,29 @@ Add a new set to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
- Add a new set to the Exordos installation                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID     UUID of the set                                                                                                                                                                                                                                                          │
-│ *  --project-id   -p  UUID     UUID of the project in which to deploy the set [required]                                                                                                                                                                                                                │
-│    --cores        -c  INTEGER  Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                                                        │
-│    --ram          -r  INTEGER  Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                                                                 │
-│    --root-disk    -d  INTEGER  Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                                                            │
-│ *  --image        -i  TEXT     Name of the image to deploy [required]                                                                                                                                                                                                                                   │
-│    --name         -n  TEXT     Name of the set                                                                                                                                                                                                                                                          │
-│    --description  -D  TEXT     Description of the set                                                                                                                                                                                                                                                   │
-│    --replicas         INTEGER  Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                                                       │
-│    --wait                      Wait until the set is active                                                                                                                                                                                                                                             │
-│    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos compute sets add [OPTIONS]
+
+ Add a new set to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│    --uuid         -u  UUID     UUID of the set                               │
+│ *  --project-id   -p  UUID     UUID of the project in which to deploy the    │
+│                                set [required]                                │
+│    --cores        -c  INTEGER  Number of cores to allocate for each node in  │
+│                                the set [default: 1]                          │
+│    --ram          -r  INTEGER  Amount of RAM in Mb to allocate for each node │
+│                                in the set [default: 1024]                    │
+│    --root-disk    -d  INTEGER  Number of GiB of root disk to allocate for    │
+│                                each node in the set [default: 10]            │
+│ *  --image        -i  TEXT     Name of the image to deploy [required]        │
+│    --name         -n  TEXT     Name of the set                               │
+│    --description  -D  TEXT     Description of the set                        │
+│    --replicas         INTEGER  Number of replicas (nodes) in the set         │
+│                                [default: 1]                                  │
+│    --wait                      Wait until the set is active                  │
+│    --tag              TEXT     Set the complete tag list. Repeat for each    │
+│                                tag.                                          │
+│    --help                      Show this message and exit.                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

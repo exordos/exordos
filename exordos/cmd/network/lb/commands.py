@@ -36,7 +36,9 @@ FIELDS_MAP = {
 }
 
 
-lbs_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+lbs_group = create_entity_group(
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_tags_command=True
+)
 
 
 @click.command(

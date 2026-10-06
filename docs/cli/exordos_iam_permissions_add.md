@@ -1,4 +1,3 @@
-
 # exordos_iam_permissions_add
 
 Add a new permission to the Exordos installation
@@ -6,9 +5,9 @@ Add a new permission to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam permissions add [OPTIONS]
+
 ```
 
 ## Options
@@ -37,6 +36,13 @@ Add a new permission to the Exordos installation
 
   Description of the permission
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -47,15 +53,16 @@ Add a new permission to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Add a new permission to the Exordos installation                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --uuid         -u  UUID  UUID of the permission                                                                                                                                                                                                                                                         │
-│ --name         -n  TEXT  Name of the permission                                                                                                                                                                                                                                                         │
-│ --description  -D  TEXT  Description of the permission                                                                                                                                                                                                                                                  │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos iam permissions add [OPTIONS]
+
+ Add a new permission to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --uuid         -u  UUID  UUID of the permission                              │
+│ --name         -n  TEXT  Name of the permission                              │
+│ --description  -D  TEXT  Description of the permission                       │
+│ --tag              TEXT  Set the complete tag list. Repeat for each tag.     │
+│ --help                   Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

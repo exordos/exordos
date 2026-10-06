@@ -23,6 +23,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.common.table import show_data
 
 ENTITY = "certificate"
@@ -37,7 +39,9 @@ FIELDS_MAP = {
 }
 CERTIFICATE_METHODS = ("dns_core", "manual")
 
-certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+certificates_group = create_entity_group(
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_tags_command=True
+)
 
 
 @click.command("add", help="Add a new certificate to the Exordos installation")
@@ -96,6 +100,7 @@ certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 )
 @click.option("--cert", type=click.File("r"), help="PEM certificate or full chain file")
 @click.option("--key", type=click.File("r"), help="Unencrypted PEM private key file")
+@tag_options()
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -107,11 +112,13 @@ def add_cmd(
     method: str,
     cert: tp.TextIO | None,
     key: tp.TextIO | None,
+    tags: tuple[str, ...] = (),
 ) -> None:
     if method == "manual" and (cert is None or key is None):
         raise click.UsageError("--method manual requires both --cert and --key")
     if method != "manual" and (cert is not None or key is not None):
         raise click.UsageError("--cert and --key require --method manual")
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -129,6 +136,7 @@ def add_cmd(
         data["cert"] = cert.read()
     if key is not None:
         data["key"] = key.read()
+    data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(entity)
 
@@ -185,6 +193,7 @@ def add_cmd(
 )
 @click.option("--cert", type=click.File("r"), help="PEM certificate or full chain file")
 @click.option("--key", type=click.File("r"), help="Unencrypted PEM private key file")
+@tag_options(update=True)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
@@ -196,9 +205,12 @@ def update_cmd(
     method: str | None,
     cert: tp.TextIO | None,
     key: tp.TextIO | None,
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
     if method == "dns_core" and (cert is not None or key is not None):
         raise click.UsageError("--cert and --key cannot be used with --method dns_core")
+    tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
     if project_id is not None:
@@ -217,6 +229,7 @@ def update_cmd(
         data["cert"] = cert.read()
     if key is not None:
         data["key"] = key.read()
+    data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 
