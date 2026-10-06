@@ -50,7 +50,18 @@ On this feature branch, `LOCAL_GENESIS_SDK_PATH` selects the matching SDK checko
 for the agent's virtualenv. Omit it once a compatible SDK release is available.
 `init` does not create or start an OST.
 
-Declare each OST through the core API from any host:
+Declare an OST on the current host without specifying an agent:
+
+```bash
+exordos storages nodes add --cluster storage1 --name ost1 \
+  --failure-domain-path dc1/row1/rack1/server1
+```
+
+The command discovers registered agents on this host with `storage_node` support.
+If none are found, it reports an error; if several are found, it prompts you to
+select one by name and UUID.
+
+To declare an OST on another host, select its agent explicitly:
 
 ```bash
 exordos storages nodes add --cluster storage1 --agent AGENT_UUID --name ost1 \

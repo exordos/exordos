@@ -20,12 +20,12 @@ Create an OST resource for a registered agent to reconcile
 
   Cluster name or UUID
 
-* `agent` (REQUIRED):
+* `agent`:
     * Type: text
-    * Default: `sentinel.unset`
+    * Default: `None`
     * Usage: `--agent`
 
-  Registered universal agent name or UUID on the storage host
+  Registered agent name or UUID; auto-detected on this host if omitted
 
 * `name` (REQUIRED):
     * Type: text
