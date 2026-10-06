@@ -1,3 +1,4 @@
+
 # exordos_secret_passwords_add
 
 Add a new password to the Exordos installation
@@ -5,9 +6,9 @@ Add a new password to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos secret passwords add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos secret passwords add [OPTIONS]                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -61,18 +62,17 @@ Add a new password to the Exordos installation
 ## CLI Help
 
 ```console
-
- Usage: exordos secret passwords add [OPTIONS]
-
- Add a new password to the Exordos installation
-
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID  UUID of the password                             │
-│ *  --project-id   -p  UUID  Name of the project in which to deploy the       │
-│                             password [required]                              │
-│    --name         -n  TEXT  Name of the password                             │
-│    --description  -D  TEXT  Description of the password                      │
-│    --tag              TEXT  Set the complete tag list. Repeat for each tag.  │
-│    --help                   Show this message and exit.                      │
-╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos secret passwords add [OPTIONS]                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                           
+ Add a new password to the Exordos installation                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --uuid         -u  UUID  UUID of the password                                                                                                                                                                                                                                                        │
+│ *  --project-id   -p  UUID  Name of the project in which to deploy the password [required]                                                                                                                                                                                                              │
+│    --name         -n  TEXT  Name of the password                                                                                                                                                                                                                                                        │
+│    --description  -D  TEXT  Description of the password                                                                                                                                                                                                                                                 │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
+│    --help                   Show this message and exit.                                                                                                                                                                                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -1,3 +1,4 @@
+
 # exordos_secret_ssh_keys_update
 
 Update ssh_key
@@ -5,9 +6,9 @@ Update ssh_key
 ## Usage
 
 ```console
-
- Usage: exordos secret ssh_keys update [OPTIONS] UUID
-
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos secret ssh_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -65,17 +66,17 @@ Update ssh_key
 ## CLI Help
 
 ```console
-
- Usage: exordos secret ssh_keys update [OPTIONS] UUID
-
- Update ssh_key
-
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID  Name of the project in which to deploy the ssh_key  │
-│ --name         -n  TEXT  Name of the ssh_key                                 │
-│ --description  -D  TEXT  Description of the ssh_key                          │
-│ --clear-tags             Remove all tags.                                    │
-│ --tag              TEXT  Set the complete tag list. Repeat for each tag.     │
-│ --help                   Show this message and exit.                         │
-╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos secret ssh_keys update [OPTIONS] UUID                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                           
+ Update ssh_key                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --project-id   -p  UUID  Name of the project in which to deploy the ssh_key                                                                                                                                                                                                                             │
+│ --name         -n  TEXT  Name of the ssh_key                                                                                                                                                                                                                                                            │
+│ --description  -D  TEXT  Description of the ssh_key                                                                                                                                                                                                                                                     │
+│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
+│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

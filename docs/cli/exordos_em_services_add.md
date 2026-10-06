@@ -1,3 +1,4 @@
+
 # exordos_em_services_add
 
 Add a new service to the Exordos installation
@@ -5,9 +6,9 @@ Add a new service to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos em services add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos em services add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -61,18 +62,17 @@ Add a new service to the Exordos installation
 ## CLI Help
 
 ```console
-
- Usage: exordos em services add [OPTIONS]
-
- Add a new service to the Exordos installation
-
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID  UUID of the service                              │
-│ *  --project-id   -p  UUID  Name of the project in which to deploy the       │
-│                             service [required]                               │
-│    --name         -n  TEXT  Name of the service                              │
-│    --description  -D  TEXT  Description of the service                       │
-│    --tag              TEXT  Set the complete tag list. Repeat for each tag.  │
-│    --help                   Show this message and exit.                      │
-╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos em services add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                           
+ Add a new service to the Exordos installation                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --uuid         -u  UUID  UUID of the service                                                                                                                                                                                                                                                         │
+│ *  --project-id   -p  UUID  Name of the project in which to deploy the service [required]                                                                                                                                                                                                               │
+│    --name         -n  TEXT  Name of the service                                                                                                                                                                                                                                                         │
+│    --description  -D  TEXT  Description of the service                                                                                                                                                                                                                                                  │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
+│    --help                   Show this message and exit.                                                                                                                                                                                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

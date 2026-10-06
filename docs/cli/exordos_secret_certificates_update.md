@@ -1,3 +1,4 @@
+
 # exordos_secret_certificates_update
 
 Update certificate
@@ -5,9 +6,9 @@ Update certificate
 ## Usage
 
 ```console
-
- Usage: exordos secret certificates update [OPTIONS] UUID
-
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -81,21 +82,19 @@ Update certificate
 ## CLI Help
 
 ```console
-
- Usage: exordos secret certificates update [OPTIONS] UUID
-
- Update certificate
-
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID  Name of the project in which to deploy the          │
-│                          certificate                                         │
-│ --name         -n  TEXT  Name of the certificate                             │
-│ --description  -D  TEXT  Description of the certificate                      │
-│ --email        -e  TEXT  Email address to use for the certificate            │
-│ --domain       -d  TEXT  Domain of the certificate, replaces the current     │
-│                          list. Can be repeated                               │
-│ --clear-tags             Remove all tags.                                    │
-│ --tag              TEXT  Set the complete tag list. Repeat for each tag.     │
-│ --help                   Show this message and exit.                         │
-╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                           
+ Update certificate                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --project-id   -p  UUID  Name of the project in which to deploy the certificate                                                                                                                                                                                                                         │
+│ --name         -n  TEXT  Name of the certificate                                                                                                                                                                                                                                                        │
+│ --description  -D  TEXT  Description of the certificate                                                                                                                                                                                                                                                 │
+│ --email        -e  TEXT  Email address to use for the certificate                                                                                                                                                                                                                                       │
+│ --domain       -d  TEXT  Domain of the certificate, replaces the current list. Can be repeated                                                                                                                                                                                                          │
+│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
+│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

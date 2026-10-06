@@ -1,3 +1,4 @@
+
 # exordos_vs_values_update
 
 Update value
@@ -5,9 +6,9 @@ Update value
 ## Usage
 
 ```console
-
- Usage: exordos vs values update [OPTIONS] UUID
-
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -81,19 +82,19 @@ Update value
 ## CLI Help
 
 ```console
-
- Usage: exordos vs values update [OPTIONS] UUID
-
- Update value
-
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID  Name of the project in which to deploy the value    │
-│ --name         -n  TEXT  Name of the value                                   │
-│ --description  -D  TEXT  Description of the value                            │
-│ --value        -V  TEXT  value                                               │
-│ --variable     -v  TEXT  uuid of the variable                                │
-│ --clear-tags             Remove all tags.                                    │
-│ --tag              TEXT  Set the complete tag list. Repeat for each tag.     │
-│ --help                   Show this message and exit.                         │
-╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                           
+ Update value                                                                                                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --project-id   -p  UUID  Name of the project in which to deploy the value                                                                                                                                                                                                                               │
+│ --name         -n  TEXT  Name of the value                                                                                                                                                                                                                                                              │
+│ --description  -D  TEXT  Description of the value                                                                                                                                                                                                                                                       │
+│ --value        -V  TEXT  value                                                                                                                                                                                                                                                                          │
+│ --variable     -v  TEXT  uuid of the variable                                                                                                                                                                                                                                                           │
+│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
+│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
