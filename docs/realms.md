@@ -111,3 +111,16 @@ Example:
 exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gMjfYDwg" \
   --refresh_token "...bZ1BENYKg" City
 ```
+
+## Repositories when bootstrapping a managed realm
+
+When running `exordos bootstrap --realm-spec /etc/exordos/realm_spec.json`,
+a non-empty `repo_url` in the realm spec is added to the bootstrap repositories:
+
+```json
+{"repo_url": "https://repository.example.com/exordos-elements/"}
+```
+
+Existing repositories, including those specified with `--repository`, are
+preserved. If the exact URL is already in the list, it is not added again.
+An absent or empty `repo_url` leaves the repository list unchanged.
