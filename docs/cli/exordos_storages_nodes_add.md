@@ -46,7 +46,7 @@ Create an OST resource for a registered agent to reconcile
     * Default: `none`
     * Usage: `--location`
 
-  Backing URI; defaults to file:///var/lib/rawstor/UUID
+  Backing URI; defaults to file:///var/lib/rawstor/ost/UUID
 
 * `bind_address`:
     * Type: text
