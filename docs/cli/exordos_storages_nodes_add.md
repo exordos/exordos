@@ -71,7 +71,7 @@ Create an OST resource for a registered agent to reconcile
 
 * `weight`:
     * Type: integer range
-    * Default: `1`
+    * Default: `100`
     * Usage: `--weight`
 
 * `description`:
