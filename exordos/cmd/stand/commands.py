@@ -1232,6 +1232,8 @@ def bootstrap_cmd(
         realm_domain = realm_spec_data.get("realm_domain")
         cors_allowed_origins = realm_spec_data.get("cors_allowed_origins")
         repo_url = realm_spec_data.get("repo_url")
+        if repo_url and repo_url not in repository:
+            repository = (*repository, repo_url)
         click.secho(
             "Using pre-assigned realm identity from the realm spec",
             fg="cyan",

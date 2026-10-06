@@ -21,6 +21,7 @@ from click.testing import CliRunner
 import pytest
 import rich_click as click
 
+from exordos import constants as c
 from exordos.cmd.stand import commands
 from exordos.cmd.stand.commands import _load_realm_spec
 
@@ -135,6 +136,28 @@ def test_load_realm_spec_rejects_invalid_elements(
 
 
 @pytest.mark.parametrize(
+    ("repo_url", "repositories", "expected_repositories"),
+    [
+        (None, (), (f"{c.ELEMENT_REPO_URL}/",)),
+        ("", (), (f"{c.ELEMENT_REPO_URL}/",)),
+        (
+            "https://repo.example.com",
+            (),
+            (f"{c.ELEMENT_REPO_URL}/", "https://repo.example.com"),
+        ),
+        (
+            "https://repo.example.com",
+            ("https://other.example.com",),
+            ("https://other.example.com", "https://repo.example.com"),
+        ),
+        (
+            "https://repo.example.com",
+            ("https://repo.example.com",),
+            ("https://repo.example.com",),
+        ),
+    ],
+)
+@pytest.mark.parametrize(
     ("spec_elements", "cli_elements", "expected"),
     [
         (["exordos_s3", "exordos_db"], [], ["exordos_s3", "exordos_db"]),
@@ -147,10 +170,14 @@ def test_bootstrap_uses_realm_spec_elements_unless_cli_overrides(
     spec_elements: list[str],
     cli_elements: list[str],
     expected: list[str] | None,
+    repo_url: str | None,
+    repositories: tuple[str, ...],
+    expected_repositories: tuple[str, ...],
 ) -> None:
     spec = _valid_spec() | {
         "elements": spec_elements,
         "ssh_public_key": "ssh-ed25519 AAAA test",
+        "repo_url": repo_url,
     }
     path = tmp_path / "realm_spec.json"
     path.write_text(json.dumps(spec))
@@ -167,6 +194,8 @@ def test_bootstrap_uses_realm_spec_elements_unless_cli_overrides(
     ]
     for name in cli_elements:
         args.extend(["--elements", name])
+    for url in repositories:
+        args.extend(["--repository", url])
     with (
         mock.patch.object(
             commands, "get_element_inventory_from_url", return_value=inventory
@@ -181,3 +210,5 @@ def test_bootstrap_uses_realm_spec_elements_unless_cli_overrides(
         result = CliRunner().invoke(commands.bootstrap_cmd, args)
     assert result.exit_code == 0, result.output
     assert bootstrap.call_args.kwargs["elements"] == expected
+    assert bootstrap.call_args.kwargs["repository"] == expected_repositories
+    assert bootstrap.call_args.kwargs["repo_url"] == repo_url
