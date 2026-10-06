@@ -367,22 +367,42 @@ def test_nodes_init_passes_version_to_package_and_agent_setup(api):
     run.assert_called_once()
 
 
-def test_nodes_add_requires_registered_agent_argument(api):
-    result = invoke(
+def test_nodes_add_discovers_local_agent_and_endpoint(api):
+    api.list.side_effect = lambda client, collection: (
         [
-            "nodes",
-            "add",
-            "--cluster",
-            "storage1",
-            "--name",
-            "ost1",
-            "--failure-domain-path",
-            "node",
+            {
+                "uuid": NODE_UUID,
+                "node": NODE_UUID,
+                "capabilities": {"capabilities": ["storage_node"]},
+            }
         ]
+        if collection == storage.c.AGENT_COLLECTION
+        else []
     )
-    assert result.exit_code != 0
-    assert "--agent" in result.output
-    api.add.assert_not_called()
+    with (
+        patch.object(
+            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
+        ),
+        patch.object(
+            storage, "_detect_local_endpoint", return_value="ost://10.0.0.1:7777"
+        ) as detect,
+    ):
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--name",
+                "ost1",
+                "--failure-domain-path",
+                "node",
+            ]
+        )
+    assert result.exit_code == 0, result.output
+    detect.assert_called_once_with("http://10.100.0.2/api/core", 7777)
+    assert api.add.call_args.args[2]["agent"] == NODE_UUID
+    assert api.add.call_args.args[2]["endpoint"] == "ost://10.0.0.1:7777"
 
 
 def test_nodes_add_selects_agent_by_name_without_local_setup(api):
@@ -437,4 +457,95 @@ def test_nodes_add_requires_endpoint_for_remote_agent(api):
         )
     assert result.exit_code != 0
     assert "Specify --endpoint" in result.output
+    api.add.assert_not_called()
+
+
+@pytest.mark.parametrize("count", [0, 1, 2])
+def test_nodes_add_discovers_storage_agents_on_local_host(api, count):
+    _agent(api)
+    candidates = [
+        {
+            "uuid": str(sys_uuid.uuid4()),
+            "node": NODE_UUID,
+            "name": f"storage-agent-{index}",
+            "capabilities": {"capabilities": ["storage_node"]},
+        }
+        for index in range(count)
+    ]
+    api.list.return_value = [
+        *candidates,
+        {"uuid": CLUSTER_UUID, "node": NODE_UUID, "capabilities": {}},
+        {
+            "uuid": CLUSTER_UUID,
+            "node": CLUSTER_UUID,
+            "capabilities": {"capabilities": ["storage_node"]},
+        },
+    ]
+    with (
+        patch.object(
+            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
+        ),
+        patch("questionary.select") as select,
+    ):
+        select.return_value.ask.return_value = candidates[-1] if count else None
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--name",
+                "ost1",
+                "--endpoint",
+                "ost://10.0.0.1:7777",
+                "--failure-domain-path",
+                "node",
+            ]
+        )
+    if not count:
+        assert result.exit_code != 0
+        assert "No storage agent" in result.output
+        api.add.assert_not_called()
+    else:
+        assert result.exit_code == 0, result.output
+        assert api.add.call_args.args[2]["agent"] == candidates[-1]["uuid"]
+    if count == 2:
+        assert [
+            choice.value for choice in select.call_args.kwargs["choices"]
+        ] == candidates
+    else:
+        select.assert_not_called()
+
+
+def test_local_storage_agent_selection_can_be_cancelled(api):
+    api.list.return_value = [
+        {
+            "uuid": str(sys_uuid.uuid4()),
+            "node": NODE_UUID,
+            "capabilities": {"capabilities": ["storage_node"]},
+        }
+        for _ in range(2)
+    ]
+    with (
+        patch.object(
+            storage.hyper_commands, "local_agent_node_uuid", return_value=NODE_UUID
+        ),
+        patch("questionary.select") as select,
+    ):
+        select.return_value.ask.return_value = None
+        result = invoke(
+            [
+                "nodes",
+                "add",
+                "--cluster",
+                "storage1",
+                "--name",
+                "ost1",
+                "--endpoint",
+                "ost://10.0.0.1:7777",
+                "--failure-domain-path",
+                "node",
+            ]
+        )
+    assert result.exit_code != 0
     api.add.assert_not_called()

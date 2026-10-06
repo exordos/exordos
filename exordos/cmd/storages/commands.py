@@ -380,6 +380,37 @@ def _prepare_local_storage_agent(ctx, agent=None, version=None):
     return str(agent_uuid), node_uuid
 
 
+def _select_local_storage_agent(client):
+    node_uuid = hyper_commands.local_agent_node_uuid()
+    candidates = [
+        agent
+        for agent in base_client.list_entities(client, c.AGENT_COLLECTION)
+        if agent.get("node") == node_uuid
+        and "storage_node" in agent.get("capabilities", {}).get("capabilities", [])
+    ]
+    if not candidates:
+        raise click.ClickException(
+            "No storage agent is registered on this host; run storages nodes init first"
+        )
+    if len(candidates) == 1:
+        return candidates[0]
+
+    import questionary
+
+    selected = questionary.select(
+        "Several storage agents are registered on this host, select one",
+        choices=[
+            questionary.Choice(
+                f"{agent.get('name', agent['uuid'])} ({agent['uuid']})", value=agent
+            )
+            for agent in candidates
+        ],
+    ).ask()
+    if selected is None:
+        raise click.Abort()
+    return selected
+
+
 def _weight(ctx, param, value):
     if value is not None and not 1 <= value <= (1 << 63) - 1:
         raise click.BadParameter("Weight must be a positive integer")
@@ -393,8 +424,8 @@ def _weight(ctx, param, value):
 @click.option("--cluster", required=True, help="Cluster name or UUID")
 @click.option(
     "--agent",
-    required=True,
-    help="Registered universal agent name or UUID on the storage host",
+    default=None,
+    help="Registered agent name or UUID; auto-detected on this host if omitted",
 )
 @click.option("--name", required=True, help="Storage node resource name")
 @click.option(
@@ -447,7 +478,11 @@ def nodes_add_cmd(
     description,
 ):
     client = _client(ctx)
-    agent_entity = base_client.get_entity(client, c.AGENT_COLLECTION, agent)
+    agent_entity = (
+        base_client.get_entity(client, c.AGENT_COLLECTION, agent)
+        if agent is not None
+        else _select_local_storage_agent(client)
+    )
     if bind_address is None:
         if endpoint:
             port = _validate_uri(endpoint, "ost").port
