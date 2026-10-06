@@ -53,7 +53,7 @@ Create an OST resource for a registered agent to reconcile
     * Default: `none`
     * Usage: `--bind`
 
-  Bind IP:port; defaults to 0.0.0.0 and an unused port starting at 7777
+  Bind IP:port; defaults to the advertised endpoint address
 
 * `endpoint`:
     * Type: text
