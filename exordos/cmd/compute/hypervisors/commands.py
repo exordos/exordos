@@ -117,7 +117,7 @@ def _pool0(entity: dict, field: str, default: str = "Unknown"):
     """First storage pool's value for `field`, e.g. "Speed"/"Total".
 
     A hypervisor can self-report more than one pool (its own qcow2 pool
-    plus any --with-rawstor ones), same as a storage cluster - showing
+    plus any rawstor ones), same as a storage cluster - showing
     just the first one keeps this table matching `exordos storages
     list`'s, at the cost of hiding the rest; see `hypervisors info` for
     the full list.
@@ -837,7 +837,7 @@ def allow_apparmor_access_to_rawstor_sockets(add_sudo: bool = False) -> None:
 def install_and_configure_rawstor(add_sudo: bool = False) -> None:
     """Install rawstor's hypervisor-side packages and let QEMU use them.
 
-    `hypervisors init --with-rawstor`'s job - a hypervisor set up via
+    `hypervisors init`'s job - a hypervisor set up via
     `bootstrap --pool-agent-placement=local` must already have this done
     beforehand (bootstrap only wires up an already-provisioned host, it
     doesn't provision one itself).
@@ -1119,20 +1119,6 @@ def local_agent_node_uuid(
     help="Install packer",
 )
 @click.option(
-    "--with-rawstor",
-    show_default=True,
-    is_flag=True,
-    default=False,
-    help=(
-        "Install rawstor packages (librawstor + rawstor-vhost) so this "
-        "hypervisor can attach rawstor-backed disks. Install rawstor-ost with "
-        "`exordos storages nodes init --type rawstor` on this host or a separate "
-        "storage node, then register it with "
-        "`exordos storages nodes add --cluster NAME --agent AGENT --name OST_NAME "
-        "--failure-domain-path PATH`."
-    ),
-)
-@click.option(
     "--user",
     type=str,
     required=False,
@@ -1318,7 +1304,6 @@ def init_cmd(
     romfile_version: str,
     pool_name: str,
     packer: bool,
-    with_rawstor: bool,
     user: str | None,
     add: bool,
     uuid: sys_uuid.UUID | None,
@@ -1380,9 +1365,8 @@ def init_cmd(
         log.info("Configuring packer...")
         _install_packer()
 
-    if with_rawstor:
-        log.info("Installing rawstor packages...")
-        install_and_configure_rawstor(add_sudo)
+    log.info("Installing rawstor packages...")
+    install_and_configure_rawstor(add_sudo)
 
     if add:
         log.info("Setting up the local boot network...")
@@ -1442,7 +1426,7 @@ def init_cmd(
                 status_endpoint=status_endpoint,
             )
             log.info("Setting up the local universal agent's virtualenv...")
-            install_agent_venv(agent_target.venv_path, with_rawstor=with_rawstor)
+            install_agent_venv(agent_target.venv_path, with_rawstor=True)
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             node_uuid = local_agent_node_uuid()
             reset_agent_meta_file(agent_target.meta_file)
