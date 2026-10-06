@@ -21,6 +21,8 @@ from rich_click.rich_context import RichContext
 
 from exordos import utils
 
+DOCS_HELP_WIDTH = 300
+
 md_base_template = """
 # {command_name}
 
@@ -59,7 +61,19 @@ def command_path(ctx) -> str:
 
 
 def recursive_help(cmd, parent=None):
-    ctx = RichContext(cmd, info_name=cmd.name, parent=parent)
+    ctx = RichContext(
+        cmd,
+        info_name=cmd.name,
+        parent=parent,
+        terminal_width=DOCS_HELP_WIDTH,
+        max_content_width=DOCS_HELP_WIDTH,
+        rich_help_config={
+            "width": DOCS_HELP_WIDTH,
+            "max_width": DOCS_HELP_WIDTH,
+            "color_system": None,
+            "force_terminal": False,
+        },
+    )
 
     yield {
         "command": cmd,
