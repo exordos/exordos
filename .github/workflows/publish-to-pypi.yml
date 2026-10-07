@@ -253,8 +253,13 @@ jobs:
           sh etc/package-macos-pkg.sh
           dist/exordos
           dist/macos-${{ matrix.target-arch }}.pkg
+      - name: Remove signing material before artifact upload
+        run: |
+          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db"
+          rm -f \
+            "$RUNNER_TEMP/developer-id.p12"
       - name: Upload component
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: macos-component-${{ matrix.target-arch }}
           path: |
@@ -274,8 +279,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8
         with:
           pattern: macos-component-*
           merge-multiple: true
@@ -383,7 +388,14 @@ jobs:
           spctl --assess --type install --verbose=2 "$PACKAGE"
       - name: Create checksum
         run: shasum -a 256 dist/exordos-macos.pkg | awk '{print $1}' > dist/exordos-macos.pkg.sha256
-      - uses: actions/upload-artifact@v7
+      - name: Remove signing material before artifact upload
+        run: |
+          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db"
+          rm -f \
+            "$RUNNER_TEMP/developer-id.p12" \
+            "$RUNNER_TEMP"/AuthKey_*.p8 \
+            "$RUNNER_TEMP/notary-result.json"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: exordos-macos
           path: |
@@ -412,11 +424,11 @@ jobs:
             other-arch: arm64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
           python-version: "3.14"
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8
         with:
           name: exordos-macos
           path: dist/
@@ -432,6 +444,10 @@ jobs:
             exit 1
           fi
           /usr/local/bin/exordos --silent --no-check-updates version
+          /usr/local/bin/exordos --help >/dev/null
+          sudo touch /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
+          sudo installer -pkg "$PACKAGE" -target /
+          test ! -e /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
           /usr/local/bin/exordos --help >/dev/null
       - name: Smoke-test installer
         env:
@@ -584,11 +600,11 @@ jobs:
         upload ./dist/exordos-windows.exe \
           "${PROJECT_NAME}/latest/exordos-windows.exe"
 
-        # VERSION is the commit point for the new macOS installer contract.
-        upload ./dist/VERSION "${PROJECT_NAME}/latest/VERSION"
-
-        # Activate the installer only after all referenced artifacts exist.
+        # The new installer can consume both historical ZIPs and packages.
         upload ./etc/install.sh "install.sh"
+
+        # Advance VERSION after artifacts and the compatible installer exist.
+        upload ./dist/VERSION "${PROJECT_NAME}/latest/VERSION"
 
   validate_release_ref:
     name: Validate release tag

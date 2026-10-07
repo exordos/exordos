@@ -21,15 +21,19 @@ case "$ARCH" in
 esac
 VERSION=$("$BUNDLE_DIR/exordos" --silent --no-check-updates version)
 # pkgbuild requires a numeric package version, including for prereleases.
-PACKAGE_VERSION=${VERSION%%[-+]*}
+PACKAGE_VERSION=$(printf '%s\n' "$VERSION" | sed 's/[^0-9.].*$//; s/\.$//')
 PACKAGE_ROOT=$(mktemp -d)
 trap 'rm -rf "$PACKAGE_ROOT"' EXIT
 
-mkdir -p "$PACKAGE_ROOT/usr/local/lib/exordos" "$PACKAGE_ROOT/usr/local/bin"
-/usr/bin/ditto "$BUNDLE_DIR" "$PACKAGE_ROOT/usr/local/lib/exordos/pkg"
-ln -s ../lib/exordos/pkg/exordos "$PACKAGE_ROOT/usr/local/bin/exordos"
+mkdir -p "$PACKAGE_ROOT/root/usr/local/lib/exordos" "$PACKAGE_ROOT/root/usr/local/bin"
+ditto "$BUNDLE_DIR" "$PACKAGE_ROOT/root/usr/local/lib/exordos/pkg"
+ln -s ../lib/exordos/pkg/exordos "$PACKAGE_ROOT/root/usr/local/bin/exordos"
 
-set -- --root "$PACKAGE_ROOT" --identifier "com.exordos.cli.$ARCH" \
+mkdir -p "$PACKAGE_ROOT/scripts"
+cp "$(dirname "$0")/macos-preinstall.sh" "$PACKAGE_ROOT/scripts/preinstall"
+chmod +x "$PACKAGE_ROOT/scripts/preinstall"
+
+set -- --root "$PACKAGE_ROOT/root" --scripts "$PACKAGE_ROOT/scripts" --identifier "com.exordos.cli.$ARCH" \
     --version "$PACKAGE_VERSION" --install-location / --ownership recommended
 pkgbuild "$@" "$PACKAGE_PATH"
 printf '%s\n' "$VERSION" > "$PACKAGE_PATH.version"

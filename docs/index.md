@@ -42,7 +42,10 @@ sudo installer -pkg exordos-macos.pkg -target /
 
 The package installs its bundle to `/usr/local/lib/exordos/pkg` and its launcher
 to `/usr/local/bin/exordos`. The shell installer retains versioned installations
-and supports `EXORDOS_INSTALL_PREFIX`.
+and supports `EXORDOS_INSTALL_PREFIX`. Historical releases remain installable
+using their architecture-specific ZIPs. Package receipts use the numeric
+version core; `exordos version` and the managed installation retain the full
+development or prerelease version.
 
 Release CI uses `MACOS_CERTIFICATE_P12_BASE64` in the `macos-release`
 environment: a base64-encoded PKCS#12 containing both Developer ID Application

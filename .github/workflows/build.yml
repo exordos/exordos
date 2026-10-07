@@ -10,6 +10,7 @@ on:
       - 'etc/package-macos-pkg.sh'
       - 'etc/assemble-macos-pkg.sh'
       - 'etc/macos-distribution.xml'
+      - 'etc/macos-preinstall.sh'
       - 'exordos/**'
       - 'pyproject.toml'
       - 'tox.ini'
@@ -175,7 +176,7 @@ jobs:
         run: |
           set -euo pipefail
           PACKAGE="dist/exordos-macos.pkg"
-          sudo installer -pkg "$PACKAGE" -target /
+          sudo installer -allowUntrusted -pkg "$PACKAGE" -target /
           lipo /usr/local/lib/exordos/pkg/exordos -verify_arch "${{ matrix.target-arch }}"
           pkgutil --pkg-info "com.exordos.cli.${{ matrix.target-arch }}"
           if pkgutil --pkg-info "com.exordos.cli.${{ matrix.other-arch }}"; then
@@ -183,6 +184,10 @@ jobs:
             exit 1
           fi
           /usr/local/bin/exordos --silent --no-check-updates version
+          /usr/local/bin/exordos --help >/dev/null
+          sudo touch /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
+          sudo installer -allowUntrusted -pkg "$PACKAGE" -target /
+          test ! -e /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
           /usr/local/bin/exordos --help >/dev/null
       - name: Smoke-test installer
         env:

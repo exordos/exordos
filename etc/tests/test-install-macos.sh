@@ -35,7 +35,18 @@ EOF
 
 cat > "$FAKE_BIN/ditto" <<'EOF'
 #!/bin/sh
-cp -R "$1" "$2"
+if [ "$1" = -x ] && [ "$2" = -k ]; then
+    python3 - "$3" "$4" <<'PYCODE'
+import sys
+import zipfile
+
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    archive.extractall(sys.argv[2])
+PYCODE
+    chmod +x "$4/exordos/exordos"
+else
+    cp -R "$1" "$2"
+fi
 EOF
 
 cat > "$FAKE_BIN/pkgutil" <<'EOF'
@@ -214,6 +225,38 @@ PREFIX="$INTEL_PREFIX" FAKE_ARCH=x86_64 EXORDOS_VERSION_OVERRIDE=3.1.14 \
 PREFIX="$INTEL_PREFIX" assert_active_version 3.1.14
 [ "$(cat "$INTEL_PREFIX/lib/exordos/versions/3.1.14/_internal/marker")" = x86_64 ] || \
     fail "Intel installed the wrong component"
+
+# An uncached historical release has only architecture-specific ZIPs.
+create_release 3.1.13
+python3 - "$FAKE_REPO/3.1.13" "$TEST_ROOT/fixture-3.1.13" <<'PY'
+from pathlib import Path
+import sys
+import zipfile
+
+release, fixture = map(Path, sys.argv[1:])
+(release / "exordos-macos.pkg").unlink()
+for arch in ("arm64", "x86_64"):
+    bundle = fixture / f"macos-{arch}.pkg/Payload/usr/local/lib/exordos/pkg"
+    with zipfile.ZipFile(release / f"exordos-macos-{arch}.zip", "w") as archive:
+        for path in bundle.rglob("*"):
+            if path.is_file():
+                archive.write(path, Path("exordos") / path.relative_to(bundle))
+PY
+for ARCH in arm64 x86_64; do
+    HASH=$(shasum -a 256 "$FAKE_REPO/3.1.13/exordos-macos-$ARCH.zip")
+    printf '%s\n' "${HASH%% *}" > "$FAKE_REPO/3.1.13/exordos-macos-$ARCH.zip.sha256"
+    LEGACY_PREFIX="$TEST_ROOT/legacy-$ARCH"
+    PREFIX="$LEGACY_PREFIX" FAKE_ARCH="$ARCH" EXORDOS_VERSION_OVERRIDE=3.1.13 install_version
+    PREFIX="$LEGACY_PREFIX" assert_active_version 3.1.13
+    [ "$(cat "$LEGACY_PREFIX/lib/exordos/versions/3.1.13/_internal/marker")" = "$ARCH" ] || \
+        fail "Historical ZIP selected the wrong architecture"
+done
+
+# Historical ZIPs still require trusted code signatures.
+if PREFIX="$TEST_ROOT/legacy-untrusted" FAKE_SIGNATURE_MODE=adhoc \
+    EXORDOS_VERSION_OVERRIDE=3.1.13 install_version; then
+    fail "Untrusted historical ZIP unexpectedly succeeded"
+fi
 
 # Unsupported architectures fail before mutating the prefix.
 UNKNOWN_PREFIX="$TEST_ROOT/unknown-prefix"
