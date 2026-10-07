@@ -49,9 +49,9 @@ import sys
 import zipfile
 
 with zipfile.ZipFile(sys.argv[1]) as package:
-    package.extractall(pathlib.Path(sys.argv[2]) / "Payload/usr/local/lib/exordos/pkg")
+    package.extractall(pathlib.Path(sys.argv[2]))
 PYCODE
-        chmod +x "$3/Payload/usr/local/lib/exordos/pkg/exordos"
+        chmod +x "$3"/macos-*.pkg/Payload/usr/local/lib/exordos/pkg/exordos
         ;;
     *) exit 2 ;;
 esac
@@ -96,15 +96,17 @@ chmod +x \
 
 create_release() {
     VERSION=$1
-    ARCH=$2
     RELEASE_DIR="$FAKE_REPO/$VERSION"
-    FIXTURE_DIR="$TEST_ROOT/fixture-$VERSION-$ARCH"
-    ARCHIVE="$RELEASE_DIR/exordos-macos-$ARCH.pkg"
-    mkdir -p "$RELEASE_DIR" "$FIXTURE_DIR/exordos/_internal"
-    printf '#!/bin/sh\nprintf "%%s\\n" "%s"\n' "$VERSION" \
-        > "$FIXTURE_DIR/exordos/exordos"
-    printf '%s\n' runtime > "$FIXTURE_DIR/exordos/_internal/marker"
-    chmod +x "$FIXTURE_DIR/exordos/exordos"
+    FIXTURE_DIR="$TEST_ROOT/fixture-$VERSION"
+    ARCHIVE="$RELEASE_DIR/exordos-macos.pkg"
+    mkdir -p "$RELEASE_DIR"
+    for ARCH in arm64 x86_64; do
+        BUNDLE="$FIXTURE_DIR/macos-$ARCH.pkg/Payload/usr/local/lib/exordos/pkg"
+        mkdir -p "$BUNDLE/_internal"
+        printf '#!/bin/sh\nprintf "%%s\\n" "%s"\n' "$VERSION" > "$BUNDLE/exordos"
+        printf '%s\n' "$ARCH" > "$BUNDLE/_internal/marker"
+        chmod +x "$BUNDLE/exordos"
+    done
     python3 - "$FIXTURE_DIR" "$ARCHIVE" <<'PY'
 import pathlib
 import sys
@@ -115,7 +117,7 @@ archive = pathlib.Path(sys.argv[2])
 with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zip_file:
     for path in source.rglob("*"):
         if path.is_file():
-            zip_file.write(path, path.relative_to(source / "exordos"))
+            zip_file.write(path, path.relative_to(source))
 PY
     HASH=$(shasum -a 256 "$ARCHIVE")
     HASH=${HASH%% *}
@@ -142,7 +144,7 @@ assert_active_version() {
         fail "active version is $ACTUAL, expected $EXPECTED"
 }
 
-create_release 3.1.14 arm64
+create_release 3.1.14
 printf '%s\n' 3.1.14 > "$FAKE_REPO/latest/VERSION"
 
 # Preserve an existing one-file installation before activating the bundle.
@@ -153,6 +155,8 @@ LEGACY_HASH=$(shasum -a 256 "$PREFIX/bin/exordos")
 LEGACY_HASH=${LEGACY_HASH%% *}
 install_version
 assert_active_version 3.1.14
+[ "$(cat "$PREFIX/lib/exordos/versions/3.1.14/_internal/marker")" = arm64 ] || \
+    fail "Apple Silicon installed the wrong component"
 [ -f "$PREFIX/lib/exordos/versions/3.1.14/.complete" ] || \
     fail "completion marker is missing"
 [ -x "$PREFIX/lib/exordos/legacy/exordos-onefile-$LEGACY_HASH" ] || \
@@ -164,7 +168,7 @@ install_version
 SECOND_MARKER=$(stat -c %i "$PREFIX/lib/exordos/versions/3.1.14/.complete")
 [ "$FIRST_MARKER" = "$SECOND_MARKER" ] || fail "reinstall replaced the version"
 
-create_release 3.1.15 arm64
+create_release 3.1.15
 printf '%s\n' 3.1.15 > "$FAKE_REPO/latest/VERSION"
 install_version
 assert_active_version 3.1.15
@@ -177,8 +181,8 @@ assert_active_version 3.1.14
 unset EXORDOS_VERSION_OVERRIDE
 
 # A checksum failure must not switch the active launcher.
-create_release 3.1.16 arm64
-printf '%064d\n' 0 > "$FAKE_REPO/3.1.16/exordos-macos-arm64.pkg.sha256"
+create_release 3.1.16
+printf '%064d\n' 0 > "$FAKE_REPO/3.1.16/exordos-macos.pkg.sha256"
 printf '%s\n' 3.1.16 > "$FAKE_REPO/latest/VERSION"
 if install_version; then
     fail "checksum mismatch unexpectedly succeeded"
@@ -186,7 +190,7 @@ fi
 assert_active_version 3.1.14
 
 # Ad-hoc signatures are rejected before the downloaded launcher is executed.
-create_release 3.1.17 arm64
+create_release 3.1.17
 printf '%s\n' 3.1.17 > "$FAKE_REPO/latest/VERSION"
 if FAKE_SIGNATURE_MODE=adhoc install_version; then
     fail "ad-hoc signature unexpectedly succeeded"
@@ -203,12 +207,13 @@ if FAKE_PACKAGE_ASSESS_EXIT=1 install_version; then
 fi
 assert_active_version 3.1.14
 
-# Intel uses its own artifact.
-create_release 3.1.14 x86_64
+# Intel selects its native component from the same artifact.
 INTEL_PREFIX="$TEST_ROOT/intel-prefix"
 PREFIX="$INTEL_PREFIX" FAKE_ARCH=x86_64 EXORDOS_VERSION_OVERRIDE=3.1.14 \
     install_version
 PREFIX="$INTEL_PREFIX" assert_active_version 3.1.14
+[ "$(cat "$INTEL_PREFIX/lib/exordos/versions/3.1.14/_internal/marker")" = x86_64 ] || \
+    fail "Intel installed the wrong component"
 
 # Unsupported architectures fail before mutating the prefix.
 UNKNOWN_PREFIX="$TEST_ROOT/unknown-prefix"

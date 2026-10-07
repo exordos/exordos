@@ -32,8 +32,7 @@ Install the CLI with a single command:
 curl -fsSL https://repo.exordos.com/install.sh | sh
 ```
 
-On macOS, you can also download `exordos-macos-arm64.pkg` (Apple Silicon) or
-`exordos-macos-x86_64.pkg` (Intel) from the
+On macOS, you can also download `exordos-macos.pkg` for Apple Silicon and Intel from the
 [GitHub releases](https://github.com/exordos/exordos/releases) and open it to
 install the CLI. Release packages are signed and notarized.
 

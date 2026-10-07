@@ -32,8 +32,7 @@ curl -fsSL https://repo.exordos.com/install.sh | sh
 curl -fsSL https://repo.exordos.com/install.sh | EXORDOS_VERSION=3.1.15 sh
 ```
 
-Также можно скачать `exordos-macos-arm64.pkg` (Apple Silicon) или
-`exordos-macos-x86_64.pkg` (Intel) из
+Также можно скачать `exordos-macos.pkg` для Apple Silicon и Intel из
 [релизов GitHub](https://github.com/exordos/exordos/releases) и открыть пакет.
 Пакет устанавливает CLI в `/usr/local/lib/exordos/pkg` и создаёт ссылку
 `/usr/local/bin/exordos`. Пакеты релизов подписаны и нотарифицированы Apple.

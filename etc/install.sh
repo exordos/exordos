@@ -155,7 +155,7 @@ if [ "$OS" = "Darwin" ]; then
             error "Installed version at $TARGET_DIR is corrupt"
         status "Using the existing exordos $VERSION installation."
     else
-        ARTIFACT="exordos-macos-$MACOS_ARCH.pkg"
+        ARTIFACT="exordos-macos.pkg"
         RELEASE_URL="$REPO_URL/$VERSION"
         ARCHIVE="$TEMP_DIR/$ARTIFACT"
         CHECKSUM_FILE="$ARCHIVE.sha256"
@@ -187,7 +187,7 @@ if [ "$OS" = "Darwin" ]; then
         # Extract the package payload to retain versioned and custom-prefix installs.
         pkgutil --expand-full "$ARCHIVE" "$TEMP_DIR/package"
         mkdir -p "$UNPACKED"
-        ditto "$TEMP_DIR/package/Payload/usr/local/lib/exordos/pkg" "$UNPACKED/exordos"
+        ditto "$TEMP_DIR/package/macos-$MACOS_ARCH.pkg/Payload/usr/local/lib/exordos/pkg" "$UNPACKED/exordos"
         if find "$UNPACKED" -mindepth 1 -maxdepth 1 ! -name exordos | grep -q .; then
             error "Unexpected top-level entry in $ARTIFACT"
         fi

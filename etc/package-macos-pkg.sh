@@ -14,6 +14,11 @@ PACKAGE_PATH=$2
 [ -d "$BUNDLE_DIR/_internal" ]
 [ -x "$BUNDLE_DIR/exordos" ]
 [ ! -e "$PACKAGE_PATH" ]
+ARCH=$(uname -m)
+case "$ARCH" in
+    arm64|x86_64) ;;
+    *) echo "Unsupported macOS architecture: $ARCH" >&2; exit 1 ;;
+esac
 VERSION=$("$BUNDLE_DIR/exordos" --silent --no-check-updates version)
 # pkgbuild requires a numeric package version, including for prereleases.
 PACKAGE_VERSION=${VERSION%%[-+]*}
@@ -24,9 +29,7 @@ mkdir -p "$PACKAGE_ROOT/usr/local/lib/exordos" "$PACKAGE_ROOT/usr/local/bin"
 /usr/bin/ditto "$BUNDLE_DIR" "$PACKAGE_ROOT/usr/local/lib/exordos/pkg"
 ln -s ../lib/exordos/pkg/exordos "$PACKAGE_ROOT/usr/local/bin/exordos"
 
-set -- --root "$PACKAGE_ROOT" --identifier com.exordos.cli \
+set -- --root "$PACKAGE_ROOT" --identifier "com.exordos.cli.$ARCH" \
     --version "$PACKAGE_VERSION" --install-location / --ownership recommended
-if [ -n "${MACOS_INSTALLER_IDENTITY:-}" ]; then
-    set -- "$@" --sign "$MACOS_INSTALLER_IDENTITY" --timestamp
-fi
 pkgbuild "$@" "$PACKAGE_PATH"
+printf '%s\n' "$VERSION" > "$PACKAGE_PATH.version"
