@@ -112,15 +112,23 @@ exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gM
   --refresh_token "...bZ1BENYKg" MyTown
 ```
 
-## Элементы при bootstrap управляемого реалма
+## Bootstrap управляемого реалма
 
 При `exordos bootstrap --realm-spec /etc/exordos/realm_spec.json` CLI читает
-поле `elements` как список названий и передаёт его в bootstrap:
+названия элементов и URL репозитория из realm spec:
 
 ```json
-{"elements": ["exordos_s3", "exordos_db"]}
+{
+  "elements": ["exordos_s3", "exordos_db"],
+  "repo_url": "https://repository.example.com/exordos-elements/"
+}
 ```
 
 Явно заданные параметры `--elements` заменяют список из конфига.
 Если поле отсутствует или содержит пустой список, используется стандартный
 bootstrap.
+
+Непустое поле `repo_url` добавляется к репозиториям bootstrap.
+Существующие репозитории, включая заданные через `--repository`, сохраняются.
+Если точно такой же URL уже есть в списке, повторно он не добавляется.
+Отсутствующее или пустое поле `repo_url` не меняет список репозиториев.
