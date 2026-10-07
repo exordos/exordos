@@ -229,20 +229,55 @@ def do_upload(
 
     wait_for_repository_active(client, entity_uuid, timeout)
 
-    base_client.action_entity(
-        client,
-        c.REPOSITORY_COLLECTION,
-        "upload",
-        entity_uuid,
-        element_name=name,
-        element_version=version,
-        manifest=manifest_data,
-        description=description,
-    )
-    click.echo(
-        f"Element {click.style(f'{name}:{version}', fg='green')} was uploaded "
-        f"successfully to repository {click.style(repository, fg='green')}"
-    )
+    def identical_version_exists():
+        elements = base_client.list_entities(
+            client, c.REPOSITORY_ELEMENT_COLLECTION, name=name, version=version
+        )
+        for element in elements:
+            if extract_repository_uuid(element).lower() != str(entity_uuid).lower():
+                continue
+            if not element.get("manifest"):
+                element = base_client.get_entity(
+                    client, c.REPOSITORY_ELEMENT_COLLECTION, element["uuid"]
+                )
+            if json.dumps(element.get("manifest"), sort_keys=True) != json.dumps(
+                manifest_data, sort_keys=True
+            ):
+                raise click.ClickException(
+                    f"Element {name}:{version} already exists with different "
+                    "manifest content; publish a new version"
+                )
+            return True
+        return False
+
+    duplicate = identical_version_exists()
+    if not duplicate:
+        try:
+            base_client.action_entity(
+                client,
+                c.REPOSITORY_COLLECTION,
+                "upload",
+                entity_uuid,
+                element_name=name,
+                element_version=version,
+                manifest=manifest_data,
+                description=description,
+            )
+        except (bazooka_exc.ConflictError, bazooka_exc.BadRequestError):
+            # Core may reject a concurrent duplicate before the upload action.
+            if not identical_version_exists():
+                raise
+            duplicate = True
+    if duplicate:
+        click.echo(
+            f"Element {click.style(f'{name}:{version}', fg='green')} is "
+            "already in the repository"
+        )
+    else:
+        click.echo(
+            f"Element {click.style(f'{name}:{version}', fg='green')} was uploaded "
+            f"successfully to repository {click.style(repository, fg='green')}"
+        )
 
 
 def extract_repository_uuid(element: dict[str, tp.Any]) -> str:
@@ -326,7 +361,7 @@ def wait_for_repo_element(
         )
         for element in elements:
             if (
-                extract_repository_uuid(element) == str(repository_uuid)
+                extract_repository_uuid(element).lower() == str(repository_uuid).lower()
                 and element.get("status") in status
             ):
                 return element

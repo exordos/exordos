@@ -1,7 +1,9 @@
 
 # exordos_em_ee_install
 
-Install element
+Install element.
+
+Installing an already installed element stops before upload and suggests `exordos em ee update`. Repository installation state takes precedence over runtime rows that remain during asynchronous uninstall.
 
 ## Usage
 

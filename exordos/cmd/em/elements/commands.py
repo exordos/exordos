@@ -395,7 +395,15 @@ def _select_current_element_by_name(
     return active_elements[0]
 
 
-@click.command("install", help="Install element")
+@click.command(
+    "install",
+    help=(
+        "Install element.\n\n"
+        "Installing an already installed element stops before upload and "
+        "suggests `exordos em ee update`. Repository installation state takes "
+        "precedence over runtime rows that remain during asynchronous uninstall."
+    ),
+)
 @click.option(
     "-v",
     "--version",
@@ -426,7 +434,7 @@ def install_cmd(
     timeout: float,
     uuid_or_name_or_path: str | None,
 ) -> None:
-    """Install element from repository API by UUID, name, or manifest path"""
+    """Install element from repository API by UUID, name, or manifest path."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     if not uuid_or_name_or_path:
@@ -450,6 +458,40 @@ def install_cmd(
         manifest_data = utils.load_yaml(str(manifest_path))
         name = manifest_data.get("name")
         e_version = manifest_data.get("version")
+
+        catalog = base_client.list_entities(
+            client, c.REPOSITORY_ELEMENT_COLLECTION, name=name
+        )
+        installed = [e for e in catalog if e.get("installation_state") == "INSTALLED"]
+        if not installed:
+            runtime_elements = base_client.list_entities(
+                client, c.ELEMENT_COLLECTION, name=name
+            )
+            if runtime_elements:
+                repository_manifests = set()
+                for element in catalog:
+                    if not element.get("manifest"):
+                        element = base_client.get_entity(
+                            client, c.REPOSITORY_ELEMENT_COLLECTION, element["uuid"]
+                        )
+                    manifest_uuid = element["manifest"].get("uuid") or element["uuid"]
+                    repository_manifests.add(str(manifest_uuid).lower())
+                installed = [
+                    element
+                    for element in runtime_elements
+                    if (element.get("manifest") or "")
+                    .rstrip("/")
+                    .split("/")[-1]
+                    .lower()
+                    not in repository_manifests
+                ]
+        if installed:
+            raise click.ClickException(
+                f"Element {name} is already installed ("
+                f"{installed[0].get('version')}) — use "
+                f"`exordos em ee update {uuid_or_name_or_path}` to move it to "
+                f"{e_version}"
+            )
 
         driver_spec = {"kind": "database"}
         repository = repo_utils.ensure_repository(

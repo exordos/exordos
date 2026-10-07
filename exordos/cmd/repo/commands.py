@@ -351,7 +351,15 @@ def repository_refresh_cmd(
 repository_group.add_command(repository_refresh_cmd)
 
 
-@click.command("upload", help=f"Upload element to {REPOSITORY_ENTITY}")
+@click.command(
+    "upload",
+    help=(
+        f"Upload element to {REPOSITORY_ENTITY}.\n\n"
+        "A version already present in the selected repository is accepted only "
+        "when its manifest content matches. Different content requires a new "
+        "version. A matching version in another repository does not skip upload."
+    ),
+)
 @click.pass_context
 @click.option(
     "-r",
