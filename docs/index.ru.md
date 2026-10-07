@@ -22,7 +22,7 @@ Exordos CLI — это интерфейс командной строки для
 curl -fsSL https://repo.exordos.com/install.sh | sh
 ```
 
-В macOS установщик выбирает нативный архив для Apple Silicon или Intel,
+В macOS установщик выбирает нативный пакет для Apple Silicon или Intel,
 проверяет его контрольную сумму SHA-256 и хранит версии в
 `/usr/local/lib/exordos`. Активная ссылка `/usr/local/bin/exordos`
 переключается атомарно. Чтобы активировать уже установленную версию или
@@ -31,6 +31,12 @@ curl -fsSL https://repo.exordos.com/install.sh | sh
 ```bash
 curl -fsSL https://repo.exordos.com/install.sh | EXORDOS_VERSION=3.1.15 sh
 ```
+
+Также можно скачать `exordos-macos-arm64.pkg` (Apple Silicon) или
+`exordos-macos-x86_64.pkg` (Intel) из
+[релизов GitHub](https://github.com/exordos/exordos/releases) и открыть пакет.
+Пакет устанавливает CLI в `/usr/local/lib/exordos/pkg` и создаёт ссылку
+`/usr/local/bin/exordos`. Пакеты релизов подписаны и нотарифицированы Apple.
 
 ### Через uv
 

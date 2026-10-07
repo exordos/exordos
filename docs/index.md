@@ -22,7 +22,7 @@ Install the CLI with a single command:
 curl -fsSL https://repo.exordos.com/install.sh | sh
 ```
 
-On macOS, the installer selects the native Apple Silicon or Intel archive,
+On macOS, the installer selects the native Apple Silicon or Intel package,
 verifies its SHA-256 checksum, and keeps versioned installations under
 `/usr/local/lib/exordos`. The active `/usr/local/bin/exordos` launcher is
 switched atomically. To reactivate an already installed version or install a
@@ -31,6 +31,27 @@ specific published version, set `EXORDOS_VERSION`:
 ```bash
 curl -fsSL https://repo.exordos.com/install.sh | EXORDOS_VERSION=3.1.15 sh
 ```
+
+Alternatively, download `exordos-macos-arm64.pkg` (Apple Silicon) or
+`exordos-macos-x86_64.pkg` (Intel) from the
+[GitHub releases](https://github.com/exordos/exordos/releases). Open the package
+or install it from the terminal:
+
+```bash
+sudo installer -pkg exordos-macos-arm64.pkg -target /
+```
+
+The package installs its bundle to `/usr/local/lib/exordos/pkg` and its launcher
+to `/usr/local/bin/exordos`. The shell installer retains versioned installations
+and supports `EXORDOS_INSTALL_PREFIX`.
+
+Release CI uses `MACOS_CERTIFICATE_P12_BASE64` in the `macos-release`
+environment: a base64-encoded PKCS#12 containing both Developer ID Application
+and Developer ID Installer certificates and their private keys, encrypted with
+`MACOS_CERTIFICATE_PASSWORD`. App Store Connect API secrets remain required. CI signs,
+notarizes, staples, verifies, and smoke-tests both architecture packages before
+publishing them and their SHA-256 checksums. Pull requests and manual binary
+builds produce unsigned packages for testing.
 
 ### Via uv
 

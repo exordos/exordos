@@ -7,7 +7,7 @@ on:
       - '.github/workflows/build.yml'
       - '.github/workflows/publish-to-pypi.yml'
       - 'etc/install.sh'
-      - 'etc/package-macos.sh'
+      - 'etc/package-macos-pkg.sh'
       - 'exordos/**'
       - 'pyproject.toml'
       - 'tox.ini'
@@ -113,14 +113,23 @@ jobs:
               esac
             fi
           done < <(find dist/exordos -type f -print0)
-      - name: Archive bundle and create checksum
+      - name: Build macOS package
         run: >-
-          sh etc/package-macos.sh
+          sh etc/package-macos-pkg.sh
           dist/exordos
-          dist/exordos-${{ matrix.artifact-suffix }}.zip
+          dist/exordos-${{ matrix.artifact-suffix }}.pkg
+      - name: Smoke-test macOS package
+        run: |
+          set -euo pipefail
+          PACKAGE="dist/exordos-${{ matrix.artifact-suffix }}.pkg"
+          sudo installer -pkg "$PACKAGE" -target /
+          EXPECTED_VERSION=$(dist/exordos/exordos --silent --no-check-updates version)
+          test "$(/usr/local/bin/exordos --silent --no-check-updates version)" = "$EXPECTED_VERSION"
+          /usr/local/bin/exordos --help >/dev/null
+          shasum -a 256 "$PACKAGE" | awk '{print $1}' > "$PACKAGE.sha256"
       - name: Smoke-test installer
         env:
-          ARTIFACT: exordos-${{ matrix.artifact-suffix }}.zip
+          ARTIFACT: exordos-${{ matrix.artifact-suffix }}.pkg
         run: |
           set -euo pipefail
           VERSION=$(dist/exordos/exordos --silent --no-check-updates version)
@@ -183,5 +192,5 @@ jobs:
         with:
           name: exordos-${{ matrix.artifact-suffix }}
           path: |
-            dist/exordos-${{ matrix.artifact-suffix }}.zip
-            dist/exordos-${{ matrix.artifact-suffix }}.zip.sha256
+            dist/exordos-${{ matrix.artifact-suffix }}.pkg
+            dist/exordos-${{ matrix.artifact-suffix }}.pkg.sha256

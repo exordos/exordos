@@ -35,29 +35,31 @@ EOF
 
 cat > "$FAKE_BIN/ditto" <<'EOF'
 #!/bin/sh
-if [ "$1" = "-x" ] && [ "$2" = "-k" ]; then
-    SOURCE=$3
-    DESTINATION=$4
-elif [ "$#" -eq 2 ]; then
-    SOURCE=$1
-    DESTINATION=$2
-else
-    exit 2
-fi
-python3 - "$SOURCE" "$DESTINATION" <<'PY'
+cp -R "$1" "$2"
+EOF
+
+cat > "$FAKE_BIN/pkgutil" <<'EOF'
+#!/bin/sh
+case "$1" in
+    --check-signature) exit "${FAKE_PACKAGE_SIGNATURE_EXIT:-0}" ;;
+    --expand-full)
+        python3 - "$2" "$3" <<'PYCODE'
 import pathlib
-import shutil
 import sys
 import zipfile
 
-source = pathlib.Path(sys.argv[1])
-destination = pathlib.Path(sys.argv[2])
-if source.is_dir():
-    shutil.copytree(source, destination, symlinks=True)
-else:
-    with zipfile.ZipFile(source) as zip_file:
-        zip_file.extractall(destination)
-PY
+with zipfile.ZipFile(sys.argv[1]) as package:
+    package.extractall(pathlib.Path(sys.argv[2]) / "Payload/usr/local/lib/exordos/pkg")
+PYCODE
+        chmod +x "$3/Payload/usr/local/lib/exordos/pkg/exordos"
+        ;;
+    *) exit 2 ;;
+esac
+EOF
+
+cat > "$FAKE_BIN/spctl" <<'EOF'
+#!/bin/sh
+exit "${FAKE_PACKAGE_ASSESS_EXIT:-0}"
 EOF
 
 cat > "$FAKE_BIN/codesign" <<'EOF'
@@ -87,6 +89,8 @@ EOF
 chmod +x \
     "$FAKE_BIN/uname" \
     "$FAKE_BIN/ditto" \
+    "$FAKE_BIN/pkgutil" \
+    "$FAKE_BIN/spctl" \
     "$FAKE_BIN/codesign" \
     "$FAKE_BIN/file"
 
@@ -95,7 +99,7 @@ create_release() {
     ARCH=$2
     RELEASE_DIR="$FAKE_REPO/$VERSION"
     FIXTURE_DIR="$TEST_ROOT/fixture-$VERSION-$ARCH"
-    ARCHIVE="$RELEASE_DIR/exordos-macos-$ARCH.zip"
+    ARCHIVE="$RELEASE_DIR/exordos-macos-$ARCH.pkg"
     mkdir -p "$RELEASE_DIR" "$FIXTURE_DIR/exordos/_internal"
     printf '#!/bin/sh\nprintf "%%s\\n" "%s"\n' "$VERSION" \
         > "$FIXTURE_DIR/exordos/exordos"
@@ -111,7 +115,7 @@ archive = pathlib.Path(sys.argv[2])
 with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zip_file:
     for path in source.rglob("*"):
         if path.is_file():
-            zip_file.write(path, path.relative_to(source))
+            zip_file.write(path, path.relative_to(source / "exordos"))
 PY
     HASH=$(shasum -a 256 "$ARCHIVE")
     HASH=${HASH%% *}
@@ -174,7 +178,7 @@ unset EXORDOS_VERSION_OVERRIDE
 
 # A checksum failure must not switch the active launcher.
 create_release 3.1.16 arm64
-printf '%064d\n' 0 > "$FAKE_REPO/3.1.16/exordos-macos-arm64.zip.sha256"
+printf '%064d\n' 0 > "$FAKE_REPO/3.1.16/exordos-macos-arm64.pkg.sha256"
 printf '%s\n' 3.1.16 > "$FAKE_REPO/latest/VERSION"
 if install_version; then
     fail "checksum mismatch unexpectedly succeeded"
@@ -186,6 +190,16 @@ create_release 3.1.17 arm64
 printf '%s\n' 3.1.17 > "$FAKE_REPO/latest/VERSION"
 if FAKE_SIGNATURE_MODE=adhoc install_version; then
     fail "ad-hoc signature unexpectedly succeeded"
+fi
+assert_active_version 3.1.14
+
+# Package signature and notarization failures leave the current version active.
+if FAKE_PACKAGE_SIGNATURE_EXIT=1 install_version; then
+    fail "invalid package signature unexpectedly succeeded"
+fi
+assert_active_version 3.1.14
+if FAKE_PACKAGE_ASSESS_EXIT=1 install_version; then
+    fail "rejected package unexpectedly succeeded"
 fi
 assert_active_version 3.1.14
 
