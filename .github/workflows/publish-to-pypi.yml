@@ -77,18 +77,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        uses: actions/checkout@v7
         with:
           fetch-depth: 30
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install deps (Linux)
         if: runner.os == 'Linux'
         run: sudo apt update && sudo apt install --yes ca-certificates
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
+        uses: astral-sh/setup-uv@v7
       - name: Install tox-uv
         run: uv tool install tox --with tox-uv
       - name: Build executable
@@ -102,7 +102,7 @@ jobs:
           fi
         shell: bash
       - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@v7
         with:
           name: exordos-${{ matrix.artifact-suffix }}
           path: dist/*
@@ -128,18 +128,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        uses: actions/checkout@v7
         with:
           fetch-depth: 30
           persist-credentials: false
       - name: Verify runner architecture
         run: test "$(uname -m)" = "${{ matrix.machine-arch }}"
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
+        uses: astral-sh/setup-uv@v7
       - name: Install tox-uv
         run: uv tool install tox --with tox-uv
       - name: Validate signing secrets
@@ -259,7 +259,7 @@ jobs:
           rm -f \
             "$RUNNER_TEMP/developer-id.p12"
       - name: Upload component
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@v7
         with:
           name: macos-component-${{ matrix.target-arch }}
           path: |
@@ -279,8 +279,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: macos-component-*
           merge-multiple: true
@@ -395,7 +395,7 @@ jobs:
             "$RUNNER_TEMP/developer-id.p12" \
             "$RUNNER_TEMP"/AuthKey_*.p8 \
             "$RUNNER_TEMP/notary-result.json"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+      - uses: actions/upload-artifact@v7
         with:
           name: exordos-macos
           path: |
@@ -424,11 +424,11 @@ jobs:
             other-arch: arm64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8
+      - uses: actions/download-artifact@v8
         with:
           name: exordos-macos
           path: dist/
