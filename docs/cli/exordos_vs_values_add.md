@@ -60,6 +60,13 @@ Add a new value to the Exordos installation
 
   value
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -82,6 +89,7 @@ Add a new value to the Exordos installation
 │    --description  -D  TEXT  Description of the value                                                                                                                                                                                                                                                    │
 │    --var              TEXT  UUID of a variable the value belongs to                                                                                                                                                                                                                                     │
 │    --value        -V  TEXT  value                                                                                                                                                                                                                                                                       │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │    --help                   Show this message and exit.                                                                                                                                                                                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

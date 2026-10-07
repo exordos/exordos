@@ -69,6 +69,13 @@ Add configuration from environment variables
     * Default: `sentinel.unset`
     * Usage: `node`
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`

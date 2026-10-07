@@ -45,6 +45,13 @@ Add a new password to the Exordos installation
 
   Description of the password
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -65,6 +72,7 @@ Add a new password to the Exordos installation
 │ *  --project-id   -p  UUID  Name of the project in which to deploy the password [required]                                                                                                                                                                                                              │
 │    --name         -n  TEXT  Name of the password                                                                                                                                                                                                                                                        │
 │    --description  -D  TEXT  Description of the password                                                                                                                                                                                                                                                 │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │    --help                   Show this message and exit.                                                                                                                                                                                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -87,6 +87,13 @@ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_key
 
   key or path to it, for example: /home/user/.ssh/id_rsa.pub
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -113,6 +120,7 @@ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_key
 │ --node-set               TEXT  node_set uuids or names                                                                                                                                                                                                                                                  │
 │ --user                   TEXT  user name of the ssh_key                                                                                                                                                                                                                                                 │
 │ --target_public_key      TEXT  key or path to it, for example: /home/user/.ssh/id_rsa.pub                                                                                                                                                                                                               │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │ --help                         Show this message and exit.                                                                                                                                                                                                                                              │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -22,6 +22,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.common.table import show_data
 
 ENTITY = "domain"
@@ -33,7 +35,9 @@ FIELDS_MAP = {
 }
 
 
-domains_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+domains_group = create_entity_group(
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_tags_command=True
+)
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
@@ -66,13 +70,16 @@ domains_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     is_flag=True,
     help=f"Sync the {ENTITY} to the ecosystem",
 )
+@tag_options()
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
     name: str,
     sync_to_ecosystem: bool,
+    tags: tuple[str, ...] = (),
 ) -> None:
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -82,6 +89,7 @@ def add_cmd(
         "name": name,
         "sync_to_ecosystem": sync_to_ecosystem,
     }
+    data.update(tag_data)
     data = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(data)
 
@@ -107,12 +115,16 @@ def add_cmd(
     is_flag=True,
     help=f"Sync the {ENTITY} to the ecosystem",
 )
+@tag_options(update=True)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
     name: str | None,
     sync_to_ecosystem: bool | None,
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
+    tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
     if name is not None:
@@ -120,6 +132,7 @@ def update_cmd(
     if sync_to_ecosystem is not None:
         data["sync_to_ecosystem"] = sync_to_ecosystem
 
+    data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 

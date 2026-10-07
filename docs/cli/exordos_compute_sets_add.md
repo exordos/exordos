@@ -91,6 +91,13 @@ Add a new set to the Exordos installation
 
   Wait until the set is active
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -117,6 +124,7 @@ Add a new set to the Exordos installation
 │    --description  -D  TEXT     Description of the set                                                                                                                                                                                                                                                   │
 │    --replicas         INTEGER  Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                                                       │
 │    --wait                      Wait until the set is active                                                                                                                                                                                                                                             │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

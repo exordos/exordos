@@ -42,6 +42,20 @@ Update service
 
   Description of the service
 
+* `clear_tags`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--clear-tags`
+
+  Remove all tags.
+
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -61,6 +75,8 @@ Update service
 │ --project-id   -p  UUID  Name of the project in which to deploy the service                                                                                                                                                                                                                             │
 │ --name         -n  TEXT  Name of the service                                                                                                                                                                                                                                                            │
 │ --description  -D  TEXT  Description of the service                                                                                                                                                                                                                                                     │
+│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

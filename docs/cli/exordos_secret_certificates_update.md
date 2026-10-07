@@ -58,6 +58,20 @@ Update certificate
 
   Domain of the certificate, replaces the current list. Can be repeated
 
+* `clear_tags`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--clear-tags`
+
+  Remove all tags.
+
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -79,6 +93,8 @@ Update certificate
 │ --description  -D  TEXT  Description of the certificate                                                                                                                                                                                                                                                 │
 │ --email        -e  TEXT  Email address to use for the certificate                                                                                                                                                                                                                                       │
 │ --domain       -d  TEXT  Domain of the certificate, replaces the current list. Can be repeated                                                                                                                                                                                                          │
+│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

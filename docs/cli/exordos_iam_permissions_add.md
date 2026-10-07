@@ -37,6 +37,13 @@ Add a new permission to the Exordos installation
 
   Description of the permission
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -56,6 +63,7 @@ Add a new permission to the Exordos installation
 │ --uuid         -u  UUID  UUID of the permission                                                                                                                                                                                                                                                         │
 │ --name         -n  TEXT  Name of the permission                                                                                                                                                                                                                                                         │
 │ --description  -D  TEXT  Description of the permission                                                                                                                                                                                                                                                  │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -26,6 +26,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 
 ENTITY = "config"
 ENTITY_COLLECTION = c.CONFIG_COLLECTION
@@ -41,7 +43,11 @@ FIELDS_MAP = {
 
 
 configs_group = create_entity_group(
-    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_delete_command=False
+    ENTITY,
+    ENTITY_COLLECTION,
+    FIELDS_MAP,
+    add_delete_command=False,
+    add_tags_command=True,
 )
 
 
@@ -92,6 +98,7 @@ configs_group = create_entity_group(
 )
 @click.argument("node", type=click.UUID)
 @click.pass_context
+@tag_options()
 def add_config_from_env_cmd(
     ctx: click.Context,
     project_id: sys_uuid.UUID,
@@ -102,7 +109,9 @@ def add_config_from_env_cmd(
     base64: bool,
     uuid: sys_uuid.UUID | None,
     node: sys_uuid.UUID,
+    tags: tuple[str, ...] = (),
 ) -> None:
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     envs = {}
@@ -131,6 +140,7 @@ def add_config_from_env_cmd(
             "body": {"content": content, "kind": "text"},
             "project_id": str(project_id),
         }
+        data.update(tag_data)
         base_client.add_entity(client, ENTITY_COLLECTION, data)
         click.echo(f"Saved envs to {env_path}")
 
@@ -176,6 +186,7 @@ def add_config_from_env_cmd(
             "body": {"content": cfg["text"], "kind": "text"},
             "project_id": str(project_id),
         }
+        data.update(tag_data)
         base_client.add_entity(client, ENTITY_COLLECTION, data)
         click.echo(f"Saved config to {cfg['path']}")
 

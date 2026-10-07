@@ -69,6 +69,20 @@ Update an existing set
 
   Name of the image to deploy
 
+* `clear_tags`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--clear-tags`
+
+  Remove all tags.
+
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -92,6 +106,8 @@ Update an existing set
 │    --description   -D  TEXT     Description of the set                                                                                                                                                                                                                                                  │
 │    --root-disk     -d  INTEGER  Number of GiB of root disk to allocate for the set                                                                                                                                                                                                                      │
 │    --image         -i  TEXT     Name of the image to deploy                                                                                                                                                                                                                                             │
+│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │    --help                       Show this message and exit.                                                                                                                                                                                                                                             │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -22,6 +22,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.common.table import show_data
 
 ENTITY = "certificate"
@@ -36,7 +38,9 @@ FIELDS_MAP = {
 }
 CERTIFICATE_METHODS = ("dns_core",)
 
-certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+certificates_group = create_entity_group(
+    ENTITY, ENTITY_COLLECTION, FIELDS_MAP, add_tags_command=True
+)
 
 
 @click.command("add", help="Add a new certificate to the Exordos installation")
@@ -93,6 +97,7 @@ certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     show_default=True,
     help="Method (provider) to issue and manage the certificate",
 )
+@tag_options()
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -102,7 +107,9 @@ def add_cmd(
     email: str,
     domains: tuple[str, ...],
     method: str,
+    tags: tuple[str, ...] = (),
 ) -> None:
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -116,6 +123,7 @@ def add_cmd(
         "domains": list(domains),
         "method": {"kind": method},
     }
+    data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(entity)
 
@@ -163,6 +171,7 @@ def add_cmd(
     multiple=True,
     help="Domain of the certificate, replaces the current list. Can be repeated",
 )
+@tag_options(update=True)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
@@ -171,7 +180,10 @@ def update_cmd(
     description: str | None,
     email: str | None,
     domains: tuple[str, ...],
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
+    tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
     if project_id is not None:
@@ -184,6 +196,7 @@ def update_cmd(
         data["email"] = email
     if domains:
         data["domains"] = list(domains)
+    data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 
