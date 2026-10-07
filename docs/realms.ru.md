@@ -125,6 +125,15 @@ exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gM
 Если поле отсутствует или содержит пустой список, используется стандартный
 bootstrap.
 
-Если в realm spec задано непустое поле `repo_url`, его URL добавляется к
-репозиториям bootstrap, включая заданные через `--repository`.
-Если такой URL уже есть в списке, повторно он не добавляется.
+## Репозитории при bootstrap управляемого реалма
+
+При `exordos bootstrap --realm-spec /etc/exordos/realm_spec.json` непустое
+поле `repo_url` в realm spec добавляется к репозиториям bootstrap:
+
+```json
+{"repo_url": "https://repository.example.com/exordos-elements/"}
+```
+
+Существующие репозитории, включая заданные через `--repository`, сохраняются.
+Если точно такой же URL уже есть в списке, повторно он не добавляется.
+Отсутствующее или пустое поле `repo_url` не меняет список репозиториев.

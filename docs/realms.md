@@ -112,6 +112,18 @@ exordos settings set-context --name "Admin Token" --access_token "...56riyO2U_gM
   --refresh_token "...bZ1BENYKg" City
 ```
 
+## Elements when bootstrapping a managed realm
+
+When running `exordos bootstrap --realm-spec /etc/exordos/realm_spec.json`,
+the CLI reads `elements` as a list of names and passes it to bootstrap:
+
+```json
+{"elements": ["exordos_s3", "exordos_db"]}
+```
+
+Explicit `--elements` options replace the list from the realm spec.
+If the field is absent or contains an empty list, the default bootstrap is used.
+
 ## Repositories when bootstrapping a managed realm
 
 When running `exordos bootstrap --realm-spec /etc/exordos/realm_spec.json`,
