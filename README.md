@@ -76,7 +76,3 @@ Tox uses `uv` for environment creation. In a sandbox or another restricted envir
 ```bash
 UV_CACHE_DIR="${TMPDIR:-/tmp}/uv-cache" tox -e develop
 ```
-
-Realm repository pushes accept `-u/--user` and `-p/--password` on `push` or as
-global options. Use global `-e` to select the Core endpoint for a single push.
-See [repository configuration](docs/config.md) for an example.
