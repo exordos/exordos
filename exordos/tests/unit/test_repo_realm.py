@@ -277,3 +277,104 @@ def test_loader_hands_the_global_otp_code_to_the_realm_login(
         )
 
     assert driver._session.auth._authenticator._otp_prompt() == "123456"
+
+
+@pytest.mark.parametrize(
+    "user,password", [("upload", "secret"), ("upload", None), (None, "secret")]
+)
+def test_realm_authenticator_explicit_credentials_override_cached_identity(
+    tmp_path, user, password
+):
+    cfg = tmp_path / "settings.yaml"
+    cfg.write_text(
+        yaml.safe_dump(
+            {
+                "current-realm": "orion",
+                "realms": {
+                    "orion": {
+                        "endpoint": "https://orion.test/api/core",
+                        "current-context": "admin",
+                        "contexts": {
+                            "admin": {
+                                "user": "admin",
+                                "login": "saved-login",
+                                "password": "saved-password",
+                                "access_token": "saved-token",
+                                "refresh_token": "saved-refresh",
+                            }
+                        },
+                    }
+                },
+            }
+        )
+    )
+    with mock.patch.object(realm.base_client, "CoreIamAuthenticator") as factory:
+        realm.realm_authenticator(cfg_path=str(cfg), user=user, password=password)
+    kwargs = factory.call_args.kwargs
+    assert kwargs["username"] == (user or "admin")
+    assert kwargs["password"] == (password or "saved-password")
+    assert kwargs["login"] == (None if user else "saved-login")
+    assert kwargs["access_token"] is None
+    assert kwargs["refresh_token"] is None
+    assert kwargs["realm"] is None
+
+
+def test_realm_driver_forwards_explicit_credentials():
+    with mock.patch.object(realm, "realm_authenticator") as factory:
+        realm.RealmRepoDriver(url=URL, realm="orion", user="upload", password="secret")
+    assert factory.call_args.kwargs == {
+        "user": "upload",
+        "password": "secret",
+        "endpoint": None,
+    }
+    factory.return_value.authenticate.assert_called_once()
+
+
+@pytest.mark.parametrize("from_settings", [False, True])
+def test_loader_passes_credentials_to_realm_driver(
+    tmp_path, monkeypatch, from_settings
+):
+    from exordos.repo import utils as repo_utils
+
+    cfg = tmp_path / "settings.yaml"
+    cfg.write_text(
+        yaml.safe_dump({"repositories": {"repo": {"driver": "realm", "url": URL}}})
+    )
+    factory = mock.Mock()
+    monkeypatch.setattr(
+        repo_utils.utils, "load_from_entry_point", lambda *args: factory
+    )
+    repo_utils.load_repo_driver(
+        "absent.yaml",
+        "repo",
+        str(tmp_path),
+        str(cfg),
+        None if from_settings else "realm",
+        (f"url={URL}",),
+        user="upload",
+        password="secret",
+    )
+    assert factory.call_args.kwargs["user"] == "upload"
+    assert factory.call_args.kwargs["password"] == "secret"
+
+
+def test_loader_rejects_credentials_for_other_drivers():
+    from exordos.repo import utils as repo_utils
+
+    with pytest.raises(realm.click.UsageError, match="realm driver"):
+        repo_utils.load_repo_driver(
+            "absent.yaml", None, ".", driver_kind="nginx", user="upload"
+        )
+
+
+def test_realm_authenticator_explicit_endpoint_without_settings(tmp_path):
+    with mock.patch.object(realm.base_client, "CoreIamAuthenticator") as factory:
+        realm.realm_authenticator(
+            cfg_path=str(tmp_path / "missing.yaml"),
+            endpoint="https://dcda9a.exordos.io/api/core",
+            user="admin",
+            password="secret",
+        )
+    assert factory.call_args.kwargs["base_url"] == "https://dcda9a.exordos.io/api/core"
+    assert factory.call_args.kwargs["username"] == "admin"
+    assert factory.call_args.kwargs["password"] == "secret"

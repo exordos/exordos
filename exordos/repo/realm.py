@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import pathlib
 import typing as tp
 
 import requests
@@ -46,25 +47,36 @@ def realm_authenticator(
     realm: str | None = None,
     cfg_path: str = c.CONFIG_FILE,
     otp_prompt: tp.Callable[[], str] | None = None,
+    user: str | None = None,
+    password: str | None = None,
+    endpoint: str | None = None,
 ) -> base_client.CoreIamAuthenticator:
     """Build an authenticator from a realm's current context in settings."""
-    with open(cfg_path) as f:
-        config = yaml.safe_load(f) or {}
+    if endpoint is not None and (
+        cfg_path is None or not pathlib.Path(cfg_path).exists()
+    ):
+        config = {}
+    else:
+        with open(cfg_path) as f:
+            config = yaml.safe_load(f) or {}
     realm_name = realm or settings_config.get_current_realm(config)
     realm_conf = settings_config.get_realm(config, realm_name)
-    if not realm_conf:
+    if not realm_conf and endpoint is None:
         raise ValueError(f"Realm {realm_name!r} not found in settings")
     context = settings_config.get_context(realm_conf)
     project_id = context.get("project_id")
+    explicit_credentials = (
+        user is not None or password is not None or endpoint is not None
+    )
     return base_client.CoreIamAuthenticator(
-        base_url=realm_conf["endpoint"],
-        username=context.get("user"),
-        login=context.get("login"),
-        password=context.get("password"),
-        access_token=context.get("access_token"),
-        refresh_token=context.get("refresh_token"),
+        base_url=endpoint if endpoint is not None else realm_conf["endpoint"],
+        username=user if user is not None else context.get("user"),
+        login=None if user is not None else context.get("login"),
+        password=password if password is not None else context.get("password"),
+        access_token=None if explicit_credentials else context.get("access_token"),
+        refresh_token=None if explicit_credentials else context.get("refresh_token"),
         scope=f"project:{project_id}" if project_id else None,
-        realm=realm_name,
+        realm=None if explicit_credentials else realm_name,
         password_prompt=base_client.PasswordPrompt(),
         otp_prompt=otp_prompt or (lambda: click.prompt("OTP code", hide_input=False)),
     )
@@ -95,10 +107,20 @@ class RealmRepoDriver(nginx.NginxRepoDriver):
         logger: logger_base.AbstractLogger = logger_base.ClickLogger(),
         authenticator: base_client.CoreIamAuthenticator | None = None,
         otp_prompt: tp.Callable[[], str] | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        endpoint: str | None = None,
     ):
         super().__init__(url=url, name=name or "realm_repo", logger=logger)
         if authenticator is None:
-            authenticator = realm_authenticator(realm, cfg_path, otp_prompt)
+            authenticator = realm_authenticator(
+                realm,
+                cfg_path,
+                otp_prompt,
+                user=user,
+                password=password,
+                endpoint=endpoint,
+            )
             # A cached token may have expired, and nothing renews it once
             # requests are signed: log in (or refresh) before the push.
             authenticator.authenticate()

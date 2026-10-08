@@ -121,3 +121,90 @@ def test_main_escapes_terminal_controls(monkeypatch, capsys, structured) -> None
     assert "denied" in captured.err
     assert "\\x1b" in captured.err
     assert not any(char in captured.err for char in "\x1b\x07\r\b\x9b")
+
+
+def test_push_global_credentials_reach_realm_driver(tmp_path, monkeypatch) -> None:
+    from exordos.cmd.repo import commands
+    from exordos.repo import realm
+
+    factory = MagicMock()
+    monkeypatch.setattr(realm, "realm_authenticator", factory)
+    monkeypatch.setattr(commands.repo_utils, "do_push", MagicMock())
+    result = CliRunner().invoke(
+        cli.exordos,
+        [
+            "--config",
+            str(tmp_path / "missing.yaml"),
+            "-e",
+            "https://dcda9a.exordos.io/api/core",
+            "-u",
+            "admin",
+            "-p",
+            "secret",
+            "push",
+            "--driver",
+            "realm",
+            "--driver-params",
+            "url=https://dcda9a.exordos.io/repo/00000000-0000-0000-0000-000000000000",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert factory.call_args.kwargs == {
+        "endpoint": "https://dcda9a.exordos.io/api/core",
+        "user": "admin",
+        "password": "secret",
+    }
+    factory.return_value.authenticate.assert_called_once()
+
+
+def test_push_local_credentials_override_global_options(tmp_path, monkeypatch) -> None:
+    from exordos.cmd.repo import commands
+
+    load = MagicMock()
+    monkeypatch.setattr(commands.repo_utils, "load_repo_driver", load)
+    monkeypatch.setattr(commands.repo_utils, "do_push", MagicMock())
+    result = CliRunner().invoke(
+        cli.exordos,
+        [
+            "--config",
+            str(tmp_path / "missing.yaml"),
+            "-u",
+            "global",
+            "-p",
+            "global-password",
+            "push",
+            "--driver",
+            "realm",
+            "-u",
+            "local",
+            "-p",
+            "local-password",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert load.call_args.kwargs["user"] == "local"
+    assert load.call_args.kwargs["password"] == "local-password"
+
+
+def test_push_keeps_saved_realm_when_global_options_omitted(
+    tmp_path, monkeypatch
+) -> None:
+    from exordos.cmd.repo import commands
+
+    load = MagicMock()
+    monkeypatch.setattr(commands.repo_utils, "load_repo_driver", load)
+    monkeypatch.setattr(commands.repo_utils, "do_push", MagicMock())
+    result = CliRunner().invoke(
+        cli.exordos,
+        [
+            "--config",
+            str(tmp_path / "missing.yaml"),
+            "push",
+            "--driver",
+            "realm",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert load.call_args.kwargs["user"] is None
+    assert load.call_args.kwargs["password"] is None
+    assert load.call_args.kwargs["endpoint"] is None
