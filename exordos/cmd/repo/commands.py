@@ -459,8 +459,37 @@ def push_cmd(
     delete_output: bool,
     project_dir: pathlib.Path,
 ) -> None:
+    # Only explicit global options override the selected repository's realm.
+    user = password = endpoint = access_token = None
+    ctx = click.get_current_context().parent
+    while ctx is not None:
+        for option in ("user", "password", "endpoint", "access_token"):
+            if (
+                ctx.get_parameter_source(option)
+                != click.core.ParameterSource.COMMANDLINE
+            ):
+                continue
+            if option == "user" and user is None:
+                user = ctx.params[option]
+            elif option == "password" and password is None:
+                password = ctx.params[option]
+            elif option == "endpoint":
+                endpoint = ctx.params[option]
+            elif option == "access_token":
+                access_token = ctx.params[option]
+        ctx = ctx.parent
     repo_driver = repo_utils.load_repo_driver(
-        exordos_cfg_file, target, project_dir, obj.cfg_path, driver, driver_params
+        exordos_cfg_file,
+        target,
+        project_dir,
+        obj.cfg_path,
+        driver,
+        driver_params,
+        otp_prompt=obj.auth_data.get("otp_prompt"),
+        user=user,
+        password=password,
+        endpoint=endpoint,
+        access_token=access_token,
     )
     repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
 

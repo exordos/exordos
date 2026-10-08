@@ -50,9 +50,47 @@ def get_published() -> str:
     )
 
 
+def _new_repo_driver(
+    driver_kind: str,
+    exordosctl_cfg_file: str,
+    otp_prompt: tp.Callable[[], str] | None = None,
+    override_user: str | None = None,
+    override_password: str | None = None,
+    override_endpoint: str | None = None,
+    override_access_token: str | None = None,
+    **params: tp.Any,
+) -> base_repo.AbstractRepoDriver:
+    if override_user is not None or override_password is not None:
+        if driver_kind != "realm":
+            raise click.UsageError("--user and --password require the realm driver")
+        if override_user is not None:
+            params["user"] = override_user
+        if override_password is not None:
+            params["password"] = override_password
+    if override_access_token is not None:
+        if driver_kind != "realm":
+            raise click.UsageError("--access-token requires the realm driver")
+        params["access_token"] = override_access_token
+    if driver_kind == "realm" and override_endpoint is not None:
+        params["endpoint"] = override_endpoint
+    driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
+    # A driver that logs in to a realm reads it from the active settings,
+    # and asks for an OTP code the way the other commands do.
+    if getattr(driver_class, "READS_SETTINGS", False):
+        params.setdefault("cfg_path", exordosctl_cfg_file)
+        if otp_prompt is not None:
+            params.setdefault("otp_prompt", otp_prompt)
+    return driver_class(**params)
+
+
 def load_repo_driver_from_settings(
     exordosctl_cfg_file: str,
     target: str,
+    otp_prompt: tp.Callable[[], str] | None = None,
+    user: str | None = None,
+    password: str | None = None,
+    endpoint: str | None = None,
+    access_token: str | None = None,
 ) -> base_repo.AbstractRepoDriver:
     """Build a repo driver from a repository entry in the settings file.
 
@@ -79,11 +117,19 @@ def load_repo_driver_from_settings(
             f"Driver not specified for repository {target}"
         )
 
-    driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
     params: dict = dict(repo)
     params.pop("driver", None)
     params["name"] = target
-    return driver_class(**params)
+    return _new_repo_driver(
+        driver_kind,
+        exordosctl_cfg_file,
+        otp_prompt,
+        override_user=user,
+        override_password=password,
+        override_endpoint=endpoint,
+        override_access_token=access_token,
+        **params,
+    )
 
 
 def load_repo_driver(
@@ -93,19 +139,49 @@ def load_repo_driver(
     exordosctl_cfg_file: str = c.CONFIG_FILE,
     driver_kind: str | None = None,
     driver_params: tuple[str, ...] | None = None,
+    otp_prompt: tp.Callable[[], str] | None = None,
+    user: str | None = None,
+    password: str | None = None,
+    endpoint: str | None = None,
+    access_token: str | None = None,
 ) -> base_repo.AbstractRepoDriver:
     if driver_kind:
         params = utils.convert_input_multiply(driver_params or ())
-        driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
-        return driver_class(name=target, **params)
+        return _new_repo_driver(
+            driver_kind,
+            exordosctl_cfg_file,
+            otp_prompt,
+            override_user=user,
+            override_password=password,
+            override_endpoint=endpoint,
+            override_access_token=access_token,
+            name=target,
+            **params,
+        )
 
     try:
         gen_config, _ = utils.get_exordos_config(project_dir, exordos_cfg_file)
     except FileNotFoundError:
-        return load_repo_driver_from_settings(exordosctl_cfg_file, target)
+        return load_repo_driver_from_settings(
+            exordosctl_cfg_file,
+            target,
+            otp_prompt,
+            user=user,
+            password=password,
+            endpoint=endpoint,
+            access_token=access_token,
+        )
 
     if not gen_config or "push" not in gen_config or not gen_config["push"]:
-        return load_repo_driver_from_settings(exordosctl_cfg_file, target)
+        return load_repo_driver_from_settings(
+            exordosctl_cfg_file,
+            target,
+            otp_prompt,
+            user=user,
+            password=password,
+            endpoint=endpoint,
+            access_token=access_token,
+        )
 
     pushes = gen_config["push"]
 
@@ -131,10 +207,17 @@ def load_repo_driver(
 
     # Load driver from entry points
     driver_kind = push.pop("driver")
-    driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
-    driver: base_repo.AbstractRepoDriver = driver_class(name=target, **push)
-
-    return driver
+    return _new_repo_driver(
+        driver_kind,
+        exordosctl_cfg_file,
+        otp_prompt,
+        override_user=user,
+        override_password=password,
+        override_endpoint=endpoint,
+        override_access_token=access_token,
+        name=target,
+        **push,
+    )
 
 
 def do_push(
