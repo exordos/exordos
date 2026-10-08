@@ -208,8 +208,9 @@ def test_interrupt_hook_reports_user_interruption() -> None:
 
 
 @pytest.mark.parametrize("explicit_url", [False, True])
+@pytest.mark.parametrize("options", [("-u", "-p"), ("--user", "--password")])
 def test_push_global_credentials_reach_realm_driver(
-    tmp_path, monkeypatch, explicit_url
+    tmp_path, monkeypatch, explicit_url, options
 ) -> None:
     from exordos.cmd.repo import commands
     from exordos.repo import realm
@@ -225,9 +226,9 @@ def test_push_global_credentials_reach_realm_driver(
             str(tmp_path / "missing.yaml"),
             "-e",
             "https://dcda9a.exordos.io/api/core",
-            "-u",
+            options[0],
             "admin",
-            "-p",
+            options[1],
             "secret",
             "push",
             "--driver",
@@ -253,35 +254,6 @@ def test_push_global_credentials_reach_realm_driver(
         "https://dcda9a.exordos.io/repo/00000000-0000-0000-0000-000000000000/"
         "exordos-elements"
     )
-
-
-def test_push_local_credentials_override_global_options(tmp_path, monkeypatch) -> None:
-    from exordos.cmd.repo import commands
-
-    load = MagicMock()
-    monkeypatch.setattr(commands.repo_utils, "load_repo_driver", load)
-    monkeypatch.setattr(commands.repo_utils, "do_push", MagicMock())
-    result = CliRunner().invoke(
-        cli.exordos,
-        [
-            "--config",
-            str(tmp_path / "missing.yaml"),
-            "-u",
-            "global",
-            "-p",
-            "global-password",
-            "push",
-            "--driver",
-            "realm",
-            "-u",
-            "local",
-            "-p",
-            "local-password",
-        ],
-    )
-    assert result.exit_code == 0, result.output
-    assert load.call_args.kwargs["user"] == "local"
-    assert load.call_args.kwargs["password"] == "local-password"
 
 
 def test_push_keeps_saved_realm_when_global_options_omitted(
