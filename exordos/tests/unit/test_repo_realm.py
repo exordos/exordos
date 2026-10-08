@@ -378,3 +378,84 @@ def test_realm_authenticator_explicit_endpoint_without_settings(tmp_path):
     assert factory.call_args.kwargs["base_url"] == "https://dcda9a.exordos.io/api/core"
     assert factory.call_args.kwargs["username"] == "admin"
     assert factory.call_args.kwargs["password"] == "secret"
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "https://28de8b.exordos.io/api/core",
+        "https://28de8b.exordos.io/api/core/",
+        "https://28de8b.exordos.io:8443/api/core",
+    ],
+)
+def test_realm_driver_infers_admin_repository_from_endpoint(tmp_path, endpoint):
+    driver = realm.RealmRepoDriver(
+        endpoint=endpoint,
+        cfg_path=str(tmp_path / "missing.yaml"),
+        authenticator=FakeAuthenticator(),
+    )
+    origin = endpoint.split("/api/core")[0]
+    assert driver.elements_path == (
+        f"{origin}/repo/00000000-0000-0000-0000-000000000000/exordos-elements"
+    )
+
+
+def test_realm_driver_infers_selected_project(tmp_path):
+    cfg = tmp_path / "settings.yaml"
+    cfg.write_text(
+        yaml.safe_dump(
+            {
+                "current-realm": "orion",
+                "realms": {
+                    "orion": {
+                        "current-context": "project",
+                        "contexts": {"project": {"project_id": "selected-project"}},
+                    }
+                },
+            }
+        )
+    )
+    driver = realm.RealmRepoDriver(
+        endpoint="https://realm.test/api/core",
+        cfg_path=str(cfg),
+        authenticator=FakeAuthenticator(),
+    )
+    assert (
+        driver.elements_path
+        == "https://realm.test/repo/selected-project/exordos-elements"
+    )
+
+
+def test_realm_driver_explicit_url_overrides_endpoint():
+    driver = realm.RealmRepoDriver(
+        url=URL,
+        endpoint="https://realm.test/api/core",
+        authenticator=FakeAuthenticator(),
+    )
+    assert driver.elements_path == f"{URL}/exordos-elements"
+
+
+def test_realm_driver_requires_endpoint_without_url():
+    with pytest.raises(ValueError, match="endpoint or repository URL"):
+        realm.RealmRepoDriver(authenticator=FakeAuthenticator())
+
+
+def test_loader_uses_endpoint_without_driver_params(tmp_path):
+    from exordos.repo import utils as repo_utils
+
+    with mock.patch.object(realm, "realm_authenticator") as factory:
+        driver = repo_utils.load_repo_driver(
+            "absent.yaml",
+            None,
+            str(tmp_path),
+            str(tmp_path / "missing.yaml"),
+            driver_kind="realm",
+            endpoint="https://28de8b.exordos.io/api/core",
+            user="admin",
+            password="secret",
+        )
+    assert driver.elements_path == (
+        "https://28de8b.exordos.io/repo/00000000-0000-0000-0000-000000000000/exordos-elements"
+    )
+    assert factory.call_args.kwargs["user"] == "admin"
+    assert factory.call_args.kwargs["password"] == "secret"

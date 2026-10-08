@@ -123,13 +123,17 @@ def test_main_escapes_terminal_controls(monkeypatch, capsys, structured) -> None
     assert not any(char in captured.err for char in "\x1b\x07\r\b\x9b")
 
 
-def test_push_global_credentials_reach_realm_driver(tmp_path, monkeypatch) -> None:
+@pytest.mark.parametrize("explicit_url", [False, True])
+def test_push_global_credentials_reach_realm_driver(
+    tmp_path, monkeypatch, explicit_url
+) -> None:
     from exordos.cmd.repo import commands
     from exordos.repo import realm
 
     factory = MagicMock()
     monkeypatch.setattr(realm, "realm_authenticator", factory)
-    monkeypatch.setattr(commands.repo_utils, "do_push", MagicMock())
+    push = MagicMock()
+    monkeypatch.setattr(commands.repo_utils, "do_push", push)
     result = CliRunner().invoke(
         cli.exordos,
         [
@@ -144,9 +148,15 @@ def test_push_global_credentials_reach_realm_driver(tmp_path, monkeypatch) -> No
             "push",
             "--driver",
             "realm",
-            "--driver-params",
-            "url=https://dcda9a.exordos.io/repo/00000000-0000-0000-0000-000000000000",
-        ],
+        ]
+        + (
+            [
+                "--driver-params",
+                "url=https://dcda9a.exordos.io/repo/00000000-0000-0000-0000-000000000000",
+            ]
+            if explicit_url
+            else []
+        ),
     )
     assert result.exit_code == 0, result.output
     assert factory.call_args.kwargs == {
@@ -155,6 +165,10 @@ def test_push_global_credentials_reach_realm_driver(tmp_path, monkeypatch) -> No
         "password": "secret",
     }
     factory.return_value.authenticate.assert_called_once()
+    assert push.call_args.args[0].elements_path == (
+        "https://dcda9a.exordos.io/repo/00000000-0000-0000-0000-000000000000/"
+        "exordos-elements"
+    )
 
 
 def test_push_local_credentials_override_global_options(tmp_path, monkeypatch) -> None:
