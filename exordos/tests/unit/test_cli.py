@@ -164,6 +164,7 @@ def test_push_global_credentials_reach_realm_driver(
         "endpoint": "https://dcda9a.exordos.io/api/core",
         "user": "admin",
         "password": "secret",
+        "access_token": None,
     }
     factory.return_value.authenticate.assert_called_once()
     assert push.call_args.args[0].elements_path == (
@@ -194,3 +195,43 @@ def test_push_keeps_saved_realm_when_global_options_omitted(
     assert load.call_args.kwargs["user"] is None
     assert load.call_args.kwargs["password"] is None
     assert load.call_args.kwargs["endpoint"] is None
+
+
+@pytest.mark.parametrize("option", ["-a", "--access-token"])
+def test_push_global_access_token_without_credentials(tmp_path, monkeypatch, option):
+    from unittest import mock as unittest_mock
+
+    from exordos.cmd.repo import commands
+    from exordos.repo import realm
+
+    push = MagicMock()
+    monkeypatch.setattr(commands.repo_utils, "do_push", push)
+    with unittest_mock.patch.object(
+        realm.base_client.CoreIamAuthenticator, "authenticate"
+    ) as authenticate:
+        result = CliRunner().invoke(
+            cli.exordos,
+            [
+                "--config",
+                str(tmp_path / "missing.yaml"),
+                "-e",
+                "https://28de8b.exordos.io/api/core",
+                option,
+                "supplied-token",
+                "push",
+                "--driver",
+                "realm",
+            ],
+        )
+    assert result.exit_code == 0, result.output
+    authenticate.assert_not_called()
+    driver = push.call_args.args[0]
+    import requests
+
+    request = requests.Request("PUT", driver.index_path).prepare()
+    driver._session.auth(request)
+    assert request.headers["Authorization"] == "Bearer supplied-token"
+    assert driver.index_path == (
+        "https://28de8b.exordos.io/repo/00000000-0000-0000-0000-000000000000/"
+        "exordos-elements/inventory.json"
+    )

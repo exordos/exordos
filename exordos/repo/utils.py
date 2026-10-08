@@ -57,6 +57,7 @@ def _new_repo_driver(
     override_user: str | None = None,
     override_password: str | None = None,
     override_endpoint: str | None = None,
+    override_access_token: str | None = None,
     **params: tp.Any,
 ) -> base_repo.AbstractRepoDriver:
     if override_user is not None or override_password is not None:
@@ -66,6 +67,10 @@ def _new_repo_driver(
             params["user"] = override_user
         if override_password is not None:
             params["password"] = override_password
+    if override_access_token is not None:
+        if driver_kind != "realm":
+            raise click.UsageError("--access-token requires the realm driver")
+        params["access_token"] = override_access_token
     if driver_kind == "realm" and override_endpoint is not None:
         params["endpoint"] = override_endpoint
     driver_class = utils.load_from_entry_point(c.EP_REPO_DRIVERS, driver_kind)
@@ -85,6 +90,7 @@ def load_repo_driver_from_settings(
     user: str | None = None,
     password: str | None = None,
     endpoint: str | None = None,
+    access_token: str | None = None,
 ) -> base_repo.AbstractRepoDriver:
     """Build a repo driver from a repository entry in the settings file.
 
@@ -121,6 +127,7 @@ def load_repo_driver_from_settings(
         override_user=user,
         override_password=password,
         override_endpoint=endpoint,
+        override_access_token=access_token,
         **params,
     )
 
@@ -136,6 +143,7 @@ def load_repo_driver(
     user: str | None = None,
     password: str | None = None,
     endpoint: str | None = None,
+    access_token: str | None = None,
 ) -> base_repo.AbstractRepoDriver:
     if driver_kind:
         params = utils.convert_input_multiply(driver_params or ())
@@ -146,6 +154,7 @@ def load_repo_driver(
             override_user=user,
             override_password=password,
             override_endpoint=endpoint,
+            override_access_token=access_token,
             name=target,
             **params,
         )
@@ -160,6 +169,7 @@ def load_repo_driver(
             user=user,
             password=password,
             endpoint=endpoint,
+            access_token=access_token,
         )
 
     if not gen_config or "push" not in gen_config or not gen_config["push"]:
@@ -170,6 +180,7 @@ def load_repo_driver(
             user=user,
             password=password,
             endpoint=endpoint,
+            access_token=access_token,
         )
 
     pushes = gen_config["push"]
@@ -203,6 +214,7 @@ def load_repo_driver(
         override_user=user,
         override_password=password,
         override_endpoint=endpoint,
+        override_access_token=access_token,
         name=target,
         **push,
     )

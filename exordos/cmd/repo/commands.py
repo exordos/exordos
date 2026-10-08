@@ -460,10 +460,10 @@ def push_cmd(
     project_dir: pathlib.Path,
 ) -> None:
     # Only explicit global options override the selected repository's realm.
-    user = password = endpoint = None
+    user = password = endpoint = access_token = None
     ctx = click.get_current_context().parent
     while ctx is not None:
-        for option in ("user", "password", "endpoint"):
+        for option in ("user", "password", "endpoint", "access_token"):
             if (
                 ctx.get_parameter_source(option)
                 != click.core.ParameterSource.COMMANDLINE
@@ -475,6 +475,8 @@ def push_cmd(
                 password = ctx.params[option]
             elif option == "endpoint":
                 endpoint = ctx.params[option]
+            elif option == "access_token":
+                access_token = ctx.params[option]
         ctx = ctx.parent
     repo_driver = repo_utils.load_repo_driver(
         exordos_cfg_file,
@@ -487,6 +489,7 @@ def push_cmd(
         user=user,
         password=password,
         endpoint=endpoint,
+        access_token=access_token,
     )
     repo_utils.do_push(repo_driver, element_dir, force, latest, jobs)
 
