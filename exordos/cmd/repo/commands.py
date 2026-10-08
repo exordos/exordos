@@ -394,10 +394,6 @@ repository_group.add_command(store_commands.store_group, aliases=["s"])
     default=None,
     help="Driver to use, nginx for example",
 )
-@click.option("-u", "--user", default=None, help="User for the realm repository")
-@click.option(
-    "-p", "--password", default=None, help="Password for the realm repository"
-)
 @click.option(
     "--driver-params",
     multiple=True,
@@ -455,8 +451,6 @@ def push_cmd(
     exordos_cfg_file: str,
     driver: str | None,
     driver_params: tuple[str, ...],
-    user: str | None,
-    password: str | None,
     target: str | None,
     element_dir: pathlib.Path,
     force: bool,
@@ -466,7 +460,7 @@ def push_cmd(
     project_dir: pathlib.Path,
 ) -> None:
     # Only explicit global options override the selected repository's realm.
-    endpoint = None
+    user = password = endpoint = None
     ctx = click.get_current_context().parent
     while ctx is not None:
         for option in ("user", "password", "endpoint"):
