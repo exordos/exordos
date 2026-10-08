@@ -6,9 +6,9 @@ Push the element to the repository
 ## Usage
 
 ```console
-
- Usage: exordos push [OPTIONS] [PROJECT_DIR]
-
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos push [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                           
 ```
 
 ## Options
@@ -28,22 +28,6 @@ Push the element to the repository
 --driver`
 
   Driver to use, nginx for example
-
-* `user`:
-    * Type: text
-    * Default: `none`
-    * Usage: `-u
---user`
-
-  User for the realm repository
-
-* `password`:
-    * Type: text
-    * Default: `none`
-    * Usage: `-p
---password`
-
-  Password for the realm repository
 
 * `driver_params`:
     * Type: text
@@ -114,38 +98,21 @@ Push the element to the repository
 ## CLI Help
 
 ```console
-
- Usage: exordos push [OPTIONS] [PROJECT_DIR]
-
- Push the element to the repository
-
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --exordos-cfg-file  -c  TEXT                  Name of the project            │
-│                                               configuration file             │
-│ --driver            -d  TEXT                  Driver to use, nginx for       │
-│                                               example                        │
-│ --user              -u  TEXT                  User for the realm repository  │
-│ --password          -p  TEXT                  Password for the realm         │
-│                                               repository                     │
-│ --driver-params         TEXT                  Additional params to pass to   │
-│                                               the driver. The format is      │
-│                                               'key=value'. For example:      │
-│                                               --driver-params                │
-│                                               url=http://repo.local.exordos. │
-│                                               com:8080/ --driver-params      │
-│                                               auth=["user","password"]       │
-│ --target            -t  TEXT                  Target repository to push to   │
-│ --element-dir       -e  PATH                  Directory where element        │
-│                                               artifacts are stored           │
-│ --force             -f                        Force push even if the element │
-│                                               already exists                 │
-│ --latest            -l                        Push the element too as the    │
-│                                               latest version (if stable      │
-│                                               version)                       │
-│ --jobs              -j  INTEGER RANGE [x>=1]  Number of artifacts to upload  │
-│                                               in parallel [default: 1]       │
-│ --delete-output                               Delete the element directory   │
-│                                               after a successful push        │
-│ --help                                        Show this message and exit.    │
-╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                           
+ Usage: exordos push [OPTIONS] [PROJECT_DIR]                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                           
+ Push the element to the repository                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                           
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --exordos-cfg-file  -c  TEXT                  Name of the project configuration file                                                                                                                                                                                                                    │
+│ --driver            -d  TEXT                  Driver to use, nginx for example                                                                                                                                                                                                                          │
+│ --driver-params         TEXT                  Additional params to pass to the driver. The format is 'key=value'. For example: --driver-params url=http://repo.local.exordos.com:8080/ --driver-params auth=["user","password"]                                                                         │
+│ --target            -t  TEXT                  Target repository to push to                                                                                                                                                                                                                              │
+│ --element-dir       -e  PATH                  Directory where element artifacts are stored                                                                                                                                                                                                              │
+│ --force             -f                        Force push even if the element already exists                                                                                                                                                                                                             │
+│ --latest            -l                        Push the element too as the latest version (if stable version)                                                                                                                                                                                            │
+│ --jobs              -j  INTEGER RANGE [x>=1]  Number of artifacts to upload in parallel [default: 1]                                                                                                                                                                                                    │
+│ --delete-output                               Delete the element directory after a successful push                                                                                                                                                                                                      │
+│ --help                                        Show this message and exit.                                                                                                                                                                                                                               │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
