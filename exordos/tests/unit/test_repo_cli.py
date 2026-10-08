@@ -692,6 +692,21 @@ class TestPushCmd:
         assert result.exit_code == 0, result.output
         return do_push_mock
 
+    @pytest.mark.parametrize("options", [("-u", "-p"), ("--user", "--password")])
+    def test_push_cmd_forwards_realm_credentials(self, options) -> None:
+        with (
+            patch.object(repo_commands.repo_utils, "load_repo_driver") as load,
+            patch.object(repo_commands.repo_utils, "do_push"),
+        ):
+            result = CliRunner().invoke(
+                repo_commands.push_cmd,
+                ["--driver", "realm", options[0], "upload", options[1], "secret"],
+                obj=self._obj(),
+            )
+        assert result.exit_code == 0, result.output
+        assert load.call_args.kwargs["user"] == "upload"
+        assert load.call_args.kwargs["password"] == "secret"
+
     def test_push_cmd_default_jobs(self) -> None:
         do_push_mock = self._invoke([])
         assert do_push_mock.call_args.args[-1] == 1

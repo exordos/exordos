@@ -106,3 +106,18 @@ You can interactively initialize the config file by running the following comman
 ```bash
 exordos settings init
 ```
+
+For a single push, supply realm credentials using `-u/--user` and
+`-p/--password`. Global options before `push` also work; `-e` selects the Core
+endpoint without requiring a saved realm:
+
+```bash
+exordos -e https://dcda9a.exordos.io/api/core \
+  -u admin -p 'YOUR_REALM_ADMIN_PASSWORD' \
+  push --driver realm \
+  --driver-params "url=https://dcda9a.exordos.io/repo/00000000-0000-0000-0000-000000000000"
+```
+
+Options after `push` override the corresponding global credentials. Omitting
+explicit credentials keeps the selected realm's saved authentication context.
+Explicit credentials bypass cached tokens without changing the saved context.
