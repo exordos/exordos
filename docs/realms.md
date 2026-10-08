@@ -143,6 +143,7 @@ the CLI reads element names and repository definitions from the realm spec:
 Explicit `--elements` options replace the list from the realm spec.
 If the field is absent or contains an empty list, the default bootstrap is used.
 
+A single dictionary in `repository` is converted to a one-item list.
 Repository objects are passed unchanged into the Core config drive alongside
 existing URL entries. Core validates their fields and registers explicit UUIDs
 idempotently. The internal URL points to an element index readable without

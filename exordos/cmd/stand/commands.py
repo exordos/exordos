@@ -461,11 +461,14 @@ def _load_realm_spec(path: str) -> dict:
         raise click.UsageError("Realm spec elements must be a list of non-empty names")
 
     repositories = spec.get("repository", [])
+    if isinstance(repositories, dict):
+        repositories = [repositories]
+        spec["repository"] = repositories
     if not isinstance(repositories, list) or any(
         not isinstance(repository, (str, dict)) for repository in repositories
     ):
         raise click.UsageError(
-            "Realm spec repository must be a list of URLs or definitions"
+            "Realm spec repository must be a definition or a list of URLs or definitions"
         )
 
     return spec

@@ -218,7 +218,10 @@ def test_bootstrap_uses_realm_spec_elements_unless_cli_overrides(
     "repo_url",
     [None, "http://10.40.0.1:8081/repo/", "http://10.40.0.1:8082/repo/index/"],
 )
-def test_bootstrap_preserves_full_realm_repository_definition(tmp_path, repo_url):
+@pytest.mark.parametrize("single_definition", [False, True])
+def test_bootstrap_preserves_full_realm_repository_definition(
+    tmp_path, repo_url, single_definition
+):
     definition = {
         "uuid": "fc040e42-439d-41cb-b2e7-7b40dca58810",
         "name": "realm-repo",
@@ -235,7 +238,10 @@ def test_bootstrap_preserves_full_realm_repository_definition(tmp_path, repo_url
             "password": None,
         },
     }
-    spec = _valid_spec() | {"repository": [definition], "repo_url": repo_url}
+    spec = _valid_spec() | {
+        "repository": definition if single_definition else [definition],
+        "repo_url": repo_url,
+    }
     path = tmp_path / "realm_spec.json"
     path.write_text(json.dumps(spec))
     inventory = mock.Mock(images=["core.raw"], manifests=["core.yaml"], version="1.0.0")
@@ -273,7 +279,7 @@ def test_bootstrap_preserves_full_realm_repository_definition(tmp_path, repo_url
     assert bootstrap.call_args.kwargs["repo_url"] == repo_url
 
 
-@pytest.mark.parametrize("repositories", [None, {}, "http://repo", [123]])
+@pytest.mark.parametrize("repositories", [None, "http://repo", [123]])
 def test_load_realm_spec_rejects_invalid_repository_list(tmp_path, repositories):
     path = tmp_path / "realm_spec.json"
     path.write_text(json.dumps(_valid_spec() | {"repository": repositories}))

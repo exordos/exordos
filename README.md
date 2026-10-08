@@ -76,7 +76,3 @@ Tox uses `uv` for environment creation. In a sandbox or another restricted envir
 ```bash
 UV_CACHE_DIR="${TMPDIR:-/tmp}/uv-cache" tox -e develop
 ```
-
-Managed realm bootstrap accepts full repository definitions in the realm spec's
-`repository` list, preserving UUIDs, driver settings, and synchronization options.
-See [managed realm bootstrap](docs/realms.md#bootstrapping-a-managed-realm).
