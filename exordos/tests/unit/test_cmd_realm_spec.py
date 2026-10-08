@@ -212,3 +212,128 @@ def test_bootstrap_uses_realm_spec_elements_unless_cli_overrides(
     assert bootstrap.call_args.kwargs["elements"] == expected
     assert bootstrap.call_args.kwargs["repository"] == expected_repositories
     assert bootstrap.call_args.kwargs["repo_url"] == repo_url
+
+
+@pytest.mark.parametrize(
+    "repo_url",
+    [None, "http://10.40.0.1:8081/repo/", "http://10.40.0.1:8082/repo/index/"],
+)
+def test_bootstrap_preserves_full_realm_repository_definition(tmp_path, repo_url):
+    definition = {
+        "uuid": "fc040e42-439d-41cb-b2e7-7b40dca58810",
+        "name": "realm-repo",
+        "description": "Realm upload repository",
+        "project_id": "00000000-0000-0000-0000-000000000000",
+        "status": "ACTIVE",
+        "priority": 2048,
+        "refresh_rate": 0,
+        "sync_mode": "lazy",
+        "driver_spec": {
+            "kind": "nginx",
+            "url": "http://10.40.0.1:8082/repo/index/",
+            "username": None,
+            "password": None,
+        },
+    }
+    spec = _valid_spec() | {"repository": [definition], "repo_url": repo_url}
+    path = tmp_path / "realm_spec.json"
+    path.write_text(json.dumps(spec))
+    inventory = mock.Mock(images=["core.raw"], manifests=["core.yaml"], version="1.0.0")
+    with (
+        mock.patch.object(
+            commands, "get_element_inventory_from_url", return_value=inventory
+        ),
+        mock.patch.object(
+            commands, "_get_core_image_uri_from_manifest", return_value=None
+        ),
+        mock.patch.object(commands.subprocess, "call", return_value=0),
+        mock.patch.object(commands, "_bootstrap_core") as bootstrap,
+        mock.patch.object(commands, "_print_bootstrap_summary"),
+    ):
+        result = CliRunner().invoke(
+            commands.bootstrap_cmd,
+            [
+                "--inventory",
+                "1.0.0",
+                "--launch-mode",
+                "core",
+                "--realm-spec",
+                str(path),
+                "--no-update-realm",
+                "--no-start",
+                "--repository",
+                "https://public.example/repo/",
+            ],
+        )
+    assert result.exit_code == 0, result.output
+    assert bootstrap.call_args.kwargs["repository"] == (
+        "https://public.example/repo/",
+        definition,
+    )
+    assert bootstrap.call_args.kwargs["repo_url"] == repo_url
+
+
+@pytest.mark.parametrize("repositories", [None, {}, "http://repo", [123]])
+def test_load_realm_spec_rejects_invalid_repository_list(tmp_path, repositories):
+    path = tmp_path / "realm_spec.json"
+    path.write_text(json.dumps(_valid_spec() | {"repository": repositories}))
+    with pytest.raises(click.UsageError, match="repository"):
+        _load_realm_spec(str(path))
+
+
+def test_config_drive_preserves_repository_definition(tmp_path):
+    import ipaddress
+
+    from exordos.infra.driver import libvirt as driver
+    from exordos.stand import models
+
+    repository = {
+        "uuid": "fc040e42-439d-41cb-b2e7-7b40dca58810",
+        "name": "realm-repo",
+        "project_id": "00000000-0000-0000-0000-000000000000",
+        "status": "ACTIVE",
+        "refresh_rate": 0,
+        "sync_mode": "lazy",
+        "priority": 2048,
+        "driver_spec": {
+            "kind": "nginx",
+            "url": "http://10.40.0.1:8081/repo/",
+            "username": "user",
+            "password": "test-password",
+        },
+    }
+    network = models.Network(
+        "main", ipaddress.IPv4Network("10.40.0.0/24"), managed_network=False
+    )
+    boot_network = models.Network(
+        "boot", ipaddress.IPv4Network("10.41.0.0/24"), managed_network=False
+    )
+    stand = models.Stand(
+        network=network,
+        boot_network=boot_network,
+        bootstraps=[models.Bootstrap(image="core.raw")],
+        baremetals=[],
+        hypervisors=[models.Hypervisor("flat", "main", "qemu:///system")],
+    )
+    manifest = tmp_path / "core.yaml"
+    manifest.write_text("name: core")
+    captured = []
+
+    def capture_spec(source_dir, destination):
+        captured.append(
+            json.loads((pathlib.Path(source_dir) / "spec.json").read_text())
+        )
+
+    with (
+        mock.patch.object(driver.libvirt, "has_domain", return_value=False),
+        mock.patch.object(driver.libvirt, "create_domain"),
+        mock.patch.object(driver.utils, "make_iso", side_effect=capture_spec),
+    ):
+        driver.LibvirtInfraDriver().create_stand(
+            stand,
+            str(manifest),
+            str(manifest),
+            no_start=True,
+            repository=("https://public.example/repo/", repository),
+        )
+    assert captured[0]["repository"] == ["https://public.example/repo/", repository]

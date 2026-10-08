@@ -460,6 +460,14 @@ def _load_realm_spec(path: str) -> dict:
     ):
         raise click.UsageError("Realm spec elements must be a list of non-empty names")
 
+    repositories = spec.get("repository", [])
+    if not isinstance(repositories, list) or any(
+        not isinstance(repository, (str, dict)) for repository in repositories
+    ):
+        raise click.UsageError(
+            "Realm spec repository must be a list of URLs or definitions"
+        )
+
     return spec
 
 
@@ -510,7 +518,7 @@ def _bootstrap_core(
     disks: list[int] | None,
     force: bool,
     core_ip: ipaddress.IPv4Address,
-    repository: tp.Tuple[str, ...],
+    repository: tp.Tuple[str | dict[str, tp.Any], ...],
     admin_password: str,
     save_admin_password_file: str | None,
     manifest_path: str,
@@ -1023,7 +1031,7 @@ def bootstrap_cmd(
     boot_bridge: str | None,
     force: bool,
     no_wait: bool,
-    repository: tp.Tuple[str, ...],
+    repository: tp.Tuple[str | dict[str, tp.Any], ...],
     admin_password: str | None,
     save_admin_password_file: str | None,
     pool_agent_placement: str,
@@ -1231,8 +1239,16 @@ def bootstrap_cmd(
         realm_id = realm_spec_data.get("realm_id")
         realm_domain = realm_spec_data.get("realm_domain")
         cors_allowed_origins = realm_spec_data.get("cors_allowed_origins")
+        # Preserve complete repository definitions for the Core config drive.
+        for definition in realm_spec_data.get("repository", []):
+            if definition not in repository:
+                repository = (*repository, definition)
         repo_url = realm_spec_data.get("repo_url")
-        if repo_url and repo_url not in repository:
+        if (
+            repo_url
+            and not realm_spec_data.get("repository")
+            and repo_url not in repository
+        ):
             repository = (*repository, repo_url)
         click.secho(
             "Using pre-assigned realm identity from the realm spec",
