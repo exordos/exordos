@@ -52,6 +52,7 @@ def realm_authenticator(
     user: str | None = None,
     password: str | None = None,
     endpoint: str | None = None,
+    access_token: str | None = None,
 ) -> base_client.CoreIamAuthenticator:
     """Build an authenticator from a realm's current context in settings."""
     if endpoint is not None and (
@@ -68,14 +69,19 @@ def realm_authenticator(
     context = settings_config.get_context(realm_conf)
     project_id = context.get("project_id")
     explicit_credentials = (
-        user is not None or password is not None or endpoint is not None
+        user is not None
+        or password is not None
+        or endpoint is not None
+        or access_token is not None
     )
+    if not explicit_credentials:
+        access_token = context.get("access_token")
     return base_client.CoreIamAuthenticator(
         base_url=endpoint if endpoint is not None else realm_conf["endpoint"],
         username=user if user is not None else context.get("user"),
         login=None if user is not None else context.get("login"),
         password=password if password is not None else context.get("password"),
-        access_token=None if explicit_credentials else context.get("access_token"),
+        access_token=access_token,
         refresh_token=None if explicit_credentials else context.get("refresh_token"),
         scope=f"project:{project_id}" if project_id else None,
         realm=None if explicit_credentials else realm_name,
@@ -112,6 +118,7 @@ class RealmRepoDriver(nginx.NginxRepoDriver):
         user: str | None = None,
         password: str | None = None,
         endpoint: str | None = None,
+        access_token: str | None = None,
     ):
         if url is None:
             if endpoint is None:
@@ -145,10 +152,12 @@ class RealmRepoDriver(nginx.NginxRepoDriver):
                 user=user,
                 password=password,
                 endpoint=endpoint,
+                access_token=access_token,
             )
-            # A cached token may have expired, and nothing renews it once
-            # requests are signed: log in (or refresh) before the push.
-            authenticator.authenticate()
+            # Use an explicitly supplied access token directly. Otherwise
+            # log in (or refresh) before the push in case cached tokens expired.
+            if access_token is None:
+                authenticator.authenticate()
         self._session.auth = _BearerAuth(authenticator)
 
     @property

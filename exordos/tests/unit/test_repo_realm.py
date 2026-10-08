@@ -326,6 +326,7 @@ def test_realm_driver_forwards_explicit_credentials():
         "user": "upload",
         "password": "secret",
         "endpoint": None,
+        "access_token": None,
     }
     factory.return_value.authenticate.assert_called_once()
 
@@ -459,3 +460,41 @@ def test_loader_uses_endpoint_without_driver_params(tmp_path):
     )
     assert factory.call_args.kwargs["user"] == "admin"
     assert factory.call_args.kwargs["password"] == "secret"
+
+
+@pytest.mark.parametrize("from_settings", [False, True])
+def test_loader_uses_access_token_without_logging_in(tmp_path, from_settings):
+    from exordos.repo import utils as repo_utils
+
+    cfg = tmp_path / "settings.yaml"
+    cfg.write_text(
+        yaml.safe_dump({"repositories": {"repo": {"driver": "realm", "url": URL}}})
+    )
+    with mock.patch.object(
+        realm.base_client,
+        "CoreIamAuthenticator",
+        wraps=realm.base_client.CoreIamAuthenticator,
+    ) as factory:
+        driver = repo_utils.load_repo_driver(
+            "absent.yaml",
+            "repo",
+            str(tmp_path),
+            str(cfg),
+            driver_kind=None if from_settings else "realm",
+            endpoint="https://realm.test/api/core",
+            access_token="supplied-token",
+        )
+    request = requests.Request("PUT", driver.index_path).prepare()
+    driver._session.auth(request)
+    assert request.headers["Authorization"] == "Bearer supplied-token"
+    assert factory.call_args.kwargs["access_token"] == "supplied-token"
+    assert factory.call_args.kwargs["refresh_token"] is None
+
+
+def test_loader_rejects_access_token_for_other_drivers():
+    from exordos.repo import utils as repo_utils
+
+    with pytest.raises(realm.click.UsageError, match="realm driver"):
+        repo_utils.load_repo_driver(
+            "absent.yaml", None, ".", driver_kind="nginx", access_token="token"
+        )
