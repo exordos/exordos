@@ -765,6 +765,72 @@ class TestUpdateCmd:
         assert result.exit_code == 0, result.output
         return result, action_mock
 
+    @pytest.mark.parametrize("yes", [False, True])
+    def test_update_cmd_no_elements_or_version_updates_all(self, yes: bool) -> None:
+        current = {"name": "foo", "version": "1.0.0", "uuid": "u_cur"}
+        target = {"name": "foo", "version": "2.0.0", "uuid": "u_new"}
+        with (
+            patch.object(em_elements.base_client, "get_user_api_client"),
+            patch.object(
+                em_elements.base_client,
+                "list_entities",
+                return_value=[{"name": "foo"}, {"name": "bar"}],
+            ) as list_mock,
+            patch.object(
+                em_elements, "_select_current_element_by_name", return_value=current
+            ) as current_mock,
+            patch.object(
+                em_elements, "_select_element_by_name", return_value=target
+            ) as select_mock,
+            patch.object(em_elements.base_client, "action_entity") as action_mock,
+            patch("questionary.checkbox") as checkbox_mock,
+            patch("questionary.confirm") as confirm_mock,
+        ):
+            confirm_mock.return_value.ask.return_value = True
+            result = CliRunner().invoke(
+                em_elements.update_cmd, ["-y"] if yes else [], obj=self._obj()
+            )
+        assert result.exit_code == 0, result.output
+        assert list_mock.call_args.args[1] == (
+            em_elements.base_client.add_fields_to_url(c.ELEMENT_COLLECTION, ("name",))
+        )
+        assert [call.args[1] for call in current_mock.call_args_list] == ["bar", "foo"]
+        assert all(call.kwargs["auto_select"] for call in select_mock.call_args_list)
+        assert action_mock.call_count == 2
+        assert confirm_mock.call_count == (0 if yes else 2)
+        checkbox_mock.assert_not_called()
+
+    def test_update_cmd_no_installed_elements(self) -> None:
+        with (
+            patch.object(em_elements.base_client, "get_user_api_client"),
+            patch.object(em_elements.base_client, "list_entities", return_value=[]),
+            patch.object(em_elements.base_client, "action_entity") as action_mock,
+            patch("questionary.checkbox") as checkbox_mock,
+        ):
+            result = CliRunner().invoke(em_elements.update_cmd, [], obj=self._obj())
+        assert result.exit_code == 0, result.output
+        assert "No elements to update" in result.output
+        action_mock.assert_not_called()
+        checkbox_mock.assert_not_called()
+
+    def test_update_cmd_version_without_elements_keeps_selection(self) -> None:
+        with (
+            patch.object(em_elements.base_client, "get_user_api_client"),
+            patch.object(
+                em_elements.base_client, "list_entities", return_value=[{"name": "foo"}]
+            ),
+            patch("questionary.checkbox") as checkbox_mock,
+            patch.object(em_elements, "_update_element_by_uuid_or_name") as update_mock,
+        ):
+            checkbox_mock.return_value.ask.return_value = ["foo"]
+            result = CliRunner().invoke(
+                em_elements.update_cmd, ["-v", "1.0.0"], obj=self._obj()
+            )
+        assert result.exit_code == 0, result.output
+        checkbox_mock.assert_called_once()
+        assert update_mock.call_args.args[1:] == ("foo", "1.0.0", False)
+        assert update_mock.call_args.kwargs == {"auto_select": False}
+
     def test_update_cmd_without_newer_candidate_is_not_proposed(self) -> None:
         # Only strictly newer candidates are considered, so the selection
         # returns nothing when the installed element is the newest one.

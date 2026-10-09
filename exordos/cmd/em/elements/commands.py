@@ -553,6 +553,7 @@ def _update_element_by_uuid_or_name(
     uuid_or_name: str,
     version: str | None,
     y: bool,
+    auto_select: bool = False,
 ) -> None:
     """Update a single element selected by UUID or name."""
     import questionary
@@ -570,7 +571,7 @@ def _update_element_by_uuid_or_name(
         version,
         exclude_uuid=current_element["uuid"],
         newer_than=None if version else current_element["version"],
-        auto_select=y,
+        auto_select=y or auto_select,
     )
 
     if target_element is None:
@@ -606,7 +607,10 @@ def _update_element_by_uuid_or_name(
     )
 
 
-@click.command("update", help="Update one or more elements")
+@click.command(
+    "update",
+    help="Update elements; without elements or --version, update all to latest",
+)
 @click.option(
     "-v",
     "--version",
@@ -647,7 +651,17 @@ def update_cmd(
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     targets = list(uuid_or_name_or_path)
-    if not targets:
+    update_all = not targets and version is None
+    if update_all:
+        all_elements = base_client.list_entities(
+            client,
+            base_client.add_fields_to_url(c.ELEMENT_COLLECTION, ("name",)),
+        )
+        targets = sorted(set(e["name"] for e in all_elements))
+        if not targets:
+            click.echo("No elements to update")
+            return
+    elif not targets:
         all_elements = base_client.list_entities(
             client,
             base_client.add_fields_to_url(c.REPOSITORY_ELEMENT_COLLECTION, ("name",)),
@@ -667,7 +681,9 @@ def update_cmd(
                 client, pathlib.Path(target), y, project_id, timeout
             )
         else:
-            _update_element_by_uuid_or_name(client, target, version, y)
+            _update_element_by_uuid_or_name(
+                client, target, version, y, auto_select=update_all
+            )
 
 
 @click.command("uninstall", help="Uninstall elements by UUID or name")
