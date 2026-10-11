@@ -6,9 +6,9 @@ Manage identity_groups in the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network identity-groups [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network identity-groups [OPTIONS] COMMAND [ARGS]...
+
 ```
 
 ## Options
@@ -23,7 +23,7 @@ Manage identity_groups in the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network identity-groups [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network identity-groups [OPTIONS] COMMAND [ARGS]...
+
 ```

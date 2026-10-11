@@ -6,9 +6,9 @@ Manage security_groups in the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups [OPTIONS] COMMAND [ARGS]...
+
 ```
 
 ## Options
@@ -23,7 +23,7 @@ Manage security_groups in the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups [OPTIONS] COMMAND [ARGS]...
+
 ```

@@ -6,9 +6,9 @@ Add an allow rule to a group
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups rule-add [OPTIONS] GROUP SPEC                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups rule-add [OPTIONS] GROUP SPEC
+
 ```
 
 ## Options
@@ -33,7 +33,7 @@ Add an allow rule to a group
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups rule-add [OPTIONS] GROUP SPEC                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups rule-add [OPTIONS] GROUP SPEC
+
 ```

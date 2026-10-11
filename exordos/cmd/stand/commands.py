@@ -558,7 +558,7 @@ def _bootstrap_core(
         )
     else:
         dev_stand = stand_models.Stand.from_spec(stand_spec)
-        # Named on the command line, they win over the spec — as the image
+        # Named on the command line, they win over the spec - as the image
         # does below. Dropping them silently was the alternative, and the
         # symptom is a realm whose extra hypervisors never peer the
         # reflector, with nothing said about why.

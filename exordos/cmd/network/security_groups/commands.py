@@ -20,8 +20,10 @@ import uuid as sys_uuid
 import rich_click as click
 
 from exordos import constants as c
+from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.network import bindings
 from exordos.cmd.network import common as net_common
 from exordos.common.table import show_data
 
@@ -43,11 +45,11 @@ security_groups_group = create_entity_group(
     group_name="security-groups",
 )
 
-RULE_HELP = (
-    "Allow rule <ingress|egress>:<tcp|udp|icmp|any>[:<port>]"
-    "[@<remote_cidr>|@<identity_group>], e.g. ingress:tcp:22 or "
-    "ingress:tcp:5432@db (repeatable). Naming a group is ingress-only: what "
-    "a packet carries is its sender's identity."
+bindings.add_binding_commands(
+    security_groups_group,
+    c.PORT_SECURITY_GROUP_COLLECTION,
+    ENTITY_COLLECTION,
+    "security_group",
 )
 
 
@@ -57,14 +59,12 @@ RULE_HELP = (
 @click.option("-n", "--name", type=str, required=True, help="Name of the group")
 @click.option("-D", "--description", type=str, default="", help="Description")
 @click.option("-p", "--project-id", type=click.UUID, required=True, help="Project UUID")
-@click.option("-r", "--rule", "rule_specs", multiple=True, help=RULE_HELP)
 def security_group_add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     name: str,
     description: str,
     project_id: sys_uuid.UUID,
-    rule_specs: tuple[str, ...],
 ) -> None:
     """A group with no rules denies everything but the established traffic —
     attaching one to a port is what turns filtering on."""
@@ -74,10 +74,6 @@ def security_group_add_cmd(
         "name": name,
         "description": description,
         "project_id": str(project_id),
-        "rules": [
-            net_common.resolve_rule(client, net_common.parse_filter_rule(r))
-            for r in rule_specs
-        ],
     }
     show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
 
@@ -91,10 +87,17 @@ def rule_add_cmd(ctx: click.Context, group: str, spec: str) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     rule = net_common.resolve_rule(client, net_common.parse_filter_rule(spec))
     entity = base_client.get_entity(client, ENTITY_COLLECTION, group)
-    rules = [r for r in entity.get("rules") or [] if r != rule]
-    rules.append(rule)
     show_data(
-        base_client.update_entity(client, ENTITY_COLLECTION, group, {"rules": rules})
+        base_client.add_entity(
+            client,
+            c.SECURITY_GROUP_RULE_COLLECTION,
+            {
+                "uuid": str(sys_uuid.uuid4()),
+                "project_id": entity["project_id"],
+                "security_group": entity["uuid"],
+                **rule,
+            },
+        )
     )
 
 
@@ -103,14 +106,29 @@ def rule_add_cmd(ctx: click.Context, group: str, spec: str) -> None:
 @click.argument("group", type=str)
 @click.argument("spec", type=str)
 def rule_del_cmd(ctx: click.Context, group: str, spec: str) -> None:
-    """SPEC: the rule as `list` shows it, e.g. ingress:tcp:22."""
+    """SPEC: a rule UUID or the rule as `list` shows it, e.g. ingress:tcp:22."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    rule = net_common.resolve_rule(client, net_common.parse_filter_rule(spec))
     entity = base_client.get_entity(client, ENTITY_COLLECTION, group)
-    rules = entity.get("rules") or []
-    kept = [r for r in rules if r != rule]
-    if len(kept) == len(rules):
+    if utils.is_valid_uuid(spec):
+        matches = base_client.list_entities(
+            client,
+            c.SECURITY_GROUP_RULE_COLLECTION,
+            security_group=entity["uuid"],
+            uuid=spec,
+        )
+    else:
+        rule = net_common.resolve_rule(client, net_common.parse_filter_rule(spec))
+        rules = base_client.list_entities(
+            client, c.SECURITY_GROUP_RULE_COLLECTION, security_group=entity["uuid"]
+        )
+        fields = ("direction", "protocol", "port", "remote_ip", "remote_group")
+        matches = [
+            row for row in rules if all(row.get(key) == rule.get(key) for key in fields)
+        ]
+    if not matches:
         raise click.ClickException(f"No such rule: {spec}")
-    show_data(
-        base_client.update_entity(client, ENTITY_COLLECTION, group, {"rules": kept})
+    if len(matches) != 1:
+        raise click.ClickException("Multiple matching rules found; give a rule UUID")
+    base_client.delete_entity(
+        client, c.SECURITY_GROUP_RULE_COLLECTION, matches[0]["uuid"]
     )

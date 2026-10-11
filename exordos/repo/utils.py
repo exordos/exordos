@@ -27,6 +27,7 @@ import uuid as sys_uuid
 
 from bazooka import exceptions as bazooka_exc
 import rich_click as click
+from requests import exceptions as requests_exc
 import yaml
 
 from exordos import utils
@@ -241,7 +242,7 @@ def do_upload(
             description=description,
         )
     except bazooka_exc.ConflictError:
-        # This exact version is already in the repository — a re-run of the
+        # This exact version is already in the repository - a re-run of the
         # same command. Nothing to upload; let the caller carry on with what
         # it wanted to do with it.
         click.echo(
@@ -367,9 +368,19 @@ def wait_for_element_active(
     deadline = time.monotonic() + timeout
     active_streak = 0
     while True:
-        elements = base_client.list_entities(
-            client, c.ELEMENT_COLLECTION, name=name, version=version
-        )
+        try:
+            elements = base_client.list_entities(
+                client, c.ELEMENT_COLLECTION, name=name, version=version
+            )
+        except (requests_exc.ConnectionError, requests_exc.Timeout):
+            # Core's API is unavailable while its own image is upgraded.
+            elements = []
+        except bazooka_exc.BaseHTTPException as error:
+            if error.code not in (502, 503, 504):
+                raise
+            elements = []
+        if not elements:
+            active_streak = 0
         if elements:
             status = elements[0].get("status")
             if status == "ACTIVE":

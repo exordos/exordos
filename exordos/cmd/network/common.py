@@ -107,18 +107,29 @@ def format_rule(rule: dict) -> str:
 
 
 # What a `--interface` may say. Kept to what a leg is: where it goes, what
-# address it takes, and what the port it makes is allowed to do. Anything
-# richer belongs on the port, which has its own commands.
-INTERFACE_KEYS = ("subnet", "network", "port", "address", "index", "sg", "public")
+# address it takes, and the floating address it requests. Port policy uses
+# independent group bindings.
+INTERFACE_KEYS = (
+    "subnet",
+    "network",
+    "port",
+    "address",
+    "index",
+    "public",
+    "floating-from",
+)
 
 # What only a leg the node *builds* can say. An adopted port already has
 # them, and it keeps its own: the node names it and nothing more.
-BUILT_LEG_KEYS = ("subnet", "network", "address", "sg", "public")
+BUILT_LEG_KEYS = ("subnet", "network", "address", "public", "floating-from")
 
 
 def parse_interface(client, spec: str) -> dict:
-    """``subnet=<ref>[,address=<ip>][,index=<n>][,sg=<ref>]…[,public=<ref>]``
+    """``subnet=<ref>[,address=<ip>][,index=<n>]…[,public=<ref>]``
     or ``port=<ref>[,index=<n>]``
+
+    ``floating-from=<subnet>`` allocates a floating IP instead of naming
+    an existing address with ``public=<address>``.
 
     One `--interface` is one leg of the node. ``subnet`` is the ordinary
     way to say where it goes; ``network`` is accepted for the case of a
@@ -132,12 +143,9 @@ def parse_interface(client, spec: str) -> dict:
     them. For the same reason the node releases such a port when it goes
     instead of deleting it.
 
-    ``sg`` may be repeated within one interface — a port carries a set of
-    groups, and a single one is not a special case worth a second spelling.
     """
     interface: dict = {"kind": "subnet"}
     config: dict = {"kind": "simple"}
-    groups: list[str] = []
     said: list[str] = []
 
     for chunk in spec.split(","):
@@ -163,10 +171,17 @@ def parse_interface(client, spec: str) -> dict:
                     f"Invalid interface index: {value!r} (0 is the primary leg)"
                 )
             interface["index"] = int(value)
-        elif key == "sg":
-            groups.append(resolve(client, c.SECURITY_GROUP_COLLECTION, value))
-        elif key == "public":
-            config["public"] = {"address": resolve(client, c.ADDRESS_COLLECTION, value)}
+        elif key in ("public", "floating-from"):
+            if "public" in config:
+                raise click.ClickException(
+                    "Give one of public= or floating-from= once per interface"
+                )
+            field, collection = (
+                ("address", c.ADDRESS_COLLECTION)
+                if key == "public"
+                else ("floating_from", c.SUBNET_COLLECTION)
+            )
+            config["public"] = {field: resolve(client, collection, value)}
         else:
             raise click.ClickException(
                 f"Unknown interface key: {key!r} "
@@ -188,8 +203,6 @@ def parse_interface(client, spec: str) -> dict:
         raise click.ClickException(
             f"Interface {spec!r} must name exactly one of subnet= or network="
         )
-    if groups:
-        config["security_groups"] = groups
     if len(config) > 1:
         interface["config"] = config
     return interface

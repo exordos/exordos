@@ -6,9 +6,9 @@ Add a new node to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos cn add [OPTIONS]                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos cn add [OPTIONS]
+
 ```
 
 ## Options
@@ -96,7 +96,7 @@ Add a new node to the Exordos installation
     * Default: `()`
     * Usage: `--interface`
 
-  A leg of the node, repeatable: subnet=<ref>[,address=<ip>][,index=<n>][,sg=<ref>][,public=<ref>], or port=<ref>[,index=<n>] to adopt a port that already exists. Index 0 is the primary leg, whose address the node publishes as its own; left unset, legs are numbered in the order given.
+  A leg of the node, repeatable: subnet=<ref>[,address=<ip>][,index=<n>][,public=<address>|floating-from=<subnet>], or port=<ref>[,index=<n>] to adopt a port that already exists. Index 0 is the primary leg, whose address the node publishes as its own; left unset, legs are numbered in the order given.
 
 * `no_network`:
     * Type: boolean
@@ -122,26 +122,41 @@ Add a new node to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos cn add [OPTIONS]                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
- Add a new node to the Exordos installation                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID     UUID of the node                                                                                                                                                                                                                                                         │
-│ *  --project-id   -p  UUID     Name of the project in which to deploy the node [required]                                                                                                                                                                                                               │
-│    --cores        -c  INTEGER  Number of cores to allocate for the node [default: 1]                                                                                                                                                                                                                    │
-│    --ram          -r  INTEGER  Amount of RAM in Mb to allocate for the node [default: 1024]                                                                                                                                                                                                             │
-│    --root-disk    -d  INTEGER  Number of GiB of root disk to allocate for the node [default: 10]                                                                                                                                                                                                        │
-│ *  --image        -i  TEXT     Name of the image to deploy [required]                                                                                                                                                                                                                                   │
-│    --name         -n  TEXT     Name of the node                                                                                                                                                                                                                                                         │
-│    --description  -D  TEXT     Description of the node                                                                                                                                                                                                                                                  │
-│    --hostname                  Hostname of the node                                                                                                                                                                                                                                                     │
-│    --network          TEXT     Give the node one leg on this network (UUID or name). Shorthand for `--interface network=<ref>`; use --interface for anything more.                                                                                                                                      │
-│    --interface        TEXT     A leg of the node, repeatable: subnet=<ref>[,address=<ip>][,index=<n>][,sg=<ref>][,public=<ref>], or port=<ref>[,index=<n>] to adopt a port that already exists. Index 0 is the primary leg, whose address the node publishes as its own; left unset, legs are numbered  │
-│                                in the order given.                                                                                                                                                                                                                                                      │
-│    --no-network                Give the node no networking at all. Different from saying nothing, which places it on the installation's default network.                                                                                                                                                │
-│    --wait                      Wait until the node is running                                                                                                                                                                                                                                           │
-│    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos cn add [OPTIONS]
+
+ Add a new node to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│    --uuid         -u  UUID     UUID of the node                              │
+│ *  --project-id   -p  UUID     Name of the project in which to deploy the    │
+│                                node [required]                               │
+│    --cores        -c  INTEGER  Number of cores to allocate for the node      │
+│                                [default: 1]                                  │
+│    --ram          -r  INTEGER  Amount of RAM in Mb to allocate for the node  │
+│                                [default: 1024]                               │
+│    --root-disk    -d  INTEGER  Number of GiB of root disk to allocate for    │
+│                                the node [default: 10]                        │
+│ *  --image        -i  TEXT     Name of the image to deploy [required]        │
+│    --name         -n  TEXT     Name of the node                              │
+│    --description  -D  TEXT     Description of the node                       │
+│    --hostname         TEXT     Hostname of the node                          │
+│    --network          TEXT     Give the node one leg on this network (UUID   │
+│                                or name). Shorthand for `--interface          │
+│                                network=<ref>`; use --interface for anything  │
+│                                more.                                         │
+│    --interface        TEXT     A leg of the node, repeatable:                │
+│                                subnet=<ref>[,address=<ip>][,index=<n>][,publ │
+│                                ic=<address>|floating-from=<subnet>], or      │
+│                                port=<ref>[,index=<n>] to adopt a port that   │
+│                                already exists. Index 0 is the primary leg,   │
+│                                whose address the node publishes as its own;  │
+│                                left unset, legs are numbered in the order    │
+│                                given.                                        │
+│    --no-network                Give the node no networking at all. Different │
+│                                from saying nothing, which places it on the   │
+│                                installation's default network.               │
+│    --wait                      Wait until the node is running                │
+│    --help                      Show this message and exit.                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

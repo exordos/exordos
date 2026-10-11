@@ -1,14 +1,14 @@
 
 # exordos_network_ports_update
 
-Update a port's groups and toggles
+Update a port's requested addresses and toggles
 
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network ports update [OPTIONS] PORT                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network ports update [OPTIONS] PORT
+
 ```
 
 ## Options
@@ -23,64 +23,42 @@ Update a port's groups and toggles
     * Default: `none`
     * Usage: `--port-security`
 
-  Anti-spoofing: only the port's own MAC/IP may be sourced
+  Allow only the port's own source MAC/IP
 
-* `security_groups`:
+* `target_mac`:
     * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-g
---security-group`
-
-  Security group to apply (UUID or name, repeatable)
-
-* `identity_groups`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--identity-group`
-
-  A group this port belongs to (UUID or name, repeatable); rules elsewhere admit it by that name. Its subnet's default group is always included, so joining one adds access rather than trading the subnet's away.
-
-* `subnet_group`:
-    * Type: boolean
     * Default: `none`
-    * Usage: `--subnet-group`
+    * Usage: `--mac`
 
-  Belong to the subnet's default group as well (the default). --no-subnet-group leaves it: the port is then reachable only where a rule names a group it is actually in.
+  Requested MAC address
+
+* `target_ipv4`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--ipv4`
+
+  Requested IPv4 address
 
 * `dhcp`:
     * Type: boolean
     * Default: `none`
     * Usage: `--dhcp`
 
-  Override the subnet's DHCP setting for this port
+  Override subnet DHCP
 
 * `dns`:
     * Type: boolean
     * Default: `none`
     * Usage: `--dns`
 
-  Serve this port from the host-local resolver
+  Serve host-local DNS
 
-* `public_address`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--public-address`
-
-  Give the port a floating IP: an existing address object (UUID)
-
-* `floating_from`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--floating-from`
-
-  Give the port a floating IP taken out of this subnet
-
-* `no_public`:
+* `network_identity`:
     * Type: boolean
-    * Default: `false`
-    * Usage: `--no-public`
+    * Default: `none`
+    * Usage: `--network-identity`
 
-  Take the port's floating IP away (the address stays allocated)
+  Belong to the network's default identity group
 
 * `help`:
     * Type: boolean
@@ -92,7 +70,7 @@ Update a port's groups and toggles
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network ports update [OPTIONS] PORT                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network ports update [OPTIONS] PORT
+
 ```

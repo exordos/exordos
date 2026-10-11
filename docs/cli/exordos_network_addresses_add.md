@@ -6,9 +6,9 @@ Allocate an address in a subnet
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network addresses add [OPTIONS]                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network addresses add [OPTIONS]
+
 ```
 
 ## Options
@@ -45,6 +45,20 @@ Allocate an address in a subnet
 
   The address to reserve (allocated from the subnet if omitted)
 
+* `kind`:
+    * Type: choice
+    * Default: `reservation`
+    * Usage: `--kind`
+
+  Address allocation kind
+
+* `port`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--port`
+
+  Port for a floating address (UUID/name)
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -55,7 +69,7 @@ Allocate an address in a subnet
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network addresses add [OPTIONS]                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network addresses add [OPTIONS]
+
 ```

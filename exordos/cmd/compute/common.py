@@ -72,7 +72,7 @@ SDN_AGENT_UNIT_PATH = f"/etc/systemd/system/{SDN_AGENT_UNIT}.service"
 SYSTEM_UUID_PATH = "/sys/class/dmi/id/product_uuid"
 
 # The node's own agent, registered with the installation the host belongs
-# to — a different one from the core this SDN agent joins.
+# to - a different one from the core this SDN agent joins.
 PRIMARY_AGENT_CONF_PATH = "/etc/exordos_universal_agent/exordos_universal_agent.conf"
 PRIMARY_AGENT_UNIT = "exordos-universal-agent"
 EVPN_DRIVER = "EvpnAgentCapabilityDriver"
@@ -221,14 +221,14 @@ def write_sdn_agent_service(node_uuid, endpoint: str, key_path: str) -> None:
 
 # gobgp 3, which is what the installation is required to run: evpn_connector
 # speaks the v3 gRPC API, and v4 renamed the proto package and the service and
-# changed the NLRI encoding, so the daemon and the connector move together — a
+# changed the NLRI encoding, so the daemon and the connector move together - a
 # v4 gobgpd will not answer it.
 GOBGP_DEFAULT_URL = (
     "https://github.com/osrg/gobgp/releases/download/v3.37.0/"
     "gobgp_3.37.0_linux_amd64.tar.gz"
 )
 # sha256 of the v3.37.0 linux/amd64 release tarball. Verifying it pins the
-# binary by content — a tampered mirror or a MITM cannot land an arbitrary
+# binary by content - a tampered mirror or a MITM cannot land an arbitrary
 # gobgpd that then runs as root. Bump alongside GOBGP_DEFAULT_URL.
 GOBGP_SHA256 = "e20b2a155fe14450b9fe37e5c1a1d1bfe101eb479645f5bbea860a8fde30e522"
 GOBGPD_BIN = "/usr/local/bin/gobgpd"

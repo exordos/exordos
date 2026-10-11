@@ -44,6 +44,21 @@ Exordos CLI bridges the gap between your local development environment and the E
 
 > **For a full overview of all commands and configuration options, visit the [documentation](https://exordos.github.io/exordos/).**
 
+### Update a node's network interface
+
+For a port generated from a node's `interfaces`, change the node declaration:
+
+```bash
+exordos cn update -u my-node \
+    --interface 'subnet=private,address=10.101.0.21,floating-from=public-pool'
+```
+
+`--interface` replaces the complete interface list. Repeat it for every interface
+the node should retain; `cn update --no-network` clears the declaration.
+`floating-from` names the address-pool subnet; core allocates a free floating IP.
+Reconciliation restores a generated port's declared settings. Assign groups
+with `network sg bind <group> <port>` or `network ig bind <group> <port>`.
+
 # 💡 Contributing
 
 Contributing to the project is highly appreciated! However, some rules should be followed for successful inclusion of new changes in the project:

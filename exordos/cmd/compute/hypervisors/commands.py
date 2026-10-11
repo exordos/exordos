@@ -1536,7 +1536,7 @@ def _serve_pool_overlay(
     # Pointing a pool at this agent *is* the statement that its guests are
     # wired by the SDN: they have to be plugged into the OVS integration
     # bridge for the agent to find them at all. Setting `ovs` here keeps
-    # the two from disagreeing — an agent that waits for guests that
+    # the two from disagreeing - an agent that waits for guests that
     # libvirt put on a Linux bridge is a silent dead end.
     pool = base_client.get_entity(client, ENTITY_COLLECTION, str(pool_uuid))
     driver_spec = dict(pool.get("driver_spec") or {})
