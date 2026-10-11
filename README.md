@@ -39,6 +39,7 @@ Exordos CLI bridges the gap between your local development environment and the E
 - **Build projects** — compile Exordos project images and artifacts from a declarative `exordos.yaml` configuration.
 - **Bootstrap installations** — spin up local virtual machine environments from built images for development and testing. Managed realm specs can provide an `elements` list; explicit `--elements` options override it.
 - **Manage installations** — connect via SSH, list, and remove running Exordos instances.
+- **Import certificates** — use `exordos secret certificates add --method manual --cert fullchain.pem --key privkey.pem` with your project, email, and domain options. Replace PEM files with `exordos secret certificates update <UUID> --cert fullchain.pem --key privkey.pem`. Requires a Core API with manual certificate support.
 - **Interact with the platform** — manage elements, IAM, secrets, compute nodes, realms, and more through a rich set of subcommands.
 - **Automate backups** — run periodic or one-shot backups of installations with compression, encryption, rotation, and disk-overflow protection.
 

@@ -1,4 +1,4 @@
-#    Copyright 2025 Genesis Corporation.
+#    Copyright 2026 Genesis Corporation.
 #
 #    All Rights Reserved.
 #
@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import typing as tp
 import uuid as sys_uuid
 
 import rich_click as click
@@ -34,7 +35,7 @@ FIELDS_MAP = {
     "Domains": lambda x: ", ".join(x.get("domains") or []),
     "Status": "status",
 }
-CERTIFICATE_METHODS = ("dns_core",)
+CERTIFICATE_METHODS = ("dns_core", "manual")
 
 certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
@@ -93,6 +94,8 @@ certificates_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     show_default=True,
     help="Method (provider) to issue and manage the certificate",
 )
+@click.option("--cert", type=click.File("r"), help="PEM certificate or full chain file")
+@click.option("--key", type=click.File("r"), help="Unencrypted PEM private key file")
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -102,7 +105,13 @@ def add_cmd(
     email: str,
     domains: tuple[str, ...],
     method: str,
+    cert: tp.TextIO | None,
+    key: tp.TextIO | None,
 ) -> None:
+    if method == "manual" and (cert is None or key is None):
+        raise click.UsageError("--method manual requires both --cert and --key")
+    if method != "manual" and (cert is not None or key is not None):
+        raise click.UsageError("--cert and --key require --method manual")
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -116,6 +125,10 @@ def add_cmd(
         "domains": list(domains),
         "method": {"kind": method},
     }
+    if cert is not None:
+        data["cert"] = cert.read()
+    if key is not None:
+        data["key"] = key.read()
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(entity)
 
@@ -163,6 +176,15 @@ def add_cmd(
     multiple=True,
     help="Domain of the certificate, replaces the current list. Can be repeated",
 )
+@click.option(
+    "-m",
+    "--method",
+    type=click.Choice(CERTIFICATE_METHODS),
+    default=None,
+    help="Method (provider) to issue and manage the certificate",
+)
+@click.option("--cert", type=click.File("r"), help="PEM certificate or full chain file")
+@click.option("--key", type=click.File("r"), help="Unencrypted PEM private key file")
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
@@ -171,7 +193,12 @@ def update_cmd(
     description: str | None,
     email: str | None,
     domains: tuple[str, ...],
+    method: str | None,
+    cert: tp.TextIO | None,
+    key: tp.TextIO | None,
 ) -> None:
+    if method == "dns_core" and (cert is not None or key is not None):
+        raise click.UsageError("--cert and --key cannot be used with --method dns_core")
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
     if project_id is not None:
@@ -184,6 +211,12 @@ def update_cmd(
         data["email"] = email
     if domains:
         data["domains"] = list(domains)
+    if method is not None:
+        data["method"] = {"kind": method}
+    if cert is not None:
+        data["cert"] = cert.read()
+    if key is not None:
+        data["key"] = key.read()
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     show_data(entity)
 

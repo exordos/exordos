@@ -6,9 +6,9 @@ Update certificate
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos secret certificates update [OPTIONS] UUID
+
 ```
 
 ## Options
@@ -58,6 +58,28 @@ Update certificate
 
   Domain of the certificate, replaces the current list. Can be repeated
 
+* `method`:
+    * Type: choice
+    * Default: `none`
+    * Usage: `-m
+--method`
+
+  Method (provider) to issue and manage the certificate
+
+* `cert`:
+    * Type: filename
+    * Default: `sentinel.unset`
+    * Usage: `--cert`
+
+  PEM certificate or full chain file
+
+* `key`:
+    * Type: filename
+    * Default: `sentinel.unset`
+    * Usage: `--key`
+
+  Unencrypted PEM private key file
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -68,17 +90,24 @@ Update certificate
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
- Update certificate                                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID  Name of the project in which to deploy the certificate                                                                                                                                                                                                                         │
-│ --name         -n  TEXT  Name of the certificate                                                                                                                                                                                                                                                        │
-│ --description  -D  TEXT  Description of the certificate                                                                                                                                                                                                                                                 │
-│ --email        -e  TEXT  Email address to use for the certificate                                                                                                                                                                                                                                       │
-│ --domain       -d  TEXT  Domain of the certificate, replaces the current list. Can be repeated                                                                                                                                                                                                          │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos secret certificates update [OPTIONS] UUID
+
+ Update certificate
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --project-id   -p  UUID               Name of the project in which to deploy │
+│                                       the certificate                        │
+│ --name         -n  TEXT               Name of the certificate                │
+│ --description  -D  TEXT               Description of the certificate         │
+│ --email        -e  TEXT               Email address to use for the           │
+│                                       certificate                            │
+│ --domain       -d  TEXT               Domain of the certificate, replaces    │
+│                                       the current list. Can be repeated      │
+│ --method       -m  [dns_core|manual]  Method (provider) to issue and manage  │
+│                                       the certificate                        │
+│ --cert             FILENAME           PEM certificate or full chain file     │
+│ --key              FILENAME           Unencrypted PEM private key file       │
+│ --help                                Show this message and exit.            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
