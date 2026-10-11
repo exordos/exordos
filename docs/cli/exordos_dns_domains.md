@@ -3,6 +3,8 @@
 
 Manage domains in the Exordos installation
 
+Use [`info`](exordos_dns_domains_info.md) (alias `i`) to show domain details and DNS records.
+
 ## Usage
 
 ```console
