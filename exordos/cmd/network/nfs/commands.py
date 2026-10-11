@@ -31,7 +31,6 @@ FIELDS_MAP = {
     "Kind": "kind",
     "Config": "config",
     "Provenance": "provenance",
-    "Owner port": lambda x: str(x.get("owner_port") or ""),
 }
 
 nfs_group = create_entity_group(
@@ -44,7 +43,7 @@ nfs_group = create_entity_group(
 
 # No `add`: a function is not made on its own. A subnet is seeded with its
 # DHCP and its default security group, a network with its resolver and its
-# metadata proxy, and a port with what it expands into — so what there is to
+# metadata proxy, and a port with what it expands into - so what there is to
 # do here is find the one that already serves the object you mean and change
 # what it answers with.
 @nfs_group.command("set", help="Change what a network function answers with")

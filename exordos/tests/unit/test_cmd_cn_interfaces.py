@@ -73,7 +73,7 @@ def test_an_interface_carries_its_ports_configuration():
     the caller first had to find.
     """
     payload = _run(
-        ["--interface", "subnet=private,address=10.100.0.7,sg=web,public=fip"]
+        ["--interface", "subnet=private,address=10.100.0.7,public=fip"]
     )
     assert payload["interfaces"] == [
         {
@@ -83,7 +83,6 @@ def test_an_interface_carries_its_ports_configuration():
             "config": {
                 "kind": "simple",
                 "public": {"address": RESOLVED},
-                "security_groups": [RESOLVED],
             },
         }
     ]
@@ -165,10 +164,9 @@ def test_junk_is_refused_rather_than_ignored(spec):
         _parse(spec)
 
 
-def test_groups_accumulate_within_one_leg():
-    """A port carries a set of groups; one is not a special case."""
-    parsed = _parse("subnet=a,sg=web,sg=db")
-    assert parsed["config"]["security_groups"] == [RESOLVED, RESOLVED]
+def test_groups_are_not_part_of_an_interface_declaration():
+    with pytest.raises(click.ClickException, match="Unknown interface key"):
+        _parse("subnet=a,sg=web,sg=db")
 
 
 # --- a leg the node adopts rather than builds -------------------------------
@@ -194,7 +192,6 @@ def test_an_adopted_port_still_takes_an_index():
         "port=p,subnet=a",
         "port=p,network=n",
         "port=p,address=10.0.0.1",
-        "port=p,sg=web",
         "port=p,public=fip",
     ],
 )

@@ -325,7 +325,7 @@ def do_upload(
             description=description,
         )
     except bazooka_exc.ConflictError:
-        # This exact version is already in the repository — a re-run of the
+        # This exact version is already in the repository - a re-run of the
         # same command. Nothing to upload; let the caller carry on with what
         # it wanted to do with it.
         click.echo(

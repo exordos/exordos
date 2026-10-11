@@ -27,16 +27,14 @@ from exordos.common.table import show_data
 ENTITY = "network"
 ENTITY_COLLECTION = c.NETWORK_COLLECTION
 
-# `driver_spec` carries the driver name plus what the core allocated for an
-# overlay (vni/rt/mtu) — flatten it, nobody wants to read a JSON blob to see
-# which network is the overlay one.
+# Driver settings and allocated overlay state are separate API fields.
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
     "Driver": lambda x: str((x.get("driver_spec") or {}).get("driver", "unknown")),
-    "VNI": lambda x: str((x.get("driver_spec") or {}).get("vni", "")),
-    "RT": lambda x: str((x.get("driver_spec") or {}).get("rt", "")),
-    "MTU": lambda x: str((x.get("driver_spec") or {}).get("mtu", "")),
+    "VNI": lambda x: str((x.get("driver_state") or {}).get("vni", "")),
+    "RT": lambda x: str((x.get("driver_state") or {}).get("rt", "")),
+    "MTU": lambda x: str((x.get("driver_state") or {}).get("mtu", "")),
     "Access": "access",
     "Project": "project_id",
 }

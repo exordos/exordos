@@ -6,9 +6,9 @@ Add a new security group
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups add [OPTIONS]                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups add [OPTIONS]
+
 ```
 
 ## Options
@@ -45,14 +45,6 @@ Add a new security group
 
   Project UUID
 
-* `rule_specs`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-r
---rule`
-
-  Allow rule <ingress|egress>:<tcp|udp|icmp|any>[:<port>][@<remote_cidr>|@<identity_group>], e.g. ingress:tcp:22 or ingress:tcp:5432@db (repeatable). Naming a group is ingress-only: what a packet carries is its sender's identity.
-
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -63,7 +55,7 @@ Add a new security group
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups add [OPTIONS]                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups add [OPTIONS]
+
 ```

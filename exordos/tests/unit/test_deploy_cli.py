@@ -348,6 +348,34 @@ class TestInstallElement:
 
 
 class TestWaitForElementActive:
+    @pytest.mark.parametrize("code", [502, 503, 504])
+    def test_retries_gateway_errors_and_resets_active_streak(self, code) -> None:
+        cause = MagicMock()
+        cause.response.status_code = code
+        client = MagicMock()
+        active = [{"name": "core", "status": "ACTIVE"}]
+        client.filter.side_effect = [
+            active,
+            bazooka_exc.BaseHTTPException(cause),
+            active,
+            active,
+        ]
+        with patch("exordos.repo.utils.time.sleep"):
+            repo_utils.wait_for_element_active(
+                client, "core", "1.0.0", timeout=30, stable_checks=2
+            )
+        assert client.filter.call_count == 4
+
+    @pytest.mark.parametrize("code", [400, 401, 403, 500])
+    def test_does_not_retry_other_http_errors(self, code) -> None:
+        cause = MagicMock()
+        cause.response.status_code = code
+        client = MagicMock()
+        client.filter.side_effect = bazooka_exc.BaseHTTPException(cause)
+        with pytest.raises(bazooka_exc.BaseHTTPException):
+            repo_utils.wait_for_element_active(client, "core", "1.0.0", timeout=30)
+        assert client.filter.call_count == 1
+
     def test_returns_when_active(self) -> None:
         client = MagicMock()
         client.filter.return_value = [{"name": "foo", "status": "ACTIVE"}]

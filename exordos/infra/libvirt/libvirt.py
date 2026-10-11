@@ -148,7 +148,7 @@ bridge_forward_network_template = """
 
 
 # The same isolated bridge, with the host on it. No `<forward>`: nothing is
-# routed or translated out of this network, which is what "isolated" is for —
+# routed or translated out of this network, which is what "isolated" is for -
 # but the host holding an address of it is what lets a hypervisor reach the
 # installation's boot API, and an overlay guest netboots only through its
 # hypervisor. Without it that guest is told where its boot script is and has
@@ -418,8 +418,17 @@ def create_domain(
 
     # Copy config drive
     if config_drive is not None:
+        # QEMU must traverse both directories even with a restrictive umask.
         subprocess.check_call(
-            ["sudo", "mkdir", "-p", CONFIG_DRIVES_DIR],
+            [
+                "sudo",
+                "install",
+                "-d",
+                "-m",
+                "0755",
+                os.path.dirname(CONFIG_DRIVES_DIR),
+                CONFIG_DRIVES_DIR,
+            ],
             stdout=subprocess.DEVNULL,
         )
         config_drive_path = os.path.join(CONFIG_DRIVES_DIR, f"{name}-config-drive.iso")

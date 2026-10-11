@@ -137,7 +137,8 @@ def _validate_hostname(hostname: str) -> None:
     default=(),
     help=(
         "A leg of the node, repeatable: "
-        "subnet=<ref>[,address=<ip>][,index=<n>][,sg=<ref>][,public=<ref>], "
+        "subnet=<ref>[,address=<ip>][,index=<n>]"
+        "[,public=<address>|floating-from=<subnet>], "
         "or port=<ref>[,index=<n>] to adopt a port that already exists. "
         "Index 0 is the primary leg, whose address the node publishes as its "
         "own; left unset, legs are numbered in the order given."
@@ -311,6 +312,24 @@ def add_cmd(
     help="Hostname of the node",
 )
 @click.option(
+    "--interface",
+    "interfaces",
+    type=str,
+    multiple=True,
+    help=(
+        "Replace the complete interface declaration (repeatable). "
+        "Use subnet=<ref>[,address=<ip>][,index=<n>]"
+        "[,public=<address>|floating-from=<subnet>], or port=<ref>[,index=<n>]. "
+        "Settings of generated ports must be changed here so reconciliation "
+        "keeps them. Include every interface the node should retain."
+    ),
+)
+@click.option(
+    "--no-network",
+    is_flag=True,
+    help="Remove all interfaces from the node declaration.",
+)
+@click.option(
     "--wait",
     type=bool,
     is_flag=True,
@@ -326,6 +345,8 @@ def update_cmd(
     name: str | None,
     description: str | None,
     hostname: str | None,
+    interfaces: tuple[str, ...],
+    no_network: bool,
     wait: bool,
     output: str = "table",
 ) -> None:
@@ -350,6 +371,15 @@ def update_cmd(
         update_data["description"] = description
     if hostname is not None:
         update_data["hostname"] = hostname
+
+    if no_network and interfaces:
+        raise click.ClickException("--no-network cannot be combined with --interface")
+    if no_network:
+        update_data["interfaces"] = []
+    elif interfaces:
+        update_data["interfaces"] = [
+            net_common.parse_interface(client, spec) for spec in interfaces
+        ]
 
     if root_disk is not None or image is not None:
         update_data["disk_spec"] = entity["disk_spec"]

@@ -6,9 +6,9 @@ Remove an allow rule from a group
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups rule-del [OPTIONS] GROUP SPEC                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups rule-del [OPTIONS] GROUP SPEC
+
 ```
 
 ## Options
@@ -33,7 +33,7 @@ Remove an allow rule from a group
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network security-groups rule-del [OPTIONS] GROUP SPEC                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network security-groups rule-del [OPTIONS] GROUP SPEC
+
 ```

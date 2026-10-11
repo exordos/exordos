@@ -31,12 +31,9 @@ FIELDS_MAP = {
     "UUID": "uuid",
     "Address": "address",
     "Subnet": "subnet",
-    "Allocation": "allocation",
-    "Origin": "origin",
-    # Absent from the response when unset, so read through a callable: a
-    # listing that mixes bound and free addresses would blow up on the key.
-    "Owner port": lambda x: str(x.get("owner_port") or ""),
-    "Association": lambda x: str(x.get("association") or ""),
+    "Kind": "kind",
+    "Port": lambda x: str(x.get("port") or ""),
+    "Status": "status",
     "Project": "project_id",
 }
 
@@ -62,21 +59,52 @@ addresses_group = create_entity_group(
     default=None,
     help="The address to reserve (allocated from the subnet if omitted)",
 )
+@click.option(
+    "--kind",
+    type=click.Choice(["reservation", "floating"]),
+    default="reservation",
+    show_default=True,
+    help="Address allocation kind",
+)
+@click.option("--port", default=None, help="Port for a floating address (UUID/name)")
 def address_add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
     subnet: str,
     address: str | None,
+    kind: str,
+    port: str | None,
 ) -> None:
-    """The allocation outlives whoever uses it: associate it with a port
-    through that port's `public` setting, disassociate it and it stays yours."""
+    """The allocation survives disassociation from a port."""
+    if kind == "reservation" and port is not None:
+        raise click.ClickException("--port requires --kind floating")
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
         "uuid": str(uuid or sys_uuid.uuid4()),
         "project_id": str(project_id),
         "subnet": net_common.resolve(client, c.SUBNET_COLLECTION, subnet),
+        "kind": kind,
     }
     if address:
         data["address"] = address
+    if port is not None:
+        data["port"] = net_common.resolve(client, c.PORT_COLLECTION, port)
     show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+
+
+@addresses_group.command("update", help="Associate or disassociate a floating address")
+@click.pass_context
+@click.argument("address")
+@click.option("--port", default=None, help="Port to associate (UUID/name)")
+@click.option("--no-port", is_flag=True, help="Disassociate from the port")
+def address_update_cmd(
+    ctx: click.Context, address: str, port: str | None, no_port: bool
+):
+    if (port is not None) == no_port:
+        raise click.ClickException("Pass exactly one of --port or --no-port")
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {
+        "port": net_common.resolve(client, c.PORT_COLLECTION, port) if port else None
+    }
+    show_data(base_client.update_entity(client, ENTITY_COLLECTION, address, data))

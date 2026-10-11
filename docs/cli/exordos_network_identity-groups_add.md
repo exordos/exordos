@@ -6,9 +6,9 @@ Add a new identity group
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network identity-groups add [OPTIONS]                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network identity-groups add [OPTIONS]
+
 ```
 
 ## Options
@@ -63,7 +63,7 @@ Add a new identity group
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network identity-groups add [OPTIONS]                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network identity-groups add [OPTIONS]
+
 ```

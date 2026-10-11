@@ -6,9 +6,9 @@ Manage ports in the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network ports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network ports [OPTIONS] COMMAND [ARGS]...
+
 ```
 
 ## Options
@@ -23,7 +23,7 @@ Manage ports in the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network ports [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos network ports [OPTIONS] COMMAND [ARGS]...
+
 ```

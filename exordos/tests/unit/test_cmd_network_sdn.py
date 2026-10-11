@@ -8,9 +8,12 @@ import pytest
 import rich_click as click
 
 from exordos.cmd.network import common as net_common
+from exordos.cmd.network.addresses import commands as addresses_commands
+from exordos.cmd.network.identity_groups import commands as identity_commands
 from exordos.cmd.network.networks import commands as networks_commands
 from exordos.cmd.network.nfs import commands as nfs_commands
 from exordos.cmd.network.ports import commands as ports_commands
+from exordos.cmd.network.security_groups import commands as security_commands
 from exordos.cmd.network.subnets import commands as subnets_commands
 
 PROJECT = "11111111-1111-1111-1111-111111111111"
@@ -109,7 +112,7 @@ def test_subnet_add_resolves_network_and_parses_routes():
     assert data["dhcp"] is True
 
 
-def test_port_add_builds_simple_config():
+def test_port_add_uses_native_fields():
     add_entity, _ = _run(
         ports_commands.port_add_cmd,
         [
@@ -119,25 +122,24 @@ def test_port_add_builds_simple_config():
             SUBNET,
             "-N",
             NODE,
-            "-g",
-            "web",
             "--no-dhcp",
+            "--mac",
+            "02:00:00:00:00:01",
+            "--ipv4",
+            "10.100.0.4",
         ],
     )
     data = add_entity.call_args[0][2]
     assert data["subnet"] == SUBNET
     assert data["node"] == NODE
-    assert data["config"] == {
-        "kind": "simple",
-        "security_groups": [SG],
-        "dhcp": False,
-    }
+    assert "config" not in data
+    assert data["dhcp"] is False
+    assert data["target_mac"] == "02:00:00:00:00:01"
+    assert data["target_ipv4"] == "10.100.0.4"
     assert data["port_security"] is True
 
 
-def test_port_update_keeps_untouched_config_keys():
-    """The kind is a polymorphic whole: an update that only sets one knob
-    must not drop the groups already on the port."""
+def test_port_update_sends_only_native_setting():
     _, update_entity = _run(
         ports_commands.port_update_cmd,
         ["some-port", "--dns"],
@@ -147,12 +149,7 @@ def test_port_update_keeps_untouched_config_keys():
         },
     )
     data = update_entity.call_args[0][3]
-    assert data["config"] == {
-        "kind": "simple",
-        "security_groups": [SG],
-        "dhcp": False,
-        "dns": True,
-    }
+    assert data == {"dns": True}
 
 
 def test_nf_set_keeps_the_rest_of_the_config():
@@ -218,3 +215,194 @@ def test_nf_set_refuses_a_no_op():
         )
     assert result.exit_code != 0
     assert "Nothing to change" in result.output
+
+
+def test_security_group_add_creates_empty_group():
+    add_entity, _ = _run(
+        security_commands.security_group_add_cmd,
+        ["-n", "web", "-p", PROJECT],
+    )
+    assert "rules" not in add_entity.call_args.args[2]
+
+
+def test_security_group_rule_add_creates_independent_row():
+    add_entity, update_entity = _run(
+        security_commands.rule_add_cmd,
+        ["web", "ingress:tcp:22"],
+        entity={"uuid": SG, "project_id": PROJECT, "rules": []},
+    )
+    collection, data = add_entity.call_args.args[1:]
+    assert collection == security_commands.c.SECURITY_GROUP_RULE_COLLECTION
+    assert data == {
+        "uuid": data["uuid"],
+        "project_id": PROJECT,
+        "security_group": SG,
+        "direction": "ingress",
+        "protocol": "tcp",
+        "port": 22,
+    }
+    update_entity.assert_not_called()
+
+
+@pytest.mark.parametrize("missing", [False, True])
+@pytest.mark.parametrize("by_uuid", [False, True])
+def test_security_group_rule_del_deletes_only_exact_row(missing, by_uuid):
+    rules = [
+        {"uuid": NODE, "direction": "ingress", "protocol": "tcp", "port": 443},
+        {
+            "uuid": SUBNET,
+            "direction": "ingress",
+            "protocol": "tcp",
+            "port": 22,
+            "remote_ip": "10.0.0.0/8",
+        },
+    ]
+    if not missing:
+        rules.append(
+            {
+                "uuid": PROJECT,
+                "direction": "ingress",
+                "protocol": "tcp",
+                "port": 22,
+                "remote_ip": None,
+                "remote_group": None,
+            }
+        )
+    with (
+        mock.patch.object(security_commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            security_commands.base_client, "get_entity", return_value={"uuid": SG}
+        ),
+        mock.patch.object(
+            security_commands.base_client,
+            "list_entities",
+            return_value=([] if missing else [rules[-1]]) if by_uuid else rules,
+        ) as list_entities,
+        mock.patch.object(security_commands.base_client, "delete_entity") as delete,
+        mock.patch.object(security_commands.base_client, "update_entity") as update,
+    ):
+        result = testing.CliRunner().invoke(
+            security_commands.rule_del_cmd,
+            ["web", PROJECT if by_uuid else "ingress:tcp:22"],
+            obj=mock.MagicMock(),
+        )
+    assert result.exit_code == (1 if missing else 0), result.output
+    assert list_entities.call_args.kwargs == {
+        "security_group": SG,
+        **({"uuid": PROJECT} if by_uuid else {}),
+    }
+    update.assert_not_called()
+    if missing:
+        assert "No such rule" in result.output
+        delete.assert_not_called()
+    else:
+        assert delete.call_args.args[1:] == (
+            security_commands.c.SECURITY_GROUP_RULE_COLLECTION,
+            PROJECT,
+        )
+
+
+@pytest.mark.parametrize(
+    "group,collection,field",
+    [
+        (
+            security_commands.security_groups_group,
+            security_commands.c.PORT_SECURITY_GROUP_COLLECTION,
+            "security_group",
+        ),
+        (
+            identity_commands.identity_groups_group,
+            identity_commands.c.PORT_IDENTITY_GROUP_COLLECTION,
+            "identity_group",
+        ),
+    ],
+)
+def test_group_bind_and_unbind_use_independent_owned_pair(group, collection, field):
+    entity = {"uuid": NODE, "project_id": PROJECT}
+    add, _ = _run(group.commands["bind"], [SG, NODE], entity=entity)
+    assert add.call_args.args[1] == collection
+    data = add.call_args.args[2]
+    assert data == {
+        "uuid": data["uuid"],
+        "project_id": PROJECT,
+        "port": NODE,
+        field: SG,
+    }
+    with (
+        mock.patch.object(security_commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            security_commands.base_client, "get_entity", return_value=entity
+        ),
+        mock.patch.object(
+            security_commands.base_client,
+            "list_entities",
+            return_value=[{"uuid": SUBNET}],
+        ) as list_entities,
+        mock.patch.object(security_commands.base_client, "delete_entity") as delete,
+    ):
+        result = testing.CliRunner().invoke(
+            group.commands["unbind"], [SG, NODE], obj=mock.MagicMock()
+        )
+    assert result.exit_code == 0, result.output
+    assert list_entities.call_args.args[1] == collection
+    assert list_entities.call_args.kwargs == {
+        "project_id": PROJECT,
+        "port": NODE,
+        field: SG,
+    }
+    assert delete.call_args.args[1:] == (collection, SUBNET)
+
+
+def test_group_unbind_refuses_missing_pair():
+    with (
+        mock.patch.object(security_commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            security_commands.base_client,
+            "get_entity",
+            return_value={"uuid": NODE, "project_id": PROJECT},
+        ),
+        mock.patch.object(
+            security_commands.base_client, "list_entities", return_value=[]
+        ),
+        mock.patch.object(security_commands.base_client, "delete_entity") as delete,
+    ):
+        result = testing.CliRunner().invoke(
+            security_commands.security_groups_group.commands["unbind"],
+            [SG, NODE],
+            obj=mock.MagicMock(),
+        )
+    assert result.exit_code == 1
+    assert "not bound" in result.output
+    delete.assert_not_called()
+
+
+@pytest.mark.parametrize("floating", [False, True])
+def test_address_add_defaults_to_reservation_and_accepts_floating_port(floating):
+    add, _ = _run(
+        addresses_commands.address_add_cmd,
+        ["-p", PROJECT, "-s", SUBNET]
+        + (["--kind", "floating", "--port", NODE] if floating else []),
+    )
+    data = add.call_args.args[2]
+    assert data["kind"] == ("floating" if floating else "reservation")
+    if floating:
+        assert data["port"] == NODE
+    else:
+        assert "port" not in data
+    assert "address" not in data
+
+
+def test_address_update_disassociates_with_null_port():
+    _, update = _run(addresses_commands.address_update_cmd, [SG, "--no-port"])
+    assert update.call_args.args[3] == {"port": None}
+
+
+def test_network_list_reads_allocated_driver_state():
+    row = {
+        "driver_spec": {"driver": "ovs_evpn", "mtu": 1450},
+        "driver_state": {"vni": 42, "rt": "64512:42", "mtu": 1400},
+    }
+    assert networks_commands.FIELDS_MAP["Driver"](row) == "ovs_evpn"
+    assert networks_commands.FIELDS_MAP["VNI"](row) == "42"
+    assert networks_commands.FIELDS_MAP["RT"](row) == "64512:42"
+    assert networks_commands.FIELDS_MAP["MTU"](row) == "1400"

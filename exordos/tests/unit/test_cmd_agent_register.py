@@ -178,7 +178,7 @@ def test_register_agent_is_idempotent_when_the_node_already_exists(tmp_path):
 
     assert result.exit_code == 0, result.output
     get_key.assert_called_once()  # carried on past the conflict
-    update_entity.assert_called_once()  # …and wired the pool
+    update_entity.assert_called_once()  # ...and wired the pool
     assert key_path.read_text() == "K=="
 
 

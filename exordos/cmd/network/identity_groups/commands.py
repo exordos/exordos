@@ -31,6 +31,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.network import bindings
 from exordos.cmd.network import common as net_common
 from exordos.common.table import show_data
 
@@ -49,6 +50,13 @@ identity_groups_group = create_entity_group(
     ENTITY_COLLECTION,
     FIELDS_MAP,
     group_name="identity-groups",
+)
+
+bindings.add_binding_commands(
+    identity_groups_group,
+    c.PORT_IDENTITY_GROUP_COLLECTION,
+    ENTITY_COLLECTION,
+    "identity_group",
 )
 
 
@@ -74,7 +82,7 @@ def add_cmd(
     network: str,
 ) -> None:
     """A name for a set of workloads. Ports join it with
-    `network ports update <port> --identity-group <name>`, and a rule admits
+    `network identity-groups bind <name> <port>`, and a rule admits
     it with `network sg rule-add <group> ingress:tcp:5432@<name>`."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
