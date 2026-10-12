@@ -104,6 +104,10 @@ class S3QcowBackuper(qcow.AbstractQcowBackuper):
         with open(file_path, "rb") as f:
             self._upload_stream(f, s3_path, encryption)
 
+    def upload_snapshot(self, stream: tp.BinaryIO, key: str) -> None:
+        """Upload a completed ZFS snapshot stream to the configured bucket."""
+        self._upload_stream(stream, key)
+
     def backup_domain_spec(
         self,
         domain_spec: str,

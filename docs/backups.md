@@ -181,3 +181,79 @@ exordos backup snapshot-restore before-upgrade -n o1-a370f746-ecosystem-cp
 ```
 
 `zfs rollback` refuses to roll back past newer snapshots of the same zvol; destroy them first if needed.
+
+### Export Full and Incremental Backups
+
+Create a snapshot, then export one ZFS stream per selected VM zvol:
+
+```bash
+exordos backup snapshot -n vm1 -s baseline
+exordos backup snapshot-export baseline -n vm1 -d /backups
+exordos backup snapshot -n vm1 -s next
+exordos backup snapshot-export next -n vm1 --base-snapshot baseline -d /backups
+```
+
+Without `--base-snapshot`, the export uses `zfs send` for a full backup.
+With it, the export uses `zfs send -i` for changes since the base snapshot.
+Both snapshots must exist on every selected disk, and the base must precede
+the target. The command validates all sends before exporting any disk.
+
+Files are named `<encoded-dataset>@<snapshot>.zfs`, or
+`<encoded-dataset>@<snapshot>--from-<base>.zfs` for incremental exports.
+Dataset slashes are encoded as `%2F`. Existing local files are never overwritten,
+and failed sends leave no partial stream file. Completed disk exports remain
+if a later disk fails; multi-disk exports are not atomic.
+
+Receive the full stream first, then each incremental stream in chain order:
+
+```bash
+sudo zfs receive backup/vm1-disk < '/backups/rpool%2Fdisks%2Fa@baseline.zfs'
+sudo zfs receive backup/vm1-disk < '/backups/rpool%2Fdisks%2Fa@next--from-baseline.zfs'
+```
+
+The receiving dataset must be at the incremental stream's base snapshot.
+Keep the full export and every increment needed to reconstruct the target.
+These streams contain disk data; preserve the VM's libvirt XML separately.
+Exports retain the crash consistency of the source snapshots.
+
+### Export Snapshots to S3
+
+Use `--s3-config` with the existing S3 backup driver configuration:
+
+```yaml
+driver:
+  S3QcowBackuper:
+    endpoint_url: https://s3.example.com
+    access_key: YOUR_ACCESS_KEY
+    secret_key: YOUR_SECRET_KEY
+    host: hypervisor1
+    bucket_name: vm-backups
+    region: us-east-1
+```
+
+Create the bucket before exporting. Protect the configuration file because it
+contains credentials. Set `--s3-prefix` to distinguish hosts or backup chains;
+its default is `snapshots`. The driver's `host` setting is not added to the
+export prefix automatically.
+
+```bash
+# Full export to S3 only
+exordos backup snapshot-export baseline -n vm1 \
+  --s3-config /path/to/s3.yaml --s3-prefix hypervisor1/vm1
+
+# Incremental export to S3, retaining a local copy
+exordos backup snapshot-export next -n vm1 --base-snapshot baseline \
+  --s3-config /path/to/s3.yaml --s3-prefix hypervisor1/vm1 -d /backups
+```
+
+Each completed disk stream is uploaded under `<prefix>/<export-filename>`.
+S3-only exports temporarily spool one disk stream to the system temporary
+directory, so it needs enough free space for that stream. With `--backup-dir`,
+that directory holds the temporary stream and the completed local copy.
+Temporary files are removed on success or failure; local copies remain if an
+upload fails. Uploads reuse the S3 client's retries, multipart support, and
+object size verification. Existing S3 keys are replaced on repeated exports.
+If a later disk fails, earlier completed uploads remain.
+
+To restore, download each full and incremental stream from S3 and receive them
+in chain order as described above.

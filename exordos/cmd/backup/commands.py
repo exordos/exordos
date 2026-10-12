@@ -16,14 +16,17 @@
 import fnmatch
 import os
 import subprocess
+import tempfile
 import time
 import typing as tp
+from urllib.parse import quote
 
 import rich_click as click
 
 from exordos import utils
 from exordos.backup import base as backup_base
 from exordos.backup import local as backup_local
+from exordos.backup import s3 as backup_s3
 from exordos.cmd.backup.constants import BackupPeriod
 from exordos.infra.libvirt import libvirt
 
@@ -109,6 +112,116 @@ def _list_zfs_snapshots() -> list[str]:
         ["sudo", "zfs", "list", "-H", "-t", "snapshot", "-o", "name"]
     )
     return sorted(out.decode().splitlines())
+
+
+@click.command("snapshot-export", help="Export VM ZFS snapshots as backup streams")
+@click.argument("snapshot_name")
+@click.option("-n", "--name", multiple=True, help="Domain to export; defaults to all")
+@click.option(
+    "--no",
+    "--exclude-name",
+    "exclude_name",
+    multiple=True,
+    help="Domain name or pattern to exclude",
+)
+@click.option(
+    "-d",
+    "--backup-dir",
+    default=None,
+    type=click.Path(file_okay=False),
+    help="Directory for ZFS stream files; required unless --s3-config is provided",
+)
+@click.option(
+    "--s3-config",
+    type=click.Path(exists=True, dir_okay=False),
+    default=None,
+    help="S3QcowBackuper configuration for uploading exports to S3",
+)
+@click.option(
+    "--s3-prefix",
+    default="snapshots",
+    show_default=True,
+    help="S3 object key prefix",
+)
+@click.option(
+    "--base-snapshot",
+    default=None,
+    help="Earlier snapshot name for an incremental export; omit for a full export",
+)
+def snapshot_export_cmd(
+    snapshot_name: str,
+    name: tuple[str, ...],
+    exclude_name: tuple[str, ...],
+    backup_dir: str | None,
+    base_snapshot: str | None,
+    s3_config: str | None,
+    s3_prefix: str,
+) -> None:
+    if backup_dir is None and s3_config is None:
+        raise click.UsageError("Specify --backup-dir, --s3-config, or both.")
+    backuper = None
+    if s3_config is not None:
+        backuper = utils.load_driver(s3_config)
+        if not isinstance(backuper, backup_s3.S3QcowBackuper):
+            raise click.UsageError("--s3-config must configure S3QcowBackuper.")
+    if name and exclude_name:
+        raise click.UsageError(
+            "Cannot specify both --name and --no/--exclude-name options at the same time."
+        )
+    for tag in (snapshot_name, base_snapshot):
+        if tag is not None and (not tag or any(c in tag for c in "/@#")):
+            raise click.UsageError("Use snapshot names without a dataset prefix.")
+
+    domains = domains_for_backup(name, exclude_name, raise_on_domain_absence=True)
+    zvols = sorted({z for d in domains for z in libvirt.get_domain_zvols(d)})
+    if not zvols:
+        click.secho("No zvol disks found", fg="yellow")
+        return
+
+    existing = set(_list_zfs_snapshots())
+    tags = [snapshot_name] + ([base_snapshot] if base_snapshot is not None else [])
+    missing = [
+        f"{z}@{tag}" for z in zvols for tag in tags if f"{z}@{tag}" not in existing
+    ]
+    if missing:
+        raise click.UsageError(f"Snapshots not found: {', '.join(missing)}")
+
+    exports = []
+    for zvol in zvols:
+        command = ["sudo", "zfs", "send"]
+        filename = f"{quote(zvol, safe='')}@{quote(snapshot_name, safe='')}"
+        if base_snapshot is not None:
+            command.extend(["-i", f"{zvol}@{base_snapshot}"])
+            filename += f"--from-{quote(base_snapshot, safe='')}"
+        command.append(f"{zvol}@{snapshot_name}")
+        filename += ".zfs"
+        path = os.path.join(backup_dir, filename) if backup_dir is not None else None
+        if path is not None and os.path.lexists(path):
+            raise click.UsageError(f"Backup file already exists: {path}")
+        exports.append((command, path, filename))
+
+    # Let ZFS validate send eligibility, including base ordering, for every disk.
+    for command, _, _ in exports:
+        subprocess.check_call(command[:3] + ["-n"] + command[3:])
+
+    if backup_dir is not None:
+        os.makedirs(backup_dir, exist_ok=True)
+    for command, path, filename in exports:
+        with tempfile.NamedTemporaryFile(
+            dir=backup_dir, prefix=".zfs-export-"
+        ) as stream:
+            subprocess.check_call(command, stdout=stream)
+            stream.flush()
+            # Publish only completed streams, without replacing an existing file.
+            if path is not None:
+                os.link(stream.name, path)
+                click.secho(f"{command[-1]}: exported to {path}", fg="green")
+            if backuper is not None:
+                key = "/".join(
+                    part for part in (s3_prefix.strip("/"), filename) if part
+                )
+                backuper.upload_snapshot(stream, key)
+                click.secho(f"{command[-1]}: uploaded to S3 key {key}", fg="green")
 
 
 @click.command("snapshot-list", help="List all ZFS snapshots on the local hypervisor")
@@ -556,6 +669,7 @@ def backup_decrypt_cmd(path: str) -> None:
 
 
 backup_cmd.add_command(snapshot_cmd)
+backup_cmd.add_command(snapshot_export_cmd)
 backup_cmd.add_command(snapshot_list_cmd)
 backup_cmd.add_command(snapshot_delete_cmd)
 backup_cmd.add_command(snapshot_restore_cmd)

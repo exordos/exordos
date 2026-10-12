@@ -13,13 +13,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from pathlib import Path
+import subprocess
 from unittest.mock import patch
 
 from click.testing import CliRunner
 import pytest
 import rich_click as click
 
+from exordos.backup.s3 import S3QcowBackuper
 from exordos.cmd.backup.commands import snapshot_cmd
+from exordos.cmd.backup.commands import snapshot_export_cmd
 from exordos.cmd.backup.commands import snapshot_restore_cmd
 from exordos.infra.libvirt import libvirt
 
@@ -241,7 +245,14 @@ def test_snapshot_restore_cmd_rejects_parent_filters(flag):
 
 
 @pytest.mark.parametrize(
-    "command", ["snapshot", "snapshot-list", "snapshot-delete", "snapshot-restore"]
+    "command",
+    [
+        "snapshot",
+        "snapshot-export",
+        "snapshot-list",
+        "snapshot-delete",
+        "snapshot-restore",
+    ],
 )
 def test_snapshot_commands_registered_under_backup(command):
     from exordos.cmd.cli import exordos
@@ -266,3 +277,262 @@ def test_snapshot_list_via_backup_does_not_start_backuper():
     assert result.exit_code == 0, result.output
     assert "pool/disk@snap1" in result.output
     backuper.assert_not_called()
+
+
+class TestCmdSnapshotExport:
+    @pytest.fixture
+    def exports(self):
+        with (
+            patch(
+                "exordos.cmd.backup.commands.domains_for_backup", return_value=["vm1"]
+            ),
+            patch(
+                "exordos.cmd.backup.commands.libvirt.get_domain_zvols",
+                return_value=["pool/a", "pool/b", "pool/a"],
+            ),
+            patch(
+                "exordos.cmd.backup.commands._list_zfs_snapshots",
+                return_value=["pool/a@old", "pool/a@new", "pool/b@old", "pool/b@new"],
+            ) as snapshots,
+            patch("exordos.cmd.backup.commands.subprocess.check_call") as send,
+        ):
+            yield snapshots, send
+
+    @pytest.mark.parametrize("base", [None, "old"])
+    def test_snapshot_export_cmd_writes_full_or_incremental_streams(
+        self, tmp_path, exports, base
+    ):
+        _, send = exports
+
+        def write_stream(command, **kwargs):
+            if "stdout" in kwargs:
+                kwargs["stdout"].write(b"zfs stream")
+
+        send.side_effect = write_stream
+        args = ["new", "-n", "vm1", "-d", str(tmp_path)]
+        if base:
+            args += ["--base-snapshot", base]
+        result = CliRunner().invoke(snapshot_export_cmd, args)
+        assert result.exit_code == 0, result.output
+        commands = []
+        for disk in ["a", "b"]:
+            command = ["sudo", "zfs", "send"]
+            if base:
+                command += ["-i", f"pool/{disk}@old"]
+            commands.append(command + [f"pool/{disk}@new"])
+            suffix = "--from-old" if base else ""
+            assert (
+                tmp_path / f"pool%2F{disk}@new{suffix}.zfs"
+            ).read_bytes() == b"zfs stream"
+        assert [c.args[0] for c in send.call_args_list] == [
+            c[:3] + ["-n"] + c[3:] for c in commands
+        ] + commands
+        assert len(list(tmp_path.iterdir())) == 2
+
+    @pytest.mark.parametrize("missing", ["pool/b@old", "pool/b@new"])
+    def test_snapshot_export_cmd_missing_snapshot_exports_nothing(
+        self, tmp_path, exports, missing
+    ):
+        snapshots, send = exports
+        snapshots.return_value.remove(missing)
+        result = CliRunner().invoke(
+            snapshot_export_cmd, ["new", "--base-snapshot", "old", "-d", str(tmp_path)]
+        )
+        assert result.exit_code == 2
+        assert missing in result.output
+        send.assert_not_called()
+        assert not list(tmp_path.iterdir())
+
+    def test_snapshot_export_cmd_existing_file_exports_nothing(self, tmp_path, exports):
+        _, send = exports
+        path = tmp_path / "pool%2Fb@new.zfs"
+        path.write_bytes(b"existing backup")
+        result = CliRunner().invoke(snapshot_export_cmd, ["new", "-d", str(tmp_path)])
+        assert result.exit_code == 2
+        send.assert_not_called()
+        assert path.read_bytes() == b"existing backup"
+
+    def test_snapshot_export_cmd_invalid_base_exports_nothing(self, tmp_path, exports):
+        _, send = exports
+        send.side_effect = [None, subprocess.CalledProcessError(1, "zfs send")]
+        result = CliRunner().invoke(
+            snapshot_export_cmd, ["old", "--base-snapshot", "new", "-d", str(tmp_path)]
+        )
+        assert result.exit_code != 0
+        assert not list(tmp_path.iterdir())
+        assert all("-n" in c.args[0] for c in send.call_args_list)
+
+    def test_snapshot_export_cmd_failed_send_removes_partial_file(
+        self, tmp_path, exports
+    ):
+        _, send = exports
+
+        def fail_send(command, **kwargs):
+            if "stdout" in kwargs:
+                kwargs["stdout"].write(b"partial stream")
+                raise subprocess.CalledProcessError(1, command)
+
+        send.side_effect = fail_send
+        result = CliRunner().invoke(snapshot_export_cmd, ["new", "-d", str(tmp_path)])
+        assert result.exit_code != 0
+        assert not list(tmp_path.iterdir())
+
+    def test_snapshot_export_cmd_no_disks_exports_nothing(self, tmp_path, exports):
+        snapshots, send = exports
+        with patch(
+            "exordos.cmd.backup.commands.libvirt.get_domain_zvols", return_value=[]
+        ):
+            result = CliRunner().invoke(
+                snapshot_export_cmd, ["new", "-d", str(tmp_path)]
+            )
+        assert result.exit_code == 0
+        assert "No zvol disks found" in result.output
+        snapshots.assert_not_called()
+        send.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["new", "-n", "vm1", "--no", "vm2"],
+            ["pool/a@new"],
+            ["new", "--base-snapshot", "pool/a@old"],
+        ],
+    )
+    def test_snapshot_export_cmd_invalid_options_exports_nothing(
+        self, tmp_path, exports, args
+    ):
+        _, send = exports
+        result = CliRunner().invoke(snapshot_export_cmd, args + ["-d", str(tmp_path)])
+        assert result.exit_code == 2
+        send.assert_not_called()
+
+    @pytest.mark.parametrize("base", [None, "old"])
+    @pytest.mark.parametrize("keep_local", [False, True])
+    def test_snapshot_export_cmd_uploads_to_s3(
+        self, tmp_path, exports, base, keep_local
+    ):
+        _, send = exports
+        config = tmp_path / "s3.yaml"
+        config.touch()
+        output = tmp_path / "exports"
+        backuper = S3QcowBackuper(
+            "https://s3.example.test", "access", "secret", "host", "bucket"
+        )
+        received = []
+
+        def write_stream(command, **kwargs):
+            if "stdout" in kwargs:
+                kwargs["stdout"].write(b"zfs stream")
+
+        def upload(stream, bucket, key, size):
+            stream.seek(0)
+            received.append((bucket, key, size, stream.read()))
+
+        send.side_effect = write_stream
+        args = ["new", "--s3-config", str(config), "--s3-prefix", "/host/vm1/"]
+        if base:
+            args += ["--base-snapshot", base]
+        if keep_local:
+            args += ["-d", str(output)]
+        with (
+            patch(
+                "exordos.cmd.backup.commands.utils.load_driver", return_value=backuper
+            ) as load,
+            patch("exordos.backup.s3.s3_client.S3BackupClient") as client,
+        ):
+            client.return_value.upload.side_effect = upload
+            result = CliRunner().invoke(snapshot_export_cmd, args)
+        assert result.exit_code == 0, result.output
+        load.assert_called_once_with(str(config))
+        suffix = "--from-old" if base else ""
+        assert received == [
+            ("bucket", f"host/vm1/pool%2F{disk}@new{suffix}.zfs", 10, b"zfs stream")
+            for disk in ("a", "b")
+        ]
+        if keep_local:
+            assert len(list(output.iterdir())) == 2
+            assert all(p.read_bytes() == b"zfs stream" for p in output.iterdir())
+        else:
+            assert not output.exists()
+
+    @pytest.mark.parametrize("keep_local", [False, True])
+    def test_snapshot_export_cmd_failed_upload_cleans_temp_keeps_local(
+        self, tmp_path, exports, keep_local
+    ):
+        _, send = exports
+        config = tmp_path / "s3.yaml"
+        config.touch()
+        output = tmp_path / "exports"
+        backuper = S3QcowBackuper(
+            "https://s3.example.test", "access", "secret", "host", "bucket"
+        )
+        temporary_paths = []
+
+        def write_stream(command, **kwargs):
+            if "stdout" in kwargs:
+                temporary_paths.append(Path(kwargs["stdout"].name))
+                kwargs["stdout"].write(b"zfs stream")
+
+        send.side_effect = write_stream
+        args = ["new", "--s3-config", str(config)]
+        if keep_local:
+            args += ["-d", str(output)]
+        with (
+            patch(
+                "exordos.cmd.backup.commands.utils.load_driver", return_value=backuper
+            ),
+            patch.object(
+                backuper, "upload_snapshot", side_effect=RuntimeError("upload failed")
+            ),
+        ):
+            result = CliRunner().invoke(snapshot_export_cmd, args)
+        assert result.exit_code != 0
+        assert str(result.exception) == "upload failed"
+        assert len(temporary_paths) == 1
+        assert not temporary_paths[0].exists()
+        if keep_local:
+            assert (output / "pool%2Fa@new.zfs").read_bytes() == b"zfs stream"
+            assert len(list(output.iterdir())) == 1
+
+    def test_snapshot_export_cmd_no_destination_exports_nothing(self, exports):
+        _, send = exports
+        result = CliRunner().invoke(snapshot_export_cmd, ["new"])
+        assert result.exit_code == 2
+        assert "Specify --backup-dir, --s3-config, or both" in result.output
+        send.assert_not_called()
+
+    def test_snapshot_export_cmd_wrong_s3_driver_exports_nothing(
+        self, tmp_path, exports
+    ):
+        _, send = exports
+        config = tmp_path / "local.yaml"
+        config.touch()
+        with patch(
+            "exordos.cmd.backup.commands.utils.load_driver", return_value=object()
+        ):
+            result = CliRunner().invoke(
+                snapshot_export_cmd, ["new", "--s3-config", str(config)]
+            )
+        assert result.exit_code == 2
+        assert "must configure S3QcowBackuper" in result.output
+        send.assert_not_called()
+
+    def test_snapshot_export_cmd_failed_send_does_not_upload(self, tmp_path, exports):
+        _, send = exports
+        config = tmp_path / "s3.yaml"
+        config.touch()
+        backuper = S3QcowBackuper(
+            "https://s3.example.test", "access", "secret", "host", "bucket"
+        )
+        send.side_effect = [None, None, subprocess.CalledProcessError(1, "zfs send")]
+        with (
+            patch(
+                "exordos.cmd.backup.commands.utils.load_driver", return_value=backuper
+            ),
+            patch.object(backuper, "upload_snapshot") as upload,
+        ):
+            result = CliRunner().invoke(
+                snapshot_export_cmd, ["new", "--s3-config", str(config)]
+            )
+        assert result.exit_code != 0
+        upload.assert_not_called()

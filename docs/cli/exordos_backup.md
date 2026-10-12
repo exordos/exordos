@@ -172,6 +172,7 @@ Backup the current installation
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ snapshot             Create ZFS snapshots of libvirt domain disks            │
+│ snapshot-export   Export VM ZFS snapshots as backup streams                  │
 │ snapshot-delete      Delete ZFS snapshots on the local hypervisor            │
 │ snapshot-list        List all ZFS snapshots on the local hypervisor          │
 │ snapshot-restore     Restore libvirt domain disks from ZFS snapshots         │
