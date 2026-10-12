@@ -59,6 +59,7 @@ def _patch_common_init_deps():
     under Python's nested `with (...)` item limit."""
     with (
         patch.object(hv_commands, "_check_debian_like", return_value=True),
+        patch.object(hv_commands, "agent_venv_exists", return_value=False),
         patch("subprocess.call", return_value=0),
         patch.object(hv_commands, "_install_packages"),
         patch.object(hv_commands, "install_rawstor_packages"),
@@ -310,6 +311,42 @@ class TestInitCmdRegistration:
         assert result.exit_code == 0, result.output
         venv_mock.assert_not_called()
         resolve_target_mock.assert_not_called()
+
+    def test_without_add_updates_bindings_for_existing_named_agent(self):
+        with (
+            _patch_common_init_deps(),
+            patch.object(hv_commands, "agent_venv_exists", return_value=True),
+            patch.object(hv_commands.os.path, "isfile", return_value=True),
+            patch.object(
+                hv_commands, "prepare_rawstor_wheel", return_value="/tmp/new.whl"
+            ),
+            patch.object(hv_commands, "run_command") as run,
+            patch.object(
+                hv_commands.base_client, "register_agent_and_write_key"
+            ) as register,
+        ):
+            result = CliRunner().invoke(
+                hv_commands.init_cmd,
+                ["--pool-agent-name", "my_universal_agent"],
+                obj=_obj(auth_data={}),
+            )
+        assert result.exit_code == 0, result.output
+        assert run.call_args_list == [
+            mock_call(
+                [
+                    "sudo",
+                    "/opt/my_universal_agent/.venv/bin/pip",
+                    "install",
+                    "--force-reinstall",
+                    "--no-deps",
+                    "/tmp/new.whl",
+                ]
+            ),
+            mock_call(
+                ["sudo", "systemctl", "restart", "exordos-my-universal-agent.service"]
+            ),
+        ]
+        register.assert_not_called()
 
     def test_without_add_skips_registration_and_libvirt_config(self) -> None:
         runner = CliRunner()
