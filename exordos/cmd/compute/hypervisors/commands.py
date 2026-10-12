@@ -1367,6 +1367,21 @@ def init_cmd(
 
     log.info("Installing rawstor packages...")
     install_and_configure_rawstor(add_sudo)
+    if not add and agent_venv_exists(agent_name):
+        log.info("Updating the existing agent's rawstor bindings...")
+        wheel = prepare_rawstor_wheel()
+        run_command(
+            [
+                "sudo",
+                f"{_agent_venv_path(agent_name)}/bin/pip",
+                "install",
+                "--force-reinstall",
+                "--no-deps",
+                wheel,
+            ]
+        )
+        if os.path.isfile(_agent_config_path(agent_name)):
+            run_command(["sudo", "systemctl", "restart", _agent_unit_name(agent_name)])
 
     if add:
         log.info("Setting up the local boot network...")

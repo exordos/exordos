@@ -111,7 +111,11 @@ The failure domain path runs from outermost to innermost:
 `--weight` defaults to 1. Node lists expose the assigned agent and readiness status.
 
 On hypervisors use `exordos hypervisors init` to install the
-Python binding and rawstor-vhost.
+rawstor packages and rawstor-vhost. If the agent selected by
+`--pool-agent-name` is already installed, `init` also reinstalls the matching
+Python binding in its virtual environment and restarts the configured service,
+including when `--add` is omitted. Without `--add`, it does not register an agent
+or require a connection to core.
 
 ## Manage resources
 
