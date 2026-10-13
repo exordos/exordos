@@ -678,13 +678,11 @@ def _set_realm_config(
         "current-context": existing.get("current-context"),
     }
 
-    if not config["realms"][realm_name]["contexts"]:
-        config["realms"][realm_name]["contexts"] = {
-            "admin": {
-                "user": "admin",
-                "password": admin_password,
-            }
-        }
+    config["realms"][realm_name]["contexts"]["admin"] = {
+        "user": "admin",
+        "password": admin_password,
+    }
+    if not config["realms"][realm_name]["current-context"]:
         config["realms"][realm_name]["current-context"] = "admin"
 
     if not config.get("current-realm"):
