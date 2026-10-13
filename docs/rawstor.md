@@ -108,7 +108,7 @@ Core rejects duplicate managed bind ports or backing directories on the same hos
 
 The failure domain path runs from outermost to innermost:
 `dc/row/rack/server`. Shorter paths omit outer levels; omitted domains are shared.
-`--weight` defaults to 1. Node lists expose the assigned agent and readiness status.
+`--weight` defaults to 100. Node lists expose the assigned agent and readiness status.
 
 On hypervisors use `exordos hypervisors init` to install the
 rawstor packages and rawstor-vhost. If the agent selected by
