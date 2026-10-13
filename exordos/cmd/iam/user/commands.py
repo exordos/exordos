@@ -249,7 +249,7 @@ def reset_password_cmd(
 )
 def change_password_cmd(
     ctx: click.Context,
-    uuid: sys_uuid.UUID,
+    user: sys_uuid.UUID,
     old_password: str,
     new_password: str | None,
 ) -> None:
@@ -260,13 +260,13 @@ def change_password_cmd(
     data = {
         "old_password": old_password,
         "new_password": new_password
-        or questionary.password(f"Enter new_password for {ENTITY} {uuid}:").ask(),
+        or questionary.password(f"Enter new_password for {ENTITY} {user}:").ask(),
     }
 
     base_client.action_entity(
-        client, ENTITY_COLLECTION, "change_password", uuid, **data
+        client, ENTITY_COLLECTION, "change_password", user, **data
     )
-    click.echo(f"Password changed for {ENTITY} {uuid}")
+    click.echo(f"Password changed for {ENTITY} {user}")
 
 
 @users_group.command("info", help=f"Show detailed information about the {ENTITY}")
