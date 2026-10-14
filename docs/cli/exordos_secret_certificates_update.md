@@ -120,6 +120,8 @@ Update certificate
 │                                       the certificate                        │
 │ --cert             FILENAME           PEM certificate or full chain file     │
 │ --key              FILENAME           Unencrypted PEM private key file       │
+│ --clear-tags                          Remove all tags.                       │
+│ --tag              TEXT               Set the complete tag list.             │
 │ --help                                Show this message and exit.            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```

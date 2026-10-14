@@ -119,6 +119,7 @@ Add a new certificate to the Exordos installation
 │                                          dns_core]                           │
 │    --cert             FILENAME           PEM certificate or full chain file  │
 │    --key              FILENAME           Unencrypted PEM private key file    │
+│    --tag              TEXT               Set the complete tag list.          │
 │    --help                                Show this message and exit.         │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```

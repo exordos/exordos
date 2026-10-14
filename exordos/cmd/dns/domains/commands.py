@@ -22,10 +22,10 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import fill_table
-from exordos.common.table import print_table
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
+from exordos.common.table import fill_table
+from exordos.common.table import print_table
 from exordos.common.table import show_data
 
 ENTITY = "domain"
