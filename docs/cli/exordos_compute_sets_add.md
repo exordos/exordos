@@ -6,9 +6,9 @@ Add a new set to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
+                                                                                
+ Usage: exordos compute sets add [OPTIONS]                                      
+                                                                                
 ```
 
 ## Options
@@ -69,12 +69,12 @@ Add a new set to the Exordos installation
 
   Name of the image to deploy
 
-* `speed`:
+* `tier`:
     * Type: choice
-    * Default: `hot`
-    * Usage: `--speed`
+    * Default: `warm`
+    * Usage: `--tier`
 
-  Speed tier to schedule the root disk onto
+  Storage tier to schedule the root disk onto
 
 * `ephemeral`:
     * Type: boolean
