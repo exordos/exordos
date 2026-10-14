@@ -6519,9 +6519,7 @@
 <h1 id="exordos_secret_certificates_update">exordos_secret_certificates_update<a class="headerlink" href="#exordos_secret_certificates_update" title="Permanent link">#</a></h1>
 <p>Update certificate</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos secret certificates update [OPTIONS] UUID</span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
 <ul>
@@ -6585,6 +6583,34 @@
 </ul>
 <p>Domain of the certificate, replaces the current list. Can be repeated</p>
 <ul>
+<li><code>method</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>none</code></li>
+<li>Usage: <code>-m
+--method</code></li>
+</ul>
+</li>
+</ul>
+<p>Method (provider) to issue and manage the certificate</p>
+<ul>
+<li><code>cert</code>:<ul>
+<li>Type: filename</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--cert</code></li>
+</ul>
+</li>
+</ul>
+<p>PEM certificate or full chain file</p>
+<ul>
+<li><code>key</code>:<ul>
+<li>Type: filename</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--key</code></li>
+</ul>
+</li>
+</ul>
+<p>Unencrypted PEM private key file</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -6594,19 +6620,25 @@
 </ul>
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos secret certificates update [OPTIONS] UUID                                                                                                                                                                                                                                                  </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Update certificate                                                                                                                                                                                                                                                                                        </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --project-id   -p  UUID  Name of the project in which to deploy the certificate                                                                                                                                                                                                                         │</span>
-<span class="go">│ --name         -n  TEXT  Name of the certificate                                                                                                                                                                                                                                                        │</span>
-<span class="go">│ --description  -D  TEXT  Description of the certificate                                                                                                                                                                                                                                                 │</span>
-<span class="go">│ --email        -e  TEXT  Email address to use for the certificate                                                                                                                                                                                                                                       │</span>
-<span class="go">│ --domain       -d  TEXT  Domain of the certificate, replaces the current list. Can be repeated                                                                                                                                                                                                          │</span>
-<span class="go">│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos secret certificates update [OPTIONS] UUID</span>
+
+<span class="go"> Update certificate</span>
+
+<span class="go">╭─ Options ────────────────────────────────────────────────────────────────────╮</span>
+<span class="go">│ --project-id   -p  UUID               Name of the project in which to deploy │</span>
+<span class="go">│                                       the certificate                        │</span>
+<span class="go">│ --name         -n  TEXT               Name of the certificate                │</span>
+<span class="go">│ --description  -D  TEXT               Description of the certificate         │</span>
+<span class="go">│ --email        -e  TEXT               Email address to use for the           │</span>
+<span class="go">│                                       certificate                            │</span>
+<span class="go">│ --domain       -d  TEXT               Domain of the certificate, replaces    │</span>
+<span class="go">│                                       the current list. Can be repeated      │</span>
+<span class="go">│ --method       -m  [dns_core|manual]  Method (provider) to issue and manage  │</span>
+<span class="go">│                                       the certificate                        │</span>
+<span class="go">│ --cert             FILENAME           PEM certificate or full chain file     │</span>
+<span class="go">│ --key              FILENAME           Unencrypted PEM private key file       │</span>
+<span class="go">│ --help                                Show this message and exit.            │</span>
+<span class="go">╰──────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 
