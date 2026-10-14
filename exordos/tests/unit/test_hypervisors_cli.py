@@ -409,6 +409,12 @@ class TestInitCmdRegistration:
         assert kwargs["avail_cores"] == 8
         assert kwargs["avail_ram"] == 16384
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
+        storage = next(
+            field.split("=", 1)[1]
+            for field in kwargs["driver_spec"]
+            if field.startswith("storage_pool=")
+        )
+        assert storage == '[{"name": "default"}]'
 
     def test_add_installs_rawstor_packages_but_no_local_pool(self) -> None:
         """Rawstor initialization only installs the vhost-attaching packages -

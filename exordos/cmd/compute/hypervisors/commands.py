@@ -19,6 +19,7 @@ import base64
 import configparser
 import getpass
 import io
+import json
 import os
 import secrets
 import socket
@@ -1411,7 +1412,12 @@ def init_cmd(
             f"network={network}",
             f"iface_mtu={iface_mtu}",
             f"network_type={network_type}",
-            f"storage_pool={pool_name}",
+            "storage_pool="
+            + (
+                json.dumps([{"name": pool_name}])
+                if connection_uri == DEFAULT_LOCAL_CONNECTION_URI
+                else pool_name
+            ),
             f"connection_uri={connection_uri}",
             f"iface_rom_file={rom_path}",
             f"machine_prefix={machine_prefix}",
