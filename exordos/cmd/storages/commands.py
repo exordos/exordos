@@ -97,9 +97,9 @@ nodes_group = create_entity_group(
         "UUID": "uuid",
         "Name": "name",
         "Cluster": "cluster",
-        "Endpoint": "endpoint",
-        "Failure domain path": "failure_domain_path",
-        "Weight": "weight",
+        "Endpoint": lambda e: e["driver_spec"]["endpoint"],
+        "Failure domain path": lambda e: e["driver_spec"]["failure_domain_path"],
+        "Weight": lambda e: e["driver_spec"]["weight"],
         "Agent": "agent",
         "Status": "status",
     },
@@ -116,9 +116,11 @@ pools_group = create_entity_group(
         "Cluster": "cluster",
         "Speed": "speed",
         "Ephemeral": "ephemeral",
-        "Mirrors": "mirrors",
-        "Failure domain": "failure_domain",
-        "Chunk size": lambda e: utils.human_readable_size(e["chunk_size"]),
+        "Mirrors": lambda e: e["driver_spec"]["mirrors"],
+        "Failure domain": lambda e: e["driver_spec"]["failure_domain"],
+        "Chunk size": lambda e: utils.human_readable_size(
+            e["driver_spec"]["chunk_size"]
+        ),
     },
     group_name="pools",
     post_fetch_handler=_filter_cluster,
@@ -494,9 +496,10 @@ def nodes_add_cmd(
             host_agents.add(agent_entity["uuid"])
             nodes = base_client.list_entities(client, NODE_COLLECTION)
             used = {
-                urlparse("ost://" + n["bind_address"]).port
+                urlparse("ost://" + n["driver_spec"]["bind_address"]).port
                 for n in nodes
-                if n.get("agent") in host_agents and n.get("bind_address")
+                if n.get("agent") in host_agents
+                and n.get("driver_spec", {}).get("bind_address")
             }
             port = next((p for p in range(7777, 65536) if p not in used), None)
             if port is None:
@@ -513,17 +516,19 @@ def nodes_add_cmd(
         "name": name,
         "description": description,
         "cluster": _cluster_uuid(client, cluster),
-        "kind": "rawstor",
         "agent": agent_entity["uuid"],
-        "bind_address": bind_address,
-        "endpoint": endpoint.rstrip("/"),
-        "failure_domain_path": failure_domain_path,
-        "weight": weight,
+        "driver_spec": {
+            "kind": "rawstor",
+            "bind_address": bind_address,
+            "endpoint": endpoint.rstrip("/"),
+            "failure_domain_path": failure_domain_path,
+            "weight": weight,
+        },
     }
     if uuid is not None:
         data["uuid"] = str(uuid)
     if location is not None:
-        data["location"] = location
+        data["driver_spec"]["location"] = location
     show_data(base_client.add_entity(client, NODE_COLLECTION, data))
 
 
@@ -541,9 +546,20 @@ def nodes_update_cmd(ctx, identifier, **kwargs):
     if "endpoint" in data:
         _validate_uri(data["endpoint"], "ost")
         data["endpoint"] = data["endpoint"].rstrip("/")
-    show_data(
-        base_client.update_entity(_client(ctx), NODE_COLLECTION, identifier, data)
-    )
+    client = _client(ctx)
+    spec = {
+        key: data.pop(key)
+        for key in ("endpoint", "bind_address", "failure_domain_path", "weight")
+        if key in data
+    }
+    if spec:
+        previous = base_client.get_entity(client, NODE_COLLECTION, identifier)[
+            "driver_spec"
+        ]
+        if "endpoint" in spec and "bind_address" not in spec:
+            previous.pop("bind_address", None)
+        data["driver_spec"] = {**previous, **spec}
+    show_data(base_client.update_entity(client, NODE_COLLECTION, identifier, data))
 
 
 def _chunk_size(ctx, param, value):
@@ -602,6 +618,14 @@ def pools_add_cmd(ctx, cluster, name, uuid, **kwargs):
         name=name,
         uuid=str(uuid or sys_uuid.uuid4()),
     )
+    data["driver_spec"] = {
+        "kind": "rawstor",
+        **{
+            key: data.pop(key)
+            for key in ("mirrors", "chunk_size", "failure_domain")
+            if key in data
+        },
+    }
     show_data(base_client.add_entity(client, POOL_COLLECTION, data))
 
 
@@ -614,9 +638,18 @@ def pools_update_cmd(ctx, identifier, **kwargs):
     data = {key: value for key, value in kwargs.items() if value is not None}
     if "speed" in data:
         data["speed"] = data["speed"].upper()
-    show_data(
-        base_client.update_entity(_client(ctx), POOL_COLLECTION, identifier, data)
-    )
+    client = _client(ctx)
+    spec = {
+        key: data.pop(key)
+        for key in ("mirrors", "chunk_size", "failure_domain")
+        if key in data
+    }
+    if spec:
+        previous = base_client.get_entity(client, POOL_COLLECTION, identifier)[
+            "driver_spec"
+        ]
+        data["driver_spec"] = {**previous, **spec}
+    show_data(base_client.update_entity(client, POOL_COLLECTION, identifier, data))
 
 
 storages_group.add_command(clusters_group, aliases=["c"])
