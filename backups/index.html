@@ -441,6 +441,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../cli/exordos_backup_snapshot-export/" class="md-nav__link">
+        exordos_backup_snapshot-export
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cli/exordos_backup_snapshot-list/" class="md-nav__link">
         exordos_backup_snapshot-list
       </a>
@@ -6522,6 +6536,20 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#export-full-and-incremental-backups" class="md-nav__link">
+    Export Full and Incremental Backups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-snapshots-to-s3" class="md-nav__link">
+    Export Snapshots to S3
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -6659,6 +6687,63 @@ virsh<span class="w"> </span>start<span class="w"> </span>foo
 <div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot-restore<span class="w"> </span>before-upgrade<span class="w"> </span>-n<span class="w"> </span>o1-a370f746-ecosystem-cp
 </code></pre></div>
 <p><code>zfs rollback</code> refuses to roll back past newer snapshots of the same zvol; destroy them first if needed.</p>
+<h3 id="export-full-and-incremental-backups">Export Full and Incremental Backups<a class="headerlink" href="#export-full-and-incremental-backups" title="Permanent link">#</a></h3>
+<p>Create a snapshot, then export one ZFS stream per selected VM zvol:</p>
+<div class="highlight"><pre><span></span><code>exordos<span class="w"> </span>backup<span class="w"> </span>snapshot<span class="w"> </span>-n<span class="w"> </span>vm1<span class="w"> </span>-s<span class="w"> </span>baseline
+exordos<span class="w"> </span>backup<span class="w"> </span>snapshot-export<span class="w"> </span>baseline<span class="w"> </span>-n<span class="w"> </span>vm1<span class="w"> </span>-d<span class="w"> </span>/backups
+exordos<span class="w"> </span>backup<span class="w"> </span>snapshot<span class="w"> </span>-n<span class="w"> </span>vm1<span class="w"> </span>-s<span class="w"> </span>next
+exordos<span class="w"> </span>backup<span class="w"> </span>snapshot-export<span class="w"> </span>next<span class="w"> </span>-n<span class="w"> </span>vm1<span class="w"> </span>--base-snapshot<span class="w"> </span>baseline<span class="w"> </span>-d<span class="w"> </span>/backups
+</code></pre></div>
+<p>Without <code>--base-snapshot</code>, the export uses <code>zfs send</code> for a full backup.
+With it, the export uses <code>zfs send -i</code> for changes since the base snapshot.
+Both snapshots must exist on every selected disk, and the base must precede
+the target. The command validates all sends before exporting any disk.</p>
+<p>Files are named <code>&lt;encoded-dataset&gt;@&lt;snapshot&gt;.zfs</code>, or
+<code>&lt;encoded-dataset&gt;@&lt;snapshot&gt;--from-&lt;base&gt;.zfs</code> for incremental exports.
+Dataset slashes are encoded as <code>%2F</code>. Existing local files are never overwritten,
+and failed sends leave no partial stream file. Completed disk exports remain
+if a later disk fails; multi-disk exports are not atomic.</p>
+<p>Receive the full stream first, then each incremental stream in chain order:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>zfs<span class="w"> </span>receive<span class="w"> </span>backup/vm1-disk<span class="w"> </span>&lt;<span class="w"> </span><span class="s1">'/backups/rpool%2Fdisks%2Fa@baseline.zfs'</span>
+sudo<span class="w"> </span>zfs<span class="w"> </span>receive<span class="w"> </span>backup/vm1-disk<span class="w"> </span>&lt;<span class="w"> </span><span class="s1">'/backups/rpool%2Fdisks%2Fa@next--from-baseline.zfs'</span>
+</code></pre></div>
+<p>The receiving dataset must be at the incremental stream's base snapshot.
+Keep the full export and every increment needed to reconstruct the target.
+These streams contain disk data; preserve the VM's libvirt XML separately.
+Exports retain the crash consistency of the source snapshots.</p>
+<h3 id="export-snapshots-to-s3">Export Snapshots to S3<a class="headerlink" href="#export-snapshots-to-s3" title="Permanent link">#</a></h3>
+<p>Use <code>--s3-config</code> with the existing S3 backup driver configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">driver</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">S3QcowBackuper</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">endpoint_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://s3.example.com</span>
+<span class="w">    </span><span class="nt">access_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">YOUR_ACCESS_KEY</span>
+<span class="w">    </span><span class="nt">secret_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">YOUR_SECRET_KEY</span>
+<span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hypervisor1</span>
+<span class="w">    </span><span class="nt">bucket_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vm-backups</span>
+<span class="w">    </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
+</code></pre></div>
+<p>Create the bucket before exporting. Protect the configuration file because it
+contains credentials. Set <code>--s3-prefix</code> to distinguish hosts or backup chains;
+its default is <code>snapshots</code>. The driver's <code>host</code> setting is not added to the
+export prefix automatically.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Full export to S3 only</span>
+exordos<span class="w"> </span>backup<span class="w"> </span>snapshot-export<span class="w"> </span>baseline<span class="w"> </span>-n<span class="w"> </span>vm1<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--s3-config<span class="w"> </span>/path/to/s3.yaml<span class="w"> </span>--s3-prefix<span class="w"> </span>hypervisor1/vm1
+
+<span class="c1"># Incremental export to S3, retaining a local copy</span>
+exordos<span class="w"> </span>backup<span class="w"> </span>snapshot-export<span class="w"> </span>next<span class="w"> </span>-n<span class="w"> </span>vm1<span class="w"> </span>--base-snapshot<span class="w"> </span>baseline<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--s3-config<span class="w"> </span>/path/to/s3.yaml<span class="w"> </span>--s3-prefix<span class="w"> </span>hypervisor1/vm1<span class="w"> </span>-d<span class="w"> </span>/backups
+</code></pre></div>
+<p>Each completed disk stream is uploaded under <code>&lt;prefix&gt;/&lt;export-filename&gt;</code>.
+S3-only exports temporarily spool one disk stream to the system temporary
+directory, so it needs enough free space for that stream. With <code>--backup-dir</code>,
+that directory holds the temporary stream and the completed local copy.
+Temporary files are removed on success or failure; local copies remain if an
+upload fails. Uploads reuse the S3 client's retries, multipart support, and
+object size verification. Existing S3 keys are replaced on repeated exports.
+If a later disk fails, earlier completed uploads remain.</p>
+<p>To restore, download each full and incremental stream from S3 and receive them
+in chain order as described above.</p>
 
 
 

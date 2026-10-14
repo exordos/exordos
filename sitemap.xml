@@ -120,6 +120,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_backup_snapshot-delete/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_backup_snapshot-export/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_backup_snapshot-export/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_backup_snapshot-export/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_backup_snapshot-list/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -3177,6 +3184,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_backup_snapshot-delete/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_backup_snapshot-delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_backup_snapshot-export/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_backup_snapshot-export/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_backup_snapshot-export/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_backup_snapshot-list/</loc>
