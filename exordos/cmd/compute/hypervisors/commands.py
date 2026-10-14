@@ -114,7 +114,7 @@ ENTITY_COLLECTION = c.HYPERVISOR_COLLECTION
 
 
 def _pool0(entity: dict, field: str, default: str = "Unknown"):
-    """First storage pool's value for `field`, e.g. "Speed"/"Total".
+    """First storage pool's value for `field`, e.g. "Tier"/"Total".
 
     A hypervisor can self-report more than one pool (its own qcow2 pool
     plus any rawstor ones), same as a storage cluster - showing
@@ -134,7 +134,7 @@ FIELDS_MAP = {
     "Avail cores": "avail_cores",
     "All ram": "all_ram",
     "Avail ram": "avail_ram",
-    "Speed": lambda e: _pool0(e, "speed"),
+    "Tier": lambda e: _pool0(e, "tier"),
     "Ephemeral": lambda e: _pool0(e, "ephemeral"),
     "Total": lambda e: _pool0(e, "capacity_usable"),
     "Available": lambda e: _pool0(e, "available_actual"),

@@ -6,9 +6,9 @@ None
 ## Usage
 
 ```console
-
- Usage: exordos storages pools update [OPTIONS] IDENTIFIER
-
+                                                                                
+ Usage: exordos storages pools update [OPTIONS] IDENTIFIER                      
+                                                                                
 ```
 
 ## Options
@@ -48,10 +48,10 @@ None
     * Default: `none`
     * Usage: `--ephemeral`
 
-* `speed`:
+* `tier`:
     * Type: choice
     * Default: `none`
-    * Usage: `--speed`
+    * Usage: `--tier`
 
 * `help`:
     * Type: boolean
@@ -63,7 +63,7 @@ None
 ## CLI Help
 
 ```console
-
- Usage: exordos storages pools update [OPTIONS] IDENTIFIER
-
+                                                                                
+ Usage: exordos storages pools update [OPTIONS] IDENTIFIER                      
+                                                                                
 ```

@@ -34,7 +34,7 @@ from exordos.common.run import run_command
 from exordos.common.table import show_data
 from exordos.logger import ClickLogger
 
-DISK_SPEEDS = ["COLD", "WARM", "HOT"]
+DISK_TIERS = ["COLD", "WARM", "HOT"]
 RAWSTOR_OST_ENDPOINT_PORT = 7777
 NODE_COLLECTION = "v1/storage/nodes/"
 POOL_COLLECTION = "v1/storage/pools/"
@@ -114,7 +114,7 @@ pools_group = create_entity_group(
         "UUID": "uuid",
         "Name": "name",
         "Cluster": "cluster",
-        "Speed": "speed",
+        "Tier": "tier",
         "Ephemeral": "ephemeral",
         "Mirrors": lambda e: e["driver_spec"]["mirrors"],
         "Failure domain": lambda e: e["driver_spec"]["failure_domain"],
@@ -156,7 +156,7 @@ def _validate_uri(value, scheme):
 
 
 @clusters_group.command(
-    "add", help="Create a core MDS with persistent and ephemeral WARM pools"
+    "add", help="Create a core MDS with persistent and ephemeral COLD pools"
 )
 @click.option("--type", "storage_type", type=click.Choice(["rawstor"]), required=True)
 @click.option("--name", required=True)
@@ -584,8 +584,8 @@ def _chunk_size(ctx, param, value):
 def _pool_options(f):
     for option in [
         click.option(
-            "--speed",
-            type=click.Choice(DISK_SPEEDS, case_sensitive=False),
+            "--tier",
+            type=click.Choice(DISK_TIERS, case_sensitive=False),
             default=None,
         ),
         click.option("--ephemeral/--no-ephemeral", default=None),
@@ -611,8 +611,8 @@ def _pool_options(f):
 def pools_add_cmd(ctx, cluster, name, uuid, **kwargs):
     client = _client(ctx)
     data = {key: value for key, value in kwargs.items() if value is not None}
-    if "speed" in data:
-        data["speed"] = data["speed"].upper()
+    if "tier" in data:
+        data["tier"] = data["tier"].upper()
     data.update(
         cluster=_cluster_uuid(client, cluster),
         name=name,
@@ -636,8 +636,8 @@ def pools_add_cmd(ctx, cluster, name, uuid, **kwargs):
 @click.pass_context
 def pools_update_cmd(ctx, identifier, **kwargs):
     data = {key: value for key, value in kwargs.items() if value is not None}
-    if "speed" in data:
-        data["speed"] = data["speed"].upper()
+    if "tier" in data:
+        data["tier"] = data["tier"].upper()
     client = _client(ctx)
     spec = {
         key: data.pop(key)

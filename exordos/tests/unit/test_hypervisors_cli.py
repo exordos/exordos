@@ -79,23 +79,23 @@ def _patch_common_init_deps():
 
 class TestPool0:
     """Tests for exordos.cmd.compute.hypervisors.commands._pool0, which
-    backs the Speed/Ephemeral/Total/Available columns in `hypervisors list`.
+    backs the Tier/Ephemeral/Total/Available columns in `hypervisors list`.
     """
 
     def test_extracts_the_first_pool_field(self) -> None:
         entity = {
             "storage_pools": [
-                {"speed": "HOT", "ephemeral": False, "capacity_usable": 100},
-                {"speed": "COLD", "ephemeral": True, "capacity_usable": 50},
+                {"tier": "HOT", "ephemeral": False, "capacity_usable": 100},
+                {"tier": "COLD", "ephemeral": True, "capacity_usable": 50},
             ]
         }
 
-        assert hv_commands._pool0(entity, "speed") == "HOT"
+        assert hv_commands._pool0(entity, "tier") == "HOT"
         assert hv_commands._pool0(entity, "capacity_usable") == 100
 
     def test_defaults_to_unknown_without_storage_pools(self) -> None:
-        assert hv_commands._pool0({}, "speed") == "Unknown"
-        assert hv_commands._pool0({"storage_pools": []}, "speed") == "Unknown"
+        assert hv_commands._pool0({}, "tier") == "Unknown"
+        assert hv_commands._pool0({"storage_pools": []}, "tier") == "Unknown"
 
 
 class TestDetectLocalResources:
@@ -1655,6 +1655,8 @@ class TestZfsSnapshotCommands:
         assert result.exit_code == 0
         assert "No ZFS snapshots found" in result.output
         destroy.assert_not_called()
+
+
 class TestRawstorArtifacts:
     def test_ci_artifact_packages_use_the_pinned_run_and_install_dependencies(self):
         with patch.object(hv_commands, "run_command") as run:

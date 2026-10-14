@@ -307,7 +307,7 @@ def test_pool_add_accepts_replication_and_chunk_policy(api):
             "256MiB",
             "--failure-domain",
             "rack",
-            "--speed",
+            "--tier",
             "warm",
             "--no-ephemeral",
         ]
@@ -317,7 +317,7 @@ def test_pool_add_accepts_replication_and_chunk_policy(api):
     assert data["driver_spec"]["mirrors"] == 2
     assert data["driver_spec"]["chunk_size"] == 256 << 20
     assert data["driver_spec"]["failure_domain"] == "rack"
-    assert data["speed"] == "WARM"
+    assert data["tier"] == "WARM"
     assert data["ephemeral"] is False
 
 

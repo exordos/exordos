@@ -100,11 +100,11 @@ sets_group = create_entity_group(
     help="Name of the image to deploy",
 )
 @click.option(
-    "--speed",
+    "--tier",
     type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
-    default="HOT",
+    default="WARM",
     show_default=True,
-    help="Speed tier to schedule the root disk onto",
+    help="Storage tier to schedule the root disk onto",
 )
 @click.option(
     "--ephemeral/--no-ephemeral",
@@ -149,7 +149,7 @@ def add_cmd(
     ram: int,
     root_disk: int,
     image: str,
-    speed: str,
+    tier: str,
     ephemeral: bool,
     name: str,
     description: str,
@@ -174,7 +174,7 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
-            "speed": speed,
+            "tier": tier,
             "ephemeral": ephemeral,
         },
     }
