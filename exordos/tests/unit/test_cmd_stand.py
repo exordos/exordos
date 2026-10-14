@@ -104,6 +104,51 @@ def _write_realm(args: tuple) -> None:
     )
 
 
+@pytest.mark.parametrize("current_context", ["admin", "operator"])
+def test_update_realm_config_refreshes_admin_credentials(tmp_path, current_context):
+    cfg_path = tmp_path / "exordosctl.yaml"
+    operator = {"user": "operator", "password": "operator-password"}
+    cfg_path.write_text(
+        yaml.safe_dump(
+            {
+                "current-realm": "test",
+                "realms": {
+                    "test": {
+                        "contexts": {
+                            "admin": {
+                                "user": "admin",
+                                "password": "old-password",
+                                "access_token": "old-access-token",
+                                "refresh_token": "old-refresh-token",
+                            },
+                            "operator": operator,
+                        },
+                        "current-context": current_context,
+                    }
+                },
+            }
+        )
+    )
+
+    commands._update_realm_config(
+        "test",
+        ipaddress.IPv4Address("10.31.0.2"),
+        ipaddress.IPv4Network("10.31.0.0/22"),
+        "new-password",
+        str(cfg_path),
+    )
+
+    config = yaml.safe_load(cfg_path.read_text())
+    realm = config["realms"]["test"]
+    assert realm["contexts"]["admin"] == {
+        "user": "admin",
+        "password": "new-password",
+    }
+    assert realm["contexts"]["operator"] == operator
+    assert realm["current-context"] == current_context
+    assert realm["endpoint"] == "http://10.31.0.2/api/core"
+
+
 def test_update_realm_config_keeps_parallel_writes(tmp_path) -> None:
     cfg_path = str(tmp_path / "exordosctl.yaml")
     names = [f"test{i}" for i in range(8)]
