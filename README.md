@@ -32,6 +32,18 @@ Install the CLI with a single command:
 curl -fsSL https://repo.exordos.com/install.sh | sh
 ```
 
+## Check element releases
+
+List releases directly from `repo.exordos.com`, without a running core or login:
+
+```console
+exordos repo versions core --stable -o json
+```
+
+Versions are sorted newest first. The `latest` boolean marks the release behind
+the repository's published `latest` alias. Use `--repo-url` for another element
+repository, or omit `--stable` to include development releases.
+
 ## What Exordos CLI does
 
 Exordos CLI bridges the gap between your local development environment and the Exordos Core platform. With a self-contained installation you can:

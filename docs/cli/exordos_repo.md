@@ -6,9 +6,9 @@ Manage Exordos repository
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos repo [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos repo [OPTIONS] COMMAND [ARGS]...
+
 ```
 
 ## Options
@@ -23,24 +23,25 @@ Manage Exordos repository
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos repo [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
- Manage Exordos repository                                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help  Show this message and exit.                                                                                                                                                                                                                                                                     │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ add                                                   Add a new repository                                                                                                                                                                                                                              │
-│ delete                                                Delete repository                                                                                                                                                                                                                                 │
-│ elements                                              Manage repo elements                                                                                                                                                                                                                              │
-│ list                                                  List repositorys                                                                                                                                                                                                                                  │
-│ push                                                  Push the element to the repository                                                                                                                                                                                                                │
-│ refresh                                               Refresh repository                                                                                                                                                                                                                                │
-│ show                                                  Show repository                                                                                                                                                                                                                                   │
-│ store                                                 Manage stores in the Exordos installation                                                                                                                                                                                                         │
-│ update                                                Update repository                                                                                                                                                                                                                                 │
-│ upload                                                Upload element to repository                                                                                                                                                                                                                      │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos repo [OPTIONS] COMMAND [ARGS]...
+
+ Manage Exordos repository
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help  Show this message and exit.                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ add       Add a new repository                                               │
+│ delete    Delete repository                                                  │
+│ elements  Manage repo elements                                               │
+│ list      List repositorys                                                   │
+│ push      Push the element to the repository                                 │
+│ refresh   Refresh repository. Refresh all lazy repositories if not specified │
+│ show      Show repository                                                    │
+│ store     Manage stores in the Exordos installation                          │
+│ update    Update repository                                                  │
+│ upload    Upload element to repository                                       │
+│ versions  List element versions directly from a repository                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

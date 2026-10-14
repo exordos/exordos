@@ -923,3 +923,72 @@ class TestRepositoryRefreshCmd:
         assert "repo1" in result.output
         assert "boom" in result.output
         assert "was refreshed successfully" in result.output
+
+
+class TestRepositoryVersions:
+    def _invoke(self, versions, latest="1.10.0", args=()):
+        def get(url):
+            if url.endswith("/demo/latest/inventory.json"):
+                return json.dumps({"version": latest}).encode()
+            assert url == "https://repo.exordos.com/exordos-elements/inventory.json"
+            return json.dumps({"elements": {"demo": dict.fromkeys(versions)}}).encode()
+
+        with patch("exordos.clients.repo._http_get", side_effect=get):
+            return CliRunner().invoke(
+                repo_commands.repository_group,
+                ["versions", "demo", "-o", "json", *args],
+            )
+
+    def test_versions_numeric_order_and_latest_alias(self):
+        result = self._invoke(["1.9.0", "1.10.0", "2.0.0", "latest", "invalid"])
+        assert result.exit_code == 0, result.output
+        assert json.loads(result.output) == [
+            {"version": "2.0.0", "latest": False},
+            {"version": "1.10.0", "latest": True},
+            {"version": "1.9.0", "latest": False},
+        ]
+
+    def test_versions_stable_excludes_prereleases(self):
+        result = self._invoke(
+            ["1.9.0", "1.10.0", "2.0.0rc1", "2.0.0.dev1"], args=["--stable"]
+        )
+        assert result.exit_code == 0, result.output
+        assert [e["version"] for e in json.loads(result.output)] == ["1.10.0", "1.9.0"]
+
+    def test_versions_includes_prereleases_by_default(self):
+        result = self._invoke(["1.10.0", "2.0.0rc1"])
+        assert result.exit_code == 0, result.output
+        assert json.loads(result.output)[0]["version"] == "2.0.0rc1"
+
+    def test_versions_custom_repository_and_table_output(self):
+        with patch.object(repo_commands.repo_client, "Repository") as repository:
+            repository.return_value.get_element_versions_by_inventory.return_value = [
+                "1.0.0"
+            ]
+            repository.return_value.get_latest_version.return_value = "1.0.0"
+            result = CliRunner().invoke(
+                repo_commands.repository_group,
+                ["versions", "demo", "--repo-url", "https://example.test/elements/"],
+            )
+        assert result.exit_code == 0, result.output
+        repository.assert_called_once_with("https://example.test/elements")
+        assert "1.0.0" in result.output and "yes" in result.output
+
+    def test_versions_repository_failure_reports_error(self):
+        with patch(
+            "exordos.clients.repo._http_get",
+            side_effect=RuntimeError("repo unavailable"),
+        ):
+            result = CliRunner().invoke(
+                repo_commands.repository_group, ["versions", "demo"]
+            )
+        assert result.exit_code == 1
+        assert "repo unavailable" in result.output
+
+    def test_versions_missing_element_reports_error(self):
+        with patch("exordos.clients.repo._http_get", return_value=b'{"elements": {}}'):
+            result = CliRunner().invoke(
+                repo_commands.repository_group, ["versions", "missing"]
+            )
+        assert result.exit_code == 1
+        assert "missing" in result.output
