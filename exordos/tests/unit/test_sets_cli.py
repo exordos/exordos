@@ -13,8 +13,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import uuid as sys_uuid
 from unittest.mock import patch
+import uuid as sys_uuid
 
 from click.testing import CliRunner
 
@@ -33,11 +33,11 @@ def _obj() -> ContextObject:
 
 
 class TestAddCmdDiskSpec:
-    """`--disk-type` (disk_kind) was replaced by --speed/--ephemeral,
-    matching RootDiskSpec's real speed/ephemeral fields directly.
+    """`--disk-type` (disk_kind) was replaced by --tier/--ephemeral,
+    matching RootDiskSpec's real tier/ephemeral fields directly.
     """
 
-    def test_speed_and_ephemeral_are_forwarded(self) -> None:
+    def test_tier_and_ephemeral_are_forwarded(self) -> None:
         runner = CliRunner()
         with (
             patch.object(sets_commands.base_client, "get_user_api_client"),
@@ -51,7 +51,7 @@ class TestAddCmdDiskSpec:
                     str(sys_uuid.uuid4()),
                     "--image",
                     "ubuntu_24.04",
-                    "--speed",
+                    "--tier",
                     "COLD",
                     "--ephemeral",
                 ],
@@ -60,6 +60,6 @@ class TestAddCmdDiskSpec:
 
         assert result.exit_code == 0, result.output
         data = add_mock.call_args.args[2]
-        assert data["disk_spec"]["speed"] == "COLD"
+        assert data["disk_spec"]["tier"] == "COLD"
         assert data["disk_spec"]["ephemeral"] is True
         assert "disk_kind" not in data["disk_spec"]

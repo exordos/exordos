@@ -1,7 +1,7 @@
 
 # exordos_storages_clusters_add
 
-Create a core MDS with persistent and ephemeral WARM pools
+Create a core MDS with persistent and ephemeral COLD pools
 
 ## Usage
 

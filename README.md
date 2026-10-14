@@ -65,7 +65,7 @@ and `--failure-domain-path dc/row/rack/server`. Use `init --pool-agent-name` for
 The host agent starts each OST;
 core admits it into the MDS topology after readiness confirmation.
 Each cluster gets WARM persistent (two mirrors) and ephemeral (one mirror) pools
-sharing its physical capacity. Local qcow2 disks default to HOT ephemeral.
+sharing its physical capacity. Local qcow2 disks default to WARM ephemeral.
 See [Rawstor storage](docs/rawstor.md) for ports, policy CRUD and space accounting.
 
 `RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `38178429887`.

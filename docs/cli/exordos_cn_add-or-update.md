@@ -6,9 +6,9 @@ Add a new node or update an existing one
 ## Usage
 
 ```console
-
- Usage: exordos cn add-or-update [OPTIONS]
-
+                                                                                
+ Usage: exordos cn add-or-update [OPTIONS]                                      
+                                                                                
 ```
 
 ## Options
@@ -61,12 +61,12 @@ Add a new node or update an existing one
 
   Name of the image to deploy
 
-* `speed`:
+* `tier`:
     * Type: choice
-    * Default: `hot`
-    * Usage: `--speed`
+    * Default: `warm`
+    * Usage: `--tier`
 
-  Speed tier to schedule the root disk onto
+  Storage tier to schedule the root disk onto
 
 * `ephemeral`:
     * Type: boolean
@@ -115,7 +115,7 @@ Add a new node or update an existing one
 ## CLI Help
 
 ```console
-
- Usage: exordos cn add-or-update [OPTIONS]
-
+                                                                                
+ Usage: exordos cn add-or-update [OPTIONS]                                      
+                                                                                
 ```

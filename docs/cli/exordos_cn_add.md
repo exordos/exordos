@@ -6,9 +6,9 @@ Add a new node to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos cn add [OPTIONS]
-
+                                                                                
+ Usage: exordos cn add [OPTIONS]                                                
+                                                                                
 ```
 
 ## Options
@@ -61,12 +61,12 @@ Add a new node to the Exordos installation
 
   Name of the image to deploy
 
-* `speed`:
+* `tier`:
     * Type: choice
-    * Default: `hot`
-    * Usage: `--speed`
+    * Default: `warm`
+    * Usage: `--tier`
 
-  Speed tier to schedule the root disk onto
+  Storage tier to schedule the root disk onto
 
 * `ephemeral`:
     * Type: boolean
@@ -91,6 +91,13 @@ Add a new node to the Exordos installation
 
   Description of the node
 
+* `hostname`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--hostname`
+
+  Hostname of the node
+
 * `wait`:
     * Type: boolean
     * Default: `false`
@@ -108,11 +115,11 @@ Add a new node to the Exordos installation
 ## CLI Help
 
 ```console
-
- Usage: exordos cn add [OPTIONS]
-
- Add a new node to the Exordos installation
-
+                                                                                
+ Usage: exordos cn add [OPTIONS]                                                
+                                                                                
+ Add a new node to the Exordos installation                                     
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │    --uuid                    -u  UUID             UUID of the node           │
 │ *  --project-id              -p  UUID             Name of the project in     │
@@ -129,14 +136,15 @@ Add a new node to the Exordos installation
 │                                                   [default: 10]              │
 │ *  --image                   -i  TEXT             Name of the image to       │
 │                                                   deploy [required]          │
-│    --speed                       [cold|warm|hot]  Speed tier to schedule the │
-│                                                   root disk onto [default:   │
-│                                                   HOT]                       │
+│    --tier                        [cold|warm|hot]  Storage tier to schedule   │
+│                                                   the root disk onto         │
+│                                                   [default: WARM]            │
 │    --ephemeral/--no-ephemer                       Whether the root disk is   │
 │    al                                             ephemeral storage          │
 │                                                   [default: ephemeral]       │
 │    --name                    -n  TEXT             Name of the node           │
 │    --description             -D  TEXT             Description of the node    │
+│    --hostname                    TEXT             Hostname of the node       │
 │    --wait                                         Wait until the node is     │
 │                                                   running                    │
 │    --help                                         Show this message and      │

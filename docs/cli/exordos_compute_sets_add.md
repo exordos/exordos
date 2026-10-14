@@ -6,9 +6,9 @@ Add a new set to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
+                                                                                
+ Usage: exordos compute sets add [OPTIONS]                                      
+                                                                                
 ```
 
 ## Options
@@ -61,12 +61,12 @@ Add a new set to the Exordos installation
 
   Name of the image to deploy
 
-* `speed`:
+* `tier`:
     * Type: choice
-    * Default: `hot`
-    * Usage: `--speed`
+    * Default: `warm`
+    * Usage: `--tier`
 
-  Speed tier to schedule the root disk onto
+  Storage tier to schedule the root disk onto
 
 * `ephemeral`:
     * Type: boolean
@@ -115,11 +115,11 @@ Add a new set to the Exordos installation
 ## CLI Help
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
- Add a new set to the Exordos installation
-
+                                                                                
+ Usage: exordos compute sets add [OPTIONS]                                      
+                                                                                
+ Add a new set to the Exordos installation                                      
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │    --uuid                    -u  UUID             UUID of the set            │
 │ *  --project-id              -p  UUID             UUID of the project in     │
@@ -136,9 +136,9 @@ Add a new set to the Exordos installation
 │                                                   in the set [default: 10]   │
 │ *  --image                   -i  TEXT             Name of the image to       │
 │                                                   deploy [required]          │
-│    --speed                       [cold|warm|hot]  Speed tier to schedule the │
-│                                                   root disk onto [default:   │
-│                                                   HOT]                       │
+│    --tier                        [cold|warm|hot]  Storage tier to schedule   │
+│                                                   the root disk onto         │
+│                                                   [default: WARM]            │
 │    --ephemeral/--no-ephemer                       Whether the root disk is   │
 │    al                                             ephemeral storage          │
 │                                                   [default: ephemeral]       │

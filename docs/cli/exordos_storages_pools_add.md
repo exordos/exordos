@@ -6,9 +6,9 @@ Add a policy sharing its cluster's capacity
 ## Usage
 
 ```console
-
- Usage: exordos storages pools add [OPTIONS]
-
+                                                                                
+ Usage: exordos storages pools add [OPTIONS]                                    
+                                                                                
 ```
 
 ## Options
@@ -53,10 +53,10 @@ Add a policy sharing its cluster's capacity
     * Default: `none`
     * Usage: `--ephemeral`
 
-* `speed`:
+* `tier`:
     * Type: choice
     * Default: `none`
-    * Usage: `--speed`
+    * Usage: `--tier`
 
 * `help`:
     * Type: boolean
@@ -68,7 +68,7 @@ Add a policy sharing its cluster's capacity
 ## CLI Help
 
 ```console
-
- Usage: exordos storages pools add [OPTIONS]
-
+                                                                                
+ Usage: exordos storages pools add [OPTIONS]                                    
+                                                                                
 ```
