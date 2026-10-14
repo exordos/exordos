@@ -24,6 +24,21 @@ EMPTY = {"uuid": "e1", "name": "empty", "version": "0.0.14", "status": "ACTIVE"}
 DEPENDENT = {"uuid": "e2", "name": "dependent", "version": "1.0.0", "status": "ACTIVE"}
 
 
+def test_list_cmd_orders_elements_by_name() -> None:
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            commands.base_client, "list_entities", return_value=[EMPTY, DEPENDENT]
+        ),
+    ):
+        result = CliRunner().invoke(
+            commands.ee_group, ["list"], obj=SimpleNamespace(auth_data={})
+        )
+
+    assert result.exit_code == 0, result.output
+    assert result.output.index("dependent") < result.output.index("empty")
+
+
 def _invoke_clear(listings: list, action_side_effect=None, args=()) -> tuple:
     with (
         mock.patch.object(commands.base_client, "get_user_api_client"),

@@ -68,6 +68,10 @@ FIELDS_MAP = {
 }
 
 
+def _sort_elements_by_name(entities: list[dict], kwargs: dict) -> list[dict]:
+    return sorted(entities, key=lambda element: element.get("name", ""))
+
+
 ee_group = create_entity_group(
     ENTITY,
     ENTITY_COLLECTION,
@@ -75,6 +79,7 @@ ee_group = create_entity_group(
     "ee",
     add_show_command=False,
     add_delete_command=False,
+    post_fetch_handler=_sort_elements_by_name,
 )
 
 
