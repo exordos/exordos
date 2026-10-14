@@ -6,9 +6,9 @@ Add a new node to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos compute cn add [OPTIONS]
-
+                                                                                
+ Usage: exordos compute cn add [OPTIONS]                                        
+                                                                                
 ```
 
 ## Options
@@ -61,12 +61,12 @@ Add a new node to the Exordos installation
 
   Name of the image to deploy
 
-* `speed`:
+* `tier`:
     * Type: choice
-    * Default: `hot`
-    * Usage: `--speed`
+    * Default: `warm`
+    * Usage: `--tier`
 
-  Speed tier to schedule the root disk onto
+  Storage tier to schedule the root disk onto
 
 * `ephemeral`:
     * Type: boolean
@@ -90,6 +90,13 @@ Add a new node to the Exordos installation
 --description`
 
   Description of the node
+
+* `hostname`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--hostname`
+
+  Hostname of the node
 
 * `wait`:
     * Type: boolean
