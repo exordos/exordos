@@ -353,6 +353,36 @@ class TestWaitForElementActive:
         client.filter.return_value = [{"name": "foo", "status": "ACTIVE"}]
         repo_utils.wait_for_element_active(client, "foo", "1.0.0", timeout=5)
 
+    def test_waits_for_api_after_core_restart(self):
+        import requests
+
+        response = requests.Response()
+        response.status_code = 502
+        unavailable = bazooka_exc.BaseHTTPException(
+            requests.HTTPError(response=response)
+        )
+        client = MagicMock()
+        client.filter.side_effect = [
+            [{"status": "ACTIVE"}],
+            unavailable,
+            requests.ConnectionError("core restarting"),
+            [{"status": "ACTIVE"}],
+            [{"status": "ACTIVE"}],
+        ]
+        with patch("exordos.repo.utils.time.sleep"):
+            repo_utils.wait_for_element_active(
+                client, "core", "dev", 30, stable_checks=2
+            )
+        assert client.filter.call_count == 5
+
+    def test_unavailable_api_still_obeys_deadline(self):
+        import requests
+
+        client = MagicMock()
+        client.filter.side_effect = requests.ConnectionError("core restarting")
+        with pytest.raises(click.ClickException, match="Timed out"):
+            repo_utils.wait_for_element_active(client, "core", "dev", timeout=-1)
+
     def test_raises_on_error_status(self) -> None:
         client = MagicMock()
         client.filter.return_value = [{"name": "foo", "status": "ERROR"}]

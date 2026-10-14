@@ -26,6 +26,7 @@ import typing as tp
 import uuid as sys_uuid
 
 from bazooka import exceptions as bazooka_exc
+import requests
 import rich_click as click
 import yaml
 
@@ -357,9 +358,18 @@ def wait_for_element_active(
     deadline = time.monotonic() + timeout
     active_streak = 0
     while True:
-        elements = base_client.list_entities(
-            client, c.ELEMENT_COLLECTION, name=name, version=version
-        )
+        try:
+            elements = base_client.list_entities(
+                client, c.ELEMENT_COLLECTION, name=name, version=version
+            )
+        except (requests.ConnectionError, requests.Timeout):
+            elements = []
+        except bazooka_exc.BaseHTTPException as error:
+            if error.cause.response.status_code not in (502, 503, 504):
+                raise
+            elements = []
+        if not elements:
+            active_streak = 0
         if elements:
             status = elements[0].get("status")
             if status == "ACTIVE":
