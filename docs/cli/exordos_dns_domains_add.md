@@ -45,6 +45,13 @@ Add a new domain
 
   Sync the domain to the ecosystem
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -65,6 +72,7 @@ Add a new domain
 │ *  --project-id         -p  UUID  Name of the project in which to deploy the domain [required]                                                                                                                                                                                                          │
 │    --name               -n  TEXT  Name of the domain                                                                                                                                                                                                                                                    │
 │    --sync-to-ecosystem  -s        Sync the domain to the ecosystem                                                                                                                                                                                                                                      │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │    --help                         Show this message and exit.                                                                                                                                                                                                                                           │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -61,6 +61,13 @@ Add a new secret to the Exordos installation
 
   Value of the secret to fall back on while the value is unset
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -83,6 +90,7 @@ Add a new secret to the Exordos installation
 │    --description    -D  TEXT  Description of the secret                                                                                                                                                                                                                                                 │
 │    --value          -v  TEXT  Value of the secret                                                                                                                                                                                                                                                       │
 │    --default-value  -d  TEXT  Value of the secret to fall back on while the value is unset                                                                                                                                                                                                              │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

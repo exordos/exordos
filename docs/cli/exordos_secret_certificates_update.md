@@ -1,4 +1,3 @@
-
 # exordos_secret_certificates_update
 
 Update certificate
@@ -79,6 +78,19 @@ Update certificate
     * Usage: `--key`
 
   Unencrypted PEM private key file
+* `clear_tags`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--clear-tags`
+
+  Remove all tags.
+
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
 
 * `help`:
     * Type: boolean
@@ -108,6 +120,8 @@ Update certificate
 │                                       the certificate                        │
 │ --cert             FILENAME           PEM certificate or full chain file     │
 │ --key              FILENAME           Unencrypted PEM private key file       │
+│ --clear-tags                          Remove all tags.                       │
+│ --tag              TEXT               Set the complete tag list.             │
 │ --help                                Show this message and exit.            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```

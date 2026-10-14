@@ -72,6 +72,13 @@ Add a new idp to the Exordos installation
 
   JSON string for callbacks
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -96,6 +103,7 @@ Add a new idp to the Exordos installation
 │    --scope               TEXT  scope                                                                                                                                                                                                                                                                    │
 │    --nonce_required                                                                                                                                                                                                                                                                                     │
 │ *  --callback            TEXT  JSON string for callbacks [required]                                                                                                                                                                                                                                     │
+│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
 │    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
