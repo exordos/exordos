@@ -572,3 +572,31 @@ def test_local_storage_agent_selection_can_be_cancelled(api):
         )
     assert result.exit_code != 0
     api.add.assert_not_called()
+
+
+def test_cluster_add_passes_managed_ost_count_and_data_size(api):
+    result = invoke(
+        [
+            "clusters",
+            "add",
+            "--type",
+            "rawstor",
+            "--name",
+            "storage1",
+            "--nodes",
+            "3",
+            "--size",
+            "30",
+        ]
+    )
+    assert result.exit_code == 0, result.output
+    payload = api.add.call_args.args[2]
+    assert payload["nodes"] == 3
+    assert payload["size"] == 30
+
+
+def test_cluster_add_defaults_to_no_managed_nodes(api):
+    result = invoke(["clusters", "add", "--type", "rawstor", "--name", "storage1"])
+    assert result.exit_code == 0, result.output
+    payload = api.add.call_args.args[2]
+    assert payload["nodes"] == 0 and payload["size"] == 10
