@@ -372,6 +372,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_compute_sets_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_compute_sets_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_compute_sets_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_compute_sets_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_compute_sets_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -412,6 +419,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_configs_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_configs_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_configs_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_configs_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_configs_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_dbaas/</loc>
@@ -622,6 +636,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_dns_domains_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_dns_domains_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_dns_domains_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_dns_domains_update/</loc>
@@ -995,6 +1016,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_em_services_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_em_services_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_em_services_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_em_services_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_em_services_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -1091,6 +1119,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_idps_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_idps_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_iam_idps_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_idps_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_idps_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_iam_introspect/</loc>
@@ -1245,6 +1280,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_permissions_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_permissions_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_iam_permissions_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_permissions_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_permissions_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_iam_projects/</loc>
@@ -2115,6 +2157,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_load_balancers_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_network_load_balancers_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_load_balancers_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_load_balancers_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_network_routes/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -2472,6 +2521,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_certificates_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_secret_certificates_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_certificates_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_certificates_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_secret_certificates_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -2512,6 +2568,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_passwords_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_passwords_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_secret_passwords_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_passwords_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_passwords_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_secret_passwords_update/</loc>
@@ -2556,6 +2619,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_rsa_keys_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_secret_rsa_keys_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_rsa_keys_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_rsa_keys_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_secret_rsa_keys_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -2596,6 +2666,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_secrets_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_secrets_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_secret_secrets_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_secrets_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_secrets_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_secret_secrets_update/</loc>
@@ -2652,6 +2729,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_update/</loc>
@@ -2969,6 +3053,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_vs_values_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_vs_values_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_vs_values_tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_vs_values_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_vs_values_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -3072,6 +3163,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_vv_show/"/>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_vv_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/usage/tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/usage/tags/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/usage/tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/</loc>
@@ -3445,6 +3543,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_compute_sets_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_compute_sets_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_compute_sets_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_compute_sets_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_compute_sets_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -3485,6 +3590,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_configs_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_configs_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_configs_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_configs_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_configs_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_dbaas/</loc>
@@ -3695,6 +3807,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_dns_domains_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_dns_domains_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_update/</loc>
@@ -4068,6 +4187,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_em_services_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_em_services_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_em_services_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_em_services_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_em_services_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -4164,6 +4290,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_idps_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_idps_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_iam_idps_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_idps_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_idps_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_iam_introspect/</loc>
@@ -4318,6 +4451,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_permissions_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_permissions_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_iam_permissions_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_iam_permissions_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_iam_permissions_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_iam_projects/</loc>
@@ -5188,6 +5328,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_load_balancers_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_load_balancers_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_network_load_balancers_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_network_load_balancers_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_network_routes/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -5545,6 +5692,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_certificates_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_certificates_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_certificates_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_certificates_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_certificates_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -5585,6 +5739,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_passwords_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_passwords_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_passwords_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_passwords_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_passwords_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_passwords_update/</loc>
@@ -5629,6 +5790,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_rsa_keys_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_rsa_keys_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_rsa_keys_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_rsa_keys_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_rsa_keys_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -5669,6 +5837,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_secrets_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_secrets_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_secrets_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_secrets_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_secrets_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_secrets_update/</loc>
@@ -5725,6 +5900,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_secret_ssh_keys_tags/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_secret_ssh_keys_update/</loc>
@@ -6042,6 +6224,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_vs_values_show/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_vs_values_tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_vs_values_tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_vs_values_tags/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_vs_values_update/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -6145,5 +6334,12 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_vv_show/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_vv_show/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/usage/tags/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/usage/tags/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/usage/tags/"/>
     </url>
 </urlset>
