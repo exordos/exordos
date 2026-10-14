@@ -167,6 +167,11 @@ class Repository:
             )
         return sorted(inventory["elements"][element_name].keys())
 
+    def get_latest_version(self, element_name: str) -> str:
+        """Resolve the published latest alias without downloading artifacts."""
+        url = self.get_inventory_url(self.element_url(element_name), "latest")
+        return self._element_inventory(url)["version"]
+
     def get_manifest(
         self, element_name: str, element_version: str | None = None
     ) -> dict:

@@ -15,18 +15,24 @@
 #    under the License.
 from __future__ import annotations
 
+import json
 import pathlib
 import shutil
 import typing as tp
 import uuid as sys_uuid
 
+from packaging.version import InvalidVersion
+from packaging.version import Version
 import rich_click as click
 
 from exordos import constants as c
 from exordos.clients import base_client
+from exordos.clients import repo as repo_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.repo.elements import commands as elements_commands
 from exordos.cmd.repo.store import commands as store_commands
+from exordos.common.table import get_table
+from exordos.common.table import print_table
 from exordos.common.table import show_data
 from exordos.repo import utils as repo_utils
 
@@ -66,6 +72,43 @@ def _build_driver_spec(
 @click.group("repo", help="Manage Exordos repository")
 def repository_group():
     pass
+
+
+@repository_group.command(
+    "versions", help="List element versions directly from a repository"
+)
+@click.argument("name")
+@click.option("--repo-url", default=c.ELEMENT_REPO_URL, show_default=True)
+@click.option("--stable", is_flag=True, help="Only show stable releases")
+@click.option("-o", "--output", type=click.Choice(["table", "json"]), default="table")
+def versions_cmd(name: str, repo_url: str, stable: bool, output: str) -> None:
+    """List releases in numeric order and mark the published latest alias."""
+    repository = repo_client.Repository(repo_url.rstrip("/"))
+    try:
+        versions = repository.get_element_versions_by_inventory(name)
+        latest = repository.get_latest_version(name)
+        parsed = []
+        for version in versions:
+            try:
+                value = Version(version)
+            except InvalidVersion:
+                continue
+            if not stable or not value.is_prerelease:
+                parsed.append((value, version))
+        entries = [
+            {"version": version, "latest": version == latest}
+            for _, version in sorted(parsed, reverse=True)
+        ]
+    except Exception as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if output == "json":
+        click.echo(json.dumps(entries))
+    else:
+        table = get_table("Version", "Latest")
+        for entry in entries:
+            table.add_row(entry["version"], "yes" if entry["latest"] else "")
+        print_table(table)
 
 
 # Repository list and delete commands (from create_entity_group)
