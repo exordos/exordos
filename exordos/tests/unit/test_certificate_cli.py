@@ -19,6 +19,7 @@ from unittest.mock import patch
 import uuid as sys_uuid
 
 from click.testing import CliRunner
+import pytest
 
 from exordos.cmd.secret.certificate import commands
 from exordos.common.cmd_context import ContextObject
@@ -128,3 +129,105 @@ class TestCertificateUpdate:
             "email": "x@y.com",
             "domains": ["a.com", "b.com"],
         }
+
+
+@pytest.mark.parametrize("method", ["manual", None])
+def test_update_cmd_reads_pem_files(tmp_path, method):
+    cert = tmp_path / "cert.pem"
+    key = tmp_path / "key.pem"
+    cert.write_text("certificate\n")
+    key.write_text("private key\n")
+    args = [str(sys_uuid.uuid4()), "--cert", str(cert), "--key", str(key)]
+    if method:
+        args += ["--method", method]
+    result, _, updated = _invoke(commands.update_cmd, *args)
+    assert result.exit_code == 0, result.output
+    expected = {"cert": "certificate\n", "key": "private key\n"}
+    if method:
+        expected["method"] = {"kind": method}
+    assert updated.call_args.args[3] == expected
+
+
+def test_add_cmd_reads_manual_pem_files(tmp_path):
+    cert = tmp_path / "cert.pem"
+    key = tmp_path / "key.pem"
+    cert.write_text("certificate\n")
+    key.write_text("private key\n")
+    result, added, _ = _invoke(
+        commands.add_cmd,
+        "-p",
+        PROJECT_ID,
+        "-e",
+        "a@b.com",
+        "-d",
+        "a.com",
+        "--method",
+        "manual",
+        "--cert",
+        str(cert),
+        "--key",
+        str(key),
+    )
+    assert result.exit_code == 0, result.output
+    data = added.call_args.args[2]
+    assert data["method"] == {"kind": "manual"}
+    assert data["cert"] == "certificate\n"
+    assert data["key"] == "private key\n"
+
+
+@pytest.mark.parametrize("files", [[], ["--cert"], ["--key"]])
+def test_add_cmd_requires_manual_pem_pair(tmp_path, files):
+    pem = tmp_path / "pem"
+    pem.write_text("PEM")
+    args = ["-p", PROJECT_ID, "-e", "a@b.com", "-d", "a.com", "-m", "manual"]
+    if files:
+        args += files + [str(pem)]
+    result, added, _ = _invoke(commands.add_cmd, *args)
+    assert result.exit_code != 0
+    assert "requires both" in result.output
+    added.assert_not_called()
+
+
+@pytest.mark.parametrize("command", [commands.add_cmd, commands.update_cmd])
+def test_certificate_cmd_rejects_dns_core_pem(tmp_path, command):
+    pem = tmp_path / "pem"
+    pem.write_text("PEM")
+    args = (
+        ["-p", PROJECT_ID, "-e", "a@b.com", "-d", "a.com"]
+        if command is commands.add_cmd
+        else [str(sys_uuid.uuid4())]
+    )
+    result, added, updated = _invoke(
+        command, *args, "-m", "dns_core", "--cert", str(pem)
+    )
+    assert result.exit_code != 0
+    added.assert_not_called()
+    updated.assert_not_called()
+
+
+def test_update_cmd_reads_single_pem_file(tmp_path):
+    cert = tmp_path / "cert.pem"
+    cert.write_text("replacement\n")
+    result, _, updated = _invoke(
+        commands.update_cmd, str(sys_uuid.uuid4()), "--cert", str(cert)
+    )
+    assert result.exit_code == 0, result.output
+    assert updated.call_args.args[3] == {"cert": "replacement\n"}
+
+
+def test_add_cmd_rejects_missing_pem_file(tmp_path):
+    result, added, _ = _invoke(
+        commands.add_cmd,
+        "-p",
+        PROJECT_ID,
+        "-e",
+        "a@b.com",
+        "-d",
+        "a.com",
+        "-m",
+        "manual",
+        "--cert",
+        str(tmp_path / "missing.pem"),
+    )
+    assert result.exit_code != 0
+    added.assert_not_called()
