@@ -104,8 +104,6 @@ def test_the_console_script_goes_through_the_error_handling() -> None:
         scripts = tomllib.load(f)["project"]["scripts"]
 
     assert scripts["exordos"] == "exordos.cmd.cli:main"
-
-
 @pytest.mark.parametrize("structured", [False, True])
 def test_main_escapes_terminal_controls(monkeypatch, capsys, structured) -> None:
     detail = "denied\x1b[2J\x1b]52;c;payload\x07\r\b\x9b"

@@ -27,6 +27,7 @@ from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.compute import common as compute_common
+from exordos.cmd.network import common as net_common
 from exordos.common.table import show_data
 
 ENTITY = "node"
@@ -119,6 +120,39 @@ def _validate_hostname(hostname: str) -> None:
     help="Hostname of the node",
 )
 @click.option(
+    "--network",
+    type=str,
+    default=None,
+    help=(
+        "Give the node one leg on this network (UUID or name). Shorthand for "
+        "`--interface network=<ref>`; use --interface for anything more."
+    ),
+)
+@click.option(
+    "--interface",
+    "interfaces",
+    type=str,
+    multiple=True,
+    default=(),
+    help=(
+        "A leg of the node, repeatable: "
+        "subnet=<ref>[,address=<ip>][,index=<n>]"
+        "[,public=<address>|floating-from=<subnet>], "
+        "or port=<ref>[,index=<n>] to adopt a port that already exists. "
+        "Index 0 is the primary leg, whose address the node publishes as its "
+        "own; left unset, legs are numbered in the order given."
+    ),
+)
+@click.option(
+    "--no-network",
+    is_flag=True,
+    default=False,
+    help=(
+        "Give the node no networking at all. Different from saying nothing, "
+        "which places it on the installation's default network."
+    ),
+)
+@click.option(
     "--wait",
     type=bool,
     is_flag=True,
@@ -136,6 +170,9 @@ def add_cmd(
     name: str,
     description: str,
     hostname: str | None,
+    network: str | None,
+    interfaces: tuple[str, ...],
+    no_network: bool,
     wait: bool,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -158,7 +195,43 @@ def add_cmd(
     if hostname is not None:
         _validate_hostname(hostname)
         data["hostname"] = hostname
-    entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
+    if no_network and (network or interfaces):
+        raise click.ClickException(
+            "--no-network says the node wants no legs; it cannot be combined "
+            "with --network or --interface"
+        )
+    if network and interfaces:
+        raise click.ClickException(
+            "--network is shorthand for a single --interface; give one or the other"
+        )
+    # Three states, and an empty list is not the absent one: no flag at all
+    # leaves `interfaces` unset, which is how a node says nothing and gets
+    # placed on the installation's default network.
+    if no_network:
+        data["interfaces"] = []
+    elif network:
+        data["interfaces"] = [
+            {
+                "kind": "subnet",
+                "network": net_common.resolve(client, c.NETWORK_COLLECTION, network),
+            }
+        ]
+    elif interfaces:
+        data["interfaces"] = [
+            net_common.parse_interface(client, spec) for spec in interfaces
+        ]
+    try:
+        entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
+    except bazooka_exc.BadRequestError as e:
+        # A core older than node interfaces refuses the unknown field. Its
+        # `default_network` would not pin a network either, so there is
+        # nothing to fall back to.
+        if "interfaces" in data and "interfaces" in e.cause.response.text:
+            raise click.ClickException(
+                "This core does not support node interfaces: "
+                "--network, --interface and --no-network need a newer core"
+            )
+        raise
     if not wait:
         show_data(entity)
         return
@@ -221,6 +294,24 @@ def add_cmd(
     help="Description of the node",
 )
 @click.option(
+    "--interface",
+    "interfaces",
+    type=str,
+    multiple=True,
+    help=(
+        "Replace the complete interface declaration (repeatable). "
+        "Use subnet=<ref>[,address=<ip>][,index=<n>]"
+        "[,public=<address>|floating-from=<subnet>], or port=<ref>[,index=<n>]. "
+        "Settings of generated ports must be changed here so reconciliation "
+        "keeps them. Include every interface the node should retain."
+    ),
+)
+@click.option(
+    "--no-network",
+    is_flag=True,
+    help="Remove all interfaces from the node declaration.",
+)
+@click.option(
     "--wait",
     type=bool,
     is_flag=True,
@@ -235,6 +326,8 @@ def update_cmd(
     image: str | None,
     name: str | None,
     description: str | None,
+    interfaces: tuple[str, ...],
+    no_network: bool,
     wait: bool,
 ) -> None:
     update_data = {}
@@ -253,6 +346,15 @@ def update_cmd(
         update_data["name"] = name
     if description is not None:
         update_data["description"] = description
+
+    if no_network and interfaces:
+        raise click.ClickException("--no-network cannot be combined with --interface")
+    if no_network:
+        update_data["interfaces"] = []
+    elif interfaces:
+        update_data["interfaces"] = [
+            net_common.parse_interface(client, spec) for spec in interfaces
+        ]
 
     if root_disk is not None or image is not None:
         update_data["disk_spec"] = entity["disk_spec"]

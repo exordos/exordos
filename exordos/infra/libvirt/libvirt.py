@@ -147,6 +147,21 @@ bridge_forward_network_template = """
 """
 
 
+# The same isolated bridge, with the host on it. No `<forward>`: nothing is
+# routed or translated out of this network, which is what "isolated" is for -
+# but the host holding an address of it is what lets a hypervisor reach the
+# installation's boot API, and an overlay guest netboots only through its
+# hypervisor. Without it that guest is told where its boot script is and has
+# no way to ask for it.
+isolated_network_host_template = """
+<network>
+  <name>{name}</name>
+  <domain name="{name}"/>
+  <ip address="{ip}" netmask="{netmask}"/>
+</network>
+"""
+
+
 network_iface_template = """
     <interface type="network">
       <source network="{network}"/>
@@ -292,9 +307,20 @@ def create_nat_network(
     define_network(name, network)
 
 
-def create_isolated_network(name: str):
-    net_params = {"name": name}
-    network = isolated_network_no_dhcp_template.format(**net_params)
+def create_isolated_network(name: str, cidr: ipaddress.IPv4Network | None = None):
+    """An isolated bridge, and the host on it when a CIDR is given.
+
+    The address is the network's first host address, the same convention
+    `create_nat_network` follows. It is what a hypervisor reaches the boot
+    API by: the API answers on this network, and a guest of an overlay can
+    only ask its hypervisor's proxy to fetch on its behalf.
+    """
+    if cidr is None:
+        network = isolated_network_no_dhcp_template.format(name=name)
+    else:
+        network = isolated_network_host_template.format(
+            name=name, ip=str(cidr[1]), netmask=str(cidr.netmask)
+        )
     define_network(name, network)
 
 
@@ -392,8 +418,17 @@ def create_domain(
 
     # Copy config drive
     if config_drive is not None:
+        # QEMU must traverse both directories even with a restrictive umask.
         subprocess.check_call(
-            ["sudo", "mkdir", "-p", CONFIG_DRIVES_DIR],
+            [
+                "sudo",
+                "install",
+                "-d",
+                "-m",
+                "0755",
+                os.path.dirname(CONFIG_DRIVES_DIR),
+                CONFIG_DRIVES_DIR,
+            ],
             stdout=subprocess.DEVNULL,
         )
         config_drive_path = os.path.join(CONFIG_DRIVES_DIR, f"{name}-config-drive.iso")

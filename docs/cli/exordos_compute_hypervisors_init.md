@@ -166,6 +166,48 @@ Initialize hypervisor
 
   Name of the universal agent to run LocalPoolAgentDriver under. The default targets the standard agent (merging in if this host is also a registered compute node). Use a different name to run a separate, dedicated agent instead - required if the standard agent here is already configured for a different core.
 
+* `sdn`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--sdn`
+
+  Also make this host an SDN hypervisor: install Open vSwitch, gobgpd, evpn_connector and the agent that wires guests into overlay networks, and point this host's machine pool at that agent. Safe to re-run on a host that is already initialized. Needs root and the top-level `exordos --endpoint/--user/--password` credentials.
+
+* `sdn_connector`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--sdn-connector`
+
+  evpn_connector source - a path, a URL or a pip requirement. Required with --sdn.
+
+* `sdn_pool`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--sdn-pool`
+
+  Machine pool this host serves, by name or uuid. Defaults to the pool --add registers, or else the installation's only pool.
+
+* `sdn_project_id`:
+    * Type: uuid
+    * Default: `none`
+    * Usage: `--sdn-project-id`
+
+  Project the SDN agent's node is registered in. Needed when the pool is not run by an agent on this host.
+
+* `sdn_sdk`:
+    * Type: text
+    * Default: `gcl-sdk`
+    * Usage: `--sdn-sdk`
+
+  SDN agent source (a path or wheel URL for a development build)
+
+* `sdn_gobgp_url`:
+    * Type: text
+    * Default: `https://github.com/osrg/gobgp/releases/download/v3.37.0/gobgp_3.37.0_linux_amd64.tar.gz`
+    * Usage: `--sdn-gobgp-url`
+
+  gobgp release archive (point it at a local mirror when offline)
+
 * `help`:
     * Type: boolean
     * Default: `false`

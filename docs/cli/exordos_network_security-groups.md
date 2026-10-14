@@ -1,0 +1,29 @@
+
+# exordos_network_security-groups
+
+Manage security_groups in the Exordos installation
+
+## Usage
+
+```console
+
+ Usage: exordos network security-groups [OPTIONS] COMMAND [ARGS]...
+
+```
+
+## Options
+
+* `help`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--help`
+
+  Show this message and exit.
+
+## CLI Help
+
+```console
+
+ Usage: exordos network security-groups [OPTIONS] COMMAND [ARGS]...
+
+```

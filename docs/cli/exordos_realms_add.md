@@ -58,6 +58,13 @@ Add a new ecosystem realm
 
   Url of the realm image
 
+* `hypervisor_count`:
+    * Type: integer
+    * Default: `sentinel.unset`
+    * Usage: `--hypervisor-count`
+
+  Extra hypervisor nodes the realm gets beyond the control node that bootstraps its core. Its workloads are placed on those, so they no longer share a host with the core
+
 * `core_version`:
     * Type: text
     * Default: `sentinel.unset`
@@ -93,6 +100,7 @@ Add a new ecosystem realm
 │ --node-ram                 INTEGER                                                                                                                                                                                                                                                                      │
 │ --node-root-disk-size      INTEGER                                                                                                                                                                                                                                                                      │
 │ --node-image               TEXT     Url of the realm image                                                                                                                                                                                                                                              │
+│ --hypervisor-count         INTEGER  Extra hypervisor nodes the realm gets beyond the control node that bootstraps its core. Its workloads are placed on those, so they no longer share a host with the core                                                                                             │
 │ --core-version             TEXT                                                                                                                                                                                                                                                                         │
 │ --ssh-public-key           FILE     Path to the ssh public key                                                                                                                                                                                                                                          │
 │ --help                              Show this message and exit.                                                                                                                                                                                                                                         │
