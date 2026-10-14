@@ -1,4 +1,4 @@
-#    Copyright 2025 Genesis Corporation.
+#    Copyright 2026 Genesis Corporation.
 #
 #    All Rights Reserved.
 #
@@ -22,6 +22,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.common.table import fill_table
+from exordos.common.table import print_table
 from exordos.common.table import show_data
 
 ENTITY = "domain"
@@ -34,6 +36,30 @@ FIELDS_MAP = {
 
 
 domains_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
+
+
+@click.command("info", help="Show domain details with DNS records")
+@click.argument("uuid", type=str, required=True)
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="the output format, defaults to table",
+)
+@click.pass_context
+def info_cmd(ctx: click.Context, uuid: str, output: str) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    domain = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
+    show_data(domain, output)
+
+    records = base_client.list_entities(
+        client, c.RECORD_COLLECTION.format(domain_uuid=domain["uuid"])
+    )
+    if records:
+        from exordos.cmd.dns.records.commands import FIELDS_MAP as RECORDS_FIELDS_MAP
+
+        print_table(fill_table(records, RECORDS_FIELDS_MAP), output)
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
@@ -126,3 +152,4 @@ def update_cmd(
 
 domains_group.add_command(add_cmd, aliases=["a"])
 domains_group.add_command(update_cmd, aliases=["u"])
+domains_group.add_command(info_cmd, aliases=["i"])
