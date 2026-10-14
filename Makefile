@@ -9,6 +9,8 @@ DBAAS_USER_UUID = 33333333-3333-3333-3333-333333333333
 DBAAS_USER_NAME = myuser
 DBAAS_DATABASE_UUID = 44444444-4444-4444-4444-444444444444
 DBAAS_DATABASE_NAME = mydb
+TOKEN_UUID = 55555555-5555-5555-5555-555555555555
+TOKEN_DAYS = 30
 ifeq ($(SSH_KEY),)
 	SSH_KEY = ~/.ssh/id_rsa.pub
 endif
@@ -96,6 +98,25 @@ role_permissions:
 
 reset_password:
 	./dist/exordos iam u reset_password dae92b97-ee63-4376-9743-f735120ea7db --new-password 123456789
+
+
+# IAM token commands
+list_tokens:
+	./dist/exordos iam tokens list
+
+show_token:
+	./dist/exordos iam tokens show $(TOKEN_UUID)
+
+# The signed token is in the answer to this one command and nowhere else
+add_token:
+	./dist/exordos iam tokens add -u $(TOKEN_UUID) -d $(TOKEN_DAYS) -s "project:$(PROJECT_ID)"
+
+# One the platform keeps renewing instead of letting it expire
+add_token_no_expire:
+	./dist/exordos iam tokens add --no-expire -s "project:$(PROJECT_ID)"
+
+delete_token:
+	./dist/exordos iam tokens delete $(TOKEN_UUID) -y
 
 
 # DBaaS commands

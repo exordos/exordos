@@ -89,6 +89,10 @@ ROLE_COLLECTION = "/v1/iam/roles/"
 PERMISSION_COLLECTION = "/v1/iam/permissions/"
 ROLE_BINDING_COLLECTION = "/v1/iam/role_bindings/"
 PERMISSION_BINDING_COLLECTION = "/v1/iam/permission_bindings/"
+TOKEN_COLLECTION = "/v1/iam/tokens/"
+# The client every installation is seeded with, which signs a token
+# unless another one is named.
+DEFAULT_CLIENT_UUID = "00000000-0000-0000-0000-000000000000"
 ORGANIZATION_MEMBER_COLLECTION = "/v1/iam/organizations/{organization_uuid}/members/"
 
 CONFIG_COLLECTION = "/v1/config/configs/"
