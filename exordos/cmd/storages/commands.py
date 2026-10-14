@@ -163,10 +163,24 @@ def _validate_uri(value, scheme):
 @click.option("--description", default="")
 @click.option("--host", default=None, help="Core address reachable from hypervisors")
 @click.option("--port", type=click.IntRange(1, 65535), default=None)
+@click.option(
+    "--nodes",
+    type=click.IntRange(min=0),
+    default=0,
+    show_default=True,
+    help="Number of managed OST virtual machines",
+)
+@click.option(
+    "--size",
+    type=click.IntRange(min=1),
+    default=10,
+    show_default=True,
+    help="Data disk size per OST VM in GiB",
+)
 @output_option
 @click.pass_context
 def clusters_add_cmd(
-    ctx, storage_type, name, uuid, description, host, port, output="table"
+    ctx, storage_type, name, uuid, description, host, port, nodes, size, output="table"
 ):
     client = _client(ctx)
     clusters = base_client.list_entities(client, c.STORAGE_CLUSTER_COLLECTION)
@@ -199,6 +213,8 @@ def clusters_add_cmd(
             "name": name,
             "description": description,
             "driver_spec": {"kind": storage_type, "endpoint": endpoint},
+            "nodes": nodes,
+            "size": size,
         },
     )
     show_resource(entity, output=output)
