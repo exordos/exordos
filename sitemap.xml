@@ -603,6 +603,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_delete/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_dns_domains_info/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_dns_domains_info/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_info/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_dns_domains_list/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -3667,6 +3674,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_delete/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_dns_domains_delete/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_info/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_info/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_dns_domains_info/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_dns_domains_list/</loc>
