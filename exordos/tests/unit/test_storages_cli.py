@@ -584,3 +584,30 @@ def test_cluster_filter_fetches_cluster_even_with_name_only_projection(api, kind
     result = invoke([kind, "list", "--cluster", CLUSTER_UUID, "--fields", "name"])
     assert result.exit_code == 0, result.output
     assert "cluster" in api.list.call_args.args[1]
+
+def test_cluster_add_passes_managed_ost_count_and_data_size(api):
+    result = invoke(
+        [
+            "clusters",
+            "add",
+            "--type",
+            "rawstor",
+            "--name",
+            "storage1",
+            "--nodes",
+            "3",
+            "--size",
+            "30",
+        ]
+    )
+    assert result.exit_code == 0, result.output
+    payload = api.add.call_args.args[2]
+    assert payload["nodes"] == 3
+    assert payload["size"] == 30
+
+
+def test_cluster_add_defaults_to_no_managed_nodes(api):
+    result = invoke(["clusters", "add", "--type", "rawstor", "--name", "storage1"])
+    assert result.exit_code == 0, result.output
+    payload = api.add.call_args.args[2]
+    assert payload["nodes"] == 0 and payload["size"] == 10
