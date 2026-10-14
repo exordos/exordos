@@ -6628,15 +6628,38 @@
 </code></pre></div>
 <h2 id="bootstrapping-a-managed-realm">Bootstrapping a managed realm<a class="headerlink" href="#bootstrapping-a-managed-realm" title="Permanent link">#</a></h2>
 <p>When running <code>exordos bootstrap --realm-spec /etc/exordos/realm_spec.json</code>,
-the CLI reads the element names and repository URL from the realm spec:</p>
+the CLI reads element names and repository definitions from the realm spec:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"elements"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"exordos_s3"</span><span class="p">,</span><span class="w"> </span><span class="s2">"exordos_db"</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">"repo_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://repository.example.com/exordos-elements/"</span>
+<span class="w">  </span><span class="nt">"repo_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://10.40.0.1:8082/repo/00000000-0000-0000-0000-000000000000/exordos-elements/"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"repository"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">    </span><span class="nt">"uuid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fc040e42-439d-41cb-b2e7-7b40dca58810"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"realm-repo"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Realm upload repository"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"project_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00000000-0000-0000-0000-000000000000"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEW"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">2048</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"refresh_rate"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"sync_mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lazy"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"driver_spec"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nginx"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://10.40.0.1:8082/repo/00000000-0000-0000-0000-000000000000/exordos-elements/"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"password"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}]</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Explicit <code>--elements</code> options replace the list from the realm spec.
 If the field is absent or contains an empty list, the default bootstrap is used.</p>
-<p>A non-empty <code>repo_url</code> is added to the bootstrap repositories.
+<p>A single dictionary in <code>repository</code> is converted to a one-item list.
+Repository objects are passed unchanged into the Core config drive alongside
+existing URL entries. Core validates their fields and registers explicit UUIDs
+idempotently. The internal URL points to an element index readable without
+authorization, allowing Core to activate and refresh the repository.</p>
+<p><code>repo_url</code> remains in the config drive when full repository definitions are
+present, without adding another URL-only repository. For older realm specs
+without definitions, a non-empty <code>repo_url</code> is added to the bootstrap repositories.
 Existing repositories, including those specified with <code>--repository</code>, are
 preserved. If the exact URL is already in the list, it is not added again.
 An absent or empty <code>repo_url</code> leaves the repository list unchanged.</p>
