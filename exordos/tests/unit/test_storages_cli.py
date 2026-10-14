@@ -44,7 +44,9 @@ def api():
         ),
         patch.object(storage.base_client, "list_entities", return_value=[]) as listing,
         patch.object(
-            storage.base_client, "get_entity", return_value={"uuid": CLUSTER_UUID}
+            storage.base_client,
+            "get_entity",
+            return_value={"uuid": CLUSTER_UUID, "driver_spec": {"kind": "rawstor"}},
         ) as get,
         patch.object(storage.base_client, "add_entity", return_value={}) as add,
         patch.object(storage.base_client, "update_entity", return_value={}) as update,
@@ -237,10 +239,10 @@ def test_nodes_add_declares_ost_via_api(api):
     assert data["cluster"] == CLUSTER_UUID
     assert data["agent"] == NODE_UUID
     assert "uuid" not in data  # Core generates the resource identity.
-    assert data["location"] == "file:///data/ost1"
-    assert data["bind_address"] == "host:7777"
-    assert data["failure_domain_path"] == "dc1/row1/rack1/host1"
-    assert data["weight"] == 100
+    assert data["driver_spec"]["location"] == "file:///data/ost1"
+    assert data["driver_spec"]["bind_address"] == "host:7777"
+    assert data["driver_spec"]["failure_domain_path"] == "dc1/row1/rack1/host1"
+    assert data["driver_spec"]["weight"] == 100
 
 
 def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
@@ -248,7 +250,12 @@ def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
     api.list.side_effect = lambda client, collection: (
         [{"uuid": CLUSTER_UUID, "node": NODE_UUID}]
         if collection == storage.c.AGENT_COLLECTION
-        else [{"agent": CLUSTER_UUID, "bind_address": "0.0.0.0:7777"}]
+        else [
+            {
+                "agent": CLUSTER_UUID,
+                "driver_spec": {"kind": "rawstor", "bind_address": "0.0.0.0:7777"},
+            }
+        ]
     )
     with (
         patch.object(
@@ -281,8 +288,8 @@ def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
         )
     assert result.exit_code == 0, result.output
     data = api.add.call_args.args[2]
-    assert data["endpoint"] == "ost://host:7778"
-    assert data["bind_address"] == "host:7778"
+    assert data["driver_spec"]["endpoint"] == "ost://host:7778"
+    assert data["driver_spec"]["bind_address"] == "host:7778"
 
 
 def test_pool_add_accepts_replication_and_chunk_policy(api):
@@ -307,17 +314,33 @@ def test_pool_add_accepts_replication_and_chunk_policy(api):
     )
     assert result.exit_code == 0, result.output
     data = api.add.call_args.args[2]
-    assert data["mirrors"] == 2
-    assert data["chunk_size"] == 256 << 20
-    assert data["failure_domain"] == "rack"
+    assert data["driver_spec"]["mirrors"] == 2
+    assert data["driver_spec"]["chunk_size"] == 256 << 20
+    assert data["driver_spec"]["failure_domain"] == "rack"
     assert data["speed"] == "WARM"
     assert data["ephemeral"] is False
 
 
 def test_pool_update_does_not_reset_unspecified_policy(api):
+    api.get.return_value = {
+        "uuid": CLUSTER_UUID,
+        "driver_spec": {
+            "kind": "rawstor",
+            "mirrors": 2,
+            "chunk_size": 1 << 30,
+            "failure_domain": "rack",
+        },
+    }
     result = invoke(["pools", "update", "persistent", "--mirrors", "3"])
     assert result.exit_code == 0, result.output
-    assert api.update.call_args.args[3] == {"mirrors": 3}
+    assert api.update.call_args.args[3] == {
+        "driver_spec": {
+            "kind": "rawstor",
+            "mirrors": 3,
+            "chunk_size": 1 << 30,
+            "failure_domain": "rack",
+        }
+    }
 
 
 @pytest.mark.parametrize("chunk", ["0", "3GiB", "2GiB", "bogus"])
@@ -402,7 +425,7 @@ def test_nodes_add_discovers_local_agent_and_endpoint(api):
     assert result.exit_code == 0, result.output
     detect.assert_called_once_with("http://10.100.0.2/api/core", 7777)
     assert api.add.call_args.args[2]["agent"] == NODE_UUID
-    assert api.add.call_args.args[2]["endpoint"] == "ost://10.0.0.1:7777"
+    assert api.add.call_args.args[2]["driver_spec"]["endpoint"] == "ost://10.0.0.1:7777"
 
 
 def test_nodes_add_selects_agent_by_name_without_local_setup(api):
