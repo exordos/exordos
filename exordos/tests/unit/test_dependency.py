@@ -21,6 +21,7 @@ import typing as tp
 from unittest.mock import patch
 
 import git
+import pytest
 
 from exordos.builder import dependency as deps
 
@@ -76,6 +77,32 @@ class TestDependency:
 
             assert dep.local_path == os.path.join(output_dir, "source")
             assert os.path.exists(os.path.join(dep.local_path, "README.md"))
+
+    @pytest.mark.parametrize("source", [".", "exordos/..", "../source"])
+    @pytest.mark.parametrize("from_env", [False, True])
+    def test_local_dependency_fetch_relative_directory(
+        self, tmp_path, monkeypatch, source, from_env
+    ) -> None:
+        source_dir = tmp_path / "source"
+        (source_dir / "exordos").mkdir(parents=True)
+        (source_dir / "README.md").write_text("dependency content")
+        output_dir = tmp_path / "deps"
+        output_dir.mkdir()
+        monkeypatch.chdir(source_dir)
+        if from_env:
+            monkeypatch.setenv("TEST_DEPENDENCY_PATH", source)
+            dep = deps.LocalEnvPathDependency(
+                "TEST_DEPENDENCY_PATH", "/opt/source", "."
+            )
+        else:
+            dep = deps.LocalPathDependency.from_config(
+                {"path": {"src": source}, "dst": "/opt/source"}, "."
+            )
+
+        dep.fetch(str(output_dir))
+
+        assert dep.local_path == str(output_dir / "source")
+        assert (output_dir / "source" / "README.md").read_text() == "dependency content"
 
     def test_http_from_config(self, build_config: tp.Dict[str, tp.Any]) -> None:
         work_dir = "/tmp/work_dir"
