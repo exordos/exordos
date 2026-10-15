@@ -16,6 +16,8 @@
 
 import typing as tp
 
+import pytest
+
 from exordos.spec import schema
 
 
@@ -95,3 +97,78 @@ class TestSearchParameterExample:
         scheme = make_scheme({"type": "object"})
 
         assert schema.search_parameter_example(scheme, "$core.nodes", "uuid") is None
+
+    @pytest.mark.parametrize(
+        "field,path",
+        [
+            ({"properties": {"value": {"example": "nested"}}}, ("spec", "value")),
+            (
+                {"type": "array", "items": {"example": "nested"}},
+                ("spec", 0),
+            ),
+            (
+                {"oneOf": [{"$ref": "#/components/schemas/Spec"}]},
+                ("spec", "value"),
+            ),
+        ],
+    )
+    def test_search_parameter_example_nested_path(self, field, path) -> None:
+        scheme = make_scheme({"properties": {"spec": field}})
+        scheme["components"]["schemas"]["Spec"] = {
+            "properties": {"value": {"example": "nested"}},
+        }
+
+        assert (
+            schema.search_parameter_example(scheme, "$core.nodes", "value", path)
+            == "nested"
+        )
+
+
+class TestMutateManifest:
+    def test_mutate_manifest_nested_callback_variable(self) -> None:
+        scheme = make_scheme(
+            {
+                "type": "object",
+                "properties": {
+                    "callback": {
+                        "type": "object",
+                        "example": {"key": "value"},
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "kind": {
+                                        "type": "string",
+                                        "enum": ["callback_uri"],
+                                    },
+                                    "callback": {
+                                        "type": "string",
+                                        "example": "any_string",
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                },
+            }
+        )
+        manifest = {
+            "resources": {
+                "$core.nodes": {
+                    "grafana_idp": {
+                        "callback": {
+                            "kind": "callback_uri",
+                            "callback": 'f"{$core.vs.variables.$var_grafana_root_url:value}/login/generic_oauth"',
+                        },
+                    },
+                },
+            },
+        }
+
+        mutated = schema.mutate_manifest(manifest, scheme)
+
+        assert mutated["resources"]["$core.nodes"]["grafana_idp"]["callback"] == {
+            "kind": "callback_uri",
+            "callback": "any_string",
+        }
+        schema.validate_yaml(mutated, scheme)

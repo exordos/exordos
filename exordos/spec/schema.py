@@ -126,8 +126,28 @@ def resolve_schema_ref(scheme: dict, schema: dict) -> dict:
     return scheme.get("components", {}).get("schemas", {}).get(ref.split("/")[-1], {})
 
 
+def search_nested_example(scheme: dict, model: dict, path: tuple) -> tp.Any:
+    model = resolve_schema_ref(scheme, model)
+    if not path:
+        return model.get("example")
+    key, *remaining = path
+    child = (
+        model.get("items", {})
+        if isinstance(key, int)
+        else model.get("properties", {}).get(key, {})
+    )
+    example = search_nested_example(scheme, child, tuple(remaining))
+    if example is not None:
+        return example
+    for variant in model.get("oneOf", []):
+        example = search_nested_example(scheme, variant, path)
+        if example is not None:
+            return example
+    return None
+
+
 def search_parameter_example(
-    scheme: dict, resource_type: str, parameter: str
+    scheme: dict, resource_type: str, parameter: str, path: tp.Optional[tuple] = None
 ) -> tp.Any:
     resource_type = scheme["properties"]["resources"]["properties"].get(resource_type)
     if not resource_type:
@@ -138,6 +158,8 @@ def search_parameter_example(
     model_name = ref.split("/")[-1]
     model = scheme["components"]["schemas"].get(model_name)
     if model:
+        if path is not None:
+            return search_nested_example(scheme, model, path)
         model = resolve_schema_ref(scheme, model)
         properties = model.get("properties", {})
         example = properties.get(parameter, {}).get("example")
@@ -233,7 +255,11 @@ def parse_variable(var: str, manifest: dict) -> Parsed:
 
 
 def walk_replace(
-    resource_type: str, manifest: dict, scheme: dict, node: tp.Union[dict, list, str]
+    resource_type: str,
+    manifest: dict,
+    scheme: dict,
+    node: tp.Union[dict, list, str],
+    path: tuple = (),
 ):
     if isinstance(node, dict):
         for key, value in node.items():
@@ -241,7 +267,9 @@ def walk_replace(
                 parsed_var = parse_variable(value, manifest)
                 if parsed_var.valid and parsed_var.is_variable:
                     if parsed_var.resource_type == "$core.vs.variables":
-                        example = search_parameter_example(scheme, resource_type, key)
+                        example = search_parameter_example(
+                            scheme, resource_type, key, path + (key,)
+                        )
                     else:
                         example = search_parameter_example(
                             scheme, parsed_var.resource_type, parsed_var.value
@@ -249,14 +277,16 @@ def walk_replace(
                     if example is not None:
                         node[key] = example
             else:
-                walk_replace(resource_type, manifest, scheme, value)
+                walk_replace(resource_type, manifest, scheme, value, path + (key,))
     elif isinstance(node, list):
         for i, item in enumerate(node):
             if isinstance(item, str):
                 parsed_var = parse_variable(item, manifest)
                 if parsed_var.valid and parsed_var.is_variable:
                     if parsed_var.resource_type == "$core.vs.variables":
-                        example = search_parameter_example(scheme, resource_type, item)
+                        example = search_parameter_example(
+                            scheme, resource_type, item, path + (i,)
+                        )
                     else:
                         example = search_parameter_example(
                             scheme, parsed_var.resource_type, parsed_var.value
@@ -264,7 +294,7 @@ def walk_replace(
                     if example is not None:
                         node[i] = example
             else:
-                walk_replace(resource_type, manifest, scheme, item)
+                walk_replace(resource_type, manifest, scheme, item, path + (i,))
 
 
 def remove_middle_parts(input_string):
