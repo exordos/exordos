@@ -6,9 +6,9 @@ Add a new set to the Exordos installation
 ## Usage
 
 ```console
-                                                                                
- Usage: exordos compute sets add [OPTIONS]                                      
-                                                                                
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
@@ -29,96 +29,118 @@ Add a new set to the Exordos installation
 
   UUID of the set
 
-* `project_id` (REQUIRED):
-    * Type: uuid
-    * Default: `sentinel.unset`
-    * Usage: `-p
+
+* `project_id` (REQUIRED): 
+  * Type: uuid 
+  * Default: `sentinel.unset`
+  * Usage: `-p
 --project-id`
 
   UUID of the project in which to deploy the set
 
-* `cores`:
-    * Type: integer
-    * Default: `1`
-    * Usage: `-c
+
+* `cores`: 
+  * Type: integer 
+  * Default: `1`
+  * Usage: `-c
 --cores`
 
   Number of cores to allocate for each node in the set
 
-* `ram`:
-    * Type: integer
-    * Default: `1024`
-    * Usage: `-r
+
+* `ram`: 
+  * Type: integer 
+  * Default: `1024`
+  * Usage: `-r
 --ram`
 
   Amount of RAM in Mb to allocate for each node in the set
 
-* `root_disk`:
-    * Type: integer
-    * Default: `10`
-    * Usage: `-d
+
+* `root_disk`: 
+  * Type: integer 
+  * Default: `10`
+  * Usage: `-d
 --root-disk`
 
   Number of GiB of root disk to allocate for each node in the set
 
-* `image` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-i
+
+* `image` (REQUIRED): 
+  * Type: text 
+  * Default: `sentinel.unset`
+  * Usage: `-i
 --image`
 
   Name of the image to deploy
 
-* `tier`:
-    * Type: choice
-    * Default: `warm`
-    * Usage: `--tier`
+
+* `tier`: 
+  * Type: choice 
+  * Default: `warm`
+  * Usage: `--tier`
 
   Storage tier to schedule the root disk onto
 
-* `ephemeral`:
-    * Type: boolean
-    * Default: `true`
-    * Usage: `--ephemeral`
+
+* `ephemeral`: 
+  * Type: boolean 
+  * Default: `true`
+  * Usage: `--ephemeral`
 
   Whether the root disk is ephemeral storage
 
-* `name`:
-    * Type: text
-    * Default: `set`
-    * Usage: `-n
+
+* `name`: 
+  * Type: text 
+  * Default: `set`
+  * Usage: `-n
 --name`
 
   Name of the set
 
-* `description`:
-    * Type: text
-    * Default: ``
-    * Usage: `-D
+
+* `description`: 
+  * Type: text 
+  * Default: ``
+  * Usage: `-D
 --description`
 
   Description of the set
 
-* `replicas`:
-    * Type: integer
-    * Default: `1`
-    * Usage: `--replicas`
+
+* `replicas`: 
+  * Type: integer 
+  * Default: `1`
+  * Usage: `--replicas`
 
   Number of replicas (nodes) in the set
 
-* `wait`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `--wait`
+
+* `wait`: 
+  * Type: boolean 
+  * Default: `false`
+  * Usage: `--wait`
 
   Wait until the set is active
 
-* `help`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `--help`
+
+* `tags`: 
+  * Type: text 
+  * Default: `sentinel.unset`
+  * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
+
+* `help`: 
+  * Type: boolean 
+  * Default: `false`
+  * Usage: `--help`
 
   Show this message and exit.
+
+
 
 ## CLI Help
 
@@ -144,3 +166,4 @@ Add a new set to the Exordos installation
 │    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
+
