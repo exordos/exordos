@@ -99,6 +99,19 @@ def _validate_hostname(hostname: str) -> None:
     help="Name of the image to deploy",
 )
 @click.option(
+    "--tier",
+    type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
+    default="WARM",
+    show_default=True,
+    help="Storage tier to schedule the root disk onto",
+)
+@click.option(
+    "--ephemeral/--no-ephemeral",
+    default=True,
+    show_default=True,
+    help="Whether the root disk is ephemeral storage",
+)
+@click.option(
     "-n",
     "--name",
     type=str,
@@ -133,6 +146,8 @@ def add_cmd(
     ram: int,
     root_disk: int,
     image: str,
+    tier: str,
+    ephemeral: bool,
     name: str,
     description: str,
     hostname: str | None,
@@ -153,6 +168,8 @@ def add_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
+            "tier": tier,
+            "ephemeral": ephemeral,
         },
     }
     if hostname is not None:
@@ -341,6 +358,19 @@ def update_cmd(
     help="Name of the image to deploy",
 )
 @click.option(
+    "--tier",
+    type=click.Choice(["COLD", "WARM", "HOT"], case_sensitive=False),
+    default="WARM",
+    show_default=True,
+    help="Storage tier to schedule the root disk onto",
+)
+@click.option(
+    "--ephemeral/--no-ephemeral",
+    default=True,
+    show_default=True,
+    help="Whether the root disk is ephemeral storage",
+)
+@click.option(
     "-n",
     "--name",
     type=str,
@@ -375,6 +405,8 @@ def add_or_update_node_cmd(
     ram: int,
     root_disk: int,
     image: str,
+    tier: str,
+    ephemeral: bool,
     name: str,
     description: str,
     hostname: str | None,
@@ -390,6 +422,8 @@ def add_or_update_node_cmd(
             ram=ram,
             root_disk=root_disk,
             image=image,
+            tier=tier,
+            ephemeral=ephemeral,
             name=name,
             description=description,
             hostname=hostname,
@@ -407,6 +441,8 @@ def add_or_update_node_cmd(
             ram=ram,
             root_disk=root_disk,
             image=image,
+            tier=tier,
+            ephemeral=ephemeral,
             name=name,
             description=description,
             hostname=hostname,
@@ -422,6 +458,8 @@ def add_or_update_node_cmd(
             "kind": "root_disk",
             "size": root_disk,
             "image": image,
+            "tier": tier,
+            "ephemeral": ephemeral,
         },
     }
     if hostname is not None:

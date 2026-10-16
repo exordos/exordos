@@ -147,3 +147,24 @@ def test_fit_table_to_width_9_columns_at_100_not_cropped():
     columns = _columns_text(output)
     assert columns[0] == UUID
     assert columns[1] == NAME
+
+
+
+class TestFillTable:
+    def test_callable_field_returning_a_bool_is_rendered(self) -> None:
+        fields_map = {
+            "Ephemeral": lambda e: e["ephemeral"],
+        }
+
+        result = table_utils.fill_table([{"ephemeral": False}], fields_map)
+
+        assert list(result.columns[0].cells) == ["False"]
+
+    def test_callable_field_returning_an_int_is_rendered(self) -> None:
+        fields_map = {
+            "Total": lambda e: e["total"],
+        }
+
+        result = table_utils.fill_table([{"total": 100}], fields_map)
+
+        assert list(result.columns[0].cells) == ["100"]
