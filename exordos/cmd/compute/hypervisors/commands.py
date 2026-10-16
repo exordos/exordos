@@ -384,9 +384,9 @@ def _install_packages(add_sudo: bool = False) -> None:
 
 RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "99.0.0")
 RAWSTOR_ARTIFACT_RUN = os.environ.get(
-    "RAWSTOR_ARTIFACT_RUN", "38805653704" if RAWSTOR_VERSION == "99.0.0" else ""
+    "RAWSTOR_ARTIFACT_RUN", "38903108689" if RAWSTOR_VERSION == "99.0.0" else ""
 )
-RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.9f7ea5d")
+RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.14d3e33")
 RAWSTOR_ARTIFACTS_URL = (
     f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
 )
@@ -399,10 +399,10 @@ RAWSTOR_WHEEL_URL = (
     "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
 )
 
-if RAWSTOR_ARTIFACT_RUN == "38805653704":
+if RAWSTOR_ARTIFACT_RUN == "38903108689":
     # The pinned artifact is available even before nightly.link refreshes the run.
     RAWSTOR_WHEEL_URL = (
-        "https://nightly.link/rawstor/librawstor/actions/artifacts/12007240414.zip"
+        "https://nightly.link/rawstor/librawstor/actions/artifacts/12046819522.zip"
     )
 elif RAWSTOR_ARTIFACT_RUN:
     RAWSTOR_WHEEL_URL = f"{RAWSTOR_ARTIFACTS_URL}/python3-rawstor.whl.zip"

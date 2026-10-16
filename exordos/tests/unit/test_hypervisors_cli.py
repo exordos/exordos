@@ -1700,11 +1700,11 @@ class TestRawstorArtifacts:
         ):
             wheel = hv_commands.prepare_rawstor_wheel()
         assert wheel.endswith(
-            "rawstor-99.0.0+0.9f7ea5d-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+            "rawstor-99.0.0+0.14d3e33-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
         )
         assert [
             "wget",
-            "https://nightly.link/rawstor/librawstor/actions/artifacts/12007240414.zip",
+            "https://nightly.link/rawstor/librawstor/actions/artifacts/12046819522.zip",
             "-O",
             "/tmp/rawstor-wheel-test/python3-rawstor.whl.zip",
         ] in [call.args[0] for call in run.call_args_list]
