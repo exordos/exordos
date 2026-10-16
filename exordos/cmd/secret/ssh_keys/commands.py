@@ -19,6 +19,7 @@ import os
 import typing as tp
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 import rich_click as click
 
 from exordos import constants as c
@@ -49,7 +50,8 @@ ssh_keys_group = create_entity_group(
     "add",
     help=f"Add a new {ENTITY} to the Exordos installation, examples: `exordos secret ssh_keys add "
     f"--node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or "
-    f"`exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`",
+    f"`exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`. "
+    "Existing SSH keys are skipped; creation continues for the remaining targets.",
 )
 @click.pass_context
 @click.option(
@@ -209,7 +211,13 @@ def add_cmd(
         if not data_copy.get("name"):
             data_copy["name"] = f"ssh_key_to_{target['name']}"
         data_copy["target"] = target["target"]
-        entity = base_client.add_entity(client, ENTITY_COLLECTION, data_copy)
+        try:
+            entity = base_client.add_entity(
+                client, ENTITY_COLLECTION, data_copy, handle_conflict_error=False
+            )
+        except bazooka_exc.ConflictError:
+            click.echo(f"{ENTITY} to target {target['name']} already exists, skipping")
+            continue
         click.echo(f"{ENTITY} {entity['uuid']} to target {target['name']} created")
         show_data(entity)
 

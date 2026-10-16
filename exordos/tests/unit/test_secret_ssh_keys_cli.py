@@ -17,7 +17,9 @@ from __future__ import annotations
 
 from unittest import mock
 
+from bazooka import exceptions as bazooka_exc
 from click.testing import CliRunner
+import pytest
 
 from exordos import constants as c
 from exordos.cmd.secret import secret_group
@@ -77,3 +79,49 @@ class TestSshKeysPruneCli:
 
         assert result.exit_code == 0, result.output
         client.delete_entity.assert_not_called()
+
+
+@mock.patch("exordos.cmd.secret.ssh_keys.commands.show_data")
+@mock.patch("exordos.cmd.secret.ssh_keys.commands.base_client.get_user_api_client")
+class TestSshKeysAddCli:
+    @pytest.mark.parametrize("all_conflicts", [False, True])
+    def test_add_cmd_continues_after_conflict(
+        self, get_client, show_data, all_conflicts
+    ) -> None:
+        client = get_client.return_value
+        client.filter.side_effect = [
+            [{"uuid": name, "name": name, "project_id": "project"}]
+            for name in ("first", "second")
+        ]
+        created = {"uuid": "new-key"}
+        client.create.side_effect = [
+            bazooka_exc.ConflictError(mock.Mock()),
+            bazooka_exc.ConflictError(mock.Mock()) if all_conflicts else created,
+        ]
+
+        result = _invoke("ssh_keys", "add", "--node", "first", "--node", "second")
+
+        assert result.exit_code == 0, result.output
+        assert client.create.call_count == 2
+        assert "target first already exists" in result.output
+        if all_conflicts:
+            assert "target second already exists" in result.output
+            show_data.assert_not_called()
+        else:
+            assert "new-key to target second created" in result.output
+            show_data.assert_called_once_with(created)
+
+    def test_add_cmd_propagates_other_errors(self, get_client, show_data) -> None:
+        client = get_client.return_value
+        client.filter.return_value = [
+            {"uuid": "first", "name": "first", "project_id": "project"}
+        ]
+        error = bazooka_exc.ForbiddenError(mock.Mock())
+        client.create.side_effect = error
+
+        result = _invoke("ssh_keys", "add", "--node", "first", "--node", "second")
+
+        assert result.exit_code != 0
+        assert result.exception is error
+        assert client.create.call_count == 1
+        show_data.assert_not_called()
