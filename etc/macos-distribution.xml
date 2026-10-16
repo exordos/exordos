@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Genesis Corporation.
+     Licensed under the Apache License, Version 2.0 (the "License") -->
+<installer-gui-script minSpecVersion="2">
+    <title>Exordos CLI</title>
+    <options customize="never" require-scripts="true" hostArchitectures="arm64,x86_64"/>
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <choices-outline>
+        <line choice="arm64"/>
+        <line choice="x86_64"/>
+    </choices-outline>
+    <choice id="arm64" title="Exordos CLI" visible="false" enabled="false"
+            selected="system.sysctl('hw.optional.arm64') == 1">
+        <pkg-ref id="com.exordos.cli.arm64"/>
+    </choice>
+    <choice id="x86_64" title="Exordos CLI" visible="false" enabled="false"
+            selected="system.sysctl('hw.optional.arm64') != 1">
+        <pkg-ref id="com.exordos.cli.x86_64"/>
+    </choice>
+    <pkg-ref id="com.exordos.cli.arm64">macos-arm64.pkg</pkg-ref>
+    <pkg-ref id="com.exordos.cli.x86_64">macos-x86_64.pkg</pkg-ref>
+</installer-gui-script>
