@@ -6,12 +6,20 @@ Update a port's requested addresses and toggles
 ## Usage
 
 ```console
-
- Usage: exordos network ports update [OPTIONS] PORT
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network ports update [OPTIONS] PORT                                                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `port` (REQUIRED):
     * Type: text
@@ -53,13 +61,6 @@ Update a port's requested addresses and toggles
 
   Serve host-local DNS
 
-* `network_identity`:
-    * Type: boolean
-    * Default: `none`
-    * Usage: `--network-identity`
-
-  Belong to the network's default identity group
-
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -70,7 +71,7 @@ Update a port's requested addresses and toggles
 ## CLI Help
 
 ```console
-
- Usage: exordos network ports update [OPTIONS] PORT
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network ports update [OPTIONS] PORT                                                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                                                                            
 ```

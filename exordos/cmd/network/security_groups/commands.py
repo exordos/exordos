@@ -23,9 +23,11 @@ from exordos import constants as c
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.network import bindings
 from exordos.cmd.network import common as net_common
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "security_group"
 ENTITY_COLLECTION = c.SECURITY_GROUP_COLLECTION
@@ -54,6 +56,7 @@ bindings.add_binding_commands(
 
 
 @security_groups_group.command("add", help="Add a new security group")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the group")
 @click.option("-n", "--name", type=str, required=True, help="Name of the group")
@@ -65,6 +68,7 @@ def security_group_add_cmd(
     name: str,
     description: str,
     project_id: sys_uuid.UUID,
+    output: str = "table",
 ) -> None:
     """A group with no rules denies everything but the established traffic —
     attaching one to a port is what turns filtering on."""
@@ -75,7 +79,9 @@ def security_group_add_cmd(
         "description": description,
         "project_id": str(project_id),
     }
-    show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+    show_resource(
+        base_client.add_entity(client, ENTITY_COLLECTION, data), output=output
+    )
 
 
 @security_groups_group.command("rule-add", help="Add an allow rule to a group")
@@ -121,7 +127,7 @@ def rule_del_cmd(ctx: click.Context, group: str, spec: str) -> None:
         rules = base_client.list_entities(
             client, c.SECURITY_GROUP_RULE_COLLECTION, security_group=entity["uuid"]
         )
-        fields = ("direction", "protocol", "port", "remote_ip", "remote_group")
+        fields = ("direction", "protocol", "port", "remote_ip", "remote_group_id")
         matches = [
             row for row in rules if all(row.get(key) == rule.get(key) for key in fields)
         ]

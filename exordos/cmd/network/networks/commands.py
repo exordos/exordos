@@ -22,7 +22,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import show_data
+from exordos.cmd.base import output_option
+from exordos.common.table import show_resource
 
 ENTITY = "network"
 ENTITY_COLLECTION = c.NETWORK_COLLECTION
@@ -43,6 +44,7 @@ networks_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @networks_group.command("add", help="Add a new network")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the network")
 @click.option("-n", "--name", type=str, required=True, help="Name of the network")
@@ -69,6 +71,7 @@ def network_add_cmd(
     project_id: sys_uuid.UUID,
     mtu: int | None,
     access: str,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     # The only driver the core makes over its API; a flat network is the
@@ -84,4 +87,6 @@ def network_add_cmd(
         "driver_spec": driver_spec,
         "access": access,
     }
-    show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+    show_resource(
+        base_client.add_entity(client, ENTITY_COLLECTION, data), output=output
+    )

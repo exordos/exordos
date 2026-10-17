@@ -6,9 +6,9 @@ Add a new node to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos cn add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos cn add [OPTIONS]                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
@@ -84,6 +84,34 @@ Add a new node to the Exordos installation
 
   Hostname of the node
 
+* `network`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--network`
+
+  Network for the primary port (UUID or name).
+
+* `auto_floating_ip`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--auto-floating-ip`
+
+  Allocate a floating IP for the primary port.
+
+* `floating_network`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--floating-network`
+
+  Floating pool network (UUID or name); requires --auto-floating-ip.
+
+* `no_network`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--no-network`
+
+  Send an empty default_network request: disable the SDN auto-port while retaining legacy flat placement when configured.
+
 * `wait`:
     * Type: boolean
     * Default: `false`
@@ -109,23 +137,27 @@ Add a new node to the Exordos installation
 ## CLI Help
 
 ```console
-
- Usage: exordos cn add [OPTIONS]
-
- Add a new node to the Exordos installation
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos cn add [OPTIONS]                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                            
+ Add a new node to the Exordos installation                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                            
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID                    UUID of the node                                                                                                                                                                                                                                           │
-│ *  --project-id   -p  UUID                    Name of the project in which to deploy the node [required]                                                                                                                                                                                                 │
-│    --cores        -c  INTEGER                 Number of cores to allocate for the node [default: 1]                                                                                                                                                                                                      │
-│    --ram          -r  INTEGER                 Amount of RAM in Mb to allocate for the node [default: 1024]                                                                                                                                                                                               │
-│    --root-disk    -d  INTEGER                 Number of GiB of root disk to allocate for the node [default: 10]                                                                                                                                                                                          │
-│ *  --image        -i  TEXT                    Name of the image to deploy [required]                                                                                                                                                                                                                     │
-│    --name         -n  TEXT                    Name of the node                                                                                                                                                                                                                                           │
-│    --description  -D  TEXT                    Description of the node                                                                                                                                                                                                                                    │
-│    --hostname         TEXT                    Hostname of the node                                                                                                                                                                                                                                       │
-│    --wait                                     Wait until the node is running                                                                                                                                                                                                                             │
-│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object.                                                                                                                                                                                                            │
-│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+│    --uuid              -u  UUID                    UUID of the node                                                                                                                                                                                                                                      │
+│ *  --project-id        -p  UUID                    Name of the project in which to deploy the node [required]                                                                                                                                                                                            │
+│    --cores             -c  INTEGER                 Number of cores to allocate for the node [default: 1]                                                                                                                                                                                                 │
+│    --ram               -r  INTEGER                 Amount of RAM in Mb to allocate for the node [default: 1024]                                                                                                                                                                                          │
+│    --root-disk         -d  INTEGER                 Number of GiB of root disk to allocate for the node [default: 10]                                                                                                                                                                                     │
+│ *  --image             -i  TEXT                    Name of the image to deploy [required]                                                                                                                                                                                                                │
+│    --name              -n  TEXT                    Name of the node                                                                                                                                                                                                                                      │
+│    --description       -D  TEXT                    Description of the node                                                                                                                                                                                                                               │
+│    --hostname              TEXT                    Hostname of the node                                                                                                                                                                                                                                  │
+│    --network               TEXT                    Network for the primary port (UUID or name).                                                                                                                                                                                                          │
+│    --auto-floating-ip                              Allocate a floating IP for the primary port.                                                                                                                                                                                                          │
+│    --floating-network      TEXT                    Floating pool network (UUID or name); requires --auto-floating-ip.                                                                                                                                                                                    │
+│    --no-network                                    Send an empty default_network request: disable the SDN auto-port while retaining legacy flat placement when configured.                                                                                                                               │
+│    --wait                                          Wait until the node is running                                                                                                                                                                                                                        │
+│    --output            -o  [json|html|table|yaml]  Output format; JSON prints one resource object.                                                                                                                                                                                                       │
+│    --help                                          Show this message and exit.                                                                                                                                                                                                                           │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

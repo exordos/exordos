@@ -6,12 +6,20 @@ Add a new subnet to a network
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network subnets add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network subnets add [OPTIONS]                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -115,7 +123,7 @@ Add a new subnet to a network
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network subnets add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network subnets add [OPTIONS]                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                            
 ```

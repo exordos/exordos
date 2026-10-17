@@ -12,71 +12,61 @@ Change what a network function answers with
 ```
 
 ## Options
+
 * `nf` (REQUIRED):
-  * Type: text
-  * Default: `sentinel.unset`
-  * Usage: `nf`
-
-
-
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `nf`
 
 * `rule_specs`:
-  * Type: text
-  * Default: `sentinel.unset`
-  * Usage: `-r
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `-r
 --rule`
 
-  splitter: the allow-list, as <ingress|egress>:<tcp|udp|icmp|any>[:<port>][@<remote_cidr>|@<identity_group>] (repeatable; replaces the whole list)
-
+  splitter: the allow-list, as <ingress|egress>:<tcp|udp|icmp|any>[:<port>][@<remote_cidr>|@<security_group>] (repeatable; replaces the whole list)
 
 * `forwarders`:
-  * Type: text
-  * Default: `sentinel.unset`
-  * Usage: `--forwarder`
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--forwarder`
 
   dns: an upstream resolver of this network (repeatable, replaces)
 
-
 * `zone_suffix`:
-  * Type: text
-  * Default: `none`
-  * Usage: `--zone-suffix`
+    * Type: text
+    * Default: `none`
+    * Usage: `--zone-suffix`
 
   dns: the internal zone's suffix
 
-
 * `platform_names`:
-  * Type: text
-  * Default: `sentinel.unset`
-  * Usage: `--platform-name`
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--platform-name`
 
   dns: a name of the installation itself (repeatable, replaces)
 
-
 * `filename`:
-  * Type: text
-  * Default: `none`
-  * Usage: `--filename`
+    * Type: text
+    * Default: `none`
+    * Usage: `--filename`
 
   dhcp: the netboot script to chain to
 
-
 * `lease_seconds`:
-  * Type: integer
-  * Default: `none`
-  * Usage: `--lease-seconds`
+    * Type: integer
+    * Default: `none`
+    * Usage: `--lease-seconds`
 
   dhcp: how long a lease is held
 
-
 * `help`:
-  * Type: boolean
-  * Default: `false`
-  * Usage: `--help`
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--help`
 
   Show this message and exit.
-
-
 
 ## CLI Help
 

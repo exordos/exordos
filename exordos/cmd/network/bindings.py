@@ -13,7 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-"""Independent security and identity group bindings for ports."""
+"""Independent security and security group bindings for ports."""
 
 import uuid
 

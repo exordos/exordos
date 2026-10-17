@@ -22,8 +22,9 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.network import common as net_common
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "address"
 ENTITY_COLLECTION = c.ADDRESS_COLLECTION
@@ -46,6 +47,7 @@ addresses_group = create_entity_group(
 
 
 @addresses_group.command("add", help="Allocate an address in a subnet")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the address")
 @click.option("-p", "--project-id", type=click.UUID, required=True, help="Project UUID")
@@ -75,6 +77,7 @@ def address_add_cmd(
     address: str | None,
     kind: str,
     port: str | None,
+    output: str = "table",
 ) -> None:
     """The allocation survives disassociation from a port."""
     if kind == "reservation" and port is not None:
@@ -90,21 +93,31 @@ def address_add_cmd(
         data["address"] = address
     if port is not None:
         data["port"] = net_common.resolve(client, c.PORT_COLLECTION, port)
-    show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+    show_resource(
+        base_client.add_entity(client, ENTITY_COLLECTION, data), output=output
+    )
 
 
 @addresses_group.command("update", help="Associate or disassociate a floating address")
+@output_option
 @click.pass_context
 @click.argument("address")
 @click.option("--port", default=None, help="Port to associate (UUID/name)")
 @click.option("--no-port", is_flag=True, help="Disassociate from the port")
 def address_update_cmd(
-    ctx: click.Context, address: str, port: str | None, no_port: bool
-):
+    ctx: click.Context,
+    address: str,
+    port: str | None,
+    no_port: bool,
+    output: str = "table",
+) -> None:
     if (port is not None) == no_port:
         raise click.ClickException("Pass exactly one of --port or --no-port")
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
         "port": net_common.resolve(client, c.PORT_COLLECTION, port) if port else None
     }
-    show_data(base_client.update_entity(client, ENTITY_COLLECTION, address, data))
+    show_resource(
+        base_client.update_entity(client, ENTITY_COLLECTION, address, data),
+        output=output,
+    )

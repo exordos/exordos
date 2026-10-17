@@ -6,12 +6,20 @@ Add a new security group
 ## Usage
 
 ```console
-
- Usage: exordos network security-groups add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network security-groups add [OPTIONS]                                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -55,7 +63,7 @@ Add a new security group
 ## CLI Help
 
 ```console
-
- Usage: exordos network security-groups add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network security-groups add [OPTIONS]                                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                            
 ```

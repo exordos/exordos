@@ -6,12 +6,20 @@ Add a port (a NIC on a subnet) to a node
 ## Usage
 
 ```console
-
- Usage: exordos network ports add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network ports add [OPTIONS]                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -96,13 +104,6 @@ Add a port (a NIC on a subnet) to a node
 
   Serve host-local DNS
 
-* `network_identity`:
-    * Type: boolean
-    * Default: `none`
-    * Usage: `--network-identity`
-
-  Belong to the network's default identity group
-
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -113,7 +114,7 @@ Add a port (a NIC on a subnet) to a node
 ## CLI Help
 
 ```console
-
- Usage: exordos network ports add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network ports add [OPTIONS]                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                            
 ```

@@ -22,8 +22,9 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.network import common as net_common
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "port"
 ENTITY_COLLECTION = c.PORT_COLLECTION
@@ -36,7 +37,6 @@ FIELDS_MAP = {
     "IPv4": lambda x: str(x.get("ipv4") or ""),
     "MAC": lambda x: str(x.get("mac") or ""),
     "Groups": lambda x: ", ".join(x.get("security_groups") or []),
-    "Identity": lambda x: ", ".join(x.get("identity_groups") or []),
     "Status": "status",
 }
 
@@ -51,11 +51,6 @@ def _port_options(f):
         ),
         click.option("--dhcp/--no-dhcp", default=None, help="Override subnet DHCP"),
         click.option("--dns/--no-dns", default=None, help="Serve host-local DNS"),
-        click.option(
-            "--network-identity/--no-network-identity",
-            default=None,
-            help="Belong to the network's default identity group",
-        ),
     ]
     for option in reversed(options):
         f = option(f)
@@ -63,6 +58,7 @@ def _port_options(f):
 
 
 @ports_group.command("add", help="Add a port (a NIC on a subnet) to a node")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the port")
 @click.option("-n", "--name", type=str, default=None, help="Name (also its DNS name)")
@@ -86,6 +82,7 @@ def port_add_cmd(
     subnet: str,
     node: str,
     port_security: bool,
+    output: str = "table",
     **settings,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -100,10 +97,13 @@ def port_add_cmd(
         "port_security": port_security,
         **{key: value for key, value in settings.items() if value is not None},
     }
-    show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+    show_resource(
+        base_client.add_entity(client, ENTITY_COLLECTION, data), output=output
+    )
 
 
 @ports_group.command("update", help="Update a port's requested addresses and toggles")
+@output_option
 @click.pass_context
 @click.argument("port", type=str)
 @click.option(
@@ -112,9 +112,13 @@ def port_add_cmd(
     help="Allow only the port's own source MAC/IP",
 )
 @_port_options
-def port_update_cmd(ctx: click.Context, port: str, **settings) -> None:
+def port_update_cmd(
+    ctx: click.Context, port: str, output: str = "table", **settings
+) -> None:
     data = {key: value for key, value in settings.items() if value is not None}
     if not data:
         raise click.ClickException("Nothing to change; pass at least one setting")
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    show_data(base_client.update_entity(client, ENTITY_COLLECTION, port, data))
+    show_resource(
+        base_client.update_entity(client, ENTITY_COLLECTION, port, data), output=output
+    )

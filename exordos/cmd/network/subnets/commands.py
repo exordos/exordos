@@ -22,8 +22,9 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.network import common as net_common
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "subnet"
 ENTITY_COLLECTION = c.SUBNET_COLLECTION
@@ -56,6 +57,7 @@ def _parse_router(spec: str) -> dict:
 
 
 @subnets_group.command("add", help="Add a new subnet to a network")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the subnet")
 @click.option("-n", "--name", type=str, required=True, help="Name of the subnet")
@@ -125,6 +127,7 @@ def subnet_add_cmd(
     dns_servers: tuple[str, ...],
     pool_only: bool,
     shared_pool: bool,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
@@ -142,4 +145,6 @@ def subnet_add_cmd(
     }
     if ip_range:
         data["ip_range"] = ip_range
-    show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+    show_resource(
+        base_client.add_entity(client, ENTITY_COLLECTION, data), output=output
+    )

@@ -6,12 +6,20 @@ Add a new network
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network networks add [OPTIONS]                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network networks add [OPTIONS]                                                                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -69,7 +77,7 @@ Add a new network
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos network networks add [OPTIONS]                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network networks add [OPTIONS]                                                                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                            
 ```

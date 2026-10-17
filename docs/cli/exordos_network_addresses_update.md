@@ -6,12 +6,20 @@ Associate or disassociate a floating address
 ## Usage
 
 ```console
-
- Usage: exordos network addresses update [OPTIONS] ADDRESS
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network addresses update [OPTIONS] ADDRESS                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `address` (REQUIRED):
     * Type: text
@@ -42,7 +50,7 @@ Associate or disassociate a floating address
 ## CLI Help
 
 ```console
-
- Usage: exordos network addresses update [OPTIONS] ADDRESS
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos network addresses update [OPTIONS] ADDRESS                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ```

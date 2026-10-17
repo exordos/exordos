@@ -79,6 +79,12 @@ def _arguments(command):
     ):
         overrides["version"] = UUID
     args = []
+    if command.name == "update":
+        module = command.callback.__module__
+        if module == "exordos.cmd.network.ports.commands":
+            args.append("--port-security")
+        if module == "exordos.cmd.network.addresses.commands":
+            args.append("--no-port")
     for param in command.params:
         if param.name == "output" or param.name == "help":
             continue

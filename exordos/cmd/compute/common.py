@@ -30,6 +30,7 @@ POWER_ACTIONS = {
     "reboot": ("reboot", "Reboot the {entity}"),
 }
 
+
 def write_agent_key(path: str, key: str) -> None:
     """Write a node's agent encryption key to ``path`` with mode 0600.
 

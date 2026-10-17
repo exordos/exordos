@@ -77,7 +77,7 @@ def parse_filter_rule(spec: str) -> dict:
     if remote_ip:
         # "From where" and "from whom" share one place in the syntax,
         # because they answer the same question about a rule. An address or
-        # a prefix stays an address; anything else names an identity group,
+        # a prefix stays an address; anything else names an security group,
         # which the command resolves to its uuid before sending.
         if is_cidr(remote_ip):
             rule["remote_ip"] = remote_ip
@@ -90,7 +90,7 @@ def resolve_rule(client, rule: dict) -> dict:
     """Turn a group named on the command line into the uuid the API wants."""
     ref = rule.pop("remote_group_ref", None)
     if ref is not None:
-        rule["remote_group"] = resolve(client, c.IDENTITY_GROUP_COLLECTION, ref)
+        rule["remote_group_id"] = resolve(client, c.SECURITY_GROUP_COLLECTION, ref)
     return rule
 
 
@@ -101,108 +101,6 @@ def format_rule(rule: dict) -> str:
         text += f":{rule['port']}"
     if rule.get("remote_ip"):
         text += f"@{rule['remote_ip']}"
-    if rule.get("remote_group"):
-        text += f"@{rule['remote_group']}"
+    if rule.get("remote_group_id"):
+        text += f"@{rule['remote_group_id']}"
     return text
-
-
-# What a `--interface` may say. Kept to what a leg is: where it goes, what
-# address it takes, and the floating address it requests. Port policy uses
-# independent group bindings.
-INTERFACE_KEYS = (
-    "subnet",
-    "network",
-    "port",
-    "address",
-    "index",
-    "public",
-    "floating-from",
-)
-
-# What only a leg the node *builds* can say. An adopted port already has
-# them, and it keeps its own: the node names it and nothing more.
-BUILT_LEG_KEYS = ("subnet", "network", "address", "public", "floating-from")
-
-
-def parse_interface(client, spec: str) -> dict:
-    """``subnet=<ref>[,address=<ip>][,index=<n>]…[,public=<ref>]``
-    or ``port=<ref>[,index=<n>]``
-
-    ``floating-from=<subnet>`` allocates a floating IP instead of naming
-    an existing address with ``public=<address>``.
-
-    One `--interface` is one leg of the node. ``subnet`` is the ordinary
-    way to say where it goes; ``network`` is accepted for the case of a
-    network with a single placeable subnet, and the API refuses it with the
-    candidates listed when there is more than one.
-
-    ``port`` is the other kind of leg: one that already exists, which the
-    node adopts rather than builds. It keeps its own configuration, so the
-    keys that describe one are refused here rather than silently dropped --
-    a caller who writes them means them, and the port is not going to take
-    them. For the same reason the node releases such a port when it goes
-    instead of deleting it.
-
-    """
-    interface: dict = {"kind": "subnet"}
-    config: dict = {"kind": "simple"}
-    said: list[str] = []
-
-    for chunk in spec.split(","):
-        key, sep, value = chunk.partition("=")
-        key, value = key.strip(), value.strip()
-        if not sep or not value:
-            raise click.ClickException(
-                f"Invalid interface part: {chunk!r} (expected <key>=<value>, "
-                f"one of {', '.join(INTERFACE_KEYS)})"
-            )
-        said.append(key)
-        if key == "subnet":
-            interface["subnet"] = resolve(client, c.SUBNET_COLLECTION, value)
-        elif key == "port":
-            interface["port"] = resolve(client, c.PORT_COLLECTION, value)
-        elif key == "network":
-            interface["network"] = resolve(client, c.NETWORK_COLLECTION, value)
-        elif key == "address":
-            interface["address"] = value
-        elif key == "index":
-            if not value.isdigit():
-                raise click.ClickException(
-                    f"Invalid interface index: {value!r} (0 is the primary leg)"
-                )
-            interface["index"] = int(value)
-        elif key in ("public", "floating-from"):
-            if "public" in config:
-                raise click.ClickException(
-                    "Give one of public= or floating-from= once per interface"
-                )
-            field, collection = (
-                ("address", c.ADDRESS_COLLECTION)
-                if key == "public"
-                else ("floating_from", c.SUBNET_COLLECTION)
-            )
-            config["public"] = {field: resolve(client, collection, value)}
-        else:
-            raise click.ClickException(
-                f"Unknown interface key: {key!r} "
-                f"(expected one of {', '.join(INTERFACE_KEYS)})"
-            )
-
-    if "port" in interface:
-        described = [key for key in said if key in BUILT_LEG_KEYS]
-        if described:
-            raise click.ClickException(
-                f"Interface {spec!r} adopts an existing port, which keeps its "
-                f"own configuration: drop {', '.join(sorted(set(described)))}="
-                " or build a leg with subnet= instead"
-            )
-        interface["kind"] = "port"
-        return interface
-
-    if ("subnet" in interface) == ("network" in interface):
-        raise click.ClickException(
-            f"Interface {spec!r} must name exactly one of subnet= or network="
-        )
-    if len(config) > 1:
-        interface["config"] = config
-    return interface

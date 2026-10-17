@@ -130,6 +130,7 @@ def test_install_cmd_accepts_names_uuid_and_manifest_in_order(tmp_path) -> None:
     manifest = tmp_path / "element.yaml"
     manifest.write_text("name: local\nversion: 2.0.0\n")
     with (
+        mock.patch.object(commands.base_client, "list_entities", return_value=[]),
         mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
         mock.patch.object(
             commands, "_select_element_by_name", side_effect=[EMPTY, DEPENDENT]
