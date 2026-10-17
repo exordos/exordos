@@ -141,9 +141,7 @@ PORT_COLLECTION = "/v1/network/ports/"
 NF_COLLECTION = "/v1/network/nfs/"
 SECURITY_GROUP_COLLECTION = "/v1/network/catalog/security_groups/"
 SECURITY_GROUP_RULE_COLLECTION = "/v1/network/catalog/security_group_rules/"
-IDENTITY_GROUP_COLLECTION = "/v1/network/catalog/identity_groups/"
 PORT_SECURITY_GROUP_COLLECTION = "/v1/network/port_security_groups/"
-PORT_IDENTITY_GROUP_COLLECTION = "/v1/network/port_identity_groups/"
 ADDRESS_COLLECTION = "/v1/network/catalog/addresses/"
 
 # Cli

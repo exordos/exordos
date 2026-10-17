@@ -26,7 +26,7 @@ Change what a network function answers with
   * Usage: `-r
 --rule`
 
-  splitter: the allow-list, as <ingress|egress>:<tcp|udp|icmp|any>[:<port>][@<remote_cidr>|@<identity_group>] (repeatable; replaces the whole list)
+  splitter: the allow-list, as <ingress|egress>:<tcp|udp|icmp|any>[:<port>][@<remote_cidr>|@<security_group>] (repeatable; replaces the whole list)
 
 
 * `forwarders`:

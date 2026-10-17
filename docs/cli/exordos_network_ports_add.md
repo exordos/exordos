@@ -96,12 +96,6 @@ Add a port (a NIC on a subnet) to a node
 
   Serve host-local DNS
 
-* `network_identity`:
-    * Type: boolean
-    * Default: `none`
-    * Usage: `--network-identity`
-
-  Belong to the network's default identity group
 
 * `help`:
     * Type: boolean

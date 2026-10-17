@@ -121,7 +121,7 @@ def rule_del_cmd(ctx: click.Context, group: str, spec: str) -> None:
         rules = base_client.list_entities(
             client, c.SECURITY_GROUP_RULE_COLLECTION, security_group=entity["uuid"]
         )
-        fields = ("direction", "protocol", "port", "remote_ip", "remote_group")
+        fields = ("direction", "protocol", "port", "remote_ip", "remote_group_id")
         matches = [
             row for row in rules if all(row.get(key) == rule.get(key) for key in fields)
         ]

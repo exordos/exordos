@@ -41,11 +41,8 @@ nfs_group = create_entity_group(
 )
 
 
-# No `add`: a function is not made on its own. A subnet is seeded with its
-# DHCP and its default security group, a network with its resolver and its
-# metadata proxy, and a port with what it expands into - so what there is to
-# do here is find the one that already serves the object you mean and change
-# what it answers with.
+# Functions are seeded for their owners: DHCP for a subnet, DNS/proxy for a
+# network. This command edits the existing service's configuration.
 @nfs_group.command("set", help="Change what a network function answers with")
 @click.pass_context
 @click.argument("nf", type=str)
@@ -56,7 +53,7 @@ nfs_group = create_entity_group(
     multiple=True,
     help=(
         "splitter: the allow-list, as <ingress|egress>:<tcp|udp|icmp|any>"
-        "[:<port>][@<remote_cidr>|@<identity_group>] (repeatable; "
+        "[:<port>][@<remote_cidr>|@<security_group>] (repeatable; "
         "replaces the whole list)"
     ),
 )

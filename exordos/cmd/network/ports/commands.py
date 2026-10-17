@@ -36,7 +36,6 @@ FIELDS_MAP = {
     "IPv4": lambda x: str(x.get("ipv4") or ""),
     "MAC": lambda x: str(x.get("mac") or ""),
     "Groups": lambda x: ", ".join(x.get("security_groups") or []),
-    "Identity": lambda x: ", ".join(x.get("identity_groups") or []),
     "Status": "status",
 }
 
@@ -51,11 +50,6 @@ def _port_options(f):
         ),
         click.option("--dhcp/--no-dhcp", default=None, help="Override subnet DHCP"),
         click.option("--dns/--no-dns", default=None, help="Serve host-local DNS"),
-        click.option(
-            "--network-identity/--no-network-identity",
-            default=None,
-            help="Belong to the network's default identity group",
-        ),
     ]
     for option in reversed(options):
         f = option(f)

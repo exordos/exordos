@@ -53,12 +53,6 @@ Update a port's requested addresses and toggles
 
   Serve host-local DNS
 
-* `network_identity`:
-    * Type: boolean
-    * Default: `none`
-    * Usage: `--network-identity`
-
-  Belong to the network's default identity group
 
 * `help`:
     * Type: boolean

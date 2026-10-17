@@ -9,7 +9,6 @@ import rich_click as click
 
 from exordos.cmd.network import common as net_common
 from exordos.cmd.network.addresses import commands as addresses_commands
-from exordos.cmd.network.identity_groups import commands as identity_commands
 from exordos.cmd.network.networks import commands as networks_commands
 from exordos.cmd.network.nfs import commands as nfs_commands
 from exordos.cmd.network.ports import commands as ports_commands
@@ -145,7 +144,8 @@ def test_port_update_sends_only_native_setting():
         ["some-port", "--dns"],
         entity={
             "uuid": "55555555-5555-5555-5555-555555555555",
-            "config": {"kind": "simple", "security_groups": [SG], "dhcp": False},
+            "security_groups": [SG],
+            "dhcp": False,
         },
     )
     data = update_entity.call_args[0][3]
@@ -169,12 +169,12 @@ def test_nf_set_keeps_the_rest_of_the_config():
 
 
 def test_nf_set_resolves_a_named_group_like_a_security_group_does():
-    """`@<group>` names an identity group; the API takes its uuid under the
+    """`@<group>` names a security group; the API takes its uuid under the
     key security-group rules use, not the CLI's own unresolved reference."""
     group = "77777777-7777-7777-7777-777777777777"
 
     def _get(_c, collection, ref):
-        if collection == nfs_commands.c.IDENTITY_GROUP_COLLECTION:
+        if collection == nfs_commands.c.SECURITY_GROUP_COLLECTION:
             assert ref == "db"
             return {"uuid": group}
         return {"uuid": SG, "kind": "splitter", "config": {"rules": []}}
@@ -193,7 +193,12 @@ def test_nf_set_resolves_a_named_group_like_a_security_group_does():
         )
     assert result.exit_code == 0, result.output
     assert update_entity.call_args[0][3]["config"]["rules"] == [
-        {"direction": "ingress", "protocol": "tcp", "port": 5432, "remote_group": group}
+        {
+            "direction": "ingress",
+            "protocol": "tcp",
+            "port": 5432,
+            "remote_group_id": group,
+        }
     ]
 
 
@@ -265,7 +270,7 @@ def test_security_group_rule_del_deletes_only_exact_row(missing, by_uuid):
                 "protocol": "tcp",
                 "port": 22,
                 "remote_ip": None,
-                "remote_group": None,
+                "remote_group_id": None,
             }
         )
     with (
@@ -309,11 +314,6 @@ def test_security_group_rule_del_deletes_only_exact_row(missing, by_uuid):
             security_commands.security_groups_group,
             security_commands.c.PORT_SECURITY_GROUP_COLLECTION,
             "security_group",
-        ),
-        (
-            identity_commands.identity_groups_group,
-            identity_commands.c.PORT_IDENTITY_GROUP_COLLECTION,
-            "identity_group",
         ),
     ],
 )
