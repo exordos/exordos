@@ -145,7 +145,14 @@ def _download_inventory_json(session: requests.Session, base_url: str) -> dict:
             f"Downloading inventory.json from {base_url}", total=None
         )
         response = session.get(inventory_url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as error:
+            raise click.ClickException(
+                f"Failed to download inventory from {inventory_url}: "
+                f"HTTP {response.status_code} {response.reason}. "
+                "Check that the element version is published in the repository."
+            ) from error
         progress.update(task, completed=1, total=1)
     return response.json()
 
@@ -213,7 +220,14 @@ def _download_inventory_files(
                 continue
             temp_file = local_file.with_suffix(".tmp")
             with session.get(remote_url, stream=True) as resp:
-                resp.raise_for_status()
+                try:
+                    resp.raise_for_status()
+                except requests.HTTPError as error:
+                    raise click.ClickException(
+                        f"Failed to download artifact from {remote_url}: "
+                        f"HTTP {resp.status_code} {resp.reason}. "
+                        "Check that the artifact is published in the repository."
+                    ) from error
                 content_length = resp.headers.get("Content-Length")
                 total = int(content_length) if content_length else None
                 progress.update(task, total=total)

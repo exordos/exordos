@@ -23,6 +23,7 @@ from unittest import mock
 
 import click
 import pytest
+import requests
 import rich.console
 import yaml
 
@@ -160,3 +161,28 @@ def test_update_realm_config_keeps_parallel_writes(tmp_path) -> None:
         config = yaml.safe_load(f)
 
     assert sorted(config["realms"]) == sorted(names)
+
+
+@pytest.mark.parametrize("category", [None, "artifacts"])
+def test_download_inventory_reports_missing_repository_file(tmp_path, category):
+    base_url = "https://repo.example/exordos-elements/ecosystem_realm/0.2.7"
+    response = requests.Response()
+    response.raw = mock.Mock()
+    response.status_code = 404
+    response.reason = "Not Found"
+    response._content = b"<html>nginx 404 Not Found</html>"
+    session = mock.Mock()
+    session.get.return_value = response
+    with pytest.raises(click.ClickException) as caught:
+        if category is None:
+            commands._download_inventory_json(session, base_url)
+        else:
+            commands._download_inventory_files(
+                session, base_url, {category: ["openapi_user.yaml"]}, tmp_path
+            )
+    message = str(caught.value)
+    path = "inventory.json" if category is None else "artifacts/openapi_user.yaml"
+    assert f"{base_url}/{path}" in message
+    assert "HTTP 404 Not Found" in message
+    assert "published in the repository" in message
+    assert "<html>" not in message
