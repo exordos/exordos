@@ -163,7 +163,7 @@ exordos = [
 ]
 
 [project.scripts]
-exordos = "exordos.cmd.cli:main"
+exordos = "exordos.cmd.entrypoint:main"
 
 [project.entry-points."exordos.backup.drivers"]
 LocalQcowBackuper = "exordos.backup.local:LocalQcowBackuper"

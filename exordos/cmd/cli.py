@@ -399,7 +399,12 @@ def main() -> None:
     """Run the CLI and report server errors with their response details."""
     error_message = ""
     try:
-        exordos()
+        result = exordos(standalone_mode=False)
+        if isinstance(result, int):
+            sys.exit(result)
+    except click.ClickException as e:
+        e.show()
+        sys.exit(e.exit_code)
     except bazooka_exc.BaseHTTPException as e:
         error_message = _explain(e.code, e.cause.response.text)
     except RequestException as e:
@@ -409,8 +414,6 @@ def main() -> None:
             error_message = f"Error: {e}"
     except (ValueError, FileNotFoundError, exordos_exc.ExordosException) as e:
         error_message = f"Error: {e}"
-    except KeyboardInterrupt:
-        error_message = "Error: Interrupted by user"
     if error_message:
         error_message = "".join(
             char if char.isprintable() or char in "\n\t" else ascii(char)[1:-1]

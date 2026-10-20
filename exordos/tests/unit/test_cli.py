@@ -15,6 +15,8 @@
 #    under the License.
 import json
 import pathlib
+import subprocess
+import sys
 from unittest.mock import MagicMock
 
 from click.testing import CliRunner
@@ -22,6 +24,7 @@ import pytest
 from requests.exceptions import RequestException
 
 from exordos.cmd import cli
+from exordos.cmd import entrypoint
 
 try:
     import tomllib
@@ -103,7 +106,7 @@ def test_the_console_script_goes_through_the_error_handling() -> None:
     with pyproject.open("rb") as f:
         scripts = tomllib.load(f)["project"]["scripts"]
 
-    assert scripts["exordos"] == "exordos.cmd.cli:main"
+    assert scripts["exordos"] == "exordos.cmd.entrypoint:main"
 
 
 @pytest.mark.parametrize("structured", [False, True])
@@ -121,3 +124,84 @@ def test_main_escapes_terminal_controls(monkeypatch, capsys, structured) -> None
     assert "denied" in captured.err
     assert "\\x1b" in captured.err
     assert not any(char in captured.err for char in "\x1b\x07\r\b\x9b")
+
+
+@pytest.mark.parametrize("error", [KeyboardInterrupt, cli.click.Abort])
+def test_main_reports_user_interruption(monkeypatch, capsys, error) -> None:
+    monkeypatch.setattr(cli, "exordos", MagicMock(side_effect=error))
+
+    with pytest.raises(SystemExit) as exit_code:
+        entrypoint.main()
+
+    assert exit_code.value.code == 130
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == "Error: Interrupted by user\n"
+
+
+@pytest.mark.parametrize("module", ["click", "exordos.cmd.cli"])
+def test_main_reports_interruption_during_import(monkeypatch, capsys, module) -> None:
+    import builtins
+
+    original_import = builtins.__import__
+
+    def interrupted_import(name, *args, **kwargs):
+        if name == module:
+            raise KeyboardInterrupt
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", interrupted_import)
+    with pytest.raises(SystemExit) as exit_code:
+        entrypoint.main()
+
+    assert exit_code.value.code == 130
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == "Error: Interrupted by user\n"
+
+
+@pytest.mark.parametrize(
+    ("args", "code", "message"),
+    [
+        (["--unknown-option"], 2, "No such option"),
+        (["interrupted-command"], 130, "Error: Interrupted by user"),
+    ],
+)
+def test_main_preserves_click_error_handling(monkeypatch, capsys, args, code, message):
+    @cli.click.command()
+    def interrupted_command():
+        raise KeyboardInterrupt
+
+    monkeypatch.setitem(
+        cli.exordos.commands, "interrupted-command", interrupted_command
+    )
+    monkeypatch.setattr("sys.argv", ["exordos", *args])
+
+    with pytest.raises(SystemExit) as exit_code:
+        entrypoint.main()
+
+    assert exit_code.value.code == code
+    captured = capsys.readouterr()
+    assert message in captured.err
+    assert "Traceback" not in captured.err
+    assert "Aborted" not in captured.err
+
+
+def test_interrupt_hook_reports_user_interruption() -> None:
+    hook = pathlib.Path(cli.__file__).with_name("interrupt_hook.py")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import os, runpy, signal, sys; "
+            "runpy.run_path(sys.argv[1]); os.kill(os.getpid(), signal.SIGINT)",
+            str(hook),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+
+    assert result.returncode == 130
+    assert result.stdout == ""
+    assert result.stderr == "Error: Interrupted by user\n"
