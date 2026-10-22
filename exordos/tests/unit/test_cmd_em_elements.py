@@ -121,3 +121,80 @@ def test_clear_waits_for_uninstall_requested_earlier() -> None:
 
     assert result.exit_code == 0, result.output
     action_entity.assert_not_called()
+
+
+def test_install_cmd_accepts_names_uuid_and_manifest_in_order(tmp_path) -> None:
+    element_uuid = "c4474e80-cc6a-4657-a333-c5be65f81eb4"
+    manifest = tmp_path / "element.yaml"
+    manifest.write_text("name: local\nversion: 2.0.0\n")
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(
+            commands, "_select_element_by_name", side_effect=[EMPTY, DEPENDENT]
+        ) as select,
+        mock.patch.object(
+            commands.repo_utils, "ensure_repository", return_value={"uuid": "repo"}
+        ),
+        mock.patch.object(commands.repo_utils, "do_upload") as upload,
+        mock.patch.object(
+            commands.repo_utils, "wait_for_repo_element", return_value={"uuid": "local"}
+        ),
+        mock.patch.object(commands.repo_utils, "install_element") as install,
+    ):
+        client = get_client.return_value
+        client.get.return_value = {**EMPTY, "uuid": element_uuid}
+        result = CliRunner().invoke(
+            commands.install_cmd,
+            ["empty", str(manifest), element_uuid, "dependent", "--version", "1.0.0"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    assert install.call_args_list == [
+        mock.call(client, "e1"),
+        mock.call(client, "local"),
+        mock.call(client, element_uuid),
+        mock.call(client, "e2"),
+    ]
+    assert select.call_args_list == [
+        mock.call(client, "empty", "1.0.0"),
+        mock.call(client, "dependent", "1.0.0"),
+    ]
+    upload.assert_called_once()
+    assert result.output.count("was installed successfully") == 4
+
+
+def test_install_cmd_stops_on_first_failure() -> None:
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            commands, "_select_element_by_name", return_value=EMPTY
+        ) as select,
+        mock.patch.object(
+            commands.repo_utils, "install_element", side_effect=RuntimeError("failed")
+        ) as install,
+    ):
+        result = CliRunner().invoke(
+            commands.install_cmd,
+            ["empty", "dependent"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code != 0
+    assert str(result.exception) == "failed"
+    select.assert_called_once()
+    install.assert_called_once()
+
+
+def test_install_cmd_preserves_interactive_selection() -> None:
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "list_entities", return_value=[EMPTY]),
+        mock.patch("questionary.select") as picker,
+        mock.patch.object(commands, "_select_element_by_name", return_value=EMPTY),
+        mock.patch.object(commands.repo_utils, "install_element") as install,
+    ):
+        picker.return_value.ask.return_value = "empty"
+        result = CliRunner().invoke(
+            commands.install_cmd, [], obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 0, result.output
+    install.assert_called_once()

@@ -400,13 +400,13 @@ def _select_current_element_by_name(
     return active_elements[0]
 
 
-@click.command("install", help="Install element")
+@click.command("install", help="Install one or more elements")
 @click.option(
     "-v",
     "--version",
     type=str,
     required=False,
-    help="version of the element",
+    help="Version to use for all elements specified by name",
 )
 @click.option(
     "-p",
@@ -422,19 +422,20 @@ def _select_current_element_by_name(
     show_default=True,
     help="Seconds to wait for repository upload and element sync to complete",
 )
-@click.argument("uuid_or_name_or_path", required=False)
+@click.argument("uuid_or_name_or_path", nargs=-1)
 @click.pass_context
 def install_cmd(
     ctx: click.Context,
     version: str | None,
     project_id: sys_uuid.UUID,
     timeout: float,
-    uuid_or_name_or_path: str | None,
+    uuid_or_name_or_path: tuple[str, ...],
 ) -> None:
-    """Install element from repository API by UUID, name, or manifest path"""
+    """Install elements from repository API by UUID, name, or manifest path."""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
-    if not uuid_or_name_or_path:
+    targets = list(uuid_or_name_or_path)
+    if not targets:
         import questionary
 
         all_elements = base_client.list_entities(
@@ -442,57 +443,61 @@ def install_cmd(
             base_client.add_fields_to_url(c.REPOSITORY_ELEMENT_COLLECTION, ("name",)),
         )
         element_names = sorted(set(e["name"] for e in all_elements))
-        uuid_or_name_or_path = questionary.select(
+        selected = questionary.select(
             "Select element to install",
             choices=element_names,
         ).ask()
-        if not uuid_or_name_or_path:
+        if not selected:
             click.echo("No element selected, aborting")
             return
+        targets = [selected]
 
-    if os.path.isfile(uuid_or_name_or_path):
-        manifest_path = pathlib.Path(uuid_or_name_or_path)
-        manifest_data = utils.load_yaml(str(manifest_path))
-        name = manifest_data.get("name")
-        e_version = manifest_data.get("version")
+    for target in targets:
+        if os.path.isfile(target):
+            manifest_path = pathlib.Path(target)
+            manifest_data = utils.load_yaml(str(manifest_path))
+            name = manifest_data.get("name")
+            e_version = manifest_data.get("version")
 
-        driver_spec = {"kind": "database"}
-        repository = repo_utils.ensure_repository(
-            client,
-            DEFAULT_UPLOAD_REPO_NAME,
-            driver_spec,
-            project_id,
-            DEFAULT_PRIORITY,
-            sync_mode="copy",
-        )
+            driver_spec = {"kind": "database"}
+            repository = repo_utils.ensure_repository(
+                client,
+                DEFAULT_UPLOAD_REPO_NAME,
+                driver_spec,
+                project_id,
+                DEFAULT_PRIORITY,
+                sync_mode="copy",
+            )
 
-        repo_utils.do_upload(client, DEFAULT_UPLOAD_REPO_NAME, manifest_path, timeout)
+            repo_utils.do_upload(
+                client, DEFAULT_UPLOAD_REPO_NAME, manifest_path, timeout
+            )
 
-        click.echo(f"Waiting for {name} ({e_version}) to become AVAILABLE...")
-        repo_element = repo_utils.wait_for_repo_element(
-            client, repository["uuid"], name, e_version, "AVAILABLE", timeout
-        )
+            click.echo(f"Waiting for {name} ({e_version}) to become AVAILABLE...")
+            repo_element = repo_utils.wait_for_repo_element(
+                client, repository["uuid"], name, e_version, "AVAILABLE", timeout
+            )
 
-        repo_utils.install_element(client, repo_element["uuid"])
+            repo_utils.install_element(client, repo_element["uuid"])
 
-        installed_name = f"{name} ({e_version})"
+            installed_name = f"{name} ({e_version})"
+            click.echo(
+                f"Element {click.style(installed_name, fg='green')} was installed successfully"
+            )
+            continue
+
+        if utils.is_valid_uuid(target):
+            element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=target)
+        else:
+            element = _select_element_by_name(client, target, version)
+
+        element_uuid = element["uuid"]
+        repo_utils.install_element(client, element_uuid)
+
+        installed_name = f"{element['name']} ({element['version']})"
         click.echo(
             f"Element {click.style(installed_name, fg='green')} was installed successfully"
         )
-        return
-
-    if utils.is_valid_uuid(uuid_or_name_or_path):
-        element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=uuid_or_name_or_path)
-    else:
-        element = _select_element_by_name(client, uuid_or_name_or_path, version)
-
-    element_uuid = element["uuid"]
-    repo_utils.install_element(client, element_uuid)
-
-    installed_name = f"{element['name']} ({element['version']})"
-    click.echo(
-        f"Element {click.style(installed_name, fg='green')} was installed successfully"
-    )
 
 
 def _update_element_from_manifest(
