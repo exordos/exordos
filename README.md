@@ -54,6 +54,23 @@ Contributing to the project is highly appreciated! However, some rules should be
 - After the changes are completed and **tested**, a Pull Request should be created with a clear description of the new functionality. Add one of the project maintainers as a reviewer.
 - Changes can be merged only after receiving approval from one of the project maintainers.
 
+## Rawstor storage
+
+Create a cluster with `exordos storages clusters add --type rawstor --name NAME`.
+Initialize OSTs on storage hosts with `storages nodes init --type rawstor`, then
+create OST resources with `storages nodes add --cluster NAME --agent AGENT_UUID --name OST_NAME`
+and `--failure-domain-path dc/row/rack/server`. Use `init --pool-agent-name` for the local service name
+(default: `universal_agent`) and `add --agent` for the registered agent name or UUID.
+`init` installs and configures the agent; `add` only creates the desired resource.
+The host agent starts each OST;
+core admits it into the MDS topology after readiness confirmation.
+Each cluster gets WARM persistent (two mirrors) and ephemeral (one mirror) pools
+sharing its physical capacity. Local qcow2 disks default to WARM ephemeral.
+See [Rawstor storage](docs/rawstor.md) for ports, policy CRUD and space accounting.
+
+`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `38903108689`.
+The same run supplies OST, vhost, librawstor and binding `99.0.0+0.14d3e33`.
+
 ## Local test environment on Ubuntu
 
 The test environments require a working Python 3 installation. Check both command names:
@@ -77,3 +94,15 @@ Tox uses `uv` for environment creation. In a sandbox or another restricted envir
 ```bash
 UV_CACHE_DIR="${TMPDIR:-/tmp}/uv-cache" tox -e develop
 ```
+
+OST and MDS instances use the rawstor package's systemd templates and per-instance
+configs under `/etc/rawstor/ost` and `/etc/rawstor/mds`. `storages nodes init`
+installs ZFS support; select an existing native backing with
+`nodes add --location zfs://POOL/DATASET`. Pools and datasets are provisioned
+separately. See the Rawstor storage guide above for service permissions and
+capacity isolation.
+
+The public cluster `driver_spec` contains only `kind` and `endpoint`; nodes and
+pool policies are managed through their separate storage resources. Core builds
+their agent snapshot at delivery time. The old `ost_endpoint` field is removed
+from the cluster API.
