@@ -378,6 +378,21 @@ def add_cmd(
     required=False,
 )
 @click.option(
+    "--node-cores",
+    type=int,
+    help="CPU cores of the realm to claim",
+)
+@click.option(
+    "--node-ram",
+    type=int,
+    help="RAM in MB of the realm to claim",
+)
+@click.option(
+    "--node-root-disk-size",
+    type=int,
+    help="Root disk size in GB of the realm to claim",
+)
+@click.option(
     "--ttl-hours",
     type=float,
     required=False,
@@ -401,6 +416,9 @@ def claim_cmd(
     ctx: click.Context,
     name: str,
     description: str | None,
+    node_cores: int | None,
+    node_ram: int | None,
+    node_root_disk_size: int | None,
     ttl_hours: float | None,
     ssh_public_key: str | None,
     output: str,
@@ -415,6 +433,12 @@ def claim_cmd(
     data = {"name": name}
     if description is not None:
         data["description"] = description
+    if node_cores is not None:
+        data["node_cores"] = node_cores
+    if node_ram is not None:
+        data["node_ram"] = node_ram
+    if node_root_disk_size is not None:
+        data["node_root_disk_size"] = node_root_disk_size
     if ttl_hours is not None:
         # The platform refuses a naive deadline, so the offset travels with it.
         expires_at = datetime.datetime.now(datetime.timezone.utc) + (
