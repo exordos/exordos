@@ -385,15 +385,16 @@ class NginxRepoDriver(base.AbstractRepoDriver):
                         file_url = f"{element_url}/{category}/{artifact_name}"
                         self._delete_remote(file_url)
 
-            # Delete category directories
+            # Delete category directories; WebDAV deletes a collection only
+            # by a URI ending in a slash (nginx answers 409 otherwise).
             for category in builder_base.ElementInventory.categories():
-                self._delete_remote(f"{element_url}/{category}")
+                self._delete_remote(f"{element_url}/{category}/")
 
             # Delete inventory file
             self._delete_remote(self.elements_inventory_path(element))
 
             # Try to delete the version directory
-            self._delete_remote(element_url)
+            self._delete_remote(f"{element_url}/")
 
             self._logger.info(f"Removed {element.name} version {element.version}")
         except base.RepoHTTPError as e:

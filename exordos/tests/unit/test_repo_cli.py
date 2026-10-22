@@ -692,6 +692,16 @@ class TestPushCmd:
         assert result.exit_code == 0, result.output
         return do_push_mock
 
+    @pytest.mark.parametrize("option", ["-u", "--user", "-p", "--password"])
+    def test_push_cmd_rejects_local_credentials(self, option) -> None:
+        result = CliRunner().invoke(
+            repo_commands.push_cmd,
+            ["--driver", "realm", option, "secret"],
+            obj=self._obj(),
+        )
+        assert result.exit_code == 2
+        assert "No such option" in result.output
+
     def test_push_cmd_default_jobs(self) -> None:
         do_push_mock = self._invoke([])
         assert do_push_mock.call_args.args[-1] == 1
