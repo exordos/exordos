@@ -469,3 +469,4 @@ def info_cmd(ctx: click.Context, node: str, output: str) -> None:
 
 cn_group.add_command(add_cmd, aliases=["a"])
 cn_group.add_command(update_cmd, aliases=["u"])
+compute_common.add_power_commands(cn_group, ENTITY, ENTITY_COLLECTION)
