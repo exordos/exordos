@@ -288,3 +288,4 @@ def update_cmd(
 
 sets_group.add_command(add_cmd, aliases=["a"])
 sets_group.add_command(update_cmd, aliases=["u"])
+compute_common.add_power_commands(sets_group, ENTITY, ENTITY_COLLECTION)
