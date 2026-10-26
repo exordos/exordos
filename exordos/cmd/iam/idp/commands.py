@@ -32,8 +32,9 @@ ENTITY_COLLECTION = c.IDP_COLLECTION
 FIELDS_MAP = {
     "UUID": "uuid",
     "Name": "name",
+    "Project": "project_id",
     "Scope": "scope",
-    "Iam_client": "iam_client",
+    "Iam_client": lambda x: (x.get("iam_client") or "").split("/")[-1],
     "Status": "status",
 }
 
@@ -86,10 +87,11 @@ idps_group = create_entity_group(
     help="scope",
 )
 @click.option(
+    "--nonce-required/--no-nonce-required",
     "--nonce_required",
-    type=bool,
-    is_flag=True,
+    "nonce_required",
     default=True,
+    help="Whether nonce is required",
 )
 @click.option(
     "--callback",
@@ -139,3 +141,102 @@ def add_cmd(
 
 
 idps_group.add_command(add_cmd, aliases=["a"])
+
+
+@click.command("update", help=f"Update {ENTITY}")
+@click.pass_context
+@click.argument("uuid", type=str)
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    default=None,
+    help=f"Name of the {ENTITY}",
+)
+@click.option(
+    "-D",
+    "--description",
+    type=str,
+    default=None,
+    help=f"Description of the {ENTITY}",
+)
+@click.option(
+    "-i",
+    "--iam-client",
+    type=click.UUID,
+    default=None,
+    help="Uuid of iam_client",
+)
+@click.option(
+    "--scope",
+    type=str,
+    default=None,
+    help="scope",
+)
+@click.option(
+    "--nonce-required/--no-nonce-required",
+    default=None,
+    help="Whether nonce is required",
+)
+@click.option(
+    "--callback",
+    type=str,
+    default=None,
+    help="JSON string for callbacks",
+)
+@tag_options(update=True)
+def update_cmd(
+    ctx: click.Context,
+    uuid: str,
+    name: str | None,
+    description: str | None,
+    iam_client: sys_uuid.UUID | None,
+    scope: str | None,
+    nonce_required: bool | None,
+    callback: str | None,
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
+) -> None:
+    data = tags_payload(tags, clear_tags)
+    if name is not None:
+        data["name"] = name
+    if description is not None:
+        data["description"] = description
+    if iam_client is not None:
+        data["iam_client"] = f"{c.CLIENT_COLLECTION}{iam_client}"
+    if scope is not None:
+        data["scope"] = scope
+    if nonce_required is not None:
+        data["nonce_required"] = nonce_required
+    if callback is not None:
+        try:
+            data["callback"] = json.loads(callback)
+        except json.JSONDecodeError:
+            raise click.BadParameter(
+                f"Invalid JSON string: '{callback}'", param_hint="--callback"
+            )
+
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
+    show_data(entity)
+
+
+idps_group.add_command(update_cmd, aliases=["u"])
+
+
+@click.command(
+    "well-known",
+    help=f"Show OpenID configuration (.well-known) of the {ENTITY}",
+)
+@click.pass_context
+@click.argument("uuid", type=str)
+def well_known_cmd(ctx: click.Context, uuid: str) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    idp_uuid = base_client._get_entity_uuid(client, ENTITY_COLLECTION, uuid)
+    data = client.get(
+        f"{ENTITY_COLLECTION}{idp_uuid}/.well-known/", "openid-configuration"
+    )
+    click.echo(json.dumps(data, indent=2))
+
+
+idps_group.add_command(well_known_cmd, aliases=["wk"])

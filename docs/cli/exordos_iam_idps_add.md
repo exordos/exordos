@@ -6,9 +6,9 @@ Add a new idp to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
@@ -63,7 +63,10 @@ Add a new idp to the Exordos installation
 * `nonce_required`:
     * Type: boolean
     * Default: `true`
-    * Usage: `--nonce_required`
+    * Usage: `--nonce-required
+--nonce_required`
+
+  Whether nonce is required
 
 * `callback` (REQUIRED):
     * Type: text
@@ -89,21 +92,21 @@ Add a new idp to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                           
- Add a new idp to the Exordos installation                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid            -u  UUID  UUID of the idp                                                                                                                                                                                                                                                          │
-│    --name            -n  TEXT  Name of the idp                                                                                                                                                                                                                                                          │
-│    --description     -D  TEXT  Description of the idp                                                                                                                                                                                                                                                   │
-│ *  --project-id      -p  UUID  Uuid of the project [required]                                                                                                                                                                                                                                           │
-│ *  --iam-client      -i  UUID  Uuid of iam_client [required]                                                                                                                                                                                                                                            │
-│    --scope               TEXT  scope                                                                                                                                                                                                                                                                    │
-│    --nonce_required                                                                                                                                                                                                                                                                                     │
-│ *  --callback            TEXT  JSON string for callbacks [required]                                                                                                                                                                                                                                     │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                            
+ Add a new idp to the Exordos installation                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --uuid                                                 -u  UUID  UUID of the idp                                                                                                                                                                                                                      │
+│    --name                                                 -n  TEXT  Name of the idp                                                                                                                                                                                                                      │
+│    --description                                          -D  TEXT  Description of the idp                                                                                                                                                                                                               │
+│ *  --project-id                                           -p  UUID  Uuid of the project [required]                                                                                                                                                                                                       │
+│ *  --iam-client                                           -i  UUID  Uuid of iam_client [required]                                                                                                                                                                                                        │
+│    --scope                                                    TEXT  scope                                                                                                                                                                                                                                │
+│    --nonce-required,--nonce_required/--no-nonce-required            Whether nonce is required                                                                                                                                                                                                            │
+│ *  --callback                                                 TEXT  JSON string for callbacks [required]                                                                                                                                                                                                 │
+│    --tag                                                      TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                      │
+│    --help                                                           Show this message and exit.                                                                                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
