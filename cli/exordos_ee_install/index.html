@@ -6867,10 +6867,10 @@
 
 
 <h1 id="exordos_ee_install">exordos_ee_install<a class="headerlink" href="#exordos_ee_install" title="Permanent link">#</a></h1>
-<p>Install element</p>
+<p>Install one or more elements</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                                </span>
+<span class="go"> Usage: exordos ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]...</span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
@@ -6883,7 +6883,7 @@
 </ul>
 </li>
 </ul>
-<p>version of the element</p>
+<p>Version to use for all elements specified by name</p>
 <ul>
 <li><code>project_id</code>:<ul>
 <li>Type: uuid</li>
@@ -6924,12 +6924,12 @@
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                                </span>
+<span class="go"> Usage: exordos ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]...</span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Install element                                                                                                                                                                                                                                                                                           </span>
+<span class="go"> Install one or more elements</span>
 <span class="go">                                                                                                                                                                                                                                                                                                           </span>
 <span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --version     -v  TEXT   version of the element                                                                                                                                                                                                                                                         │</span>
+<span class="go">│ --version     -v  TEXT   Version to use for all elements specified by name                                                                                                                                                                                                                                                         │</span>
 <span class="go">│ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                         │</span>
 <span class="go">│ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                            │</span>
 <span class="go">│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │</span>
