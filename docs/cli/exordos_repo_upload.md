@@ -1,7 +1,9 @@
 
 # exordos_repo_upload
 
-Upload element to repository
+Upload element to repository.
+
+A version already present in the selected repository is accepted only when its manifest content matches. Different content requires a new version. A matching version in another repository does not skip upload.
 
 ## Usage
 
