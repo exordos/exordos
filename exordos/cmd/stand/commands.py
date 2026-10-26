@@ -474,6 +474,10 @@ def _load_realm_spec(path: str) -> dict:
     ):
         raise click.UsageError("Realm spec elements must be a list of non-empty names")
 
+    idps = spec.get("idps", [])
+    if not isinstance(idps, list) or any(not isinstance(idp, dict) for idp in idps):
+        raise click.UsageError("Realm spec idps must be a list of dictionaries")
+
     repositories = spec.get("repository", [])
     if isinstance(repositories, dict):
         repositories = [repositories]
@@ -553,6 +557,7 @@ def _bootstrap_core(
     elements: list[str] | None = None,
     cors_allowed_origins: list[str] | None = None,
     repo_url: str | None = None,
+    idps: list[dict] | None = None,
 ) -> ipaddress.IPv4Address | None:
     logger = ClickLogger()
     logger.info("Starting exordos bootstrap in 'core' mode")
@@ -646,6 +651,7 @@ def _bootstrap_core(
             developer_keys=ssh_public_key,
             iam=iam,
             elements=elements,
+            idps=idps,
             cors_allowed_origins=cors_allowed_origins,
             repo_url=repo_url,
         )
@@ -1253,6 +1259,7 @@ def bootstrap_cmd(
         realm_tokens = realm_spec_data["realm_tokens"]
         realm_id = realm_spec_data.get("realm_id")
         realm_domain = realm_spec_data.get("realm_domain")
+        idps = realm_spec_data.get("idps", [])
         cors_allowed_origins = realm_spec_data.get("cors_allowed_origins")
         # Preserve complete repository definitions for the Core config drive.
         for definition in realm_spec_data.get("repository", []):
@@ -1272,6 +1279,7 @@ def bootstrap_cmd(
     else:
         realm_id = None
         realm_domain = None
+        idps = []
         cors_allowed_origins = None
         repo_url = None
         with status_lib.status_done("Registering realm in ecosystem..."):
@@ -1331,6 +1339,7 @@ def bootstrap_cmd(
             realm_domain=realm_domain,
             ssh_public_key=ssh_public_key_content,
             elements=list(elements) if elements else None,
+            idps=idps,
             cors_allowed_origins=cors_allowed_origins,
             repo_url=repo_url,
         )
