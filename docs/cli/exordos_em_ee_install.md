@@ -1,13 +1,13 @@
 
 # exordos_em_ee_install
 
-Install element
+Install one or more elements
 
 ## Usage
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                             
+ Usage: exordos em ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]...
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -19,7 +19,7 @@ Install element
     * Usage: `-v
 --version`
 
-  version of the element
+  Version to use for all elements specified by name
 
 * `project_id`:
     * Type: uuid
@@ -52,12 +52,12 @@ Install element
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos em ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]                                                                                                                                                                                                                                             
+ Usage: exordos em ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]...
                                                                                                                                                                                                                                                                                                            
- Install element                                                                                                                                                                                                                                                                                           
+ Install one or more elements
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --version     -v  TEXT   version of the element                                                                                                                                                                                                                                                         │
+│ --version     -v  TEXT   Version to use for all elements specified by name                                                                                                                                                                                                                                                         │
 │ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                         │
 │ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                            │
 │ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
