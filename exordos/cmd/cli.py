@@ -130,6 +130,7 @@ def _get_otp_prompt(otp_code: str | None) -> str:
     "-p",
     "--password",
     default=None,
+    hide_input=True,
     help="Password for the client user",
 )
 @click.option(
