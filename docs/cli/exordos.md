@@ -61,7 +61,7 @@ their response text. Terminal control characters are escaped.
     * Usage: `-p
 --password`
 
-  Password for the client user
+  Password for the client user. Omit the value to enter it in a hidden prompt
 
 * `access_token`:
     * Type: text
