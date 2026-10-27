@@ -131,7 +131,9 @@ def _get_otp_prompt(otp_code: str | None) -> str:
     "--password",
     default=None,
     hide_input=True,
-    help="Password for the client user",
+    prompt="Password",
+    prompt_required=False,
+    help="Password for the client user. Omit the value to enter it in a hidden prompt",
 )
 @click.option(
     "-a",
@@ -251,9 +253,9 @@ def exordos(
     def _get_final_value(
         param_name: str, cli_value: tp.Any, base_conf: dict, direct_conf: dict
     ) -> tp.Any:
-        if (
-            ctx.get_parameter_source(param_name)
-            == click.core.ParameterSource.COMMANDLINE
+        if ctx.get_parameter_source(param_name) in (
+            click.core.ParameterSource.COMMANDLINE,
+            click.core.ParameterSource.PROMPT,
         ):
             return cli_value
         return direct_conf.get(param_name, base_conf.get(param_name, cli_value))
