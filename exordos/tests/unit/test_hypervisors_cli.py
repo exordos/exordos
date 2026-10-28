@@ -348,6 +348,9 @@ class TestInitCmdRegistration:
         assert kwargs["avail_cores"] == 8
         assert kwargs["avail_ram"] == 16384
         assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
+        assert hv_commands.utils.convert_input_multiply(kwargs["driver_spec"])[
+            "storage_pool"
+        ] == [{"name": "default"}]
 
     def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
         """A local hypervisor's `init --add` must register this host's
