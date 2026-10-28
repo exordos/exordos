@@ -19,6 +19,7 @@ import base64
 import configparser
 import getpass
 import io
+import json
 import os
 import secrets
 import socket
@@ -1303,13 +1304,15 @@ def init_cmd(
                 "kind=exordos_local_hyper",
                 f"node={local_agent_node_uuid()}",
             )
+            storage_pool = json.dumps([{"name": pool_name}])
         else:
             kind_fields = ("kind=libvirt",)
+            storage_pool = pool_name
         driver_spec = kind_fields + (
             f"network={network}",
             f"iface_mtu={iface_mtu}",
             f"network_type={network_type}",
-            f"storage_pool={pool_name}",
+            f"storage_pool={storage_pool}",
             f"connection_uri={connection_uri}",
             f"iface_rom_file={rom_path}",
             f"machine_prefix={machine_prefix}",
