@@ -77,6 +77,7 @@ SSH_KEY_COLLECTION = "/v1/secret/ssh_keys/"
 RSA_KEY_COLLECTION = "/v1/secret/rsa_keys/"
 
 NODE_COLLECTION = "/v1/compute/nodes/"
+CLOUD_CONNECTION_COLLECTION = "/v1/compute/cloud_connections/"
 HYPERVISOR_COLLECTION = "/v1/compute/hypervisors/"
 SET_COLLECTION = "/v1/compute/sets/"
 

@@ -13,6 +13,7 @@
 import rich_click as click
 
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.compute.cloud_connections import commands as cloud_connections_commands
 from exordos.cmd.compute.hypervisors import commands as hypervisors_commands
 from exordos.cmd.compute.nodes import commands as nodes_commands
 from exordos.cmd.compute.sets import commands as sets_commands
@@ -28,3 +29,5 @@ def compute_group():
 compute_group.add_command(hypervisors_commands.hypervisors_group, aliases=["h"])  # noqa
 compute_group.add_command(nodes_commands.cn_group, aliases=["n", "nodes"])  # noqa
 compute_group.add_command(sets_commands.sets_group, aliases=["s"])  # noqa
+
+compute_group.add_command(cloud_connections_commands.cloud_connections_group)

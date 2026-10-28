@@ -62,6 +62,7 @@ Exordos CLI bridges the gap between your local development environment and the E
 - **Import certificates** — use `exordos secret certificates add --method manual --cert fullchain.pem --key privkey.pem` with your project, email, and domain options. Replace PEM files with `exordos secret certificates update <UUID> --cert fullchain.pem --key privkey.pem`. Requires a Core API with manual certificate support.
 - **Get an access token** — run `exordos auth login` using the current context, or `TOKEN=$(exordos --no-check-updates auth login)` for scripts. Password and OTP prompts go to stderr.
 - **Interact with the platform** — manage elements, IAM, secrets, compute nodes, realms, and more through a rich set of subcommands.
+- **Connect OpenStack** — register and replace cloud credentials through Core API with `compute cloud-connections`; secrets are prompted without echo.
 - **Automate backups** — run periodic or one-shot backups of installations with compression, encryption, rotation, and disk-overflow protection.
 
 > **For a full overview of all commands and configuration options, visit the [documentation](https://exordos.github.io/exordos/).**

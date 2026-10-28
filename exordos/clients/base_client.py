@@ -20,6 +20,7 @@ import uuid as sys_uuid
 
 from bazooka import Client
 from bazooka import exceptions as bazooka_exc
+from bazooka.client import SensitiveMicroserviceSession
 import certifi
 import rich_click as click
 
@@ -36,9 +37,12 @@ READ_TIMEOUT = 10
 def get_user_api_client(
     auth_data: dict,
     timeout: tp.Tuple[int, int] | None = None,
+    sensitive: bool = False,
 ) -> http_client.CollectionBaseClient:
+    options = {"session": SensitiveMicroserviceSession} if sensitive else {}
     bazooka_client = Client(
         default_timeout=timeout or (CONNECT_TIMEOUT, READ_TIMEOUT),
+        **options,
     )
     if auth_data.get("no_auth"):
         auth = None
