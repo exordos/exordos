@@ -4,25 +4,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-from bazooka import exceptions
 import rich_click as click
-
-from exordos import constants as c
-from exordos.clients import base_client
-from exordos.cmd.base import create_entity_group
-from exordos.common.table import show_data
-
-FIELDS_MAP = {
-    "UUID": "uuid",
-    "Name": "name",
-    "Kind": lambda value: value["driver_spec"]["kind"],
-    "Scope": lambda value: str(value.get("driver_state") or {}),
-    "Project": "project_id",
-}
-COLLECTION = c.CLOUD_CONNECTION_COLLECTION
-cloud_connections_group = create_entity_group(
-    "cloud connection", COLLECTION, FIELDS_MAP, group_name="cloud-connections"
-)
 
 
 def credential_options(command):
@@ -101,74 +83,3 @@ def credentials(
             project_name=os_project_name, project_domain_name=project_domain_name
         )
     return auth
-
-
-@cloud_connections_group.command("add", help="Register OpenStack credentials in Core")
-@click.pass_context
-@click.option("--name", "-n", required=True)
-@click.option(
-    "--project-id", "-p", type=click.UUID, required=True, help="Core project UUID"
-)
-@click.option(
-    "--kind",
-    type=click.Choice(["openstack"]),
-    default="openstack",
-    show_default=True,
-    help="Cloud driver kind",
-)
-@click.option("--auth-url", required=True, help="Keystone v3 URL")
-@click.option("--region", default=None)
-@click.option(
-    "--interface",
-    type=click.Choice(["public", "internal", "admin"]),
-    default="public",
-    show_default=True,
-)
-@credential_options
-def add(ctx, name, project_id, kind, auth_url, region, interface, **options):
-    auth = credentials(**options)
-    client = base_client.get_user_api_client(
-        ctx.obj.auth_data, sensitive=True, timeout=(5, 90)
-    )
-    data = dict(
-        name=name,
-        project_id=str(project_id),
-        driver_spec=dict(
-            kind=kind,
-            auth_url=auth_url,
-            auth_type=options["auth_type"],
-            auth=auth,
-            region=region,
-            interface=interface,
-        ),
-    )
-    try:
-        result = base_client.add_entity(
-            client, COLLECTION, data, handle_conflict_error=False
-        )
-    except exceptions.ConflictError:
-        raise click.ClickException("Cloud connection already exists") from None
-    show_data(result)
-
-
-@cloud_connections_group.command(
-    "update-credentials", help="Replace credentials within the same OpenStack project"
-)
-@click.pass_context
-@click.argument("connection")
-@credential_options
-def update_credentials(ctx, connection, **options):
-    client = base_client.get_user_api_client(
-        ctx.obj.auth_data, sensitive=True, timeout=(5, 90)
-    )
-    current = base_client.get_entity(client, COLLECTION, connection)
-    spec = dict(current["driver_spec"])
-    if spec["kind"] != "openstack":
-        raise click.ClickException(
-            "Credential replacement is supported for the openstack kind"
-        )
-    spec.update(auth_type=options["auth_type"], auth=credentials(**options))
-    result = base_client.update_entity(
-        client, COLLECTION, current["uuid"], {"driver_spec": spec}
-    )
-    show_data(result)

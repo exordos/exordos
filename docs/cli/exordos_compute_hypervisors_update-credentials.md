@@ -1,55 +1,22 @@
 
-# exordos_compute_cloud-connections_add
+# exordos_compute_hypervisors_update-credentials
 
-Register OpenStack credentials in Core
+Replace credentials within the same OpenStack project
 
 ## Usage
 
 ```console
 
- Usage: exordos compute cloud-connections add [OPTIONS]
+ Usage: exordos compute hypervisors update-credentials [OPTIONS] HYPERVISOR
 
 ```
 
 ## Options
 
-* `name` (REQUIRED):
+* `hypervisor` (REQUIRED):
     * Type: text
     * Default: `sentinel.unset`
-    * Usage: `--name
--n`
-
-* `project_id` (REQUIRED):
-    * Type: uuid
-    * Default: `sentinel.unset`
-    * Usage: `--project-id
--p`
-
-  Core project UUID
-
-* `kind`:
-    * Type: choice
-    * Default: `openstack`
-    * Usage: `--kind`
-
-  Cloud driver kind
-
-* `auth_url` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--auth-url`
-
-  Keystone v3 URL
-
-* `region`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--region`
-
-* `interface`:
-    * Type: choice
-    * Default: `public`
-    * Usage: `--interface`
+    * Usage: `hypervisor`
 
 * `auth_type`:
     * Type: choice
@@ -113,6 +80,6 @@ Register OpenStack credentials in Core
 
 ```console
 
- Usage: exordos compute cloud-connections add [OPTIONS]
+ Usage: exordos compute hypervisors update-credentials [OPTIONS] HYPERVISOR
 
 ```

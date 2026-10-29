@@ -40,7 +40,8 @@ Exordos CLI bridges the gap between your local development environment and the E
 - **Bootstrap installations** — spin up local virtual machine environments from built images for development and testing. Managed realm specs can provide an `elements` list; explicit `--elements` options override it.
 - **Manage installations** — connect via SSH, list, and remove running Exordos instances.
 - **Interact with the platform** — manage elements, IAM, secrets, compute nodes, realms, and more through a rich set of subcommands.
-- **Connect OpenStack** — register and replace cloud credentials through Core API with `compute cloud-connections`; secrets are prompted without echo.
+- **Connect OpenStack** — register and replace cloud credentials through Core API with `compute hypervisors`; secrets are prompted without echo.
+- **Place workloads across sites** — create routed networks with `network networks add --driver-spec-file`, assign hypervisors with `--site`, and select a logical network and anti-affinity policy with `compute sets add`.
 - **Automate backups** — run periodic or one-shot backups of installations with compression, encryption, rotation, and disk-overflow protection.
 
 > **For a full overview of all commands and configuration options, visit the [documentation](https://exordos.github.io/exordos/).**

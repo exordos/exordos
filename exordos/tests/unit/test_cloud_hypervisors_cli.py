@@ -16,8 +16,10 @@ from exordos.common.cmd_context import ContextObject
 
 PROJECT = "11111111-1111-1111-1111-111111111111"
 BASE = [
-    "cloud-connections",
+    "hypervisors",
     "add",
+    "--kind",
+    "openstack",
     "--name",
     "lab",
     "--project-id",
@@ -42,8 +44,8 @@ def invoke(args, input=None):
     )
 
 
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.show_data")
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.base_client")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_application_credential_is_prompted_and_sent_only_to_api(client, show):
     result = invoke(
         BASE + ["--application-credential-id", "app"], input="private-sentinel\n"
@@ -67,8 +69,8 @@ def test_application_credential_is_prompted_and_sent_only_to_api(client, show):
     show.assert_called_once_with(client.add_entity.return_value)
 
 
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.show_data")
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.base_client")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_password_authentication_is_project_scoped(client, show):
     result = invoke(
         BASE
@@ -93,8 +95,8 @@ def test_password_authentication_is_project_scoped(client, show):
     }
 
 
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.show_data")
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.base_client")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_credential_replacement_calls_core_api(client, show):
     client.get_entity.return_value = {
         "uuid": PROJECT,
@@ -107,7 +109,7 @@ def test_credential_replacement_calls_core_api(client, show):
     }
     result = invoke(
         [
-            "cloud-connections",
+            "hypervisors",
             "update-credentials",
             PROJECT,
             "--application-credential-id",
@@ -126,7 +128,7 @@ def test_credential_replacement_calls_core_api(client, show):
     )
     client.get_entity.assert_called_once_with(
         client.get_user_api_client.return_value,
-        "/v1/compute/cloud_connections/",
+        "/v1/compute/hypervisors/",
         PROJECT,
     )
     assert "private-sentinel" not in result.output
@@ -138,7 +140,7 @@ def test_missing_credential_id_is_rejected_before_prompt():
     assert "--application-credential-id is required" in result.output
 
 
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.base_client")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_connection_conflict_does_not_print_credentials(client):
     client.add_entity.side_effect = exceptions.ConflictError(cause=mock.Mock())
     result = invoke(
@@ -146,7 +148,7 @@ def test_connection_conflict_does_not_print_credentials(client):
     )
     assert result.exit_code != 0
     assert "private-sentinel" not in result.output
-    assert "Cloud connection already exists" in result.output
+    assert "Hypervisor already exists" in result.output
     assert client.add_entity.call_args.kwargs["handle_conflict_error"] is False
 
 
@@ -157,17 +159,36 @@ def test_sensitive_api_client_masks_request_bodies():
     assert client._http_client.SESSION is SensitiveMicroserviceSession
 
 
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.base_client")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_generic_update_rejects_credentials_before_sending_them(client):
+    result = invoke(
+        [
+            "hypervisors",
+            "update",
+            PROJECT,
+            "--driver-spec-full",
+            "kind=openstack",
+            "--driver-spec-full",
+            'auth={"password":"private-sentinel"}',
+        ]
+    )
+    assert result.exit_code != 0
+    assert "update-credentials" in result.output
+    assert "private-sentinel" not in result.output
+    client.update_entity.assert_not_called()
+
+
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_unknown_driver_kind_is_rejected_before_credentials_are_read(client):
     result = invoke(BASE + ["--kind", "unknown"])
     assert result.exit_code != 0
     client.get_user_api_client.assert_not_called()
 
 
-@mock.patch("exordos.cmd.compute.cloud_connections.commands.base_client")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_other_driver_kind_is_not_updated_with_openstack_credentials(client):
     client.get_entity.return_value = {"uuid": PROJECT, "driver_spec": {"kind": "other"}}
-    result = invoke(["cloud-connections", "update-credentials", PROJECT])
+    result = invoke(["hypervisors", "update-credentials", PROJECT])
     assert result.exit_code != 0
     assert "Credential replacement is supported for the openstack kind" in result.output
     client.update_entity.assert_not_called()

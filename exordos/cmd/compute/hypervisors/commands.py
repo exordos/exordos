@@ -35,8 +35,10 @@ from exordos import exceptions
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.compute import cloud_credentials
 from exordos.cmd.compute import common as compute_common
 from exordos.cmd.network import common as net_common
+from exordos.cmd.network.networks.commands import read_spec
 from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
@@ -124,6 +126,7 @@ FIELDS_MAP = {
     "All ram": "all_ram",
     "Avail ram": "avail_ram",
     "Status": "status",
+    "Site": lambda value: value.get("site") or "",
 }
 
 
@@ -188,6 +191,20 @@ hypervisors_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
         "a=b --driver-spec e=f"
     ),
 )
+@click.option("--site", default=None, help="Failure domain for placement anti-affinity")
+@click.option(
+    "--kind",
+    type=click.Choice(["libvirt", "exordos_local_hyper", "openstack", "dummy"]),
+    default=None,
+)
+@click.option("--project-id", type=click.UUID, default=None, help="Core project UUID")
+@click.option("--auth-url", default=None, help="Keystone v3 URL")
+@click.option("--region", default=None)
+@click.option(
+    "--interface", type=click.Choice(["public", "internal", "admin"]), default="public"
+)
+@click.option("--network-defaults-file", type=click.File("r"), default=None)
+@cloud_credentials.credential_options
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -199,11 +216,40 @@ def add_cmd(
     ram_ratio: float | None,
     machine_type: str | None,
     driver_spec: tuple[str, ...],
+    site: str | None = None,
+    kind=None,
+    project_id=None,
+    auth_url=None,
+    region=None,
+    interface="public",
+    network_defaults_file=None,
+    **credential_options,
 ) -> None:
-    client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
     driver_spec = utils.convert_input_multiply(driver_spec)
+    if kind is not None:
+        if driver_spec.get("kind", kind) != kind:
+            raise click.UsageError("Conflicting driver kinds")
+        driver_spec["kind"] = kind
+    cloud = driver_spec.get("kind") == "openstack"
+    if cloud:
+        if not auth_url:
+            raise click.UsageError("--auth-url is required for an OpenStack hypervisor")
+        driver_spec.update(
+            auth_url=auth_url,
+            auth_type=credential_options["auth_type"],
+            auth=cloud_credentials.credentials(**credential_options),
+            region=region,
+            interface=interface,
+        )
+    client = (
+        base_client.get_user_api_client(
+            ctx.obj.auth_data, sensitive=True, timeout=(5, 90)
+        )
+        if cloud
+        else base_client.get_user_api_client(ctx.obj.auth_data)
+    )
     data: dict = {
         "uuid": str(uuid),
         "name": name,
@@ -220,7 +266,21 @@ def add_cmd(
         data["ram_ratio"] = ram_ratio
     if machine_type is not None:
         data["machine_type"] = machine_type
-    entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
+    if site is not None:
+        data["site"] = site
+    if project_id is not None:
+        data["project_id"] = str(project_id)
+    if network_defaults_file is not None:
+        data["network_defaults"] = read_spec(network_defaults_file)
+    if cloud:
+        try:
+            entity = base_client.add_entity(
+                client, ENTITY_COLLECTION, data, handle_conflict_error=False
+            )
+        except bazooka_exc.ConflictError:
+            raise click.ClickException("Hypervisor already exists") from None
+    else:
+        entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     show_data(entity)
 
 
@@ -289,6 +349,8 @@ def add_cmd(
         "a=b --driver-spec-full e=f"
     ),
 )
+@click.option("--site", default=None, help="Failure domain for placement anti-affinity")
+@click.option("--network-defaults-file", type=click.File("r"), default=None)
 def update_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID,
@@ -301,9 +363,15 @@ def update_cmd(
     machine_type: str | None,
     driver_spec: tuple[str, ...],
     driver_spec_full: tuple[str, ...],
+    site: str | None = None,
+    network_defaults_file=None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
+    if network_defaults_file is not None:
+        data["network_defaults"] = read_spec(network_defaults_file)
+    if site is not None:
+        data["site"] = site
     if name is not None:
         data["name"] = name
     if description is not None:
@@ -321,6 +389,10 @@ def update_cmd(
 
     driver_spec = utils.convert_input_multiply(driver_spec)
     driver_spec_full = utils.convert_input_multiply(driver_spec_full)
+    if "auth" in driver_spec or "auth" in driver_spec_full:
+        raise click.ClickException(
+            "Use hypervisors update-credentials to replace credentials"
+        )
     if driver_spec and driver_spec_full:
         raise click.ClickException(
             "Both --driver-spec and --driver-spec-full are set. Use only one."
@@ -1774,3 +1846,28 @@ def register_agent_cmd(
 
 hypervisors_group.add_command(add_cmd, aliases=["a"])
 hypervisors_group.add_command(update_cmd, aliases=["u"])
+
+
+@hypervisors_group.command(
+    "update-credentials", help="Replace credentials within the same OpenStack project"
+)
+@click.pass_context
+@click.argument("hypervisor")
+@cloud_credentials.credential_options
+def update_credentials(ctx, hypervisor, **options):
+    client = base_client.get_user_api_client(
+        ctx.obj.auth_data, sensitive=True, timeout=(5, 90)
+    )
+    current = base_client.get_entity(client, ENTITY_COLLECTION, hypervisor)
+    spec = dict(current["driver_spec"])
+    if spec["kind"] != "openstack":
+        raise click.ClickException(
+            "Credential replacement is supported for the openstack kind"
+        )
+    spec.update(
+        auth_type=options["auth_type"], auth=cloud_credentials.credentials(**options)
+    )
+    result = base_client.update_entity(
+        client, ENTITY_COLLECTION, current["uuid"], {"driver_spec": spec}
+    )
+    show_data(result)
