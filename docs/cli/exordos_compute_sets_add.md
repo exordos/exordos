@@ -6,134 +6,184 @@ Add a new set to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
-
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
+* `output`: 
+  * Type: choice 
+  * Default: `table`
+  * Usage: `--output
 -o`
 
   Output format; JSON prints one resource object (an array for bulk creation).
 
-* `uuid`:
-    * Type: uuid
-    * Default: `none`
-    * Usage: `-u
+
+* `uuid`: 
+  * Type: uuid 
+  * Default: `none`
+  * Usage: `-u
 --uuid`
 
   UUID of the set
 
-* `project_id` (REQUIRED):
-    * Type: uuid
-    * Default: `sentinel.unset`
-    * Usage: `-p
+
+* `project_id` (REQUIRED): 
+  * Type: uuid 
+  * Default: `sentinel.unset`
+  * Usage: `-p
 --project-id`
 
   UUID of the project in which to deploy the set
 
-* `cores`:
-    * Type: integer
-    * Default: `1`
-    * Usage: `-c
+
+* `cores`: 
+  * Type: integer 
+  * Default: `1`
+  * Usage: `-c
 --cores`
 
   Number of cores to allocate for each node in the set
 
-* `ram`:
-    * Type: integer
-    * Default: `1024`
-    * Usage: `-r
+
+* `ram`: 
+  * Type: integer 
+  * Default: `1024`
+  * Usage: `-r
 --ram`
 
   Amount of RAM in Mb to allocate for each node in the set
 
-* `root_disk`:
-    * Type: integer
-    * Default: `10`
-    * Usage: `-d
+
+* `root_disk`: 
+  * Type: integer 
+  * Default: `10`
+  * Usage: `-d
 --root-disk`
 
   Number of GiB of root disk to allocate for each node in the set
 
-* `image` (REQUIRED):
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `-i
+
+* `image` (REQUIRED): 
+  * Type: text 
+  * Default: `sentinel.unset`
+  * Usage: `-i
 --image`
 
   Name of the image to deploy
 
-* `name`:
-    * Type: text
-    * Default: `set`
-    * Usage: `-n
+
+* `name`: 
+  * Type: text 
+  * Default: `set`
+  * Usage: `-n
 --name`
 
   Name of the set
 
-* `description`:
-    * Type: text
-    * Default: ``
-    * Usage: `-D
+
+* `description`: 
+  * Type: text 
+  * Default: ``
+  * Usage: `-D
 --description`
 
   Description of the set
 
-* `replicas`:
-    * Type: integer
-    * Default: `1`
-    * Usage: `--replicas`
+
+* `replicas`: 
+  * Type: integer 
+  * Default: `1`
+  * Usage: `--replicas`
 
   Number of replicas (nodes) in the set
 
-* `wait`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `--wait`
+
+* `wait`: 
+  * Type: boolean 
+  * Default: `false`
+  * Usage: `--wait`
 
   Wait until the set is active
 
-* `tags`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--tag`
+
+* `network`: 
+  * Type: uuid 
+  * Default: `none`
+  * Usage: `--network`
+
+  Logical network; the scheduler selects a local segment
+
+
+* `placement_kind`: 
+  * Type: choice 
+  * Default: `none`
+  * Usage: `--placement-kind`
+
+  
+
+
+* `placement_scope`: 
+  * Type: choice 
+  * Default: `none`
+  * Usage: `--placement-scope`
+
+  
+
+
+* `ephemeral`: 
+  * Type: boolean 
+  * Default: `none`
+  * Usage: `--ephemeral`
+
+  Root disk policy; OpenStack Cinder requires --durable
+
+
+* `tags`: 
+  * Type: text 
+  * Default: `sentinel.unset`
+  * Usage: `--tag`
 
   Set the complete tag list. Repeat for each tag.
 
-* `help`:
-    * Type: boolean
-    * Default: `false`
-    * Usage: `--help`
+
+* `help`: 
+  * Type: boolean 
+  * Default: `false`
+  * Usage: `--help`
 
   Show this message and exit.
+
+
 
 ## CLI Help
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
- Add a new set to the Exordos installation
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
+ Add a new set to the Exordos installation                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                               │
-│    --uuid         -u  UUID                    UUID of the set                                                                                                                                                                                                                                            │
-│ *  --project-id   -p  UUID                    UUID of the project in which to deploy the set [required]                                                                                                                                                                                                  │
-│    --cores        -c  INTEGER                 Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                                          │
-│    --ram          -r  INTEGER                 Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                                                   │
-│    --root-disk    -d  INTEGER                 Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                                              │
-│ *  --image        -i  TEXT                    Name of the image to deploy [required]                                                                                                                                                                                                                     │
-│    --name         -n  TEXT                    Name of the set                                                                                                                                                                                                                                            │
-│    --description  -D  TEXT                    Description of the set                                                                                                                                                                                                                                     │
-│    --replicas         INTEGER                 Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                                         │
-│    --wait                                     Wait until the set is active                                                                                                                                                                                                                               │
-│    --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                            │
-│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+│    --output               -o  [json|html|table|yaml]              Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                           │
+│    --uuid                 -u  UUID                                UUID of the set                                                                                                                                                                                                                        │
+│ *  --project-id           -p  UUID                                UUID of the project in which to deploy the set [required]                                                                                                                                                                              │
+│    --cores                -c  INTEGER                             Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                      │
+│    --ram                  -r  INTEGER                             Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                               │
+│    --root-disk            -d  INTEGER                             Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                          │
+│ *  --image                -i  TEXT                                Name of the image to deploy [required]                                                                                                                                                                                                 │
+│    --name                 -n  TEXT                                Name of the set                                                                                                                                                                                                                        │
+│    --description          -D  TEXT                                Description of the set                                                                                                                                                                                                                 │
+│    --replicas                 INTEGER                             Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                     │
+│    --wait                                                         Wait until the set is active                                                                                                                                                                                                           │
+│    --network                  UUID                                Logical network; the scheduler selects a local segment                                                                                                                                                                                 │
+│    --placement-kind           [soft-anti-affinity|anti-affinity]                                                                                                                                                                                                                                         │
+│    --placement-scope          [site|pool]                                                                                                                                                                                                                                                                │
+│    --ephemeral/--durable                                          Root disk policy; OpenStack Cinder requires --durable                                                                                                                                                                                  │
+│    --tag                      TEXT                                Set the complete tag list. Repeat for each tag.                                                                                                                                                                                        │
+│    --help                                                         Show this message and exit.                                                                                                                                                                                                            │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
+
