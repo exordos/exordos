@@ -53,7 +53,15 @@ vv_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "vv")
 @click.argument(
     "value",
     type=click.STRING,
-    required=True,
+    required=False,
+)
+@click.option(
+    "-f",
+    "--from-file",
+    "value_file",
+    type=click.File("r"),
+    default=None,
+    help="Read the value from a file ('-' for stdin) instead of VALUE argument",
 )
 @click.option(
     "-p",
@@ -84,12 +92,20 @@ vv_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "vv")
 def set_variable_cmd(
     ctx: click.Context,
     var_uuid_or_name: str,
-    value: str,
+    value: str | None,
+    value_file: tp.TextIO | None,
     project_id: sys_uuid.UUID | None,
     name: str | None,
     description: str | None,
     rotate: bool,
 ) -> None:
+    if (value is None) == (value_file is None):
+        raise click.UsageError("Specify either VALUE or '--from-file', but not both")
+    if value_file is not None:
+        # Text mode normalizes line endings to LF; strip trailing newlines
+        # the same way as shell "$(cat file)" does
+        value = value_file.read().rstrip("\n")
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
     var_uuid: str | None = None
