@@ -102,7 +102,8 @@ def set_variable_cmd(
     if (value is None) == (value_file is None):
         raise click.UsageError("Specify either VALUE or '--from-file', but not both")
     if value_file is not None:
-        # Strip trailing newlines the same way as shell "$(cat file)" does
+        # Text mode normalizes line endings to LF; strip trailing newlines
+        # the same way as shell "$(cat file)" does
         value = value_file.read().rstrip("\n")
 
     client = base_client.get_user_api_client(ctx.obj.auth_data)

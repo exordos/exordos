@@ -80,6 +80,18 @@ class TestVarsSetCli:
         assert result.exit_code == 0, result.output
         assert _sent_value(client) == "line1\nline2"
 
+    def test_set_variable_cmd_from_file_crlf_normalized(
+        self, client, _show, tmp_path
+    ) -> None:
+        self._setup_variable(client)
+        path = tmp_path / "value.txt"
+        path.write_bytes(b"line1\r\nline2\r\n")
+
+        result = _invoke("vars", "set", "my_var", "-f", str(path))
+
+        assert result.exit_code == 0, result.output
+        assert _sent_value(client) == "line1\nline2"
+
     def test_set_variable_cmd_from_file_converts_type(
         self, client, _show, tmp_path
     ) -> None:
