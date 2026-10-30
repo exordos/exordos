@@ -7,7 +7,7 @@ Create variable if missing and set its value by creating a new value record
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos vv set [OPTIONS] VAR_UUID_OR_NAME VALUE                                                                                                                                                                                                                                                    
+ Usage: exordos vv set [OPTIONS] VAR_UUID_OR_NAME [VALUE]                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
 
@@ -18,10 +18,18 @@ Create variable if missing and set its value by creating a new value record
     * Default: `sentinel.unset`
     * Usage: `var_uuid_or_name`
 
-* `value` (REQUIRED):
+* `value`:
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `value`
+
+* `value_file`:
+    * Type: filename
+    * Default: `none`
+    * Usage: `-f
+--from-file`
+
+  Read the value from a file ('-' for stdin) instead of VALUE argument
 
 * `project_id`:
     * Type: uuid
@@ -63,6 +71,6 @@ Create variable if missing and set its value by creating a new value record
 
 ```console
                                                                                                                                                                                                                                                                                                            
- Usage: exordos vv set [OPTIONS] VAR_UUID_OR_NAME VALUE                                                                                                                                                                                                                                                    
+ Usage: exordos vv set [OPTIONS] VAR_UUID_OR_NAME [VALUE]                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                                                            
 ```
