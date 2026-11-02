@@ -212,11 +212,12 @@ def _select_element_by_name(
     exclude_uuid: str | None = None,
     newer_than: str | None = None,
     auto_select: bool = False,
+    dev: bool = False,
 ) -> dict[str, tp.Any] | None:
     """Select the best element by name, sorting by (repository_priority, version).
 
     Collects the element from every repository and filters out development
-    versions unless version_filter is specified. When the remaining candidates
+    versions unless version_filter or dev is specified. When the remaining candidates
     carry more than one version and come from more than one repository, the
     user is asked which version to take; otherwise the candidate from the
     highest priority repository is returned, which for a single repository is
@@ -226,10 +227,11 @@ def _select_element_by_name(
         client: API client for making requests.
         name: Element name to search for.
         version_filter: Optional version string to filter by.
-            If None, only stable versions are considered.
+            If None, the release channel is selected by dev.
         exclude_uuid: Optional element UUID to drop from the candidates.
         newer_than: Optional version, keeps only strictly newer candidates.
         auto_select: Take the best candidate instead of asking the user.
+        dev: Consider only development/prerelease versions.
 
     Returns:
         Dictionary representing the selected element, or None if newer_than
@@ -253,9 +255,16 @@ def _select_element_by_name(
     if not elements:
         raise click.ClickException(f"No elements found with name '{name}'")
 
-    # Filter out development versions unless version is explicitly provided
+    # Filter by release channel unless a version is explicitly provided.
     if version_filter is None:
-        elements = [e for e in elements if version_lib.is_stable_version(e["version"])]
+        elements = [
+            e for e in elements if version_lib.is_stable_version(e["version"]) != dev
+        ]
+
+    if not elements and dev:
+        raise click.ClickException(
+            f"No development versions found for element '{name}'"
+        )
 
     if not elements:
         raise click.ClickException(
@@ -563,6 +572,7 @@ def _update_element_by_uuid_or_name(
     uuid_or_name: str,
     version: str | None,
     y: bool,
+    dev: bool = False,
 ) -> None:
     """Update a single element selected by UUID or name."""
     import questionary
@@ -581,6 +591,7 @@ def _update_element_by_uuid_or_name(
         exclude_uuid=current_element["uuid"],
         newer_than=None if version else current_element["version"],
         auto_select=y,
+        dev=dev,
     )
 
     if target_element is None:
@@ -618,6 +629,11 @@ def _update_element_by_uuid_or_name(
 
 @click.command("update", help="Update one or more elements")
 @click.option(
+    "--dev",
+    is_flag=True,
+    help="Update to the latest development/prerelease version",
+)
+@click.option(
     "-v",
     "--version",
     type=str,
@@ -645,6 +661,7 @@ def _update_element_by_uuid_or_name(
 @click.pass_context
 def update_cmd(
     ctx: click.Context,
+    dev: bool,
     version: str | None,
     y: bool,
     project_id: sys_uuid.UUID,
@@ -653,6 +670,11 @@ def update_cmd(
 ) -> None:
     """Update elements from repository API by UUID, name, or manifest path"""
     import questionary
+
+    if dev and version is not None:
+        raise click.UsageError("--dev and --version cannot be used together")
+    if dev and any(os.path.isfile(target) for target in uuid_or_name_or_path):
+        raise click.UsageError("--dev cannot be used with manifest paths")
 
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
@@ -677,7 +699,7 @@ def update_cmd(
                 client, pathlib.Path(target), y, project_id, timeout
             )
         else:
-            _update_element_by_uuid_or_name(client, target, version, y)
+            _update_element_by_uuid_or_name(client, target, version, y, dev=dev)
 
 
 @click.command("uninstall", help="Uninstall elements by UUID or name")
