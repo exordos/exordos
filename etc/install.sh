@@ -83,7 +83,7 @@ esac
 ###########################################
 
 if [ "$OS" = "Darwin" ]; then
-    NEEDS=$(require awk codesign curl ditto file find grep shasum)
+    NEEDS=$(require awk codesign curl ditto file find grep pkgutil shasum spctl)
     if [ -n "$NEEDS" ]; then
         status "ERROR: The following tools are required but missing:"
         for NEED in $NEEDS; do
@@ -155,14 +155,29 @@ if [ "$OS" = "Darwin" ]; then
             error "Installed version at $TARGET_DIR is corrupt"
         status "Using the existing exordos $VERSION installation."
     else
-        ARTIFACT="exordos-macos-$MACOS_ARCH.zip"
+        ARTIFACT="exordos-macos.pkg"
         RELEASE_URL="$REPO_URL/$VERSION"
         ARCHIVE="$TEMP_DIR/$ARTIFACT"
         CHECKSUM_FILE="$ARCHIVE.sha256"
 
         status "Downloading exordos $VERSION for macOS $MACOS_ARCH..."
-        curl --fail --show-error --location --progress-bar \
-            "$RELEASE_URL/$ARTIFACT" --output "$ARCHIVE"
+        DOWNLOAD_EXIT=0
+        HTTP_STATUS=$(curl --fail --show-error --location --progress-bar \
+            --write-out '%{http_code}' "$RELEASE_URL/$ARTIFACT" --output "$ARCHIVE") || \
+            DOWNLOAD_EXIT=$?
+        if [ "$DOWNLOAD_EXIT" -ne 0 ]; then
+            case "$DOWNLOAD_EXIT:$HTTP_STATUS" in
+                22:404|37:000)
+                    # Historical releases contain architecture-specific ZIPs.
+                    ARTIFACT="exordos-macos-$MACOS_ARCH.zip"
+                    ARCHIVE="$TEMP_DIR/$ARTIFACT"
+                    CHECKSUM_FILE="$ARCHIVE.sha256"
+                    curl --fail --show-error --location --progress-bar \
+                        "$RELEASE_URL/$ARTIFACT" --output "$ARCHIVE"
+                    ;;
+                *) error "Failed to download $ARTIFACT" ;;
+            esac
+        fi
         curl --fail --show-error --location --silent \
             "$RELEASE_URL/$ARTIFACT.sha256" --output "$CHECKSUM_FILE"
 
@@ -180,13 +195,28 @@ if [ "$OS" = "Darwin" ]; then
             error "SHA-256 checksum mismatch for $ARTIFACT"
 
         UNPACKED="$TEMP_DIR/unpacked"
-        mkdir -p "$UNPACKED"
-        ditto -x -k "$ARCHIVE" "$UNPACKED"
+        case "$ARTIFACT" in
+            *.pkg)
+                if [ "${EXORDOS_INSTALL_ALLOW_ADHOC:-0}" != "1" ]; then
+                    pkgutil --check-signature "$ARCHIVE"
+                    spctl --assess --type install "$ARCHIVE"
+                fi
+                # --expand-full also unpacks component payloads.
+                pkgutil --expand-full "$ARCHIVE" "$TEMP_DIR/package"
+                mkdir -p "$UNPACKED"
+                ditto "$TEMP_DIR/package/macos-$MACOS_ARCH.pkg/Payload/usr/local/lib/exordos/pkg" \
+                    "$UNPACKED/exordos"
+                ;;
+            *.zip)
+                mkdir -p "$UNPACKED"
+                ditto -x -k "$ARCHIVE" "$UNPACKED"
+                ;;
+        esac
         if find "$UNPACKED" -mindepth 1 -maxdepth 1 ! -name exordos | grep -q .; then
             error "Unexpected top-level entry in $ARTIFACT"
         fi
         [ -d "$UNPACKED/exordos" ] && [ ! -L "$UNPACKED/exordos" ] || \
-            error "Invalid archive layout in $ARTIFACT"
+            error "Invalid package layout in $ARTIFACT"
         [ -d "$UNPACKED/exordos/_internal" ] && \
             [ ! -L "$UNPACKED/exordos/_internal" ] || \
             error "Missing runtime directory in $ARTIFACT"
@@ -241,7 +271,7 @@ if [ "$OS" = "Darwin" ]; then
             "$UNPACKED/exordos/exordos" --silent --no-check-updates version
         )
         [ "$ARCHIVE_VERSION" = "$VERSION" ] || \
-            error "Archive contains exordos $ARCHIVE_VERSION, expected $VERSION"
+            error "Package contains exordos $ARCHIVE_VERSION, expected $VERSION"
         printf '%s\n' "$ACTUAL_HASH" > "$UNPACKED/exordos/.archive-sha256"
         : > "$UNPACKED/exordos/.complete"
 

@@ -35,29 +35,42 @@ EOF
 
 cat > "$FAKE_BIN/ditto" <<'EOF'
 #!/bin/sh
-if [ "$1" = "-x" ] && [ "$2" = "-k" ]; then
-    SOURCE=$3
-    DESTINATION=$4
-elif [ "$#" -eq 2 ]; then
-    SOURCE=$1
-    DESTINATION=$2
-else
-    exit 2
-fi
-python3 - "$SOURCE" "$DESTINATION" <<'PY'
-import pathlib
-import shutil
+if [ "$1" = -x ] && [ "$2" = -k ]; then
+    python3 - "$3" "$4" <<'PYCODE'
 import sys
 import zipfile
 
-source = pathlib.Path(sys.argv[1])
-destination = pathlib.Path(sys.argv[2])
-if source.is_dir():
-    shutil.copytree(source, destination, symlinks=True)
-else:
-    with zipfile.ZipFile(source) as zip_file:
-        zip_file.extractall(destination)
-PY
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    archive.extractall(sys.argv[2])
+PYCODE
+    chmod +x "$4/exordos/exordos"
+else
+    cp -R "$1" "$2"
+fi
+EOF
+
+cat > "$FAKE_BIN/pkgutil" <<'EOF'
+#!/bin/sh
+case "$1" in
+    --check-signature) exit "${FAKE_PACKAGE_SIGNATURE_EXIT:-0}" ;;
+    --expand-full)
+        python3 - "$2" "$3" <<'PYCODE'
+import pathlib
+import sys
+import zipfile
+
+with zipfile.ZipFile(sys.argv[1]) as package:
+    package.extractall(pathlib.Path(sys.argv[2]))
+PYCODE
+        chmod +x "$3"/macos-*.pkg/Payload/usr/local/lib/exordos/pkg/exordos
+        ;;
+    *) exit 2 ;;
+esac
+EOF
+
+cat > "$FAKE_BIN/spctl" <<'EOF'
+#!/bin/sh
+exit "${FAKE_PACKAGE_ASSESS_EXIT:-0}"
 EOF
 
 cat > "$FAKE_BIN/codesign" <<'EOF'
@@ -87,20 +100,24 @@ EOF
 chmod +x \
     "$FAKE_BIN/uname" \
     "$FAKE_BIN/ditto" \
+    "$FAKE_BIN/pkgutil" \
+    "$FAKE_BIN/spctl" \
     "$FAKE_BIN/codesign" \
     "$FAKE_BIN/file"
 
 create_release() {
     VERSION=$1
-    ARCH=$2
     RELEASE_DIR="$FAKE_REPO/$VERSION"
-    FIXTURE_DIR="$TEST_ROOT/fixture-$VERSION-$ARCH"
-    ARCHIVE="$RELEASE_DIR/exordos-macos-$ARCH.zip"
-    mkdir -p "$RELEASE_DIR" "$FIXTURE_DIR/exordos/_internal"
-    printf '#!/bin/sh\nprintf "%%s\\n" "%s"\n' "$VERSION" \
-        > "$FIXTURE_DIR/exordos/exordos"
-    printf '%s\n' runtime > "$FIXTURE_DIR/exordos/_internal/marker"
-    chmod +x "$FIXTURE_DIR/exordos/exordos"
+    FIXTURE_DIR="$TEST_ROOT/fixture-$VERSION"
+    ARCHIVE="$RELEASE_DIR/exordos-macos.pkg"
+    mkdir -p "$RELEASE_DIR"
+    for ARCH in arm64 x86_64; do
+        BUNDLE="$FIXTURE_DIR/macos-$ARCH.pkg/Payload/usr/local/lib/exordos/pkg"
+        mkdir -p "$BUNDLE/_internal"
+        printf '#!/bin/sh\nprintf "%%s\\n" "%s"\n' "$VERSION" > "$BUNDLE/exordos"
+        printf '%s\n' "$ARCH" > "$BUNDLE/_internal/marker"
+        chmod +x "$BUNDLE/exordos"
+    done
     python3 - "$FIXTURE_DIR" "$ARCHIVE" <<'PY'
 import pathlib
 import sys
@@ -138,7 +155,7 @@ assert_active_version() {
         fail "active version is $ACTUAL, expected $EXPECTED"
 }
 
-create_release 3.1.14 arm64
+create_release 3.1.14
 printf '%s\n' 3.1.14 > "$FAKE_REPO/latest/VERSION"
 
 # Preserve an existing one-file installation before activating the bundle.
@@ -149,6 +166,8 @@ LEGACY_HASH=$(shasum -a 256 "$PREFIX/bin/exordos")
 LEGACY_HASH=${LEGACY_HASH%% *}
 install_version
 assert_active_version 3.1.14
+[ "$(cat "$PREFIX/lib/exordos/versions/3.1.14/_internal/marker")" = arm64 ] || \
+    fail "Apple Silicon installed the wrong component"
 [ -f "$PREFIX/lib/exordos/versions/3.1.14/.complete" ] || \
     fail "completion marker is missing"
 [ -x "$PREFIX/lib/exordos/legacy/exordos-onefile-$LEGACY_HASH" ] || \
@@ -160,7 +179,7 @@ install_version
 SECOND_MARKER=$(stat -c %i "$PREFIX/lib/exordos/versions/3.1.14/.complete")
 [ "$FIRST_MARKER" = "$SECOND_MARKER" ] || fail "reinstall replaced the version"
 
-create_release 3.1.15 arm64
+create_release 3.1.15
 printf '%s\n' 3.1.15 > "$FAKE_REPO/latest/VERSION"
 install_version
 assert_active_version 3.1.15
@@ -173,8 +192,8 @@ assert_active_version 3.1.14
 unset EXORDOS_VERSION_OVERRIDE
 
 # A checksum failure must not switch the active launcher.
-create_release 3.1.16 arm64
-printf '%064d\n' 0 > "$FAKE_REPO/3.1.16/exordos-macos-arm64.zip.sha256"
+create_release 3.1.16
+printf '%064d\n' 0 > "$FAKE_REPO/3.1.16/exordos-macos.pkg.sha256"
 printf '%s\n' 3.1.16 > "$FAKE_REPO/latest/VERSION"
 if install_version; then
     fail "checksum mismatch unexpectedly succeeded"
@@ -182,19 +201,62 @@ fi
 assert_active_version 3.1.14
 
 # Ad-hoc signatures are rejected before the downloaded launcher is executed.
-create_release 3.1.17 arm64
+create_release 3.1.17
 printf '%s\n' 3.1.17 > "$FAKE_REPO/latest/VERSION"
 if FAKE_SIGNATURE_MODE=adhoc install_version; then
     fail "ad-hoc signature unexpectedly succeeded"
 fi
 assert_active_version 3.1.14
 
-# Intel uses its own artifact.
-create_release 3.1.14 x86_64
+# Package signature and notarization failures leave the current version active.
+if FAKE_PACKAGE_SIGNATURE_EXIT=1 install_version; then
+    fail "invalid package signature unexpectedly succeeded"
+fi
+assert_active_version 3.1.14
+if FAKE_PACKAGE_ASSESS_EXIT=1 install_version; then
+    fail "rejected package unexpectedly succeeded"
+fi
+assert_active_version 3.1.14
+
+# Intel selects its native component from the same artifact.
 INTEL_PREFIX="$TEST_ROOT/intel-prefix"
 PREFIX="$INTEL_PREFIX" FAKE_ARCH=x86_64 EXORDOS_VERSION_OVERRIDE=3.1.14 \
     install_version
 PREFIX="$INTEL_PREFIX" assert_active_version 3.1.14
+[ "$(cat "$INTEL_PREFIX/lib/exordos/versions/3.1.14/_internal/marker")" = x86_64 ] || \
+    fail "Intel installed the wrong component"
+
+# An uncached historical release has only architecture-specific ZIPs.
+create_release 3.1.13
+python3 - "$FAKE_REPO/3.1.13" "$TEST_ROOT/fixture-3.1.13" <<'PY'
+from pathlib import Path
+import sys
+import zipfile
+
+release, fixture = map(Path, sys.argv[1:])
+(release / "exordos-macos.pkg").unlink()
+for arch in ("arm64", "x86_64"):
+    bundle = fixture / f"macos-{arch}.pkg/Payload/usr/local/lib/exordos/pkg"
+    with zipfile.ZipFile(release / f"exordos-macos-{arch}.zip", "w") as archive:
+        for path in bundle.rglob("*"):
+            if path.is_file():
+                archive.write(path, Path("exordos") / path.relative_to(bundle))
+PY
+for ARCH in arm64 x86_64; do
+    HASH=$(shasum -a 256 "$FAKE_REPO/3.1.13/exordos-macos-$ARCH.zip")
+    printf '%s\n' "${HASH%% *}" > "$FAKE_REPO/3.1.13/exordos-macos-$ARCH.zip.sha256"
+    LEGACY_PREFIX="$TEST_ROOT/legacy-$ARCH"
+    PREFIX="$LEGACY_PREFIX" FAKE_ARCH="$ARCH" EXORDOS_VERSION_OVERRIDE=3.1.13 install_version
+    PREFIX="$LEGACY_PREFIX" assert_active_version 3.1.13
+    [ "$(cat "$LEGACY_PREFIX/lib/exordos/versions/3.1.13/_internal/marker")" = "$ARCH" ] || \
+        fail "Historical ZIP selected the wrong architecture"
+done
+
+# Historical ZIPs still require trusted code signatures.
+if PREFIX="$TEST_ROOT/legacy-untrusted" FAKE_SIGNATURE_MODE=adhoc \
+    EXORDOS_VERSION_OVERRIDE=3.1.13 install_version; then
+    fail "Untrusted historical ZIP unexpectedly succeeded"
+fi
 
 # Unsupported architectures fail before mutating the prefix.
 UNKNOWN_PREFIX="$TEST_ROOT/unknown-prefix"

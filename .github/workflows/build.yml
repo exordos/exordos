@@ -7,7 +7,10 @@ on:
       - '.github/workflows/build.yml'
       - '.github/workflows/publish-to-pypi.yml'
       - 'etc/install.sh'
-      - 'etc/package-macos.sh'
+      - 'etc/package-macos-pkg.sh'
+      - 'etc/assemble-macos-pkg.sh'
+      - 'etc/macos-distribution.xml'
+      - 'etc/macos-preinstall.sh'
       - 'exordos/**'
       - 'pyproject.toml'
       - 'tox.ini'
@@ -68,12 +71,10 @@ jobs:
           - os: macos-15
             machine-arch: arm64
             target-arch: arm64
-            artifact-suffix: macos-arm64
             python-version: "3.14"
           - os: macos-15-intel
             machine-arch: x86_64
             target-arch: x86_64
-            artifact-suffix: macos-x86_64
             python-version: "3.14"
     runs-on: ${{ matrix.os }}
     steps:
@@ -113,17 +114,87 @@ jobs:
               esac
             fi
           done < <(find dist/exordos -type f -print0)
-      - name: Archive bundle and create checksum
+      - name: Build macOS component
         run: >-
-          sh etc/package-macos.sh
+          sh etc/package-macos-pkg.sh
           dist/exordos
-          dist/exordos-${{ matrix.artifact-suffix }}.zip
-      - name: Smoke-test installer
-        env:
-          ARTIFACT: exordos-${{ matrix.artifact-suffix }}.zip
+          dist/macos-${{ matrix.target-arch }}.pkg
+      - name: Upload component
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos-component-${{ matrix.target-arch }}
+          path: |
+            dist/macos-${{ matrix.target-arch }}.pkg
+            dist/macos-${{ matrix.target-arch }}.pkg.version
+
+  assemble_macos_package:
+    needs: build_macos_binaries
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: macos-component-*
+          merge-multiple: true
+          path: components/
+      - name: Assemble macOS package
+        run: |
+          mkdir -p dist
+          sh etc/assemble-macos-pkg.sh components dist/exordos-macos.pkg
+      - name: Create checksum
+        run: shasum -a 256 dist/exordos-macos.pkg | awk '{print $1}' > dist/exordos-macos.pkg.sha256
+      - uses: actions/upload-artifact@v7
+        with:
+          name: exordos-macos
+          path: |
+            dist/exordos-macos.pkg
+            dist/exordos-macos.pkg.sha256
+
+  test_macos_package:
+    needs: assemble_macos_package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            target-arch: arm64
+            other-arch: x86_64
+          - os: macos-15-intel
+            target-arch: x86_64
+            other-arch: arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - uses: actions/download-artifact@v8
+        with:
+          name: exordos-macos
+          path: dist/
+      - name: Smoke-test macOS package
         run: |
           set -euo pipefail
-          VERSION=$(dist/exordos/exordos --silent --no-check-updates version)
+          PACKAGE="dist/exordos-macos.pkg"
+          sudo installer -allowUntrusted -pkg "$PACKAGE" -target /
+          lipo /usr/local/lib/exordos/pkg/exordos -verify_arch "${{ matrix.target-arch }}"
+          pkgutil --pkg-info "com.exordos.cli.${{ matrix.target-arch }}"
+          if pkgutil --pkg-info "com.exordos.cli.${{ matrix.other-arch }}"; then
+            echo "The non-native component was installed" >&2
+            exit 1
+          fi
+          /usr/local/bin/exordos --silent --no-check-updates version
+          /usr/local/bin/exordos --help >/dev/null
+          sudo touch /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
+          sudo installer -allowUntrusted -pkg "$PACKAGE" -target /
+          test ! -e /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
+          /usr/local/bin/exordos --help >/dev/null
+      - name: Smoke-test installer
+        env:
+          ARTIFACT: exordos-macos.pkg
+        run: |
+          set -euo pipefail
+          VERSION=$(/usr/local/bin/exordos --silent --no-check-updates version)
           REPO_ROOT="$RUNNER_TEMP/exordos-repo"
           INSTALL_PREFIX="$RUNNER_TEMP/exordos-install"
           mkdir -p "$REPO_ROOT/latest" "$REPO_ROOT/$VERSION"
@@ -178,10 +249,3 @@ jobs:
               if list(Path(environment["TMPDIR"]).glob("_MEI*")):
                   raise SystemExit("onedir launch unexpectedly created a _MEI directory")
           PY
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: exordos-${{ matrix.artifact-suffix }}
-          path: |
-            dist/exordos-${{ matrix.artifact-suffix }}.zip
-            dist/exordos-${{ matrix.artifact-suffix }}.zip.sha256

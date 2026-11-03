@@ -43,7 +43,7 @@ jobs:
     needs:
     - build_python
     - build_binaries
-    - build_macos_binaries
+    - test_macos_package
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -77,18 +77,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        uses: actions/checkout@v7
         with:
           fetch-depth: 30
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install deps (Linux)
         if: runner.os == 'Linux'
         run: sudo apt update && sudo apt install --yes ca-certificates
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
+        uses: astral-sh/setup-uv@v7
       - name: Install tox-uv
         run: uv tool install tox --with tox-uv
       - name: Build executable
@@ -102,7 +102,7 @@ jobs:
           fi
         shell: bash
       - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@v7
         with:
           name: exordos-${{ matrix.artifact-suffix }}
           path: dist/*
@@ -120,44 +120,36 @@ jobs:
           - os: macos-15
             machine-arch: arm64
             target-arch: arm64
-            artifact-suffix: macos-arm64
             python-version: "3.14"
           - os: macos-15-intel
             machine-arch: x86_64
             target-arch: x86_64
-            artifact-suffix: macos-x86_64
             python-version: "3.14"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        uses: actions/checkout@v7
         with:
           fetch-depth: 30
           persist-credentials: false
       - name: Verify runner architecture
         run: test "$(uname -m)" = "${{ matrix.machine-arch }}"
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
+        uses: astral-sh/setup-uv@v7
       - name: Install tox-uv
         run: uv tool install tox --with tox-uv
       - name: Validate signing secrets
         env:
           MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
           MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-          APPLE_API_PRIVATE_KEY_P8_BASE64: ${{ secrets.APPLE_API_PRIVATE_KEY_P8_BASE64 }}
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
           set -euo pipefail
           test -n "$MACOS_CERTIFICATE_P12_BASE64"
           test -n "$MACOS_CERTIFICATE_PASSWORD"
-          test -n "$APPLE_API_PRIVATE_KEY_P8_BASE64"
-          test -n "$APPLE_API_KEY_ID"
-          test -n "$APPLE_API_ISSUER_ID"
       - name: Import Developer ID certificate
         env:
           MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -256,20 +248,84 @@ jobs:
             fi
           done < <(find dist/exordos -type f -print0)
           test "$SIGNED_CODE_COUNT" -gt 0
-      - name: Archive bundle
+      - name: Build macOS component
         run: >-
-          sh etc/package-macos.sh
+          sh etc/package-macos-pkg.sh
           dist/exordos
-          dist/exordos-${{ matrix.artifact-suffix }}.zip
-      - name: Notarize archive
+          dist/macos-${{ matrix.target-arch }}.pkg
+      - name: Remove signing material before artifact upload
+        run: |
+          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db"
+          rm -f \
+            "$RUNNER_TEMP/developer-id.p12"
+      - name: Upload component
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos-component-${{ matrix.target-arch }}
+          path: |
+            dist/macos-${{ matrix.target-arch }}.pkg
+            dist/macos-${{ matrix.target-arch }}.pkg.version
+      - name: Remove signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db" 2>/dev/null || true
+          rm -f \
+            "$RUNNER_TEMP/developer-id.p12"
+
+  assemble_macos_package:
+    needs: build_macos_binaries
+    runs-on: macos-15
+    environment: macos-release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: macos-component-*
+          merge-multiple: true
+          path: components/
+      - name: Import Developer ID Installer certificate
+        env:
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$MACOS_CERTIFICATE_P12_BASE64"
+          test -n "$MACOS_CERTIFICATE_PASSWORD"
+          KEYCHAIN_PATH="$RUNNER_TEMP/exordos-signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 32)
+          printf '%s' "$MACOS_CERTIFICATE_P12_BASE64" | /usr/bin/base64 -D > "$RUNNER_TEMP/developer-id.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$RUNNER_TEMP/developer-id.p12" -k "$KEYCHAIN_PATH" \
+            -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/productbuild
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          INSTALLER_IDENTITY=$(security find-identity -v "$KEYCHAIN_PATH" \
+            | sed -n 's/.*"\(Developer ID Installer:[^"]*\)".*/\1/p' | head -1)
+          if [[ -z "$INSTALLER_IDENTITY" ]]; then
+            echo "::error::MACOS_CERTIFICATE_P12_BASE64 must include a Developer ID Installer certificate and private key."
+            exit 1
+          fi
+          printf 'MACOS_INSTALLER_IDENTITY=%s\n' "$INSTALLER_IDENTITY" >> "$GITHUB_ENV"
+      - name: Assemble macOS package
+        run: |
+          mkdir -p dist
+          sh etc/assemble-macos-pkg.sh components dist/exordos-macos.pkg
+      - name: Notarize package
         env:
           APPLE_API_PRIVATE_KEY_P8_BASE64: ${{ secrets.APPLE_API_PRIVATE_KEY_P8_BASE64 }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
           set -euo pipefail
+          test -n "$APPLE_API_PRIVATE_KEY_P8_BASE64"
+          test -n "$APPLE_API_KEY_ID"
+          test -n "$APPLE_API_ISSUER_ID"
           API_KEY_PATH="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY_ID}.p8"
-          NOTARY_RESULT="$RUNNER_TEMP/notary-result-${{ matrix.artifact-suffix }}.json"
+          NOTARY_RESULT="$RUNNER_TEMP/notary-result.json"
           printf '%s' "$APPLE_API_PRIVATE_KEY_P8_BASE64" \
             | /usr/bin/base64 -D > "$API_KEY_PATH"
           chmod 600 "$API_KEY_PATH"
@@ -298,7 +354,7 @@ jobs:
 
           set +e
           xcrun notarytool submit \
-            "dist/exordos-${{ matrix.artifact-suffix }}.zip" \
+            "dist/exordos-macos.pkg" \
             --key "$API_KEY_PATH" \
             --key-id "$APPLE_API_KEY_ID" \
             --issuer "$APPLE_API_ISSUER_ID" \
@@ -322,12 +378,83 @@ jobs:
           if [[ "$NOTARY_EXIT" -ne 0 || "$NOTARY_STATUS" != 'Accepted' ]]; then
             exit 1
           fi
-      - name: Smoke-test installer
-        env:
-          ARTIFACT: exordos-${{ matrix.artifact-suffix }}.zip
+      - name: Staple and verify macOS package
         run: |
           set -euo pipefail
-          VERSION=$(dist/exordos/exordos --silent --no-check-updates version)
+          PACKAGE="dist/exordos-macos.pkg"
+          xcrun stapler staple "$PACKAGE"
+          xcrun stapler validate "$PACKAGE"
+          pkgutil --check-signature "$PACKAGE"
+          spctl --assess --type install --verbose=2 "$PACKAGE"
+      - name: Create checksum
+        run: shasum -a 256 dist/exordos-macos.pkg | awk '{print $1}' > dist/exordos-macos.pkg.sha256
+      - name: Remove signing material before artifact upload
+        run: |
+          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db"
+          rm -f \
+            "$RUNNER_TEMP/developer-id.p12" \
+            "$RUNNER_TEMP"/AuthKey_*.p8 \
+            "$RUNNER_TEMP/notary-result.json"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: exordos-macos
+          path: |
+            dist/exordos-macos.pkg
+            dist/exordos-macos.pkg.sha256
+      - name: Remove signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db" 2>/dev/null || true
+          rm -f \
+            "$RUNNER_TEMP/developer-id.p12" \
+            "$RUNNER_TEMP"/AuthKey_*.p8 \
+            "$RUNNER_TEMP/notary-result.json"
+
+  test_macos_package:
+    needs: assemble_macos_package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            target-arch: arm64
+            other-arch: x86_64
+          - os: macos-15-intel
+            target-arch: x86_64
+            other-arch: arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - uses: actions/download-artifact@v8
+        with:
+          name: exordos-macos
+          path: dist/
+      - name: Smoke-test macOS package
+        run: |
+          set -euo pipefail
+          PACKAGE="dist/exordos-macos.pkg"
+          sudo installer -pkg "$PACKAGE" -target /
+          lipo /usr/local/lib/exordos/pkg/exordos -verify_arch "${{ matrix.target-arch }}"
+          pkgutil --pkg-info "com.exordos.cli.${{ matrix.target-arch }}"
+          if pkgutil --pkg-info "com.exordos.cli.${{ matrix.other-arch }}"; then
+            echo "The non-native component was installed" >&2
+            exit 1
+          fi
+          /usr/local/bin/exordos --silent --no-check-updates version
+          /usr/local/bin/exordos --help >/dev/null
+          sudo touch /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
+          sudo installer -pkg "$PACKAGE" -target /
+          test ! -e /usr/local/lib/exordos/pkg/_internal/obsolete-upgrade-test
+          /usr/local/bin/exordos --help >/dev/null
+      - name: Smoke-test installer
+        env:
+          ARTIFACT: exordos-macos.pkg
+        run: |
+          set -euo pipefail
+          VERSION=$(/usr/local/bin/exordos --silent --no-check-updates version)
           REPO_ROOT="$RUNNER_TEMP/exordos-repo"
           INSTALL_PREFIX="$RUNNER_TEMP/exordos-install"
           mkdir -p "$REPO_ROOT/latest" "$REPO_ROOT/$VERSION"
@@ -381,35 +508,14 @@ jobs:
               if list(Path(environment["TMPDIR"]).glob("_MEI*")):
                   raise SystemExit("onedir launch unexpectedly created a _MEI directory")
           PY
-      - name: Remove signing material before artifact upload
-        run: |
-          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db"
-          rm -f \
-            "$RUNNER_TEMP/developer-id.p12" \
-            "$RUNNER_TEMP"/AuthKey_*.p8 \
-            "$RUNNER_TEMP/notary-result-${{ matrix.artifact-suffix }}.json"
-      - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
-        with:
-          name: exordos-${{ matrix.artifact-suffix }}
-          path: |
-            dist/exordos-${{ matrix.artifact-suffix }}.zip
-            dist/exordos-${{ matrix.artifact-suffix }}.zip.sha256
-      - name: Remove signing material
-        if: always()
-        run: |
-          security delete-keychain "$RUNNER_TEMP/exordos-signing.keychain-db" 2>/dev/null || true
-          rm -f \
-            "$RUNNER_TEMP/developer-id.p12" \
-            "$RUNNER_TEMP"/AuthKey_*.p8 \
-            "$RUNNER_TEMP/notary-result-${{ matrix.artifact-suffix }}.json"
+
 
   github-release:
     name: Create GitHub Release with artifacts
     needs:
     - publish-to-pypi
     - build_binaries
-    - build_macos_binaries
+    - test_macos_package
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -475,14 +581,10 @@ jobs:
           "${PROJECT_NAME}/${VERSION}/exordos-linux"
         upload ./dist/exordos-linux-ubuntu-resolute \
           "${PROJECT_NAME}/${VERSION}/exordos-linux-ubuntu-resolute"
-        upload ./dist/exordos-macos-arm64.zip \
-          "${PROJECT_NAME}/${VERSION}/exordos-macos-arm64.zip"
-        upload ./dist/exordos-macos-arm64.zip.sha256 \
-          "${PROJECT_NAME}/${VERSION}/exordos-macos-arm64.zip.sha256"
-        upload ./dist/exordos-macos-x86_64.zip \
-          "${PROJECT_NAME}/${VERSION}/exordos-macos-x86_64.zip"
-        upload ./dist/exordos-macos-x86_64.zip.sha256 \
-          "${PROJECT_NAME}/${VERSION}/exordos-macos-x86_64.zip.sha256"
+        upload ./dist/exordos-macos.pkg \
+          "${PROJECT_NAME}/${VERSION}/exordos-macos.pkg"
+        upload ./dist/exordos-macos.pkg.sha256 \
+          "${PROJECT_NAME}/${VERSION}/exordos-macos.pkg.sha256"
         upload ./dist/exordos-windows.exe \
           "${PROJECT_NAME}/${VERSION}/exordos-windows.exe"
 
@@ -491,22 +593,18 @@ jobs:
           "${PROJECT_NAME}/latest/exordos-linux"
         upload ./dist/exordos-linux-ubuntu-resolute \
           "${PROJECT_NAME}/latest/exordos-linux-ubuntu-resolute"
-        upload ./dist/exordos-macos-arm64.zip \
-          "${PROJECT_NAME}/latest/exordos-macos-arm64.zip"
-        upload ./dist/exordos-macos-arm64.zip.sha256 \
-          "${PROJECT_NAME}/latest/exordos-macos-arm64.zip.sha256"
-        upload ./dist/exordos-macos-x86_64.zip \
-          "${PROJECT_NAME}/latest/exordos-macos-x86_64.zip"
-        upload ./dist/exordos-macos-x86_64.zip.sha256 \
-          "${PROJECT_NAME}/latest/exordos-macos-x86_64.zip.sha256"
+        upload ./dist/exordos-macos.pkg \
+          "${PROJECT_NAME}/latest/exordos-macos.pkg"
+        upload ./dist/exordos-macos.pkg.sha256 \
+          "${PROJECT_NAME}/latest/exordos-macos.pkg.sha256"
         upload ./dist/exordos-windows.exe \
           "${PROJECT_NAME}/latest/exordos-windows.exe"
 
-        # VERSION is the commit point for the new macOS installer contract.
-        upload ./dist/VERSION "${PROJECT_NAME}/latest/VERSION"
-
-        # Activate the installer only after all referenced artifacts exist.
+        # The new installer can consume both historical ZIPs and packages.
         upload ./etc/install.sh "install.sh"
+
+        # Advance VERSION after artifacts and the compatible installer exist.
+        upload ./dist/VERSION "${PROJECT_NAME}/latest/VERSION"
 
   validate_release_ref:
     name: Validate release tag
