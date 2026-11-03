@@ -1,7 +1,7 @@
 FROM ubuntu:26.04
 
 RUN apt-get update \
-    && apt-get install --yes --no-install-recommends curl ca-certificates git \
+    && apt-get install --yes --no-install-recommends curl ca-certificates git xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 ARG CACHE_BUST=1

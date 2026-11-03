@@ -32,6 +32,26 @@ Install the CLI with a single command:
 curl -fsSL https://repo.exordos.com/install.sh | sh
 ```
 
+Linux bundles support x86_64 and ARM64 systems with glibc 2.28 or newer.
+The installer requires `curl`, `tar`, and `xz` (`xz-utils` on Ubuntu/Debian).
+It verifies SHA-256 and the executable before switching to the downloaded
+version. Python and runtime libraries are included and unpacked once during
+installation. Existing versions and a backup of a replaced one-file executable
+are kept under `<prefix>/lib/exordos/`.
+
+On Linux, new installations use `~/.local` for regular users and `/usr/local`
+for root. Existing launchers found in `PATH`, `~/bin`, or `~/.local/bin`
+are updated in place when writable; an inaccessible default installation
+outside `/usr/local` falls back to `~/.local`. Add `<prefix>/bin` to `PATH` when
+using a custom prefix. System installations require root-owned directories
+without group or other write access. To select a prefix and a release that provides Linux
+bundles, replace `<version>` in:
+
+```bash
+curl -fsSL https://repo.exordos.com/install.sh |
+  EXORDOS_INSTALL_PREFIX="$HOME/.local" EXORDOS_VERSION="<version>" sh
+```
+
 ## What Exordos CLI does
 
 Exordos CLI bridges the gap between your local development environment and the Exordos Core platform. With a self-contained installation you can:

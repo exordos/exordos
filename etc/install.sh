@@ -305,169 +305,213 @@ fi
 
 [ "$OS" = "Linux" ] || error 'This script is intended to run on Linux and macOS only.'
 
-IS_WSL2=false
-
+umask 022
 KERN=$(uname -r)
 case "$KERN" in
-    *icrosoft*WSL2 | *icrosoft*wsl2) IS_WSL2=true;;
-    *icrosoft) error "Microsoft WSL1 is not currently supported. Please use WSL2 with 'wsl --set-version <distro> 2'" ;;
-    *) ;;
+    *icrosoft*WSL2 | *icrosoft*wsl2) ;;
+    *icrosoft) error "Microsoft WSL1 is not supported. Please use WSL2." ;;
 esac
 
-NEEDS=$(require curl grep xargs git)
-if [ -n "$NEEDS" ]; then
-    status "ERROR: The following tools are required but missing:"
-    for NEED in $NEEDS; do
-        echo "  - $NEED"
+NEEDS=$(require awk chmod cp curl find getconf id install readlink sed sha256sum stat tar xz)
+[ -z "$NEEDS" ] || error "Required tools are missing:$NEEDS"
+GLIBC=$(getconf GNU_LIBC_VERSION 2>/dev/null || :)
+case "$GLIBC" in
+    'glibc '*) GLIBC_VERSION=${GLIBC#glibc } ;;
+    *) error "exordos requires Linux with glibc 2.28 or newer" ;;
+esac
+awk -v version="$GLIBC_VERSION" 'BEGIN {
+    split(version, parts, ".")
+    exit !(parts[1] > 2 || (parts[1] == 2 && parts[2] >= 28))
+}' || error "exordos requires glibc 2.28 or newer; found $GLIBC_VERSION"
+case "$ARCH" in
+    amd64) LINUX_ARCH=x86_64 ;;
+    arm64) LINUX_ARCH=aarch64 ;;
+esac
+
+OLD_BINARY=$(command -v exordos || :)
+if [ -z "$OLD_BINARY" ]; then
+    for CANDIDATE in "$HOME/bin/exordos" "$HOME/.local/bin/exordos"; do
+        if [ -x "$CANDIDATE" ]; then
+            OLD_BINARY="$CANDIDATE"
+            break
+        fi
     done
-    exit 1
 fi
-
-# Function to find a writable bin directory
-find_writable_bindir() {
-    # Check for user's personal bin directories first
-    for dir in "$HOME/bin" "$HOME/.local/bin"; do
-      if [ -d "$dir" ] && [ -w "$dir" ]; then
-          echo "$dir"
-          return
-      fi
-    done
-
-    # If ~/.local/bin is in PATH but doesn't exist, create it
-    if echo "$PATH" | tr ':' '\n' | grep -q "$HOME/.local/bin"; then
-        if [ ! -d "$HOME/.local/bin" ]; then
-          mkdir -p "$HOME/.local/bin"
-        fi
-        echo "$HOME/.local/bin"
-        return
-    fi
-
-    # Check other directories in PATH that are writable
-    for dir in $(echo $PATH | tr ':' ' '); do
-        if [ -d "$dir" ] && [ -w "$dir" ]; then
-            echo "$dir"
-            return
-        fi
-    done
-
-    # Create $HOME/.local/bin if it doesn't exist and add to PATH
-    if [ ! -d "$HOME/.local/bin" ]; then
-        mkdir -p "$HOME/.local/bin"
-        # Add to shell profile for persistence
-        if [ -n "${BASH_VERSION-}" ]; then
-            PROFILE="$HOME/.bashrc"
-        else
-            PROFILE="$HOME/.profile"
-        fi
-        if ! grep -q '.local/bin' "$PROFILE" 2>/dev/null; then
-            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$PROFILE"
-        fi
-        echo "$HOME/.local/bin"
-        return
-    fi
-
-    # If no writable directory found in PATH, try standard system directories with sudo
-    for dir in /usr/local/bin /usr/bin /bin; do
-        if [ -d "$dir" ]; then
-            # Try to create directory if it doesn't exist (with sudo)
-            if ! [ -w "$dir" ]; then
-                status "Need sudo to write to $dir"
-                sudo mkdir -p "$dir" 2>/dev/null || true
-                if [ -w "$dir" ]; then
-                    echo "$dir"
-                    return
-                fi
-            else
-                echo "$dir"
-                return
-            fi
-        fi
-    done
-
-    # If no suitable directory found
-    error "No suitable directory found to install exordos binary"
-}
-
-! command -v exordos >/dev/null 2>&1
-OLD_BINARY_EXISTS=$?
-OLD_BINARY=$(which exordos 2>/dev/null || echo "/usr/local/bin/exordos")
-# Find a writable directory
-BINDIR=$(find_writable_bindir)
-
-status "Installing exordos to $BINDIR"
-
-# Determine the correct filename based on OS version
-LINUX_FILENAME="exordos-linux"
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    if [ "$ID" = "ubuntu" ]; then
-        # Check Ubuntu version for Resolute (26.04)
-        VERSION_MAJOR="${VERSION_ID%%.*}"
-        if [ "$VERSION_MAJOR" = "26" ]; then
-            LINUX_FILENAME="exordos-linux-ubuntu-resolute"
-        fi
-    fi
-fi
-
-# Download and install
-download() {
-    local url_base="$1"
-    local dest_dir="$2"
-    local filename="$3"
-
-    if curl --fail --silent --head --location "${url_base}/${filename}" >/dev/null 2>&1; then
-        status "Downloading ${filename}"
-        curl --fail --show-error --location --progress-bar \
-            "${url_base}/${filename}" --output "${dest_dir}/exordos"
-        return 0
-    fi
-    error "Failed to download ${filename}"
-}
-
-download "https://repo.exordos.com/exordos/latest" "$BINDIR" "$LINUX_FILENAME"
-chmod +x "$BINDIR"/exordos
-
-if [ -f "$OLD_BINARY" ]; then
-    if [ "$BINDIR/exordos" != "$OLD_BINARY" ]; then
-        echo "Found old binary at $OLD_BINARY"
-        echo "Current binary is at: $BINDIR/exordos"
-        if [ -n "${DELETE_OLD+x}" ]; then
-            response=Y
-        else
-            echo "Do you want to remove the old exordos binary? (y/N)"
-            read -r response
-        fi
-        case "$response" in
-            [yY])
-                sudo rm -f "$OLD_BINARY"
-                echo "Old binary removed"
-                ;;
-            *)
-                echo "Keeping old binary"
-                ;;
+DEFAULT_PREFIX="$HOME/.local"
+[ "$(id -u)" -ne 0 ] || DEFAULT_PREFIX=/usr/local
+DEFAULT_BINDIR=''
+case "$OLD_BINARY" in
+    /*/exordos)
+        DEFAULT_BINDIR=$(dirname "$OLD_BINARY")
+        case "$DEFAULT_BINDIR" in
+            */bin|*/sbin) DEFAULT_PREFIX=$(dirname "$DEFAULT_BINDIR") ;;
+            *) DEFAULT_PREFIX="$DEFAULT_BINDIR" ;;
         esac
+        ;;
+esac
+INSTALL_PREFIX="${EXORDOS_INSTALL_PREFIX:-$DEFAULT_PREFIX}"
+case "$INSTALL_PREFIX" in
+    /|//*|*//*|*/./*|*/.|*/../*|*/..)
+        error "EXORDOS_INSTALL_PREFIX must be a canonical path below /" ;;
+    /*) ;;
+    *) error "EXORDOS_INSTALL_PREFIX must be an absolute directory" ;;
+esac
+INSTALL_ROOT="$INSTALL_PREFIX/lib/exordos"
+VERSIONS_DIR="$INSTALL_ROOT/versions"
+BINDIR="$INSTALL_PREFIX/bin"
+if [ -z "${EXORDOS_INSTALL_PREFIX:-}" ] && [ -n "$DEFAULT_BINDIR" ]; then
+    BINDIR="$DEFAULT_BINDIR"
+elif [ "$INSTALL_PREFIX" = /usr/local ] && [ "$OLD_BINARY" = /usr/local/sbin/exordos ]; then
+    BINDIR=/usr/local/sbin
+fi
+REPO_URL="${EXORDOS_REPO_URL:-https://repo.exordos.com/exordos}"
+VERSION="${EXORDOS_VERSION:-}"
+if [ -z "$VERSION" ]; then
+    curl --fail --show-error --location --silent \
+        "$REPO_URL/latest/VERSION" --output "$TEMP_DIR/VERSION"
+    VERSION=$(cat "$TEMP_DIR/VERSION")
+fi
+case "$VERSION" in
+    [0-9]*) ;;
+    *) error "Invalid exordos version: $VERSION" ;;
+esac
+case "$VERSION" in
+    *[!0-9A-Za-z.+-]*|*..*) error "Invalid exordos version: $VERSION" ;;
+esac
+
+if ! mkdir -p "$VERSIONS_DIR" "$BINDIR" 2>/dev/null || \
+    [ ! -w "$VERSIONS_DIR" ] || [ ! -w "$BINDIR" ]; then
+    if [ -z "${EXORDOS_INSTALL_PREFIX:-}" ] && [ "$(id -u)" -ne 0 ] && \
+        [ "$INSTALL_PREFIX" != /usr/local ]; then
+        INSTALL_PREFIX="$HOME/.local"
+        INSTALL_ROOT="$INSTALL_PREFIX/lib/exordos"
+        VERSIONS_DIR="$INSTALL_ROOT/versions"
+        BINDIR="$INSTALL_PREFIX/bin"
+        status "The existing launcher cannot be updated; installing to $BINDIR."
+        mkdir -p "$VERSIONS_DIR" "$BINDIR"
+        [ -w "$VERSIONS_DIR" ] && [ -w "$BINDIR" ] || error "User installation prefix is not writable"
+    else
+        [ "$INSTALL_PREFIX" = /usr/local ] || \
+            error "EXORDOS_INSTALL_PREFIX must be writable without sudo"
+        available sudo || error "sudo is required to install exordos to $INSTALL_PREFIX"
+        sudo -v
+        NEED_SUDO=1
+        privileged mkdir -p "$VERSIONS_DIR" "$BINDIR"
     fi
 fi
 
-install_success() {
-  # if exordos cmd did not exist before the launch of this script, this is installing, not updating
-  if [ "$OLD_BINARY_EXISTS" -eq 0 ]; then
-      "$BINDIR"/exordos introduction
-  fi
+ROOT_INSTALL=0
+if [ "$(id -u)" -eq 0 ] || [ "$NEED_SUDO" -eq 1 ]; then
+    ROOT_INSTALL=1
+    BINDIR=$(readlink -f "$BINDIR")
+    INSTALL_ROOT=$(readlink -f "$INSTALL_ROOT")
+    VERSIONS_DIR=$(readlink -f "$VERSIONS_DIR")
+    for CHECK_DIR in "$BINDIR" "$INSTALL_ROOT" "$VERSIONS_DIR"; do
+        while :; do
+            [ "$(stat -c %u "$CHECK_DIR")" -eq 0 ] || \
+                error "Root installation requires root-owned directories: $CHECK_DIR"
+            MODE=$(stat -c %a "$CHECK_DIR")
+            if [ "$((0$MODE & 0022))" -ne 0 ] && [ "$((0$MODE & 01000))" -eq 0 ]; then
+                error "Root installation requires directories without group/other write access: $CHECK_DIR"
+            fi
+            [ "$CHECK_DIR" != / ] || break
+            CHECK_DIR=$(dirname "$CHECK_DIR")
+        done
+    done
+fi
 
-  # if command is not available, print instructions to run exordos
-  if ! command -v exordos >/dev/null 2>&1; then
-    status ""
-    status "To run exordos, either restart your shell or run:"
-    status ""
-    status "    $BINDIR/exordos"
-  fi
+TARGET_DIR="$VERSIONS_DIR/$VERSION"
+TARGET_BINARY="$TARGET_DIR/exordos"
+if [ -e "$TARGET_DIR" ] || [ -L "$TARGET_DIR" ]; then
+    [ -d "$TARGET_DIR" ] && [ ! -L "$TARGET_DIR" ] && \
+        [ -f "$TARGET_DIR/.complete" ] && [ -x "$TARGET_BINARY" ] && \
+        [ ! -L "$TARGET_BINARY" ] || \
+        error "Installed version is incomplete: $TARGET_DIR"
+    if [ "$ROOT_INSTALL" -eq 1 ]; then
+        UNTRUSTED=$(find "$TARGET_DIR" ! -type l \( ! -user root -o -perm /022 \) -print -quit)
+        [ -z "$UNTRUSTED" ] || error "Root installation cannot execute an untrusted file: $UNTRUSTED"
+    fi
+    INSTALLED_VERSION=$("$TARGET_BINARY" --silent --no-check-updates version)
+    [ "$INSTALLED_VERSION" = "$VERSION" ] || error "Installed version is corrupt"
+else
+    ARTIFACT="exordos-linux-$LINUX_ARCH.tar.xz"
+    ARCHIVE="$TEMP_DIR/$ARTIFACT"
+    status "Downloading exordos $VERSION for Linux $LINUX_ARCH..."
+    curl --fail --show-error --location --progress-bar \
+        "$REPO_URL/$VERSION/$ARTIFACT" --output "$ARCHIVE"
+    curl --fail --show-error --location --silent \
+        "$REPO_URL/$VERSION/$ARTIFACT.sha256" --output "$ARCHIVE.sha256"
+    EXPECTED_HASH=$(tr 'A-F' 'a-f' < "$ARCHIVE.sha256")
+    case "$EXPECTED_HASH" in
+        *[!0-9a-f]*) error "Invalid SHA-256 checksum for $ARTIFACT" ;;
+    esac
+    [ "${#EXPECTED_HASH}" -eq 64 ] || error "Invalid SHA-256 checksum for $ARTIFACT"
+    ACTUAL_HASH=$(sha256sum "$ARCHIVE")
+    ACTUAL_HASH=${ACTUAL_HASH%% *}
+    [ "$ACTUAL_HASH" = "$EXPECTED_HASH" ] || error "SHA-256 checksum mismatch for $ARTIFACT"
 
-  version=$("$BINDIR"/exordos --no-check-updates version)
-  status ""
-  status "exordos $version was successfully installed"
-}
-trap install_success EXIT
+    tar -tJf "$ARCHIVE" > "$TEMP_DIR/entries"
+    awk '
+        $0 != "exordos" && $0 !~ /^exordos\// { exit 1 }
+        /(^|\/)\.\.(\/|$)/ { exit 1 }
+    ' "$TEMP_DIR/entries" || error "Invalid archive paths in $ARTIFACT"
+    UNPACKED="$TEMP_DIR/unpacked"
+    mkdir "$UNPACKED"
+    tar -xJf "$ARCHIVE" --no-same-owner --no-same-permissions -C "$UNPACKED"
+    [ -d "$UNPACKED/exordos" ] && [ ! -L "$UNPACKED/exordos" ] && \
+        [ -d "$UNPACKED/exordos/_internal" ] && [ ! -L "$UNPACKED/exordos/_internal" ] && \
+        [ -f "$UNPACKED/exordos/exordos" ] && [ ! -L "$UNPACKED/exordos/exordos" ] && \
+        [ -x "$UNPACKED/exordos/exordos" ] || error "Invalid bundle layout in $ARTIFACT"
+    find "$UNPACKED/exordos" -type l > "$TEMP_DIR/links"
+    while IFS= read -r LINK; do
+        LINK_TARGET=$(readlink "$LINK")
+        case "$LINK_TARGET" in
+            /*|..|../*|*/../*|*/..) error "Unsafe symlink in $ARTIFACT" ;;
+        esac
+    done < "$TEMP_DIR/links"
+    find "$UNPACKED/exordos" \( -type f -o -type d \) -exec chmod go-w {} +
+    ARCHIVE_VERSION=$("$UNPACKED/exordos/exordos" --silent --no-check-updates version)
+    [ "$ARCHIVE_VERSION" = "$VERSION" ] || error "Archive version does not match $VERSION"
+    printf '%s\n' "$ACTUAL_HASH" > "$UNPACKED/exordos/.archive-sha256"
+    : > "$UNPACKED/exordos/.complete"
+
+    [ ! -e "$TARGET_DIR" ] && [ ! -L "$TARGET_DIR" ] || error "Version directory already exists"
+    INSTALL_STAGE=$(privileged mktemp -d "$VERSIONS_DIR/.exordos-install.$VERSION.XXXXXX")
+    privileged cp -a --no-preserve=ownership "$UNPACKED/exordos/." "$INSTALL_STAGE/"
+    privileged chmod 0755 "$INSTALL_STAGE"
+    STAGED_VERSION=$("$INSTALL_STAGE/exordos" --silent --no-check-updates version)
+    [ "$STAGED_VERSION" = "$VERSION" ] || error "Staged version validation failed"
+    privileged mv -nT "$INSTALL_STAGE" "$TARGET_DIR"
+    [ ! -e "$INSTALL_STAGE" ] || error "Version directory already exists"
+    INSTALL_STAGE=''
+fi
+
+if [ -e "$BINDIR/exordos" ] && [ ! -L "$BINDIR/exordos" ]; then
+    [ -f "$BINDIR/exordos" ] || error "$BINDIR/exordos is not a regular file"
+    LEGACY_HASH=$(sha256sum "$BINDIR/exordos")
+    LEGACY_HASH=${LEGACY_HASH%% *}
+    LEGACY_BINARY="$INSTALL_ROOT/legacy/exordos-onefile-$LEGACY_HASH"
+    privileged mkdir -p "$INSTALL_ROOT/legacy"
+    if [ ! -f "$LEGACY_BINARY" ]; then
+        privileged cp -p --no-preserve=ownership "$BINDIR/exordos" "$LEGACY_BINARY"
+    fi
+    BACKUP_HASH=$(sha256sum "$LEGACY_BINARY")
+    [ "${BACKUP_HASH%% *}" = "$LEGACY_HASH" ] || error "Legacy backup validation failed"
+fi
+{
+    printf '%s\n' '#!/bin/sh'
+    printf "exec '"
+    printf '%s' "$TARGET_BINARY" | sed "s/'/'\\\\''/g"
+    printf '%s\n' "' \"\$@\""
+} > "$TEMP_DIR/launcher"
+INSTALL_STAGE=$(privileged mktemp "$BINDIR/.exordos-install.XXXXXX")
+privileged install -m 0755 "$TEMP_DIR/launcher" "$INSTALL_STAGE"
+privileged mv -fT "$INSTALL_STAGE" "$BINDIR/exordos"
+INSTALL_STAGE=''
+status "exordos $VERSION was successfully installed to $BINDIR/exordos."
+if [ "$(command -v exordos || :)" != "$BINDIR/exordos" ]; then
+    status "Add $BINDIR to the start of PATH to use this installation."
+fi
 
 }
 
