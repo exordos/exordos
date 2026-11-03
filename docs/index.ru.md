@@ -56,7 +56,7 @@ pip install exordos
 
 ```bash
 sudo apt update
-sudo apt install qemu-kvm qemu-utils libvirt-daemon-system libvirt-dev mkisofs
+sudo apt install qemu-system-x86 qemu-utils libvirt-daemon-system libvirt-dev mkisofs
 sudo adduser $USER libvirt
 sudo adduser $USER kvm
 ```

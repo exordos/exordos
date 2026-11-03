@@ -56,7 +56,7 @@ If you want to **build elements locally** (compile images with Packer and QEMU) 
 
 ```bash
 sudo apt update
-sudo apt install qemu-kvm qemu-utils libvirt-daemon-system libvirt-dev mkisofs
+sudo apt install qemu-system-x86 qemu-utils libvirt-daemon-system libvirt-dev mkisofs
 sudo adduser $USER libvirt
 sudo adduser $USER kvm
 ```
