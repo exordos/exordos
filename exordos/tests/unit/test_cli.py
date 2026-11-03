@@ -32,6 +32,33 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 
+@pytest.mark.parametrize("option", ["--password", "-p"])
+@pytest.mark.parametrize("interactive", [True, False])
+def test_exordos_password_input_is_hidden(monkeypatch, option, interactive) -> None:
+    captured = {}
+
+    @cli.click.command()
+    @cli.click.pass_context
+    def capture_password(ctx):
+        captured.update(ctx.obj.auth_data)
+
+    monkeypatch.setitem(cli.exordos.commands, "capture-password", capture_password)
+    monkeypatch.setattr(
+        cli.settings_config, "load_config", lambda *args: {"password": "configured"}
+    )
+    args = [option]
+    if not interactive:
+        args.append("secret-password")
+    args.extend(["--user", "alice", "capture-password"])
+
+    result = CliRunner().invoke(cli.exordos, args, input="secret-password\n")
+
+    assert result.exit_code == 0, result.output
+    assert captured["password"] == "secret-password"
+    assert "secret-password" not in result.output
+    assert ("Password:" in result.output) == interactive
+
+
 def test_refresh_token_auth_does_not_prompt_for_password(monkeypatch) -> None:
     prompt = MagicMock()
     monkeypatch.setattr(cli.click, "prompt", prompt)

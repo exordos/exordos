@@ -34,6 +34,10 @@ curl -fsSL https://repo.exordos.com/install.sh | sh
 
 ## What Exordos CLI does
 
+Use `exordos --user alice --password -- <command>` to enter a password in a
+hidden prompt. Supplying a password as a command-line argument cannot hide it
+from the shell.
+
 Exordos CLI bridges the gap between your local development environment and the Exordos Core platform. With a self-contained installation you can:
 
 - **Build projects** — compile Exordos project images and artifacts from a declarative `exordos.yaml` configuration.
