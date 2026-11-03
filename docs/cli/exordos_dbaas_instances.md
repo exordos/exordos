@@ -3,6 +3,9 @@
 
 Manage instances in the Exordos installation
 
+Invoking this group without a subcommand displays help and exits with status 2.
+Use `--help` to display help and exit with status 0.
+
 ## Usage
 
 ```console

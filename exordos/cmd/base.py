@@ -107,7 +107,6 @@ def create_entity_group(
     @click.group(
         group_name or entity_plural,
         cls=ClickAliasedGroup,
-        invoke_without_command=True,
         help=f"Manage {entity_plural} in the Exordos installation",
     )
     @click.pass_context
