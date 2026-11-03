@@ -25,11 +25,36 @@ from requests.exceptions import RequestException
 
 from exordos.cmd import cli
 from exordos.cmd import entrypoint
+from exordos.cmd.base import create_entity_group
 
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
+
+
+@pytest.mark.parametrize("args", [[], ["--help"]])
+def test_create_entity_group_without_subcommand_shows_help(args) -> None:
+    group = create_entity_group("widget", "v1/widgets/", {})
+
+    result = CliRunner().invoke(group, args)
+
+    assert result.exit_code == (2 if not args else 0)
+    assert "Manage widgets" in result.output
+    assert "list" in result.output
+    assert "show" in result.output
+    assert "delete" in result.output
+
+
+def test_exordos_dbaas_instances_without_subcommand_shows_help() -> None:
+    result = CliRunner().invoke(
+        cli.exordos, ["--config", "missing.yaml", "dbaas", "instances"]
+    )
+
+    assert result.exit_code == 2
+    assert "Manage instances" in result.output
+    assert "list" in result.output
+    assert "add" in result.output
 
 
 def test_refresh_token_auth_does_not_prompt_for_password(monkeypatch) -> None:
