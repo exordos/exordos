@@ -337,7 +337,8 @@ def add_cmd(
     help=(
         "Driver Specification. "
         "The format is 'key=value'. For example: --driver-spec "
-        "a=b --driver-spec e=f"
+        "a=b --driver-spec e=f. OpenStack accepts volume_type and key_name, "
+        "separately from other hypervisor fields."
     ),
 )
 @click.option(
@@ -402,6 +403,21 @@ def update_cmd(
     elif driver_spec:
         hypervisor_data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
         current_spec = hypervisor_data.get("driver_spec") or {}
+        if current_spec.get("kind") == "openstack":
+            if set(driver_spec) - {"volume_type", "key_name"}:
+                raise click.ClickException(
+                    "Only volume_type and key_name can be updated as cloud driver settings"
+                )
+            if data:
+                raise click.ClickException(
+                    "Update cloud driver settings separately from other hypervisor fields"
+                )
+            entity = base_client.action_entity(
+                client, ENTITY_COLLECTION, "update_driver_settings",
+                hypervisor_data["uuid"], settings=driver_spec,
+            )
+            show_data(entity)
+            return
         data["driver_spec"] = {**current_spec, **driver_spec}
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)

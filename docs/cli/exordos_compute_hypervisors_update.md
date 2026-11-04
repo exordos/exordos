@@ -65,7 +65,7 @@ Update hypervisor
     * Default: `sentinel.unset`
     * Usage: `--driver-spec`
 
-  Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f
+  Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f. OpenStack accepts volume_type and key_name, separately from other hypervisor fields.
 
 * `driver_spec_full`:
     * Type: text
@@ -111,7 +111,10 @@ Update hypervisor
 │ --machine-type           -m  [vm|hw]                                         │
 │ --driver-spec                TEXT      Driver Specification. The format is   │
 │                                        'key=value'. For example:             │
-│                                        --driver-spec a=b --driver-spec e=f   │
+│                                        --driver-spec a=b --driver-spec e=f.  │
+│                                        OpenStack accepts volume_type and     │
+│                                        key_name, separately from other       │
+│                                        hypervisor fields.                    │
 │ --driver-spec-full           TEXT      Full Driver Specification. The format │
 │                                        is 'key=value'. For example:          │
 │                                        --driver-spec-full a=b                │
