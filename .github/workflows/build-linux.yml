@@ -1,0 +1,119 @@
+#    Copyright 2026 Genesis Corporation.
+#    Licensed under the Apache License, Version 2.0 (the "License")
+
+name: Build portable Linux bundles
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+            image: quay.io/pypa/manylinux_2_28_x86_64@sha256:7e41b1c7fd64dfc69703a1124b43c404382973ee06ec5d764b85c34d2221fded
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+            image: quay.io/pypa/manylinux_2_28_aarch64@sha256:54b271d9562a3686298880df05367909e949ed317e7b1b79b59c696d75f78676
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.image }}
+    env:
+      UV_PYTHON_DOWNLOADS: manual
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select baseline Python and install build tools
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          uv python install 3.14.5
+          BUILD_PYTHON=$(uv python find --managed-python 3.14.5)
+          echo "EXORDOS_BUILD_PYTHON=$BUILD_PYTHON" >> "$GITHUB_ENV"
+          dirname "$BUILD_PYTHON" >> "$GITHUB_PATH"
+          echo /opt/python/cp314-cp314/bin >> "$GITHUB_PATH"
+          /opt/python/cp314-cp314/bin/python -m pip install tox tox-uv
+      - name: Build stripped onedir bundle
+        run: tox -e bin -- --onedir --strip --noupx
+      - name: Verify ABI, startup and HTTPS
+        run: '"$EXORDOS_BUILD_PYTHON" etc/tests/check-linux-bundle.py dist/exordos/exordos --abi'
+      - name: Package bundle
+        run: |
+          sh etc/package-linux.sh dist/exordos dist/exordos-linux-${{ matrix.arch }}.tar.xz
+          dist/exordos/exordos --silent --no-check-updates version > dist/VERSION
+      - name: Test installed bundle on glibc 2.28
+        run: |
+          VERSION=$(cat dist/VERSION)
+          REPO_ROOT=$(mktemp -d /tmp/exordos-baseline-repo.XXXXXX)
+          INSTALL_PREFIX=$(mktemp -d /tmp/exordos-baseline-install.XXXXXX)
+          mkdir -p "$REPO_ROOT/latest" "$REPO_ROOT/$VERSION"
+          cp dist/*.tar.xz dist/*.sha256 "$REPO_ROOT/$VERSION/"
+          cp dist/VERSION "$REPO_ROOT/latest/"
+          EXORDOS_INSTALL_PREFIX="$INSTALL_PREFIX" EXORDOS_REPO_URL="file://$REPO_ROOT" sh etc/install.sh
+          "$EXORDOS_BUILD_PYTHON" etc/tests/check-linux-bundle.py "$INSTALL_PREFIX/bin/exordos"
+      - name: Build legacy x86_64 download
+        if: matrix.arch == 'x86_64'
+        run: |
+          tox -e bin -- --onefile --strip --noupx --distpath dist/legacy
+          mv dist/legacy/exordos dist/exordos-linux
+          rmdir dist/legacy
+          cp dist/exordos-linux dist/exordos-linux-ubuntu-resolute
+          dist/exordos-linux --silent --no-check-updates version
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: exordos-linux-${{ matrix.arch }}
+          path: |
+            dist/exordos-linux-${{ matrix.arch }}.tar.xz
+            dist/exordos-linux-${{ matrix.arch }}.tar.xz.sha256
+            dist/exordos-linux
+            dist/exordos-linux-ubuntu-resolute
+            dist/VERSION
+
+  test:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+        image: [ubuntu:22.04, ubuntu:24.04, ubuntu:26.04, debian:12, debian:13]
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.image }}
+    steps:
+      - name: Install runtime test tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates curl xz-utils python3 openssl
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: exordos-linux-${{ matrix.arch }}
+          path: dist
+      - name: Test install, reinstall and installed runtime
+        run: |
+          set -eu
+          VERSION=$(cat dist/VERSION)
+          REPO_ROOT="$RUNNER_TEMP/exordos-repo"
+          INSTALL_PREFIX=$(mktemp -d /tmp/exordos-install.XXXXXX)
+          mkdir -p "$REPO_ROOT/latest" "$REPO_ROOT/$VERSION"
+          cp dist/*.tar.xz dist/*.sha256 "$REPO_ROOT/$VERSION/"
+          cp dist/VERSION "$REPO_ROOT/latest/"
+          export EXORDOS_INSTALL_PREFIX="$INSTALL_PREFIX"
+          export EXORDOS_REPO_URL="file://$REPO_ROOT"
+          sh etc/install.sh
+          sh etc/install.sh
+          python3 etc/tests/check-linux-bundle.py "$INSTALL_PREFIX/bin/exordos"
+      - name: Test sudo installation and root reuse
+        if: matrix.arch == 'x86_64' && matrix.image == 'ubuntu:26.04'
+        run: |
+          apt-get install -y --no-install-recommends sudo
+          EXORDOS_REPO_URL="file://$RUNNER_TEMP/exordos-repo" sh etc/tests/test-install-linux-root.sh

@@ -43,6 +43,7 @@ jobs:
     needs:
     - build_python
     - build_binaries
+    - build_linux_binaries
     - build_macos_binaries
     runs-on: ubuntu-latest
     environment:
@@ -60,17 +61,15 @@ jobs:
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
 
+  build_linux_binaries:
+    needs: validate_release_ref
+    uses: ./.github/workflows/build-linux.yml
+
   build_binaries:
     needs: validate_release_ref
     strategy:
       matrix:
         include:
-          - os: ubuntu-26.04
-            artifact-suffix: linux-ubuntu-resolute
-            python-version: "3.14"
-          - os: ubuntu-latest
-            artifact-suffix: linux
-            python-version: "3.14"
           - os: windows-latest
             artifact-suffix: windows
             python-version: "3.14"
@@ -84,9 +83,6 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install deps (Linux)
-        if: runner.os == 'Linux'
-        run: sudo apt update && sudo apt install --yes ca-certificates
       - name: Install uv
         uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
       - name: Install tox-uv
@@ -409,6 +405,7 @@ jobs:
     needs:
     - publish-to-pypi
     - build_binaries
+    - build_linux_binaries
     - build_macos_binaries
     runs-on: ubuntu-latest
     permissions:
@@ -446,6 +443,10 @@ jobs:
     name: Create exordos Release with artifacts
     needs: github-release
     runs-on: self-hosted
+    concurrency:
+      group: exordos-repository-publication
+      cancel-in-progress: false
+      queue: max
     steps:
     - name: Checkout repository
       uses: actions/checkout@v7
@@ -461,19 +462,23 @@ jobs:
       run: |
         set -eu
         : "${REPO_ENDPOINT_PUT:?REPO_ENDPOINT_PUT must be set}"
-        chmod +x ./dist/exordos-linux
-        VERSION=$(./dist/exordos-linux --silent version)
-        printf '%s\n' "$VERSION" > ./dist/VERSION
+        VERSION=$(cat ./dist/VERSION)
 
         upload() {
           curl --fail --show-error --silent \
             -X PUT --upload-file "$1" "$REPO_ENDPOINT_PUT/$2"
         }
 
+        for ARCH in x86_64 aarch64; do
+          ARTIFACT="exordos-linux-$ARCH.tar.xz"
+          upload "./dist/$ARTIFACT" "${PROJECT_NAME}/${VERSION}/$ARTIFACT"
+          upload "./dist/$ARTIFACT.sha256" "${PROJECT_NAME}/${VERSION}/$ARTIFACT.sha256"
+        done
+
         # Upload VERSION release
         upload ./dist/exordos-linux \
           "${PROJECT_NAME}/${VERSION}/exordos-linux"
-        upload ./dist/exordos-linux-ubuntu-resolute \
+        upload ./dist/exordos-linux \
           "${PROJECT_NAME}/${VERSION}/exordos-linux-ubuntu-resolute"
         upload ./dist/exordos-macos-arm64.zip \
           "${PROJECT_NAME}/${VERSION}/exordos-macos-arm64.zip"
@@ -489,7 +494,7 @@ jobs:
         # Upload latest release
         upload ./dist/exordos-linux \
           "${PROJECT_NAME}/latest/exordos-linux"
-        upload ./dist/exordos-linux-ubuntu-resolute \
+        upload ./dist/exordos-linux \
           "${PROJECT_NAME}/latest/exordos-linux-ubuntu-resolute"
         upload ./dist/exordos-macos-arm64.zip \
           "${PROJECT_NAME}/latest/exordos-macos-arm64.zip"
@@ -502,7 +507,7 @@ jobs:
         upload ./dist/exordos-windows.exe \
           "${PROJECT_NAME}/latest/exordos-windows.exe"
 
-        # VERSION is the commit point for the new macOS installer contract.
+        # VERSION selects the release after all referenced artifacts exist.
         upload ./dist/VERSION "${PROJECT_NAME}/latest/VERSION"
 
         # Activate the installer only after all referenced artifacts exist.

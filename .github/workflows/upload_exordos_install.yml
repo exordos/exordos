@@ -14,7 +14,17 @@ jobs:
       with:
         persist-credentials: false
     - name: Push artifacts to repository
-      run: curl -X PUT --upload-file ./etc/install.sh $REPO_ENDPOINT_PUT/install.sh
+      run: |
+        set -eu
+        VERSION=$(curl -fsSL https://repo.exordos.com/exordos/latest/VERSION)
+        for ARCH in x86_64 aarch64; do
+          ARTIFACT="exordos-linux-$ARCH.tar.xz"
+          for FILE in "$ARTIFACT" "$ARTIFACT.sha256"; do
+            curl --fail --show-error --silent --head \
+              "https://repo.exordos.com/exordos/$VERSION/$FILE" >/dev/null
+          done
+        done
+        curl --fail --show-error --silent -X PUT --upload-file ./etc/install.sh "$REPO_ENDPOINT_PUT/install.sh"
 
   update-exordos-cli:
     name: update exordos cli
@@ -26,11 +36,10 @@ jobs:
     steps:
     - name: update exordos cli
       run: |
-        set -eux
-
-        sudo curl --fail --show-error --location --progress-bar https://repo.exordos.com/exordos/latest/exordos-linux --output /usr/local/sbin/exordos
-        sudo chmod +x /usr/local/sbin/exordos
-        
-        which exordos
-        exordos version
+        set -eu
+        INSTALLER=$(mktemp)
+        trap 'rm -f "$INSTALLER"' EXIT
+        curl --fail --show-error --location https://repo.exordos.com/install.sh --output "$INSTALLER"
+        sudo env EXORDOS_INSTALL_PREFIX=/usr/local sh "$INSTALLER"
+        exordos --no-check-updates version
  
