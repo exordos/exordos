@@ -194,7 +194,7 @@ hypervisors_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 @click.option("--site", default=None, help="Failure domain for placement anti-affinity")
 @click.option(
     "--kind",
-    type=click.Choice(["libvirt", "exordos_local_hyper", "openstack", "dummy"]),
+    type=click.Choice(["libvirt", "exordos_local_hyper", "openstack", "core", "dummy"]),
     default=None,
 )
 @click.option("--project-id", type=click.UUID, default=None, help="Core project UUID")
@@ -204,6 +204,12 @@ hypervisors_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     "--interface", type=click.Choice(["public", "internal", "admin"]), default="public"
 )
 @click.option("--network-defaults-file", type=click.File("r"), default=None)
+@click.option(
+    "--driver-spec-file",
+    type=click.File("r"),
+    default=None,
+    help="JSON driver specification, including provider credentials",
+)
 @cloud_credentials.credential_options
 def add_cmd(
     ctx: click.Context,
@@ -223,17 +229,22 @@ def add_cmd(
     region=None,
     interface="public",
     network_defaults_file=None,
+    driver_spec_file=None,
     **credential_options,
 ) -> None:
     if uuid is None:
         uuid = sys_uuid.uuid4()
     driver_spec = utils.convert_input_multiply(driver_spec)
+    if driver_spec_file is not None:
+        if driver_spec:
+            raise click.UsageError("Use either --driver-spec or --driver-spec-file")
+        driver_spec = read_spec(driver_spec_file)
     if kind is not None:
         if driver_spec.get("kind", kind) != kind:
             raise click.UsageError("Conflicting driver kinds")
         driver_spec["kind"] = kind
-    cloud = driver_spec.get("kind") == "openstack"
-    if cloud:
+    cloud = driver_spec.get("kind") in {"openstack", "core"}
+    if driver_spec.get("kind") == "openstack":
         if not auth_url:
             raise click.UsageError("--auth-url is required for an OpenStack hypervisor")
         driver_spec.update(
@@ -403,6 +414,10 @@ def update_cmd(
     elif driver_spec:
         hypervisor_data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
         current_spec = hypervisor_data.get("driver_spec") or {}
+        if current_spec.get("kind") == "core":
+            raise click.ClickException(
+                "Remote Core scope is immutable; only hypervisor metadata can be updated"
+            )
         if current_spec.get("kind") == "openstack":
             if set(driver_spec) - {"volume_type", "key_name"}:
                 raise click.ClickException(
@@ -413,8 +428,11 @@ def update_cmd(
                     "Update cloud driver settings separately from other hypervisor fields"
                 )
             entity = base_client.action_entity(
-                client, ENTITY_COLLECTION, "update_driver_settings",
-                hypervisor_data["uuid"], settings=driver_spec,
+                client,
+                ENTITY_COLLECTION,
+                "update_driver_settings",
+                hypervisor_data["uuid"],
+                settings=driver_spec,
             )
             show_data(entity)
             return

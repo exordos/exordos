@@ -4,6 +4,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+import json
 from unittest import mock
 
 from bazooka import exceptions
@@ -42,6 +43,46 @@ def invoke(args, input=None):
             need_update=None,
         ),
     )
+
+
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_remote_core_spec_file_uses_sensitive_client(client, show, tmp_path):
+    path = tmp_path / "core.json"
+    spec = {
+        "kind": "core",
+        "api_url": "https://core.example",
+        "project_id": PROJECT,
+        "hypervisors": [PROJECT],
+        "auth": {"username": "operator", "password": "private-sentinel"},
+    }
+    path.write_text(json.dumps(spec))
+    result = invoke(
+        ["hypervisors", "add", "--kind", "core", "--driver-spec-file", str(path)]
+    )
+    assert result.exit_code == 0, result.output
+    assert "private-sentinel" not in result.output
+    assert client.add_entity.call_args.args[2]["driver_spec"] == spec
+    client.get_user_api_client.assert_called_once_with(
+        {}, sensitive=True, timeout=(5, 90)
+    )
+
+
+def test_remote_core_rejects_mixed_spec_inputs(tmp_path):
+    path = tmp_path / "core.json"
+    path.write_text('{"kind":"core"}')
+    result = invoke(
+        [
+            "hypervisors",
+            "add",
+            "--driver-spec-file",
+            str(path),
+            "--driver-spec",
+            "kind=core",
+        ]
+    )
+    assert result.exit_code != 0
+    assert "either" in result.output
 
 
 @mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")

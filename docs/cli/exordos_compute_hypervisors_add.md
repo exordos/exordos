@@ -111,6 +111,13 @@ Add a new hypervisor
     * Default: `none`
     * Usage: `--network-defaults-file`
 
+* `driver_spec_file`:
+    * Type: filename
+    * Default: `none`
+    * Usage: `--driver-spec-file`
+
+  JSON driver specification, including provider credentials
+
 * `auth_type`:
     * Type: choice
     * Default: `v3applicationcredential`
@@ -196,14 +203,18 @@ Add a new hypervisor
 │ --site                       TEXT                    Failure domain for      │
 │                                                      placement anti-affinity │
 │ --kind                       [libvirt|exordos_local                          │
-│                              _hyper|openstack|dummy                          │
-│                              ]                                               │
+│                              _hyper|openstack|core|                          │
+│                              dummy]                                          │
 │ --project-id                 UUID                    Core project UUID       │
 │ --auth-url                   TEXT                    Keystone v3 URL         │
 │ --region                     TEXT                                            │
 │ --interface                  [public|internal|admin                          │
 │                              ]                                               │
 │ --network-defaults-file      FILENAME                                        │
+│ --driver-spec-file           FILENAME                JSON driver             │
+│                                                      specification,          │
+│                                                      including provider      │
+│                                                      credentials             │
 │ --auth-type                  [v3applicationcredenti  [default:               │
 │                              al|v3password]          v3applicationcredential │
 │                                                      ]                       │
