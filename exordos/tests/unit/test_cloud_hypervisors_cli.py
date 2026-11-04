@@ -140,6 +140,49 @@ def test_missing_credential_id_is_rejected_before_prompt():
     assert "--application-credential-id is required" in result.output
 
 
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_public_driver_setting_edit_preserves_hidden_credentials(client, show):
+    client.get_entity.return_value = {
+        "uuid": PROJECT,
+        "driver_spec": {"kind": "openstack", "volume_type": "__DEFAULT__"},
+    }
+    result = invoke([
+        "hypervisors", "update", PROJECT, "--driver-spec", "volume_type=fast",
+    ])
+    assert result.exit_code == 0, result.output
+    client.action_entity.assert_called_once_with(
+        client.get_user_api_client.return_value, "/v1/compute/hypervisors/",
+        "update_driver_settings", PROJECT, settings={"volume_type": "fast"},
+    )
+    client.update_entity.assert_not_called()
+    show.assert_called_once_with(client.action_entity.return_value)
+
+
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_cloud_driver_edit_rejects_identity_changes_before_mutation(client):
+    client.get_entity.return_value = {"uuid": PROJECT, "driver_spec": {"kind": "openstack"}}
+    result = invoke([
+        "hypervisors", "update", PROJECT, "--driver-spec", "auth_url=https://other/v3",
+    ])
+    assert result.exit_code != 0
+    client.action_entity.assert_not_called()
+    client.update_entity.assert_not_called()
+
+
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_cloud_settings_cannot_partially_apply_a_combined_metadata_update(client):
+    client.get_entity.return_value = {"uuid": PROJECT, "driver_spec": {"kind": "openstack"}}
+    result = invoke([
+        "hypervisors", "update", PROJECT, "--name", "renamed",
+        "--driver-spec", "volume_type=fast",
+    ])
+    assert result.exit_code != 0
+    assert "separately" in result.output
+    client.action_entity.assert_not_called()
+    client.update_entity.assert_not_called()
+
+
 @mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_connection_conflict_does_not_print_credentials(client):
     client.add_entity.side_effect = exceptions.ConflictError(cause=mock.Mock())
