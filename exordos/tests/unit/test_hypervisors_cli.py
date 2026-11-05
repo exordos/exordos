@@ -1670,7 +1670,7 @@ class TestRawstorArtifacts:
         commands = [c.args[0] for c in run.call_args_list]
         assert [
             "wget",
-            f"{hv_commands.RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip",
+            "https://nightly.link/rawstor/librawstor/actions/artifacts/13454295232.zip",
             "-O",
             "/tmp/rawstor-packages/librawstor.deb.zip",
         ] in commands
