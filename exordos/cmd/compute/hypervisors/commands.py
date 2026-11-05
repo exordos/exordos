@@ -390,6 +390,11 @@ RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.a8ca46
 RAWSTOR_ARTIFACTS_URL = (
     f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
 )
+RAWSTOR_DEB_URL = (
+    "https://nightly.link/rawstor/librawstor/actions/artifacts/13454295232.zip"
+    if RAWSTOR_ARTIFACT_RUN == "42108118577"
+    else f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip"
+)
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
 # The bindings' abi3 wheel works unmodified across interpreter versions
 # (unlike the per-interpreter python3.X-rawstor system packages), so one
@@ -427,7 +432,7 @@ def install_rawstor_packages(
     if artifact_run:
         archive = f"{deb_dir}/librawstor.deb.zip"
         run_command(
-            ["wget", f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip", "-O", archive],
+            ["wget", RAWSTOR_DEB_URL, "-O", archive],
             sudo=add_sudo,
         )
         run_command(["python3", "-m", "zipfile", "-e", archive, deb_dir], sudo=add_sudo)
