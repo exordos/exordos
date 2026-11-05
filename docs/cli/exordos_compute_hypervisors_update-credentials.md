@@ -28,24 +28,10 @@ Replace credentials within the same OpenStack project
     * Default: `sentinel.unset`
     * Usage: `--application-credential-id`
 
-* `application_credential_secret`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--application-credential-secret`
-
-  Secret; prompted without echo when omitted.
-
 * `username`:
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `--username`
-
-* `password`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--password`
-
-  Password; prompted without echo when omitted.
 
 * `os_project_id`:
     * Type: text

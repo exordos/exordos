@@ -85,7 +85,7 @@ def test_remote_core_rejects_mixed_spec_inputs(tmp_path):
     assert "either" in result.output
 
 
-@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_resource")
 @mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_application_credential_is_prompted_and_sent_only_to_api(client, show):
     result = invoke(
@@ -159,14 +159,18 @@ def test_credential_replacement_calls_core_api(client, show):
         input="private-sentinel\n",
     )
     assert result.exit_code == 0, result.output
-    data = client.update_entity.call_args.args[3]
-    assert data["driver_spec"] == dict(
-        client.get_entity.return_value["driver_spec"],
+    client.action_entity.assert_called_once_with(
+        client.get_user_api_client.return_value,
+        "/v1/compute/hypervisors/",
+        "update_credentials",
+        PROJECT,
+        auth_type="v3applicationcredential",
         auth={
             "application_credential_id": "replacement",
             "application_credential_secret": "private-sentinel",
         },
     )
+    client.update_entity.assert_not_called()
     client.get_entity.assert_called_once_with(
         client.get_user_api_client.return_value,
         "/v1/compute/hypervisors/",
@@ -175,37 +179,102 @@ def test_credential_replacement_calls_core_api(client, show):
     assert "private-sentinel" not in result.output
 
 
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_resource")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_application_auth_ignores_unrelated_password_environment(
+    client, show, monkeypatch
+):
+    monkeypatch.setenv("OS_PASSWORD", "unrelated-secret")
+    monkeypatch.setenv("OS_APPLICATION_CREDENTIAL_SECRET", "application-secret")
+    result = invoke(BASE + ["--application-credential-id", "app"])
+    assert result.exit_code == 0, result.output
+    assert (
+        client.add_entity.call_args.args[2]["driver_spec"]["auth"][
+            "application_credential_secret"
+        ]
+        == "application-secret"
+    )
+
+
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_resource")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_password_auth_ignores_unrelated_application_secret(client, show, monkeypatch):
+    monkeypatch.setenv("OS_APPLICATION_CREDENTIAL_SECRET", "unrelated-secret")
+    monkeypatch.setenv("OS_PASSWORD", "password-secret")
+    result = invoke(
+        BASE
+        + [
+            "--auth-type",
+            "v3password",
+            "--username",
+            "user",
+            "--os-project-id",
+            PROJECT,
+        ]
+    )
+    assert result.exit_code == 0, result.output
+    assert (
+        client.add_entity.call_args.args[2]["driver_spec"]["auth"]["password"]
+        == "password-secret"
+    )
+
+
+def test_secret_valued_command_line_options_are_not_accepted():
+    for option in ("--password", "--application-credential-secret"):
+        result = invoke(BASE + [option, "private-sentinel"])
+        assert result.exit_code != 0
+        assert "No such option" in result.output
+
+
 def test_missing_credential_id_is_rejected_before_prompt():
     result = invoke(BASE)
     assert result.exit_code != 0
     assert "--application-credential-id is required" in result.output
 
 
-@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_resource")
 @mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_public_driver_setting_edit_preserves_hidden_credentials(client, show):
     client.get_entity.return_value = {
         "uuid": PROJECT,
         "driver_spec": {"kind": "openstack", "volume_type": "__DEFAULT__"},
     }
-    result = invoke([
-        "hypervisors", "update", PROJECT, "--driver-spec", "volume_type=fast",
-    ])
+    result = invoke(
+        [
+            "hypervisors",
+            "update",
+            PROJECT,
+            "--driver-spec",
+            "volume_type=fast",
+        ]
+    )
     assert result.exit_code == 0, result.output
     client.action_entity.assert_called_once_with(
-        client.get_user_api_client.return_value, "/v1/compute/hypervisors/",
-        "update_driver_settings", PROJECT, settings={"volume_type": "fast"},
+        client.get_user_api_client.return_value,
+        "/v1/compute/hypervisors/",
+        "update_driver_settings",
+        PROJECT,
+        settings={"volume_type": "fast"},
     )
     client.update_entity.assert_not_called()
-    show.assert_called_once_with(client.action_entity.return_value)
+    show.assert_called_once_with(client.action_entity.return_value, output="table")
 
 
 @mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_cloud_driver_edit_rejects_identity_changes_before_mutation(client):
-    client.get_entity.return_value = {"uuid": PROJECT, "driver_spec": {"kind": "openstack"}}
-    result = invoke([
-        "hypervisors", "update", PROJECT, "--driver-spec", "auth_url=https://other/v3",
-    ])
+    client.get_entity.return_value = {
+        "uuid": PROJECT,
+        "driver_spec": {"kind": "openstack"},
+    }
+    result = invoke(
+        [
+            "hypervisors",
+            "update",
+            PROJECT,
+            "--driver-spec",
+            "auth_url=https://other/v3",
+        ]
+    )
     assert result.exit_code != 0
     client.action_entity.assert_not_called()
     client.update_entity.assert_not_called()
@@ -213,11 +282,21 @@ def test_cloud_driver_edit_rejects_identity_changes_before_mutation(client):
 
 @mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
 def test_cloud_settings_cannot_partially_apply_a_combined_metadata_update(client):
-    client.get_entity.return_value = {"uuid": PROJECT, "driver_spec": {"kind": "openstack"}}
-    result = invoke([
-        "hypervisors", "update", PROJECT, "--name", "renamed",
-        "--driver-spec", "volume_type=fast",
-    ])
+    client.get_entity.return_value = {
+        "uuid": PROJECT,
+        "driver_spec": {"kind": "openstack"},
+    }
+    result = invoke(
+        [
+            "hypervisors",
+            "update",
+            PROJECT,
+            "--name",
+            "renamed",
+            "--driver-spec",
+            "volume_type=fast",
+        ]
+    )
     assert result.exit_code != 0
     assert "separately" in result.output
     client.action_entity.assert_not_called()
