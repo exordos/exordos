@@ -4,6 +4,8 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+import os
+
 import rich_click as click
 
 
@@ -16,17 +18,7 @@ def credential_options(command):
             show_default=True,
         ),
         click.option("--application-credential-id"),
-        click.option(
-            "--application-credential-secret",
-            envvar="OS_APPLICATION_CREDENTIAL_SECRET",
-            help="Secret; prompted without echo when omitted.",
-        ),
         click.option("--username"),
-        click.option(
-            "--password",
-            envvar="OS_PASSWORD",
-            help="Password; prompted without echo when omitted.",
-        ),
         click.option(
             "--os-project-id",
             help="OpenStack project UUID, distinct from Core project UUID.",
@@ -43,9 +35,7 @@ def credential_options(command):
 def credentials(
     auth_type,
     application_credential_id,
-    application_credential_secret,
     username,
-    password,
     os_project_id,
     os_project_name,
     user_domain_name,
@@ -54,16 +44,16 @@ def credentials(
     if auth_type == "v3applicationcredential":
         if not application_credential_id:
             raise click.UsageError("--application-credential-id is required")
-        if username or password or os_project_id or os_project_name:
+        if username or os_project_id or os_project_name:
             raise click.UsageError(
                 "Password options cannot be used with application credentials"
             )
         return {
             "application_credential_id": application_credential_id,
-            "application_credential_secret": application_credential_secret
+            "application_credential_secret": os.environ.get("OS_APPLICATION_CREDENTIAL_SECRET")
             or click.prompt("Application credential secret", hide_input=True),
         }
-    if application_credential_id or application_credential_secret:
+    if application_credential_id:
         raise click.UsageError(
             "Application credential options cannot be used with password authentication"
         )
@@ -74,7 +64,7 @@ def credentials(
     auth = {
         "username": username,
         "user_domain_name": user_domain_name,
-        "password": password or click.prompt("OpenStack password", hide_input=True),
+        "password": os.environ.get("OS_PASSWORD") or click.prompt("OpenStack password", hide_input=True),
     }
     if os_project_id:
         auth["project_id"] = os_project_id

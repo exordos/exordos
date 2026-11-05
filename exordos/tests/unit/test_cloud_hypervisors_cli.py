@@ -159,20 +159,48 @@ def test_credential_replacement_calls_core_api(client, show):
         input="private-sentinel\n",
     )
     assert result.exit_code == 0, result.output
-    data = client.update_entity.call_args.args[3]
-    assert data["driver_spec"] == dict(
-        client.get_entity.return_value["driver_spec"],
+    client.action_entity.assert_called_once_with(
+        client.get_user_api_client.return_value, "/v1/compute/hypervisors/",
+        "update_credentials", PROJECT, auth_type="v3applicationcredential",
         auth={
             "application_credential_id": "replacement",
             "application_credential_secret": "private-sentinel",
         },
     )
+    client.update_entity.assert_not_called()
     client.get_entity.assert_called_once_with(
         client.get_user_api_client.return_value,
         "/v1/compute/hypervisors/",
         PROJECT,
     )
     assert "private-sentinel" not in result.output
+
+
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_application_auth_ignores_unrelated_password_environment(client, show, monkeypatch):
+    monkeypatch.setenv("OS_PASSWORD", "unrelated-secret")
+    monkeypatch.setenv("OS_APPLICATION_CREDENTIAL_SECRET", "application-secret")
+    result = invoke(BASE + ["--application-credential-id", "app"])
+    assert result.exit_code == 0, result.output
+    assert client.add_entity.call_args.args[2]["driver_spec"]["auth"]["application_credential_secret"] == "application-secret"
+
+
+@mock.patch("exordos.cmd.compute.hypervisors.commands.show_data")
+@mock.patch("exordos.cmd.compute.hypervisors.commands.base_client")
+def test_password_auth_ignores_unrelated_application_secret(client, show, monkeypatch):
+    monkeypatch.setenv("OS_APPLICATION_CREDENTIAL_SECRET", "unrelated-secret")
+    monkeypatch.setenv("OS_PASSWORD", "password-secret")
+    result = invoke(BASE + ["--auth-type", "v3password", "--username", "user", "--os-project-id", PROJECT])
+    assert result.exit_code == 0, result.output
+    assert client.add_entity.call_args.args[2]["driver_spec"]["auth"]["password"] == "password-secret"
+
+
+def test_secret_valued_command_line_options_are_not_accepted():
+    for option in ("--password", "--application-credential-secret"):
+        result = invoke(BASE + [option, "private-sentinel"])
+        assert result.exit_code != 0
+        assert "No such option" in result.output
 
 
 def test_missing_credential_id_is_rejected_before_prompt():

@@ -1898,10 +1898,8 @@ def update_credentials(ctx, hypervisor, **options):
         raise click.ClickException(
             "Credential replacement is supported for the openstack kind"
         )
-    spec.update(
-        auth_type=options["auth_type"], auth=cloud_credentials.credentials(**options)
-    )
-    result = base_client.update_entity(
-        client, ENTITY_COLLECTION, current["uuid"], {"driver_spec": spec}
+    result = base_client.action_entity(
+        client, ENTITY_COLLECTION, "update_credentials", current["uuid"],
+        auth_type=options["auth_type"], auth=cloud_credentials.credentials(**options),
     )
     show_data(result)

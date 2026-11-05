@@ -128,24 +128,10 @@ Add a new hypervisor
     * Default: `sentinel.unset`
     * Usage: `--application-credential-id`
 
-* `application_credential_secret`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--application-credential-secret`
-
-  Secret; prompted without echo when omitted.
-
 * `username`:
     * Type: text
     * Default: `sentinel.unset`
     * Usage: `--username`
-
-* `password`:
-    * Type: text
-    * Default: `sentinel.unset`
-    * Usage: `--password`
-
-  Password; prompted without echo when omitted.
 
 * `os_project_id`:
     * Type: text
@@ -219,13 +205,7 @@ Add a new hypervisor
 │                              al|v3password]          v3applicationcredential │
 │                                                      ]                       │
 │ --application-credenti…      TEXT                                            │
-│ --application-credenti…      TEXT                    Secret; prompted        │
-│                                                      without echo when       │
-│                                                      omitted.                │
 │ --username                   TEXT                                            │
-│ --password                   TEXT                    Password; prompted      │
-│                                                      without echo when       │
-│                                                      omitted.                │
 │ --os-project-id              TEXT                    OpenStack project UUID, │
 │                                                      distinct from Core      │
 │                                                      project UUID.           │

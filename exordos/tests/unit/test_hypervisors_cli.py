@@ -329,7 +329,8 @@ class TestInitCmdRegistration:
             patch.object(
                 hv_commands, "local_agent_node_uuid", return_value="node-uuid"
             ),
-            patch.object(hv_commands, "add_cmd") as add_cmd_mock,
+            patch.object(hv_commands.base_client, "add_entity") as add_entity_mock,
+            patch.object(hv_commands, "show_data"),
             patch.object(hv_commands.base_client, "get_user_api_client"),
             patch.object(hv_commands, "reset_agent_meta_file"),
             patch.object(hv_commands, "write_agent_config"),
@@ -343,14 +344,12 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
-        add_cmd_mock.assert_called_once()
-        kwargs = add_cmd_mock.call_args.kwargs
+        add_entity_mock.assert_called_once()
+        kwargs = add_entity_mock.call_args.args[2]
         assert kwargs["avail_cores"] == 8
         assert kwargs["avail_ram"] == 16384
-        assert "kind=exordos_local_hyper" in kwargs["driver_spec"]
-        assert hv_commands.utils.convert_input_multiply(kwargs["driver_spec"])[
-            "storage_pool"
-        ] == [{"name": "default"}]
+        assert kwargs["driver_spec"]["kind"] == "exordos_local_hyper"
+        assert kwargs["driver_spec"]["storage_pool"] == [{"name": "default"}]
 
     def test_add_local_hyper_fetches_and_deploys_agent_private_key(self) -> None:
         """A local hypervisor's `init --add` must register this host's
