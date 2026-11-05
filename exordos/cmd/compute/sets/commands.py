@@ -123,6 +123,23 @@ sets_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     default=False,
     help="Wait until the set is active",
 )
+@click.option(
+    "--network",
+    type=click.UUID,
+    default=None,
+    help="Logical network; the scheduler selects a local segment",
+)
+@click.option(
+    "--placement-kind",
+    type=click.Choice(["soft-anti-affinity", "anti-affinity"]),
+    default=None,
+)
+@click.option("--placement-scope", type=click.Choice(["site", "pool"]), default=None)
+@click.option(
+    "--ephemeral/--durable",
+    default=None,
+    help="Root disk policy; OpenStack Cinder requires --durable",
+)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -135,6 +152,10 @@ def add_cmd(
     description: str,
     replicas: int,
     wait: bool,
+    network=None,
+    placement_kind=None,
+    placement_scope=None,
+    ephemeral=None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     log = logger.ClickLogger()
@@ -154,6 +175,16 @@ def add_cmd(
             "image": image,
         },
     }
+    if ephemeral is not None:
+        data["disk_spec"]["ephemeral"] = ephemeral
+    if network is not None:
+        data["default_network"] = {"network": str(network)}
+    if placement_kind is not None or placement_scope is not None:
+        data["placement"] = {
+            "kind": placement_kind or "soft-anti-affinity",
+        }
+        if placement_scope is not None:
+            data["placement"]["scope"] = placement_scope
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
         show_data(entity)

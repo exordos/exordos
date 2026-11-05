@@ -6,9 +6,9 @@ Add a new set to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute sets add [OPTIONS]
+
 ```
 
 ## Options
@@ -91,6 +91,30 @@ Add a new set to the Exordos installation
 
   Wait until the set is active
 
+* `network`:
+    * Type: uuid
+    * Default: `none`
+    * Usage: `--network`
+
+  Logical network; the scheduler selects a local segment
+
+* `placement_kind`:
+    * Type: choice
+    * Default: `none`
+    * Usage: `--placement-kind`
+
+* `placement_scope`:
+    * Type: choice
+    * Default: `none`
+    * Usage: `--placement-scope`
+
+* `ephemeral`:
+    * Type: boolean
+    * Default: `none`
+    * Usage: `--ephemeral`
+
+  Root disk policy; OpenStack Cinder requires --durable
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -101,22 +125,47 @@ Add a new set to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
- Add a new set to the Exordos installation                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID     UUID of the set                                                                                                                                                                                                                                                          │
-│ *  --project-id   -p  UUID     UUID of the project in which to deploy the set [required]                                                                                                                                                                                                                │
-│    --cores        -c  INTEGER  Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                                                        │
-│    --ram          -r  INTEGER  Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                                                                 │
-│    --root-disk    -d  INTEGER  Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                                                            │
-│ *  --image        -i  TEXT     Name of the image to deploy [required]                                                                                                                                                                                                                                   │
-│    --name         -n  TEXT     Name of the set                                                                                                                                                                                                                                                          │
-│    --description  -D  TEXT     Description of the set                                                                                                                                                                                                                                                   │
-│    --replicas         INTEGER  Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                                                       │
-│    --wait                      Wait until the set is active                                                                                                                                                                                                                                             │
-│    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos compute sets add [OPTIONS]
+
+ Add a new set to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│    --uuid                 -u  UUID                    UUID of the set        │
+│ *  --project-id           -p  UUID                    UUID of the project in │
+│                                                       which to deploy the    │
+│                                                       set [required]         │
+│    --cores                -c  INTEGER                 Number of cores to     │
+│                                                       allocate for each node │
+│                                                       in the set [default:   │
+│                                                       1]                     │
+│    --ram                  -r  INTEGER                 Amount of RAM in Mb to │
+│                                                       allocate for each node │
+│                                                       in the set [default:   │
+│                                                       1024]                  │
+│    --root-disk            -d  INTEGER                 Number of GiB of root  │
+│                                                       disk to allocate for   │
+│                                                       each node in the set   │
+│                                                       [default: 10]          │
+│ *  --image                -i  TEXT                    Name of the image to   │
+│                                                       deploy [required]      │
+│    --name                 -n  TEXT                    Name of the set        │
+│    --description          -D  TEXT                    Description of the set │
+│    --replicas                 INTEGER                 Number of replicas     │
+│                                                       (nodes) in the set     │
+│                                                       [default: 1]           │
+│    --wait                                             Wait until the set is  │
+│                                                       active                 │
+│    --network                  UUID                    Logical network; the   │
+│                                                       scheduler selects a    │
+│                                                       local segment          │
+│    --placement-kind           [soft-anti-affinity|an                         │
+│                               ti-affinity]                                   │
+│    --placement-scope          [site|pool]                                    │
+│    --ephemeral/--durable                              Root disk policy;      │
+│                                                       OpenStack Cinder       │
+│                                                       requires --durable     │
+│    --help                                             Show this message and  │
+│                                                       exit.                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```

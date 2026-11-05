@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import json
 import uuid as sys_uuid
 
 import rich_click as click
@@ -61,6 +62,18 @@ networks_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     show_default=True,
     help="private: this project only; public: visible/allocatable to everyone",
 )
+@click.option(
+    "--driver-spec-file",
+    type=click.File("r"),
+    default=None,
+    help="JSON driver specification for a local network",
+)
+@click.option(
+    "--cidr",
+    default=None,
+    help="Logical network address pool; subnets allocate /23 blocks",
+)
+@click.option("--connectivity", type=click.Choice(["auto", "openvpn"]), default=None)
 def network_add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -69,13 +82,27 @@ def network_add_cmd(
     project_id: sys_uuid.UUID,
     mtu: int | None,
     access: str,
+    driver_spec_file=None,
+    cidr=None,
+    connectivity=None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    # The only driver the core makes over its API; a flat network is the
-    # operator's, set up by bootstrap.
+    # Default to a local overlay when no driver specification is supplied.
     driver_spec: dict = {"driver": "ovs_evpn"}
     if mtu is not None:
         driver_spec["mtu"] = mtu
+    if cidr is not None and (mtu is not None or driver_spec_file is not None):
+        raise click.UsageError(
+            "A logical network uses --cidr without a local driver specification"
+        )
+    if connectivity is not None and cidr is None:
+        raise click.UsageError("--connectivity requires --cidr")
+    if driver_spec_file is not None:
+        if mtu is not None:
+            raise click.UsageError(
+                "Set MTU in the driver specification when using --driver-spec-file"
+            )
+        driver_spec = read_spec(driver_spec_file)
     data = {
         "uuid": str(uuid or sys_uuid.uuid4()),
         "name": name,
@@ -84,4 +111,41 @@ def network_add_cmd(
         "driver_spec": driver_spec,
         "access": access,
     }
+    if cidr is not None:
+        data.pop("driver_spec")
+        data["cidr"] = cidr
+        if connectivity is not None:
+            data["connectivity"] = {"driver": connectivity}
     show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+
+
+def read_spec(source):
+    try:
+        value = json.load(source)
+        if not isinstance(value, dict):
+            raise ValueError()
+        return value
+    except (ValueError, TypeError):
+        raise click.ClickException(
+            "Driver specification must be a JSON object"
+        ) from None
+
+
+@networks_group.command(
+    "update", help="Update network metadata or its complete driver specification"
+)
+@click.pass_context
+@click.argument("network")
+@click.option("--name", default=None)
+@click.option("--description", default=None)
+@click.option("--driver-spec-file", type=click.File("r"), default=None)
+def network_update_cmd(ctx, network, name, description, driver_spec_file):
+    data = {
+        key: value
+        for key, value in {"name": name, "description": description}.items()
+        if value is not None
+    }
+    if driver_spec_file is not None:
+        data["driver_spec"] = read_spec(driver_spec_file)
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    show_data(base_client.update_entity(client, ENTITY_COLLECTION, network, data))

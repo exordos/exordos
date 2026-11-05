@@ -23,6 +23,7 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.network import common as net_common
+from exordos.cmd.network.networks.commands import read_spec
 from exordos.common.table import show_data
 
 ENTITY = "subnet"
@@ -68,7 +69,23 @@ def _parse_router(spec: str) -> dict:
     required=True,
     help="Network the subnet belongs to (UUID or name)",
 )
-@click.option("-c", "--cidr", type=str, required=True, help="CIDR, e.g. 10.100.0.0/24")
+@click.option(
+    "-c",
+    "--cidr",
+    type=str,
+    default=None,
+    help="CIDR; logical networks allocate /23 when omitted",
+)
+@click.option(
+    "--hypervisor",
+    "hypervisors",
+    type=click.UUID,
+    multiple=True,
+    help="Placement hypervisor UUID (repeatable for local SDN)",
+)
+@click.option(
+    "--gateway-file", type=click.File("r"), default=None, help="JSON gateway overrides"
+)
 @click.option(
     "--dhcp/--no-dhcp",
     default=True,
@@ -125,6 +142,8 @@ def subnet_add_cmd(
     dns_servers: tuple[str, ...],
     pool_only: bool,
     shared_pool: bool,
+    hypervisors=(),
+    gateway_file=None,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
@@ -133,13 +152,41 @@ def subnet_add_cmd(
         "description": description,
         "project_id": str(project_id),
         "network": net_common.resolve(client, c.NETWORK_COLLECTION, network),
-        "cidr": cidr,
         "dhcp": dhcp,
         "routers": [_parse_router(r) for r in router_specs],
         "dns_servers": list(dns_servers),
         "placeable": not pool_only,
         "shared_pool": shared_pool,
     }
+    if cidr is not None:
+        data["cidr"] = cidr
+    if hypervisors:
+        data["hypervisors"] = [str(ref) for ref in hypervisors]
+    if gateway_file is not None:
+        data["gateway"] = read_spec(gateway_file)
     if ip_range:
         data["ip_range"] = ip_range
     show_data(base_client.add_entity(client, ENTITY_COLLECTION, data))
+
+
+@subnets_group.command(
+    "update", help="Update a subnet or attach an existing subnet to a logical network"
+)
+@click.pass_context
+@click.argument("subnet")
+@click.option("--name", default=None)
+@click.option("--network", default=None)
+@click.option("--hypervisor", "hypervisors", type=click.UUID, multiple=True)
+@click.option("--gateway-file", type=click.File("r"), default=None)
+def subnet_update_cmd(ctx, subnet, name, network, hypervisors, gateway_file):
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {}
+    if name is not None:
+        data["name"] = name
+    if network is not None:
+        data["network"] = net_common.resolve(client, c.NETWORK_COLLECTION, network)
+    if hypervisors:
+        data["hypervisors"] = [str(ref) for ref in hypervisors]
+    if gateway_file is not None:
+        data["gateway"] = read_spec(gateway_file)
+    show_data(base_client.update_entity(client, ENTITY_COLLECTION, subnet, data))
