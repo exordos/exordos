@@ -384,9 +384,9 @@ def _install_packages(add_sudo: bool = False) -> None:
 
 RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "99.0.0")
 RAWSTOR_ARTIFACT_RUN = os.environ.get(
-    "RAWSTOR_ARTIFACT_RUN", "41665065044" if RAWSTOR_VERSION == "99.0.0" else ""
+    "RAWSTOR_ARTIFACT_RUN", "42031858028" if RAWSTOR_VERSION == "99.0.0" else ""
 )
-RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.c338e7e")
+RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.0f27ce6")
 RAWSTOR_ARTIFACTS_URL = (
     f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
 )
