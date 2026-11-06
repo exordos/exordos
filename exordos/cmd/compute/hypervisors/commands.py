@@ -384,15 +384,15 @@ def _install_packages(add_sudo: bool = False) -> None:
 
 RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "99.0.0")
 RAWSTOR_ARTIFACT_RUN = os.environ.get(
-    "RAWSTOR_ARTIFACT_RUN", "42191718636" if RAWSTOR_VERSION == "99.0.0" else ""
+    "RAWSTOR_ARTIFACT_RUN", "42206175066" if RAWSTOR_VERSION == "99.0.0" else ""
 )
-RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.6b09cf4")
+RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.aa0fd44")
 RAWSTOR_ARTIFACTS_URL = (
     f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
 )
 RAWSTOR_DEB_URL = (
-    "https://nightly.link/rawstor/librawstor/actions/artifacts/13491045019.zip"
-    if RAWSTOR_ARTIFACT_RUN == "42191718636"
+    "https://nightly.link/rawstor/librawstor/actions/artifacts/13496657944.zip"
+    if RAWSTOR_ARTIFACT_RUN == "42206175066"
     else f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip"
 )
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
@@ -406,8 +406,8 @@ RAWSTOR_WHEEL_URL = (
 
 if RAWSTOR_ARTIFACT_RUN:
     RAWSTOR_WHEEL_URL = (
-        "https://nightly.link/rawstor/librawstor/actions/artifacts/13490561637.zip"
-        if RAWSTOR_ARTIFACT_RUN == "42191718636"
+        "https://nightly.link/rawstor/librawstor/actions/artifacts/13496574354.zip"
+        if RAWSTOR_ARTIFACT_RUN == "42206175066"
         else f"{RAWSTOR_ARTIFACTS_URL}/python3-rawstor.whl.zip"
     )
 
