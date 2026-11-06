@@ -6,9 +6,9 @@ Add a new node to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute cn add [OPTIONS]                                                                                                                                                                                                                                                                   
-                                                                                                                                                                                                                                                                                                           
+                                                                                
+ Usage: exordos compute cn add [OPTIONS]                                        
+                                                                                
 ```
 
 ## Options
@@ -61,6 +61,20 @@ Add a new node to the Exordos installation
 
   Name of the image to deploy
 
+* `tier`:
+    * Type: choice
+    * Default: `warm`
+    * Usage: `--tier`
+
+  Storage tier to schedule the root disk onto
+
+* `ephemeral`:
+    * Type: boolean
+    * Default: `true`
+    * Usage: `--ephemeral`
+
+  Whether the root disk is ephemeral storage
+
 * `name`:
     * Type: text
     * Default: `node`
@@ -101,22 +115,39 @@ Add a new node to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute cn add [OPTIONS]                                                                                                                                                                                                                                                                   
-                                                                                                                                                                                                                                                                                                           
- Add a new node to the Exordos installation                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID     UUID of the node                                                                                                                                                                                                                                                         │
-│ *  --project-id   -p  UUID     Name of the project in which to deploy the node [required]                                                                                                                                                                                                               │
-│    --cores        -c  INTEGER  Number of cores to allocate for the node [default: 1]                                                                                                                                                                                                                    │
-│    --ram          -r  INTEGER  Amount of RAM in Mb to allocate for the node [default: 1024]                                                                                                                                                                                                             │
-│    --root-disk    -d  INTEGER  Number of GiB of root disk to allocate for the node [default: 10]                                                                                                                                                                                                        │
-│ *  --image        -i  TEXT     Name of the image to deploy [required]                                                                                                                                                                                                                                   │
-│    --name         -n  TEXT     Name of the node                                                                                                                                                                                                                                                         │
-│    --description  -D  TEXT     Description of the node                                                                                                                                                                                                                                                  │
-│    --hostname                  Hostname of the node                                                                                                                                                                                                                                                     │
-│    --wait                      Wait until the node is running                                                                                                                                                                                                                                           │
-│    --help                      Show this message and exit.                                                                                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                
+ Usage: exordos compute cn add [OPTIONS]                                        
+                                                                                
+ Add a new node to the Exordos installation                                     
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│    --uuid                    -u  UUID             UUID of the node           │
+│ *  --project-id              -p  UUID             Name of the project in     │
+│                                                   which to deploy the node   │
+│                                                   [required]                 │
+│    --cores                   -c  INTEGER          Number of cores to         │
+│                                                   allocate for the node      │
+│                                                   [default: 1]               │
+│    --ram                     -r  INTEGER          Amount of RAM in Mb to     │
+│                                                   allocate for the node      │
+│                                                   [default: 1024]            │
+│    --root-disk               -d  INTEGER          Number of GiB of root disk │
+│                                                   to allocate for the node   │
+│                                                   [default: 10]              │
+│ *  --image                   -i  TEXT             Name of the image to       │
+│                                                   deploy [required]          │
+│    --tier                        [cold|warm|hot]  Storage tier to schedule   │
+│                                                   the root disk onto         │
+│                                                   [default: WARM]            │
+│    --ephemeral/--no-ephemer                       Whether the root disk is   │
+│    al                                             ephemeral storage          │
+│                                                   [default: ephemeral]       │
+│    --name                    -n  TEXT             Name of the node           │
+│    --description             -D  TEXT             Description of the node    │
+│    --hostname                    TEXT             Hostname of the node       │
+│    --wait                                         Wait until the node is     │
+│                                                   running                    │
+│    --help                                         Show this message and      │
+│                                                   exit.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
