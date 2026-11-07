@@ -1670,7 +1670,7 @@ class TestRawstorArtifacts:
         commands = [c.args[0] for c in run.call_args_list]
         assert [
             "wget",
-            "https://nightly.link/rawstor/librawstor/actions/artifacts/13544685014.zip",
+            "https://nightly.link/rawstor/librawstor/actions/artifacts/13576021071.zip",
             "-O",
             "/tmp/rawstor-packages/librawstor.deb.zip",
         ] in commands
@@ -1700,11 +1700,11 @@ class TestRawstorArtifacts:
         ):
             wheel = hv_commands.prepare_rawstor_wheel()
         assert wheel.endswith(
-            "rawstor-99.0.0+0.5a39a56-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+            "rawstor-99.0.0+0.f53cfda-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
         )
         assert [
             "wget",
-            "https://nightly.link/rawstor/librawstor/actions/artifacts/13544545130.zip",
+            "https://nightly.link/rawstor/librawstor/actions/artifacts/13575900947.zip",
             "-O",
             "/tmp/rawstor-wheel-test/python3-rawstor.whl.zip",
         ] in [call.args[0] for call in run.call_args_list]
