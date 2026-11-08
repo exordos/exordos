@@ -88,8 +88,8 @@ Each cluster gets WARM persistent (two mirrors) and ephemeral (one mirror) pools
 sharing its physical capacity. Local qcow2 disks default to WARM ephemeral.
 See [Rawstor storage](docs/rawstor.md) for ports, policy CRUD and space accounting.
 
-`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `42426427073`.
-The same run supplies OST, vhost, librawstor and binding `99.0.0+0.b2be680`.
+`RAWSTOR_VERSION` defaults to `99.0.0`, from GitHub Actions run `42477585353`.
+The same run supplies OST, vhost, librawstor and binding `99.0.0+0.8900170`.
 
 ## Local test environment on Ubuntu
 
