@@ -154,6 +154,7 @@ def test_nodes_init_prepares_agent_without_starting_an_ost(
     )
     with (
         patch.object(storage, "_require_local_privileges"),
+        patch.object(storage.hyper_commands, "read_with_sudo", return_value=NODE_UUID),
         patch.object(storage.time, "sleep"),
         patch.object(storage.hyper_commands, "is_root", return_value=True),
         patch.object(
@@ -572,3 +573,11 @@ def test_local_storage_agent_selection_can_be_cancelled(api):
         )
     assert result.exit_code != 0
     api.add.assert_not_called()
+
+
+@pytest.mark.parametrize("kind", ["nodes", "pools"])
+def test_cluster_filter_fetches_cluster_even_with_name_only_projection(api, kind):
+    api.list.return_value = [{"name": "one", "cluster": CLUSTER_UUID}]
+    result = invoke([kind, "list", "--cluster", CLUSTER_UUID, "--fields", "name"])
+    assert result.exit_code == 0, result.output
+    assert "cluster" in api.list.call_args.args[1]
