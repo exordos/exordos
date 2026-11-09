@@ -105,6 +105,7 @@ nodes_group = create_entity_group(
     },
     group_name="nodes",
     post_fetch_handler=_filter_cluster,
+    required_fields=("cluster",),
     extra_options=[click.Option(["--cluster"], help="Filter by cluster name or UUID")],
 )
 pools_group = create_entity_group(
@@ -124,6 +125,7 @@ pools_group = create_entity_group(
     },
     group_name="pools",
     post_fetch_handler=_filter_cluster,
+    required_fields=("cluster",),
     extra_options=[click.Option(["--cluster"], help="Filter by cluster name or UUID")],
 )
 
@@ -306,11 +308,15 @@ def _storage_agent_uuid(agent, node_uuid, existing):
         uuid5_name = hyper_commands._config_value(
             existing, "universal_agent", "uuid5_name", ""
         )
-        agent_uuid = explicit or (
-            str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), uuid5_name))
-            if uuid5_name
-            else node_uuid
-        )
+        if explicit:
+            agent_uuid = explicit
+        else:
+            system_uuid = sys_uuid.UUID(
+                hyper_commands.read_with_sudo("/sys/class/dmi/id/product_uuid").strip()
+            )
+            agent_uuid = (
+                sys_uuid.uuid5(system_uuid, uuid5_name) if uuid5_name else system_uuid
+            )
     elif agent != hyper_commands.DEFAULT_AGENT_NAME:
         agent_uuid = str(sys_uuid.uuid5(sys_uuid.UUID(node_uuid), agent))
     return str(agent_uuid)
@@ -319,6 +325,16 @@ def _storage_agent_uuid(agent, node_uuid, existing):
 def _prepare_local_storage_agent(ctx, agent=None, version=None):
     _require_local_privileges()
     agent = agent or hyper_commands.DEFAULT_AGENT_NAME
+    legacy_unit = run_command(
+        ["systemctl", "show", "--property=LoadState", "--value", "rawstor-ost.service"],
+        sudo=not hyper_commands.is_root(),
+        check=False,
+    )
+    if legacy_unit.stdout.strip() == "loaded":
+        run_command(
+            ["systemctl", "disable", "--now", "rawstor-ost.service"],
+            sudo=not hyper_commands.is_root(),
+        )
     run_command(["modprobe", "zfs"], sudo=not hyper_commands.is_root())
     core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
     if not core_host:
@@ -507,7 +523,9 @@ def nodes_add_cmd(
     else:
         port = _validate_uri(f"ost://{bind_address}", "ost").port
     if endpoint is None:
-        if agent_entity["node"] != hyper_commands.local_agent_node_uuid():
+        if sys_uuid.UUID(agent_entity["node"]) != sys_uuid.UUID(
+            hyper_commands.local_agent_node_uuid()
+        ):
             raise click.ClickException("Specify --endpoint for an OST on another host")
         endpoint = _detect_local_endpoint(ctx.obj.auth_data["endpoint"], port)
     endpoint_uri = _validate_uri(endpoint, "ost")
