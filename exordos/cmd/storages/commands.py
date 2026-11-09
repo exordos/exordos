@@ -325,16 +325,6 @@ def _storage_agent_uuid(agent, node_uuid, existing):
 def _prepare_local_storage_agent(ctx, agent=None, version=None):
     _require_local_privileges()
     agent = agent or hyper_commands.DEFAULT_AGENT_NAME
-    legacy_unit = run_command(
-        ["systemctl", "show", "--property=LoadState", "--value", "rawstor-ost.service"],
-        sudo=not hyper_commands.is_root(),
-        check=False,
-    )
-    if legacy_unit.stdout.strip() == "loaded":
-        run_command(
-            ["systemctl", "disable", "--now", "rawstor-ost.service"],
-            sudo=not hyper_commands.is_root(),
-        )
     run_command(["modprobe", "zfs"], sudo=not hyper_commands.is_root())
     core_host = urlparse(ctx.obj.auth_data["endpoint"]).hostname
     if not core_host:

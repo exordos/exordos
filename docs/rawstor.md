@@ -47,7 +47,8 @@ preserving an existing agent's UUID and other drivers for the same core.
 `--pool-agent-name` is the local service name and defaults to `universal_agent`.
 On this feature branch, `LOCAL_GENESIS_SDK_PATH` selects the matching SDK checkout
 for the agent's virtualenv. Omit it once a compatible SDK release is available.
-`init` does not create or start an OST.
+`init` does not create, start or stop an OST. An existing legacy OST keeps
+serving until an administrator explicitly migrates it.
 
 Declare an OST on the current host without specifying an agent:
 
@@ -100,7 +101,9 @@ sharing a pool also share its free space and cannot be counted independently.
 `--location` defaults to `file:///var/lib/rawstor/ost/UUID`. Each OST must have a
 dedicated backing filesystem; sharing one between OSTs would count its free
 space more than once. Multiple OSTs on one host need separate backing filesystems
-and bind ports. `--bind` defaults to `0.0.0.0` and the advertised endpoint port.
+and bind ports. `--bind` defaults to the IP address and port of the advertised endpoint.
+Hostname endpoints require an explicit `--bind` IP. Listening on every
+interface requires an explicit `--bind 0.0.0.0:PORT` or `--bind [::]:PORT`.
 When adding on the same host without `--endpoint`, CLI detects the host address
 and chooses an unused managed bind port starting at 7777. For a remote host,
 provide `--endpoint`. The advertised endpoint may differ from the bind address.
