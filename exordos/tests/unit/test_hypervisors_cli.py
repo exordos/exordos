@@ -285,11 +285,8 @@ class TestInitCmdRegistration:
     always-on dependency install, and the --add-gated registration step.
     """
 
-    def test_without_add_skips_agent_setup(self) -> None:
-        """Without --add, no agent setup runs: the command must be usable
-        during image build where no core is reachable yet, so neither
-        resolve_agent_install_target nor install_agent_venv may be called.
-        """
+    def test_without_add_prepares_runtime_before_core_is_available(self) -> None:
+        """Prepare dependencies without contacting Core during image builds."""
         runner = CliRunner()
         with (
             _patch_common_init_deps(),
@@ -309,7 +306,9 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
-        venv_mock.assert_not_called()
+        venv_mock.assert_called_once_with(
+            "/opt/universal_agent/.venv", with_rawstor=True
+        )
         resolve_target_mock.assert_not_called()
 
     def test_without_add_updates_bindings_for_existing_named_agent(self):
@@ -772,7 +771,9 @@ class TestInitCmdRegistration:
             )
 
         assert result.exit_code == 0, result.output
-        venv_mock.assert_not_called()
+        venv_mock.assert_called_once_with(
+            "/opt/universal_agent/.venv", with_rawstor=True
+        )
         rawstor_mock.assert_called_once_with(["librawstor", "rawstor-vhost"], True)
         group_mock.assert_called_once_with(True)
 
@@ -1142,16 +1143,17 @@ class TestInstallRawstorPackages:
     def test_downloads_and_installs_each_package(self) -> None:
         version = hv_commands.RAWSTOR_VERSION
         base_url = f"{hv_commands.RAWSTOR_RELEASES_URL}/v{version}"
-        deb_dir = "/tmp/rawstor-packages"
+        deb_dir = "/tmp/rawstor-packages-private"
 
         with (
             patch.object(hv_commands, "run_command") as run_mock,
             patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", ""),
         ):
+            run_mock.return_value.stdout = "/tmp/rawstor-packages-private"
             hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"])
 
         assert run_mock.call_args_list == [
-            mock_call(["mkdir", "-p", deb_dir], sudo=False),
+            mock_call(["mktemp", "-d", "-t", "rawstor-packages-XXXXXXXX"], sudo=False),
             mock_call(
                 [
                     "wget",
@@ -1182,6 +1184,7 @@ class TestInstallRawstorPackages:
                 env=dict(DEBIAN_FRONTEND="noninteractive"),
                 sudo=False,
             ),
+            mock_call(["rm", "-rf", "--", deb_dir], sudo=False),
         ]
 
     def test_passes_sudo_through(self) -> None:
@@ -1189,6 +1192,7 @@ class TestInstallRawstorPackages:
             patch.object(hv_commands, "run_command") as run_mock,
             patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", ""),
         ):
+            run_mock.return_value.stdout = "/tmp/rawstor-packages-private"
             hv_commands.install_rawstor_packages(["librawstor"], add_sudo=True)
 
         assert all(c.kwargs.get("sudo") is True for c in run_mock.call_args_list)
@@ -1253,9 +1257,17 @@ class TestStoragePoolExists:
 
 
 class TestAgentVenvExists:
-    def test_true_when_the_venv_directory_exists(self, tmp_path) -> None:
-        with patch.object(hv_commands, "_agent_venv_path", return_value=str(tmp_path)):
+    def test_true_only_when_runtime_dependencies_import(self, tmp_path) -> None:
+        (tmp_path / "bin").mkdir()
+        (tmp_path / "bin/python").touch()
+        with (
+            patch.object(hv_commands, "_agent_venv_path", return_value=str(tmp_path)),
+            patch.object(hv_commands, "run_command") as run,
+        ):
+            run.return_value.returncode = 0
             assert hv_commands.agent_venv_exists("exordos-agent") is True
+            run.return_value.returncode = 1
+            assert hv_commands.agent_venv_exists("exordos-agent") is False
 
     def test_false_when_the_venv_directory_is_missing(self, tmp_path) -> None:
         with patch.object(
@@ -1666,29 +1678,30 @@ class TestZfsSnapshotCommands:
 class TestRawstorArtifacts:
     def test_ci_artifact_packages_use_the_pinned_run_and_install_dependencies(self):
         with patch.object(hv_commands, "run_command") as run:
+            run.return_value.stdout = "/tmp/rawstor-packages-private"
             hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"], True)
         commands = [c.args[0] for c in run.call_args_list]
         assert [
             "wget",
             "https://nightly.link/rawstor/librawstor/actions/artifacts/13619881138.zip",
             "-O",
-            "/tmp/rawstor-packages/librawstor.deb.zip",
+            "/tmp/rawstor-packages-private/librawstor.deb.zip",
         ] in commands
         assert [
             "python3",
             "-m",
             "zipfile",
             "-e",
-            "/tmp/rawstor-packages/librawstor.deb.zip",
-            "/tmp/rawstor-packages",
+            "/tmp/rawstor-packages-private/librawstor.deb.zip",
+            "/tmp/rawstor-packages-private",
         ] in commands
-        assert commands[-1] == [
+        assert commands[-2] == [
             "apt-get",
             "install",
             "--reinstall",
             "-y",
-            "/tmp/rawstor-packages/librawstor_99.0.0_amd64.deb",
-            "/tmp/rawstor-packages/rawstor-ost_99.0.0_amd64.deb",
+            "/tmp/rawstor-packages-private/librawstor_99.0.0_amd64.deb",
+            "/tmp/rawstor-packages-private/rawstor-ost_99.0.0_amd64.deb",
         ]
 
     def test_ci_wheel_is_extracted_before_pip_installs_it(self):
@@ -1709,3 +1722,17 @@ class TestRawstorArtifacts:
             "/tmp/rawstor-wheel-test/python3-rawstor.whl.zip",
         ] in [call.args[0] for call in run.call_args_list]
         assert run.call_args.args[0][:4] == ["python3", "-m", "zipfile", "-e"]
+
+
+def test_rawstor_package_staging_is_removed_after_download_failure():
+    def command(args, **kwargs):
+        if args[0] == "wget":
+            raise RuntimeError("download failed")
+        return MagicMock(stdout="/tmp/rawstor-packages-private\n")
+
+    with patch.object(hv_commands, "run_command", side_effect=command) as run:
+        with pytest.raises(RuntimeError, match="download failed"):
+            hv_commands.install_rawstor_packages(["librawstor"], add_sudo=True)
+    assert run.call_args == mock_call(
+        ["rm", "-rf", "--", "/tmp/rawstor-packages-private"], sudo=True
+    )

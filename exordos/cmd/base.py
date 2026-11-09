@@ -96,6 +96,7 @@ def create_entity_group(
     add_clear_command: bool = False,
     parents: list[str] | None = None,
     post_fetch_handler: Callable[[list[dict], dict], list[dict]] | None = None,
+    required_fields: tuple[str, ...] = (),
     extra_options: list[click.Option] | None = None,
     lookup_field: str | None = None,
     no_auth: bool = False,
@@ -168,7 +169,10 @@ def create_entity_group(
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             filters = utils.convert_input_multiply(filters)
             url = entity_collection.format(**kwargs)
-            url = base_client.add_fields_to_url(url, fields)
+            url = base_client.add_fields_to_url(
+                url,
+                tuple(dict.fromkeys((*fields, *required_fields))) if fields else fields,
+            )
             if watch:
                 from rich.live import Live
 

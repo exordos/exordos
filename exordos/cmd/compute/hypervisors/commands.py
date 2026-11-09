@@ -430,32 +430,38 @@ def install_rawstor_packages(
     """Download and install the given rawstor .deb packages."""
     version = version or RAWSTOR_VERSION
     artifact_run = RAWSTOR_ARTIFACT_RUN if version == RAWSTOR_VERSION else ""
-    deb_dir = "/tmp/rawstor-packages"
-    run_command(["mkdir", "-p", deb_dir], sudo=add_sudo)
+    deb_dir = run_command(
+        ["mktemp", "-d", "-t", "rawstor-packages-XXXXXXXX"], sudo=add_sudo
+    ).stdout.strip()
 
-    if artifact_run:
-        archive = f"{deb_dir}/librawstor.deb.zip"
+    try:
+        if artifact_run:
+            archive = f"{deb_dir}/librawstor.deb.zip"
+            run_command(
+                ["wget", RAWSTOR_DEB_URL, "-O", archive],
+                sudo=add_sudo,
+            )
+            run_command(
+                ["python3", "-m", "zipfile", "-e", archive, deb_dir], sudo=add_sudo
+            )
+
+        deb_paths = []
+        for package in packages:
+            deb_name = f"{package}_{version}_amd64.deb"
+            url = f"{RAWSTOR_RELEASES_URL}/v{version}/{deb_name}"
+            deb_path = os.path.join(deb_dir, deb_name)
+            if not artifact_run:
+                run_command(["wget", url, "-O", deb_path], sudo=add_sudo)
+            deb_paths.append(deb_path)
+
+        # CI builds share a Debian version, so an installed package may be older.
         run_command(
-            ["wget", RAWSTOR_DEB_URL, "-O", archive],
+            ["apt-get", "install", "--reinstall", "-y", *deb_paths],
+            env=dict(DEBIAN_FRONTEND="noninteractive"),
             sudo=add_sudo,
         )
-        run_command(["python3", "-m", "zipfile", "-e", archive, deb_dir], sudo=add_sudo)
-
-    deb_paths = []
-    for package in packages:
-        deb_name = f"{package}_{version}_amd64.deb"
-        url = f"{RAWSTOR_RELEASES_URL}/v{version}/{deb_name}"
-        deb_path = os.path.join(deb_dir, deb_name)
-        if not artifact_run:
-            run_command(["wget", url, "-O", deb_path], sudo=add_sudo)
-        deb_paths.append(deb_path)
-
-    # CI builds share a Debian version, so an installed package may be older.
-    run_command(
-        ["apt-get", "install", "--reinstall", "-y", *deb_paths],
-        env=dict(DEBIAN_FRONTEND="noninteractive"),
-        sudo=add_sudo,
-    )
+    finally:
+        run_command(["rm", "-rf", "--", deb_dir], sudo=add_sudo)
 
 
 def generate_node_private_key_base64() -> str:
@@ -869,7 +875,20 @@ def storage_pool_exists(pool_name: str, add_sudo: bool = False) -> bool:
 
 def agent_venv_exists(agent_name: str) -> bool:
     """Whether install_agent_venv has already set up this agent's venv."""
-    return os.path.isdir(_agent_venv_path(agent_name))
+    python = os.path.join(_agent_venv_path(agent_name), "bin", "python")
+    if not os.path.isfile(python):
+        return False
+    return (
+        run_command(
+            [
+                python,
+                "-c",
+                "import libvirt, rawstor; from gcl_sdk.agents.universal.drivers.exordos_hyper import ExordosLocalHyperDriver",
+            ],
+            check=False,
+        ).returncode
+        == 0
+    )
 
 
 def _create_storage_pool(pool_name: str, add_sudo: bool = False) -> None:
@@ -1377,7 +1396,10 @@ def init_cmd(
 
     log.info("Installing rawstor packages...")
     install_and_configure_rawstor(add_sudo)
-    if not add and agent_venv_exists(agent_name):
+    if not add and not agent_venv_exists(agent_name):
+        log.info("Preparing the local agent virtualenv...")
+        install_agent_venv(_agent_venv_path(agent_name), with_rawstor=True)
+    elif not add:
         log.info("Updating the existing agent's rawstor bindings...")
         wheel = prepare_rawstor_wheel()
         run_command(

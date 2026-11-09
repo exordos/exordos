@@ -129,15 +129,14 @@ ambiguous across clusters.
 exordos storages clusters list
 exordos storages clusters show storage1
 exordos storages nodes list --cluster storage1
-exordos storages nodes update OST_UUID --weight 2
+exordos storages nodes update OST_UUID --weight 200
 exordos storages pools list --cluster storage1
 exordos storages pools update POOL_UUID --mirrors 2 --failure-domain rack \
   --chunk-size 64MiB
 ```
 
 Mirrors, failure domain, chunk size, tier and ephemeral belong to the pool.
-Changing a policy applies to newly created disks; existing disks retain the
-policy recorded when scheduled. Chunk sizes must be powers of two, up to 1 GiB.
+A policy cannot change while disks or pending resources reference the pool. Chunk sizes must be powers of two, up to 1 GiB.
 MDS endpoints cannot change after registration. Cluster deletion automatically
 removes its empty nodes and pools; deletion is blocked while the cluster has managed
 or pending disks, or the OST contains unmanaged objects. Pool removal is
@@ -204,8 +203,9 @@ CLI options remain unchanged; commands construct the nested API configuration.
 
 The pinned build requires a strict majority for writable mirrors. With two
 data copies and no witness, both copies must remain available for writes.
-Rawstor supports metadata-only witnesses, but ordinary MDS placement does not
-add them automatically; Exordos does not configure witnesses yet.
+Exordos includes the MDS as a metadata-only witness in the topology. Rawstor
+places a witness for even mirror counts, allowing a two-copy mirror to retain
+a majority when one data node is unavailable.
 
 The LIST wire format distinguishes chunks (`1`) from objects (`2`); update
 clients, MDS and OST together. Read-only mirrored opens also require quorum;
