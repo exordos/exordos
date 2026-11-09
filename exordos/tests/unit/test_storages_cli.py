@@ -196,6 +196,9 @@ def test_nodes_init_prepares_agent_without_starting_an_ost(
     agent_unit.assert_called_once()
     commands = [call.args[0] for call in run.call_args_list]
     assert ["modprobe", "zfs"] in commands
+    assert not any(
+        "rawstor-ost.service" in arg for command in commands for arg in command
+    )
     assert all(
         not any("rawstor-ost@" in arg for arg in call.args[0])
         for call in run.call_args_list
