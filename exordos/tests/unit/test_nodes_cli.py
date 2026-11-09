@@ -86,3 +86,45 @@ class TestAddCmdDiskSpec:
         data = add_mock.call_args.args[2]
         assert data["disk_spec"]["tier"] == "HOT"
         assert data["disk_spec"]["ephemeral"] is True
+
+
+def test_root_disk_resize_preserves_placement_and_other_disks():
+    uuid = str(sys_uuid.uuid4())
+    disks = {
+        "kind": "disks",
+        "disks": [
+            {
+                "image": "https://example.com/root.raw",
+                "size": 10,
+                "tier": "COLD",
+                "ephemeral": False,
+            },
+            {"image": None, "size": 5, "tier": "HOT", "ephemeral": True},
+        ],
+    }
+    with (
+        patch.object(nodes_commands.base_client, "get_user_api_client"),
+        patch.object(
+            nodes_commands.base_client,
+            "get_entity",
+            return_value={"uuid": uuid, "disk_spec": disks},
+        ),
+        patch.object(
+            nodes_commands.base_client,
+            "update_entity",
+            return_value={"status": "IN_PROGRESS"},
+        ) as update,
+        patch.object(nodes_commands, "show_data"),
+    ):
+        result = CliRunner().invoke(
+            nodes_commands.update_cmd, ["-u", uuid, "--root-disk", "20"], obj=_obj()
+        )
+    assert result.exit_code == 0, result.output
+    spec = update.call_args.args[3]["disk_spec"]
+    assert spec["disks"][0] == {
+        "image": "https://example.com/root.raw",
+        "size": 20,
+        "tier": "COLD",
+        "ephemeral": False,
+    }
+    assert spec["disks"][1]["size"] == 5
