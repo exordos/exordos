@@ -16,6 +16,7 @@
 from types import SimpleNamespace
 from unittest import mock
 
+from bazooka import exceptions as bazooka_exc
 from click.testing import CliRunner
 import pytest
 
@@ -301,3 +302,43 @@ def test_install_cmd_literal_manifest_with_glob_characters(tmp_path) -> None:
             str(manifest)
         ]
     listing.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "message,expected_code,expected_calls",
+    [
+        ("Element with the same name is already installed", 0, 2),
+        ("Other validation error", 1, 1),
+    ],
+)
+def test_install_cmd_glob_handles_installed_name_conflict(
+    message, expected_code, expected_calls
+) -> None:
+    elements = [
+        {"name": "ecosystem_ui_a", "uuid": "a", "version": "2.0.0"},
+        {"name": "ecosystem_ui_b", "uuid": "b", "version": "2.0.0"},
+    ]
+    cause = mock.Mock()
+    cause.response.text = message
+    error = bazooka_exc.BadRequestError(cause)
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "list_entities", return_value=elements),
+        mock.patch.object(commands, "_select_element_by_name", side_effect=elements),
+        mock.patch.object(
+            commands.base_client, "action_entity", side_effect=[error, None]
+        ) as install,
+    ):
+        result = CliRunner().invoke(
+            commands.install_cmd,
+            ["ecosystem_ui_*"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == expected_code, result.output
+    assert install.call_count == expected_calls
+    if expected_code == 0:
+        assert "ecosystem_ui_a is already installed, skipping" in result.output
+        assert "ecosystem_ui_b (2.0.0) was installed successfully" in result.output
+        assert "ecosystem_ui_a (2.0.0) was installed successfully" not in result.output
+    else:
+        assert result.exception is error

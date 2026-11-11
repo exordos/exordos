@@ -24,6 +24,7 @@ import time
 import typing as tp
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 from packaging import version as packaging_version
 from rich.prompt import Confirm
 from rich.text import Text
@@ -542,7 +543,19 @@ def install_cmd(
             element = _select_element_by_name(client, target, version)
 
         element_uuid = element["uuid"]
-        repo_utils.install_element(client, element_uuid)
+        try:
+            repo_utils.install_element(client, element_uuid)
+        except bazooka_exc.BadRequestError as exc:
+            if (
+                "Element with the same name is already installed"
+                not in exc.cause.response.text
+            ):
+                raise
+            click.echo(
+                f"Element {element['name']} is already installed, skipping. "
+                "Use update to change its version."
+            )
+            continue
 
         installed_name = f"{element['name']} ({element['version']})"
         click.echo(
