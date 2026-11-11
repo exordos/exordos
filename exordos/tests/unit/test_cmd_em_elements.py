@@ -299,7 +299,7 @@ def test_install_cmd_literal_manifest_with_glob_characters(tmp_path) -> None:
     manifest.write_text("name: local\nversion: 1.0.0\n")
     with mock.patch.object(commands.base_client, "list_entities") as listing:
         assert commands._expand_element_targets(mock.Mock(), [str(manifest)]) == [
-            str(manifest)
+            (str(manifest), False)
         ]
     listing.assert_not_called()
 
@@ -342,3 +342,104 @@ def test_install_cmd_glob_handles_installed_name_conflict(
         assert "ecosystem_ui_a (2.0.0) was installed successfully" not in result.output
     else:
         assert result.exception is error
+
+
+@pytest.mark.parametrize("command", [commands.install_cmd, commands.update_cmd])
+@pytest.mark.parametrize("uuid_name", [False, True])
+def test_install_update_cmd_glob_preserves_name_dispatch(
+    command, uuid_name, tmp_path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    name = "11111111-1111-1111-1111-111111111111" if uuid_name else "ui_a"
+    (tmp_path / name).write_text("name: unintended\nversion: 9.0.0\n")
+    current = {
+        "name": name,
+        "uuid": "current",
+        "version": "1.0.0",
+        "installation_state": "INSTALLED",
+    }
+    target = {
+        "name": name,
+        "uuid": "target",
+        "version": "2.0.0",
+        "installation_state": "UNINSTALLED",
+    }
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(
+            commands.base_client, "list_entities", return_value=[current, target]
+        ),
+        mock.patch.object(commands.base_client, "action_entity") as action,
+        mock.patch.object(commands.repo_utils, "do_upload") as upload,
+    ):
+        args = ["111*" if uuid_name else "ui_*"]
+        if command is commands.update_cmd:
+            args.append("-y")
+        result = CliRunner().invoke(command, args, obj=SimpleNamespace(auth_data={}))
+    assert result.exit_code == 0, result.output
+    get_client.return_value.get.assert_not_called()
+    upload.assert_not_called()
+    if command is commands.install_cmd:
+        action.assert_called_once_with(
+            get_client.return_value,
+            commands.c.REPOSITORY_ELEMENT_COLLECTION,
+            "install",
+            "target",
+        )
+    else:
+        action.assert_called_once_with(
+            get_client.return_value,
+            commands.c.REPOSITORY_ELEMENT_COLLECTION,
+            "upgrade",
+            "current",
+            target="target",
+        )
+
+
+def test_expand_element_targets_exact_name_precedes_glob() -> None:
+    with mock.patch.object(
+        commands.base_client,
+        "list_entities",
+        return_value=[{"name": "ui_[ab]"}, {"name": "ui_a"}, {"name": "ui_b"}],
+    ):
+        assert commands._expand_element_targets(mock.Mock(), ["ui_[ab]"]) == [
+            ("ui_[ab]", True)
+        ]
+
+
+def test_update_cmd_glob_continues_after_only_installed_version() -> None:
+    current = {
+        "name": "ui_a",
+        "uuid": "a",
+        "version": "1.0.0",
+        "installation_state": "INSTALLED",
+    }
+    other = {**current, "name": "ui_b", "uuid": "b"}
+    newer = {
+        **other,
+        "uuid": "new",
+        "version": "2.0.0",
+        "installation_state": "UNINSTALLED",
+    }
+    elements = [current, other, newer]
+
+    def listing(client, collection, **filters):
+        return [e for e in elements if not filters or e["name"] == filters["name"]]
+
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(commands.base_client, "list_entities", side_effect=listing),
+        mock.patch.object(commands.base_client, "action_entity") as action,
+    ):
+        result = CliRunner().invoke(
+            commands.update_cmd, ["ui_*", "-y"], obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 0, result.output
+    assert "ui_a (1.0.0) is already up to date" in result.output
+    action.assert_called_once_with(
+        get_client.return_value,
+        commands.c.REPOSITORY_ELEMENT_COLLECTION,
+        "upgrade",
+        "b",
+        target="new",
+    )

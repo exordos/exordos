@@ -253,6 +253,8 @@ def _select_element_by_name(
         elements = [e for e in elements if e["uuid"] != exclude_uuid]
 
     if not elements:
+        if newer_than is not None:
+            return None
         raise click.ClickException(f"No elements found with name '{name}'")
 
     # Filter out development versions unless version is explicitly provided
@@ -260,6 +262,8 @@ def _select_element_by_name(
         elements = [e for e in elements if version_lib.is_stable_version(e["version"])]
 
     if not elements:
+        if newer_than is not None:
+            return None
         raise click.ClickException(
             f"No stable versions found for element '{name}'. "
             "Use --version to install a development version."
@@ -404,13 +408,14 @@ def _select_current_element_by_name(
 
 def _expand_element_targets(
     client: "CollectionBaseClient", targets: list[str], installed_only: bool = False
-) -> list[str]:
-    """Expand name globs while preserving literal UUIDs and manifest paths."""
+) -> list[tuple[str, bool]]:
+    """Return targets with a flag forcing expanded matches to resolve by name."""
     names = None
     expanded = []
     for target in targets:
         if os.path.isfile(target) or not any(char in target for char in "*?["):
             matches = [target]
+            name_only = False
         else:
             if names is None:
                 elements = base_client.list_entities(
@@ -434,12 +439,17 @@ def _expand_element_targets(
                         )
                     }
                 )
-            matches = [name for name in names if fnmatch.fnmatchcase(name, target)]
+            matches = (
+                [target]
+                if target in names
+                else [name for name in names if fnmatch.fnmatchcase(name, target)]
+            )
+            name_only = True
             if not matches:
                 raise click.ClickException(f"No elements match pattern '{target}'")
         for match in matches:
-            if match not in expanded:
-                expanded.append(match)
+            if not any(value == match for value, _ in expanded):
+                expanded.append((match, name_only))
     return expanded
 
 
@@ -503,8 +513,8 @@ def install_cmd(
             return
         targets = [selected]
 
-    for target in _expand_element_targets(client, targets):
-        if os.path.isfile(target):
+    for target, name_only in _expand_element_targets(client, targets):
+        if not name_only and os.path.isfile(target):
             manifest_path = pathlib.Path(target)
             manifest_data = utils.load_yaml(str(manifest_path))
             name = manifest_data.get("name")
@@ -537,7 +547,7 @@ def install_cmd(
             )
             continue
 
-        if utils.is_valid_uuid(target):
+        if not name_only and utils.is_valid_uuid(target):
             element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=target)
         else:
             element = _select_element_by_name(client, target, version)
@@ -626,11 +636,12 @@ def _update_element_by_uuid_or_name(
     uuid_or_name: str,
     version: str | None,
     y: bool,
+    name_only: bool = False,
 ) -> None:
     """Update a single element selected by UUID or name."""
     import questionary
 
-    if utils.is_valid_uuid(uuid_or_name):
+    if not name_only and utils.is_valid_uuid(uuid_or_name):
         current_element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=uuid_or_name)
     else:
         current_element = _select_current_element_by_name(client, uuid_or_name)
@@ -742,13 +753,17 @@ def update_cmd(
             click.echo("No element selected, aborting")
             return
 
-    for target in _expand_element_targets(client, targets, installed_only=True):
-        if os.path.isfile(target):
+    for target, name_only in _expand_element_targets(
+        client, targets, installed_only=True
+    ):
+        if not name_only and os.path.isfile(target):
             _update_element_from_manifest(
                 client, pathlib.Path(target), y, project_id, timeout
             )
         else:
-            _update_element_by_uuid_or_name(client, target, version, y)
+            _update_element_by_uuid_or_name(
+                client, target, version, y, name_only=name_only
+            )
 
 
 @click.command("uninstall", help="Uninstall elements by UUID or name")
