@@ -17,6 +17,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 from click.testing import CliRunner
+import pytest
 
 from exordos.cmd.em.elements import commands
 
@@ -198,3 +199,105 @@ def test_install_cmd_preserves_interactive_selection() -> None:
         )
     assert result.exit_code == 0, result.output
     install.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "pattern", ["ecosystem_ui_*", "ecosystem_ui_?", "ecosystem_ui_[ab]"]
+)
+def test_install_cmd_expands_name_globs(pattern) -> None:
+    elements = [
+        {"name": "ecosystem_ui_b", "version": "1.0.0", "uuid": "b"},
+        {"name": "ecosystem_ui_a", "version": "1.0.0", "uuid": "a"},
+        {"name": "Ecosystem_ui_c", "version": "1.0.0", "uuid": "c"},
+    ]
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(
+            commands.base_client, "list_entities", return_value=elements + elements
+        ) as listing,
+        mock.patch.object(
+            commands, "_select_element_by_name", side_effect=[elements[1], elements[0]]
+        ) as select,
+        mock.patch.object(commands.repo_utils, "install_element") as install,
+    ):
+        result = CliRunner().invoke(
+            commands.install_cmd,
+            [pattern, "ecosystem_ui_*", "ecosystem_ui_a", "--version", "1.0.0"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    listing.assert_called_once()
+    assert select.call_args_list == [
+        mock.call(get_client.return_value, name, "1.0.0")
+        for name in ("ecosystem_ui_a", "ecosystem_ui_b")
+    ]
+    assert install.call_args_list == [
+        mock.call(get_client.return_value, uuid) for uuid in ("a", "b")
+    ]
+
+
+def test_update_cmd_glob_only_updates_installed_elements() -> None:
+    elements = [
+        {"name": "ui_current", "installation_state": "INSTALLED", "status": "NEW"},
+        {
+            "name": "ui_available",
+            "installation_state": "UNINSTALLED",
+            "status": "ACTIVE",
+        },
+        {"name": "ui_legacy", "status": "IN_PROGRESS"},
+        {"name": "ui_unused", "status": "AVAILABLE"},
+    ]
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(commands.base_client, "list_entities", return_value=elements),
+        mock.patch.object(commands, "_select_current_element_by_name") as current,
+        mock.patch.object(commands, "_select_element_by_name") as select,
+        mock.patch.object(commands.base_client, "action_entity") as upgrade,
+    ):
+        current.side_effect = [
+            {"name": name, "version": "1.0.0", "uuid": name}
+            for name in ("ui_current", "ui_legacy")
+        ]
+        select.side_effect = [{"uuid": "new", "version": "2.0.0"}, None]
+        result = CliRunner().invoke(
+            commands.update_cmd, ["-y", "ui_*"], obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 0, result.output
+    assert current.call_args_list == [
+        mock.call(get_client.return_value, name) for name in ("ui_current", "ui_legacy")
+    ]
+    upgrade.assert_called_once_with(
+        get_client.return_value,
+        commands.c.REPOSITORY_ELEMENT_COLLECTION,
+        "upgrade",
+        "ui_current",
+        target="new",
+    )
+    assert "already up to date" in result.output
+
+
+@pytest.mark.parametrize("command", [commands.install_cmd, commands.update_cmd])
+def test_install_update_cmd_unmatched_glob_fails_before_changes(command) -> None:
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "list_entities", return_value=[EMPTY]),
+        mock.patch.object(commands.repo_utils, "install_element") as install,
+        mock.patch.object(commands, "_update_element_by_uuid_or_name") as update,
+    ):
+        result = CliRunner().invoke(
+            command, ["empty", "missing_*"], obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 1
+    assert "No elements match pattern 'missing_*'" in result.output
+    install.assert_not_called()
+    update.assert_not_called()
+
+
+def test_install_cmd_literal_manifest_with_glob_characters(tmp_path) -> None:
+    manifest = tmp_path / "element[1].yaml"
+    manifest.write_text("name: local\nversion: 1.0.0\n")
+    with mock.patch.object(commands.base_client, "list_entities") as listing:
+        assert commands._expand_element_targets(mock.Mock(), [str(manifest)]) == [
+            str(manifest)
+        ]
+    listing.assert_not_called()

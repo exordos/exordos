@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import fnmatch
 import os
 import pathlib
 import subprocess
@@ -400,7 +401,56 @@ def _select_current_element_by_name(
     return active_elements[0]
 
 
-@click.command("install", help="Install one or more elements")
+def _expand_element_targets(
+    client: "CollectionBaseClient", targets: list[str], installed_only: bool = False
+) -> list[str]:
+    """Expand name globs while preserving literal UUIDs and manifest paths."""
+    names = None
+    expanded = []
+    for target in targets:
+        if os.path.isfile(target) or not any(char in target for char in "*?["):
+            matches = [target]
+        else:
+            if names is None:
+                elements = base_client.list_entities(
+                    client,
+                    base_client.add_fields_to_url(
+                        c.REPOSITORY_ELEMENT_COLLECTION,
+                        ("name", "installation_state", "status")
+                        if installed_only
+                        else ("name",),
+                    ),
+                )
+                names = sorted(
+                    {
+                        e["name"]
+                        for e in elements
+                        if not installed_only
+                        or e.get("installation_state") == "INSTALLED"
+                        or (
+                            e.get("installation_state") is None
+                            and e.get("status") in ("ACTIVE", "IN_PROGRESS")
+                        )
+                    }
+                )
+            matches = [name for name in names if fnmatch.fnmatchcase(name, target)]
+            if not matches:
+                raise click.ClickException(f"No elements match pattern '{target}'")
+        for match in matches:
+            if match not in expanded:
+                expanded.append(match)
+    return expanded
+
+
+@click.command(
+    "install",
+    help="Install elements by UUID, name, name glob, or manifest path.\n\n"
+    "Name globs support *, ?, and [abc] and match case-sensitively. "
+    "Quote patterns to prevent shell expansion: "
+    "exordos ee install 'ecosystem_ui_*'. "
+    "Each matching name is installed once, using the usual version selection. "
+    "An unmatched pattern is an error.",
+)
 @click.option(
     "-v",
     "--version",
@@ -452,7 +502,7 @@ def install_cmd(
             return
         targets = [selected]
 
-    for target in targets:
+    for target in _expand_element_targets(client, targets):
         if os.path.isfile(target):
             manifest_path = pathlib.Path(target)
             manifest_data = utils.load_yaml(str(manifest_path))
@@ -616,7 +666,15 @@ def _update_element_by_uuid_or_name(
     )
 
 
-@click.command("update", help="Update one or more elements")
+@click.command(
+    "update",
+    help="Update elements by UUID, name, name glob, or manifest path.\n\n"
+    "Name globs support *, ?, and [abc] and match case-sensitively. "
+    "Quote patterns to prevent shell expansion: "
+    "exordos ee update 'ecosystem_ui_*'. "
+    "Globs select installed elements only; each matching name is updated once. "
+    "An unmatched pattern is an error.",
+)
 @click.option(
     "-v",
     "--version",
@@ -671,7 +729,7 @@ def update_cmd(
             click.echo("No element selected, aborting")
             return
 
-    for target in targets:
+    for target in _expand_element_targets(client, targets, installed_only=True):
         if os.path.isfile(target):
             _update_element_from_manifest(
                 client, pathlib.Path(target), y, project_id, timeout

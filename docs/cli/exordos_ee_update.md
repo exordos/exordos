@@ -1,14 +1,16 @@
 
 # exordos_ee_update
 
-Update one or more elements
+Update elements by UUID, name, name glob, or manifest path.
+
+Name globs support *, ?, and [abc] and match case-sensitively. Quote patterns to prevent shell expansion: exordos ee update 'ecosystem_ui_*'. Globs select installed elements only; each matching name is updated once. An unmatched pattern is an error.
 
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]...                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]...
+
 ```
 
 ## Options
@@ -59,16 +61,17 @@ Update one or more elements
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]...                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Update one or more elements                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --version     -v  TEXT   version of the element                                                                                                                                                                                                                                                         │
-│ --yes         -y         Automatically answer yes for all questions                                                                                                                                                                                                                                     │
-│ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                         │
-│ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                            │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]...
+
+ Update elements by UUID, name, name glob, or manifest path.
+ Name globs support *, ?, and [abc] and match case-sensitively. Quote patterns to prevent shell expansion: exordos ee update 'ecosystem_ui_*'. Globs select installed elements only; each matching name is updated once. An unmatched pattern is an error.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --version     -v  TEXT   version of the element                                                                                                                                                                                                                                                          │
+│ --yes         -y         Automatically answer yes for all questions                                                                                                                                                                                                                                      │
+│ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                          │
+│ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                             │
+│ --help                   Show this message and exit.                                                                                                                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

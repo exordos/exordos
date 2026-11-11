@@ -1,14 +1,16 @@
 
 # exordos_ee_install
 
-Install one or more elements
+Install elements by UUID, name, name glob, or manifest path.
+
+Name globs support *, ?, and [abc] and match case-sensitively. Quote patterns to prevent shell expansion: exordos ee install 'ecosystem_ui_*'. Each matching name is installed once, using the usual version selection. An unmatched pattern is an error.
 
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
+
  Usage: exordos ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]...
-                                                                                                                                                                                                                                                                                                           
+
 ```
 
 ## Options
@@ -51,15 +53,16 @@ Install one or more elements
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
+
  Usage: exordos ee install [OPTIONS] [UUID_OR_NAME_OR_PATH]...
-                                                                                                                                                                                                                                                                                                           
- Install one or more elements
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --version     -v  TEXT   Version to use for all elements specified by name                                                                                                                                                                                                                                                         │
-│ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                         │
-│ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                            │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Install elements by UUID, name, name glob, or manifest path.
+ Name globs support *, ?, and [abc] and match case-sensitively. Quote patterns to prevent shell expansion: exordos ee install 'ecosystem_ui_*'. Each matching name is installed once, using the usual version selection. An unmatched pattern is an error.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --version     -v  TEXT   Version to use for all elements specified by name                                                                                                                                                                                                                               │
+│ --project-id  -p  UUID   Project UUID, required only if the upload repository doesn't exist yet                                                                                                                                                                                                          │
+│ --timeout         FLOAT  Seconds to wait for repository upload and element sync to complete [default: 600.0]                                                                                                                                                                                             │
+│ --help                   Show this message and exit.                                                                                                                                                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
