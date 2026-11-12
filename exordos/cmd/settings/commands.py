@@ -28,7 +28,7 @@ from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.base import output_option
 from exordos.cmd.settings.config import get_current_realm
 from exordos.cmd.settings.config import save_config
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 
 @click.group("settings", help="Modify exordos settings files")
@@ -302,7 +302,7 @@ def add_repo(
 
     save_config(config, ctx.obj.cfg_path)
     if output.lower() == "json":
-        show_data(repo_config, output)
+        show_resource(repo_config, output)
     else:
         click.echo(f"repo '{repo}' set")
 

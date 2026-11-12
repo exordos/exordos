@@ -27,7 +27,7 @@ from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.common.table import fill_table
 from exordos.common.table import print_table
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "permission"
 ENTITY_COLLECTION = c.PERMISSION_COLLECTION
@@ -89,7 +89,7 @@ def add_cmd(
 
     data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @click.command("role", help="List permissions bound to a role")

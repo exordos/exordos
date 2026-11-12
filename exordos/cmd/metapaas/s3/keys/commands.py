@@ -23,7 +23,7 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "access key"
 ENTITY_COLLECTION = c.S3_ACCESS_KEY_COLLECTION
@@ -111,7 +111,7 @@ def add_cmd(
         data,
     )
     # The secret key is shown here for the last time, it is hidden afterwards.
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 keys_group.add_command(add_cmd, aliases=["a"])

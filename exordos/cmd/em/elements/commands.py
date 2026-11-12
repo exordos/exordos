@@ -36,7 +36,7 @@ from exordos.common import ssh
 from exordos.common import version as version_lib
 from exordos.common.table import get_table
 from exordos.common.table import print_table
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 import exordos.constants as c
 from exordos.repo import utils as repo_utils
 
@@ -97,7 +97,7 @@ def show_cmd(ctx: click.Context, name: str, output: str) -> None:
     """Show element general information"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = base_client.get_entity(client, ENTITY_COLLECTION, name)
-    show_data(data, output)
+    show_resource(data, output)
     if output.lower() == "json":
         return
 

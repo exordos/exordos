@@ -29,6 +29,7 @@ from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.cmd.compute import common as compute_common
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "set"
 ENTITY_COLLECTION = c.SET_COLLECTION
@@ -165,7 +166,7 @@ def add_cmd(
     data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
-        show_data(entity, output=output)
+        show_resource(entity, output=output)
         return
     while entity["status"] != "ACTIVE":
         click.echo(
@@ -174,7 +175,7 @@ def add_cmd(
         )
         time.sleep(2)
         entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help="Update an existing set")

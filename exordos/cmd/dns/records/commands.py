@@ -24,6 +24,7 @@ from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "record"
 ENTITY_COLLECTION = c.RECORD_COLLECTION
@@ -126,7 +127,7 @@ def add_cmd(
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(domain_uuid=domain_uuid), data
     )
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 records_group.add_command(add_cmd, aliases=["a"])

@@ -24,6 +24,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "limit"
 ENTITY_COLLECTION = c.LIMIT_COLLECTION
@@ -99,7 +100,7 @@ def add_cmd(
     if field_name is not None:
         data["field_name"] = field_name
     data = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(data, output=output)
+    show_resource(data, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

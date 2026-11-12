@@ -27,6 +27,7 @@ from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.common.table import fill_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 
 def output_option(f):
@@ -251,10 +252,10 @@ def create_entity_group(
                         f"Multiple {entity_plural} with {lookup_field} {uuid} found"
                     )
                 for entity in entities:
-                    show_data(entity, output)
+                    show_resource(entity, output)
             else:
                 data = base_client.get_entity(client, url, uuid)
-                show_data(data, output)
+                show_resource(data, output)
 
         entity_group.add_command(show_cmd, aliases=["get", "g"])
 

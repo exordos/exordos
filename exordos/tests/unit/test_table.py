@@ -149,7 +149,7 @@ def test_fit_table_to_width_9_columns_at_100_not_cropped():
     assert columns[1] == NAME
 
 
-def test_show_data_json_preserves_native_types(capsys):
+def test_show_resource_json_preserves_native_types(capsys):
     import json
 
     entity = {
@@ -160,6 +160,17 @@ def test_show_data_json_preserves_native_types(capsys):
         "network": {"ipv4": "192.0.2.1"},
         "disks": [{"size": 10}],
     }
-    table_utils.show_data(entity, output="json", msg="Ignored JSON title")
+    table_utils.show_resource(entity, output="json")
 
     assert json.loads(capsys.readouterr().out) == entity
+
+
+def test_show_data_json_keeps_field_value_rows(capsys):
+    import json
+
+    table_utils.show_data({"cores": 2, "spec": {"enabled": True}}, output="json")
+
+    assert json.loads(capsys.readouterr().out) == [
+        {"field": "cores", "value": "2"},
+        {"field": "spec", "value": "{'enabled': True}"},
+    ]

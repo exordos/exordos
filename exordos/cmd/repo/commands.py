@@ -35,6 +35,7 @@ from exordos.cmd.repo.store import commands as store_commands
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 from exordos.repo import utils as repo_utils
 
 if tp.TYPE_CHECKING:
@@ -226,7 +227,7 @@ def repository_add_cmd(
     if driver_spec is not None:
         data["driver_spec"] = driver_spec
     entity = base_client.add_entity(client, c.REPOSITORY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help=f"Update {REPOSITORY_ENTITY}")

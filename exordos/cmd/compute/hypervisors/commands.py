@@ -38,6 +38,7 @@ from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
 
@@ -220,7 +221,7 @@ def add_cmd(
     if machine_type is not None:
         data["machine_type"] = machine_type
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

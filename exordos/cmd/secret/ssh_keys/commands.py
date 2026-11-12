@@ -31,6 +31,7 @@ from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.common import compute
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "ssh_key"
 ENTITY_COLLECTION = c.SSH_KEY_COLLECTION
@@ -233,7 +234,7 @@ def add_cmd(
         if output.lower() == "json":
             created.append(entity)
         else:
-            show_data(entity, output=output)
+            show_resource(entity, output=output)
     if output.lower() == "json":
         click.echo(json.dumps(created, ensure_ascii=False))
 

@@ -28,6 +28,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.compute import common as compute_common
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "node"
 ENTITY_COLLECTION = c.NODE_COLLECTION
@@ -167,7 +168,7 @@ def add_cmd(
         data["hostname"] = hostname
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
-        show_data(entity, output=output)
+        show_resource(entity, output=output)
         return
     while entity["status"] != "ACTIVE":
         click.echo(
@@ -176,7 +177,7 @@ def add_cmd(
         )
         time.sleep(2)
         entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help="Update an existing node")

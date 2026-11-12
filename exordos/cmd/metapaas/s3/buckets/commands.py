@@ -24,6 +24,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "bucket"
 ENTITY_COLLECTION = c.S3_BUCKET_COLLECTION
@@ -160,7 +161,7 @@ def add_cmd(
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(instance_uuid=instance_uuid), data
     )
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

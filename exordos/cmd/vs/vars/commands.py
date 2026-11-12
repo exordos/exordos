@@ -27,6 +27,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "variable"
 ENTITY_COLLECTION = c.VARIABLE_COLLECTION
@@ -263,7 +264,7 @@ def add_cmd(
         },
     }
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 vv_group.add_command(add_cmd, aliases=["a"])

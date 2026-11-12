@@ -26,6 +26,7 @@ from exordos.cmd.base import output_option
 from exordos.common.table import fill_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "profile"
 ENTITY_COLLECTION = c.PROFILE_COLLECTION
@@ -173,7 +174,7 @@ def add_cmd(
         "profile_type": profile_type,
     }
     data = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(data, output=output)
+    show_resource(data, output=output)
 
 
 profiles_group.add_command(add_cmd, aliases=["a"])

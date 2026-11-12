@@ -140,7 +140,7 @@ def test_create_tags_payload(module_name, group_name, options, expected):
     module = import_module(f"exordos.cmd.{module_name}.commands")
     with (
         mock.patch.object(module, "base_client") as client,
-        mock.patch.object(module, "show_data"),
+        mock.patch.object(module, "show_resource"),
     ):
         client.get_entity.return_value = {
             "uuid": UUID,

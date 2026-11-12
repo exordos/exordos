@@ -23,7 +23,7 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "client"
 ENTITY_COLLECTION = c.CLIENT_COLLECTION
@@ -116,7 +116,7 @@ def add_cmd(
     }
 
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 clients_group.add_command(add_cmd, aliases=["a"])

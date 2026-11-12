@@ -23,7 +23,7 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "role_binding"
 ENTITY_COLLECTION = c.ROLE_BINDING_COLLECTION
@@ -89,4 +89,4 @@ def add_cmd(
     if project_id is not None:
         data["project"] = f"{c.PROJECT_COLLECTION}{project_id}"
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)

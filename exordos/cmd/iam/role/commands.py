@@ -24,6 +24,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "role"
 ENTITY_COLLECTION = c.ROLE_COLLECTION
@@ -89,7 +90,7 @@ def add_cmd(
         data["project_id"] = str(project_id)
 
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

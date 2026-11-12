@@ -28,6 +28,7 @@ from exordos.cmd.base import tags_payload
 from exordos.common.table import fill_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "domain"
 ENTITY_COLLECTION = c.DOMAIN_COLLECTION
@@ -120,7 +121,7 @@ def add_cmd(
     }
     data.update(tag_data)
     data = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(data, output=output)
+    show_resource(data, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

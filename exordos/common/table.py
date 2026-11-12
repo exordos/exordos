@@ -148,10 +148,15 @@ def print_table(
 
 
 def show_data(data: dict, output: str = "table", msg: tp.Optional[str] = None) -> None:
-    if output.lower() == "json":
-        click.echo(json.dumps(data, ensure_ascii=False))
-        return
     table = get_table(*SHOW_FIELDS)
     for key, value in data.items():
         table.add_row(key, str(value))
     print_table(table, output, msg)
+
+
+def show_resource(data: dict, output: str = "table") -> None:
+    """Print one native JSON resource or use the existing display formats."""
+    if output.lower() == "json":
+        click.echo(json.dumps(data, ensure_ascii=False))
+    else:
+        show_data(data, output)

@@ -82,7 +82,7 @@ class TestSshKeysPruneCli:
         client.delete_entity.assert_not_called()
 
 
-@mock.patch("exordos.cmd.secret.ssh_keys.commands.show_data")
+@mock.patch("exordos.cmd.secret.ssh_keys.commands.show_resource")
 @mock.patch("exordos.cmd.secret.ssh_keys.commands.base_client.get_user_api_client")
 class TestSshKeysAddCli:
     @pytest.mark.parametrize("all_conflicts", [False, True])

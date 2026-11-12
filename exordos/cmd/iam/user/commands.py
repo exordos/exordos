@@ -24,6 +24,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "user"
 ENTITY_COLLECTION = c.USER_COLLECTION
@@ -174,7 +175,7 @@ def add_cmd(
         data["otp_secret"] = otp_secret
 
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity, output=output)
+    show_resource(entity, output=output)
 
 
 @users_group.command("reset_password", help=f"Reset password of the {ENTITY}")

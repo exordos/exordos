@@ -42,7 +42,7 @@ def _invoke_add(command, extra_args: list[str]):
     return result, add_entity
 
 
-def _invoke_info(details: dict):
+def _invoke_info(details: dict, extra_args=()):
     with (
         mock.patch.object(commands.base_client, "get_user_api_client"),
         mock.patch.object(commands.base_client, "get_entity", return_value=NODE),
@@ -50,7 +50,7 @@ def _invoke_info(details: dict):
     ):
         return CliRunner().invoke(
             commands.info_cmd,
-            [NODE["name"]],
+            [NODE["name"], *extra_args],
             obj=SimpleNamespace(auth_data={}),
         )
 
@@ -339,3 +339,12 @@ def test_show_cmd_json_rejects_ambiguous_lookup():
     assert result.exit_code != 0
     assert result.stdout == ""
     assert "Multiple resources" in result.stderr
+
+
+def test_info_cmd_json_keeps_legacy_field_value_rows():
+    result = _invoke_info({}, ["--output", "json"])
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == [
+        {"field": key, "value": str(value)} for key, value in NODE.items()
+    ]

@@ -24,6 +24,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 # ---------------------------------------------------------------------------
 # border
@@ -175,7 +176,9 @@ def border_add_cmd(
     }
     if node:
         data["node"] = str(node)
-    show_data(base_client.add_entity(client, c.BORDER_COLLECTION, data), output=output)
+    show_resource(
+        base_client.add_entity(client, c.BORDER_COLLECTION, data), output=output
+    )
 
 
 def _update_rules(ctx: click.Context, border: str, field: str, rules: list) -> None:
