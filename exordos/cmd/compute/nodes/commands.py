@@ -221,6 +221,12 @@ def add_cmd(
     help="Description of the node",
 )
 @click.option(
+    "--hostname",
+    type=str,
+    default=None,
+    help="Hostname of the node",
+)
+@click.option(
     "--wait",
     type=bool,
     is_flag=True,
@@ -235,6 +241,7 @@ def update_cmd(
     image: str | None,
     name: str | None,
     description: str | None,
+    hostname: str | None,
     wait: bool,
 ) -> None:
     update_data = {}
@@ -253,6 +260,9 @@ def update_cmd(
         update_data["name"] = name
     if description is not None:
         update_data["description"] = description
+    if hostname is not None:
+        _validate_hostname(hostname)
+        update_data["hostname"] = hostname
 
     if root_disk is not None or image is not None:
         update_data["disk_spec"] = entity["disk_spec"]

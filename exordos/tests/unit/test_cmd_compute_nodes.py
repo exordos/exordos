@@ -106,6 +106,51 @@ def test_add_cmd_rejects_invalid_hostname(hostname: str) -> None:
     add_entity.assert_not_called()
 
 
+def _invoke_update(command, extra_args: list[str]):
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "get_entity", return_value=NODE),
+        mock.patch.object(
+            commands.base_client, "update_entity", return_value=NODE
+        ) as update_entity,
+    ):
+        result = CliRunner().invoke(
+            command,
+            ["-u", NODE["uuid"], *extra_args],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    return result, update_entity
+
+
+def test_update_cmd_sets_hostname() -> None:
+    result, update_entity = _invoke_update(
+        commands.update_cmd, ["--hostname", "node-1"]
+    )
+
+    assert result.exit_code == 0, result.output
+    data = update_entity.call_args.args[3]
+    assert data["hostname"] == "node-1"
+
+
+def test_update_cmd_omits_hostname_when_not_provided() -> None:
+    result, update_entity = _invoke_update(commands.update_cmd, ["--cores", "2"])
+
+    assert result.exit_code == 0, result.output
+    data = update_entity.call_args.args[3]
+    assert "hostname" not in data
+
+
+@pytest.mark.parametrize("hostname", ["bad_host", "node-", "bad host", "a" * 64])
+def test_update_cmd_rejects_invalid_hostname(hostname: str) -> None:
+    result, update_entity = _invoke_update(
+        commands.update_cmd, ["--hostname", hostname]
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid hostname" in result.output
+    update_entity.assert_not_called()
+
+
 def test_add_or_update_cmd_rejects_invalid_hostname_on_update() -> None:
     with (
         mock.patch.object(commands.base_client, "get_user_api_client"),
