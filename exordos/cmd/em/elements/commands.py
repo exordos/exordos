@@ -85,12 +85,21 @@ ee_group = create_entity_group(
 
 @click.command("show", help="Show element general information")
 @click.argument("name")
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="Output format; JSON prints one resource object.",
+)
 @click.pass_context
-def show_cmd(ctx: click.Context, name: str) -> None:
+def show_cmd(ctx: click.Context, name: str, output: str) -> None:
     """Show element general information"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = base_client.get_entity(client, ENTITY_COLLECTION, name)
-    show_data(data)
+    show_data(data, output)
+    if output.lower() == "json":
+        return
 
     resources = base_client.list_entities(
         client, f"{c.ELEMENT_COLLECTION}{data['uuid']}/resources/"

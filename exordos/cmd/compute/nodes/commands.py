@@ -125,6 +125,13 @@ def _validate_hostname(hostname: str) -> None:
     default=False,
     help="Wait until the node is running",
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="Output format; JSON prints one resource object.",
+)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -137,9 +144,9 @@ def add_cmd(
     description: str,
     hostname: str | None,
     wait: bool,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    log = logger.ClickLogger()
     if uuid is None:
         uuid = sys_uuid.uuid4()
     data = {
@@ -160,13 +167,16 @@ def add_cmd(
         data["hostname"] = hostname
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
-        show_data(entity)
+        show_data(entity, output=output)
         return
     while entity["status"] != "ACTIVE":
-        log.info(f"Waiting for node to be ready. Status: {entity['status']}")
+        click.echo(
+            f"Waiting for node to be ready. Status: {entity['status']}",
+            err=output.lower() == "json",
+        )
         time.sleep(2)
         entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(entity)
+    show_data(entity, output=output)
 
 
 @click.command("update", help="Update an existing node")

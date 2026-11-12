@@ -233,6 +233,10 @@ def create_entity_group(
                     raise click.ClickException(
                         f"{entity_name} with {lookup_field} {uuid} not found"
                     )
+                if output.lower() == "json" and len(entities) > 1:
+                    raise click.ClickException(
+                        f"Multiple {entity_plural} with {lookup_field} {uuid} found"
+                    )
                 for entity in entities:
                     show_data(entity, output)
             else:

@@ -6,9 +6,9 @@ Add a new record
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns records add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos dns records add [OPTIONS]
+
 ```
 
 ## Options
@@ -60,6 +60,14 @@ Add a new record
     * Usage: `-d
 --domain-uuid`
 
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -70,20 +78,21 @@ Add a new record
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns records add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
- Add a new record                                                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID            UUID of the record                                                                                                                                                                                                                                                │
-│ *  --project-id   -p  UUID            UUID of the project in which to deploy the record [required]                                                                                                                                                                                                      │
-│ *  --record-type      [a|ns|soa|txt]  [required]                                                                                                                                                                                                                                                        │
-│    --ttl              INTEGER                                                                                                                                                                                                                                                                           │
-│    --prio             INTEGER                                                                                                                                                                                                                                                                           │
-│    --disabled                                                                                                                                                                                                                                                                                           │
-│    --record           TEXT                                                                                                                                                                                                                                                                              │
-│ *  --domain-uuid  -d  TEXT            [required]                                                                                                                                                                                                                                                        │
-│    --help                             Show this message and exit.                                                                                                                                                                                                                                       │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos dns records add [OPTIONS]
+
+ Add a new record
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --uuid         -u  UUID                    UUID of the record                                                                                                                                                                                                                                         │
+│ *  --project-id   -p  UUID                    UUID of the project in which to deploy the record [required]                                                                                                                                                                                               │
+│ *  --record-type      [a|ns|soa|txt]          [required]                                                                                                                                                                                                                                                 │
+│    --ttl              INTEGER                                                                                                                                                                                                                                                                            │
+│    --prio             INTEGER                                                                                                                                                                                                                                                                            │
+│    --disabled                                                                                                                                                                                                                                                                                            │
+│    --record           TEXT                                                                                                                                                                                                                                                                               │
+│ *  --domain-uuid  -d  TEXT                    [required]                                                                                                                                                                                                                                                 │
+│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object.                                                                                                                                                                                                            │
+│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

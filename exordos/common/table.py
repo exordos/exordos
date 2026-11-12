@@ -15,6 +15,7 @@
 #    under the License.
 
 from io import StringIO
+import json
 import typing as tp
 
 from rich import get_console
@@ -147,6 +148,9 @@ def print_table(
 
 
 def show_data(data: dict, output: str = "table", msg: tp.Optional[str] = None) -> None:
+    if output.lower() == "json":
+        click.echo(json.dumps(data, ensure_ascii=False))
+        return
     table = get_table(*SHOW_FIELDS)
     for key, value in data.items():
         table.add_row(key, str(value))

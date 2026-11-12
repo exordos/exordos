@@ -89,6 +89,13 @@ records_group = create_entity_group(
     type=str,
     required=True,
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="Output format; JSON prints one resource object.",
+)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -99,6 +106,7 @@ def add_cmd(
     disabled: bool,
     record: tuple[str, ...],
     domain_uuid: str,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -118,7 +126,7 @@ def add_cmd(
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(domain_uuid=domain_uuid), data
     )
-    show_data(entity)
+    show_data(entity, output=output)
 
 
 records_group.add_command(add_cmd, aliases=["a"])

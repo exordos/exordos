@@ -54,12 +54,21 @@ manifests_group = create_entity_group(
     type=str,
     required=True,
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="Output format; JSON prints one resource object.",
+)
 @click.pass_context
-def show_cmd(ctx: click.Context, uuid: str) -> None:
+def show_cmd(ctx: click.Context, uuid: str, output: str) -> None:
     """Show manifest general information"""
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(data)
+    show_data(data, output)
+    if output.lower() == "json":
+        return
 
     if data["resources"]:
         click.echo("Resources json:")

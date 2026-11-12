@@ -13,6 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import json
 from types import SimpleNamespace
 from unittest import mock
 
@@ -195,3 +196,146 @@ def test_add_or_update_cmd_rejects_invalid_hostname_on_update() -> None:
     assert "Invalid hostname" in result.output
     update_entity.assert_not_called()
     get_entity.assert_not_called()
+
+
+@pytest.mark.parametrize("output", ["json", "JSON"])
+def test_add_cmd_json_preserves_resource(output):
+    result, _ = _invoke_add(commands.add_cmd, ["--output", output])
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == NODE
+
+
+def test_add_cmd_json_wait_prints_only_final_resource():
+    pending = {**NODE, "status": "BUILD", "cores": 2, "default_network": None}
+    active = {**pending, "status": "ACTIVE", "default_network": {"ipv4": "192.0.2.1"}}
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "add_entity", return_value=pending),
+        mock.patch.object(
+            commands.base_client, "get_entity", side_effect=[pending, active]
+        ),
+        mock.patch.object(commands.time, "sleep"),
+    ):
+        result = CliRunner().invoke(
+            commands.add_cmd,
+            ["--project-id", PROJECT_ID, "--image", "ubuntu", "--wait", "-o", "json"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == active
+    assert result.stderr.count("Waiting for node") == 2
+
+
+@pytest.mark.parametrize("command", ["show", "get", "g"])
+@pytest.mark.parametrize("identifier", [NODE["uuid"], NODE["name"]])
+def test_show_cmd_json_gets_only_node(command, identifier):
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "get_entity", return_value=NODE) as get,
+        mock.patch.object(commands.base_client, "action_entity") as action,
+    ):
+        result = CliRunner().invoke(
+            commands.cn_group,
+            [command, identifier, "-o", "json"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == NODE
+    assert get.call_args.args[2] == identifier
+    action.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["compute", "cn", "get", NODE["name"]],
+        ["compute", "cn", "add", "--project-id", PROJECT_ID, "--image", "ubuntu"],
+        [
+            "dns",
+            "records",
+            "add",
+            "--project-id",
+            PROJECT_ID,
+            "--domain-uuid",
+            PROJECT_ID,
+            "--record-type",
+            "A",
+            "--record",
+            "address=192.0.2.1",
+        ],
+    ],
+)
+def test_json_output_root_diagnostics_use_stderr(tmp_path, args):
+    from exordos.cmd.cli import exordos
+    from exordos.cmd.version import commands as version_commands
+
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "get_entity", return_value=NODE),
+        mock.patch.object(commands.base_client, "add_entity", return_value=NODE),
+        mock.patch.object(version_commands, "should_check_version", return_value=True),
+        mock.patch.object(version_commands, "save_last_check_time"),
+        mock.patch.object(
+            version_commands.requests, "get", side_effect=ValueError("offline")
+        ),
+    ):
+        result = CliRunner().invoke(
+            exordos,
+            [
+                "--config",
+                str(tmp_path / "missing.yaml"),
+                "--check-updates",
+                *args,
+                "-o",
+                "json",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == NODE
+    assert "configuration file" in result.stderr
+    assert "Failed to check" in result.stderr
+
+
+@pytest.mark.parametrize("module", ["elements", "manifests"])
+def test_show_cmd_em_json_prints_only_resource(module):
+    from importlib import import_module
+
+    cmd = import_module(f"exordos.cmd.em.{module}.commands")
+    entity = {**NODE, "resources": {"nested": [True, None, 3]}}
+    with (
+        mock.patch.object(cmd.base_client, "get_user_api_client"),
+        mock.patch.object(cmd.base_client, "get_entity", return_value=entity),
+        mock.patch.object(cmd.base_client, "list_entities") as listing,
+    ):
+        result = CliRunner().invoke(
+            cmd.show_cmd,
+            [NODE["uuid"], "-o", "json"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == entity
+    listing.assert_not_called()
+
+
+def test_show_cmd_json_rejects_ambiguous_lookup():
+    from exordos.cmd.base import create_entity_group
+
+    group = create_entity_group("resource", "/resources/", {}, lookup_field="uuid")
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            commands.base_client, "list_entities", return_value=[NODE, NODE]
+        ),
+    ):
+        result = CliRunner().invoke(
+            group,
+            ["show", NODE["uuid"], "-o", "json"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code != 0
+    assert result.stdout == ""
+    assert "Multiple resources" in result.stderr
