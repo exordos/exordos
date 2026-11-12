@@ -33,3 +33,25 @@ baremetals:
 ```
 
 Этот стенд создает один узел инициализации и два физических узла, каждый с 2 ГБ ОЗУ и 2 ядрами CPU.
+
+## Настройки гипервизора при bootstrap
+
+Параметры планирования начального гипервизора задаются при bootstrap Core:
+
+```console
+exordos bootstrap --inventory <inventory> --launch-mode core \
+  --hyper-name compute-host --hyper-cores-ratio 4 --hyper-ram-ratio 1.5
+```
+
+Также доступны `--hyper-description`, `--hyper-avail-cores` и
+`--hyper-avail-ram` (МБ). Коэффициенты должны быть неотрицательными; если их не
+задать, Core использует `1.0`. Опции работают с обоими режимами
+`--pool-agent-placement`: `core` и `local`.
+
+При `--stand-spec` задавайте `name`, `description`, `avail_cores`, `avail_ram`,
+`cores_ratio` и `ram_ratio` в записях `hypervisors`. Спецификация стенда имеет
+приоритет над CLI-опциями гипервизора. Существующие пулы пропускаются по URI
+подключения; bootstrap не обновляет их настройки.
+
+Образ Core также должен поддерживать новые поля bootstrap: обновить нужно и
+CLI, и Core.
