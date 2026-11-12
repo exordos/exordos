@@ -151,10 +151,29 @@ def test_update_cmd_rejects_invalid_hostname(hostname: str) -> None:
     update_entity.assert_not_called()
 
 
+def test_update_cmd_rejects_invalid_hostname_before_api_lookup() -> None:
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(commands.base_client, "get_entity") as get_entity,
+    ):
+        result = CliRunner().invoke(
+            commands.update_cmd,
+            ["-u", NODE["uuid"], "--hostname", "bad_host"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+
+    assert result.exit_code != 0
+    assert "Invalid hostname" in result.output
+    get_client.assert_not_called()
+    get_entity.assert_not_called()
+
+
 def test_add_or_update_cmd_rejects_invalid_hostname_on_update() -> None:
     with (
         mock.patch.object(commands.base_client, "get_user_api_client"),
-        mock.patch.object(commands.base_client, "get_entity", return_value=NODE),
+        mock.patch.object(
+            commands.base_client, "get_entity", return_value=NODE
+        ) as get_entity,
         mock.patch.object(commands.base_client, "update_entity") as update_entity,
     ):
         result = CliRunner().invoke(
@@ -175,3 +194,4 @@ def test_add_or_update_cmd_rejects_invalid_hostname_on_update() -> None:
     assert result.exit_code != 0
     assert "Invalid hostname" in result.output
     update_entity.assert_not_called()
+    get_entity.assert_not_called()

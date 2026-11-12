@@ -244,6 +244,9 @@ def update_cmd(
     hostname: str | None,
     wait: bool,
 ) -> None:
+    if hostname is not None:
+        _validate_hostname(hostname)
+
     update_data = {}
     client = base_client.get_user_api_client(ctx.obj.auth_data)
 
@@ -261,7 +264,6 @@ def update_cmd(
     if description is not None:
         update_data["description"] = description
     if hostname is not None:
-        _validate_hostname(hostname)
         update_data["hostname"] = hostname
 
     if root_disk is not None or image is not None:
@@ -390,6 +392,9 @@ def add_or_update_node_cmd(
     hostname: str | None,
     wait: bool,
 ) -> None:
+    if hostname is not None:
+        _validate_hostname(hostname)
+
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         return ctx.invoke(
@@ -435,7 +440,6 @@ def add_or_update_node_cmd(
         },
     }
     if hostname is not None:
-        _validate_hostname(hostname)
         data["hostname"] = hostname
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     if not wait:
