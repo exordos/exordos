@@ -348,3 +348,56 @@ def test_info_cmd_json_keeps_legacy_field_value_rows():
     assert json.loads(result.stdout) == [
         {"field": key, "value": str(value)} for key, value in NODE.items()
     ]
+
+
+@pytest.mark.parametrize(
+    "command", [commands.update_cmd, commands.add_or_update_node_cmd]
+)
+def test_update_cmd_json_wait_prints_only_final_resource(command):
+    pending = {**NODE, "status": "BUILD"}
+    active = {**NODE, "status": "ACTIVE", "cores": 2}
+    args = ["-u", NODE["uuid"], "--cores", "2", "--wait", "-o", "json"]
+    if command is commands.add_or_update_node_cmd:
+        args.extend(["--project-id", PROJECT_ID, "--image", "ubuntu"])
+    client = mock.Mock()
+    client.get.return_value = active
+    with (
+        mock.patch.object(
+            commands.base_client, "get_user_api_client", return_value=client
+        ),
+        mock.patch.object(
+            commands.base_client, "get_entity", side_effect=[NODE, active]
+        ),
+        mock.patch.object(commands.base_client, "update_entity", return_value=pending),
+        mock.patch.object(commands.time, "sleep"),
+    ):
+        result = CliRunner().invoke(command, args, obj=SimpleNamespace(auth_data={}))
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == active
+    assert "Waiting for node" in result.stderr
+
+
+@pytest.mark.parametrize("scenario", ["generated_uuid", "missing", "existing"])
+def test_add_or_update_cmd_json_preserves_format(scenario):
+    from bazooka import exceptions as bazooka_exc
+
+    args = ["--project-id", PROJECT_ID, "--image", "ubuntu", "-o", "json"]
+    if scenario != "generated_uuid":
+        args.extend(["--uuid", NODE["uuid"]])
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "get_entity") as get,
+        mock.patch.object(commands.base_client, "add_entity", return_value=NODE) as add,
+        mock.patch.object(
+            commands.base_client, "update_entity", return_value=NODE
+        ) as update,
+    ):
+        if scenario == "missing":
+            get.side_effect = bazooka_exc.NotFoundError(mock.Mock())
+        result = CliRunner().invoke(
+            commands.add_or_update_node_cmd, args, obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == NODE
+    assert update.called == (scenario == "existing")
+    assert add.called == (scenario != "existing")

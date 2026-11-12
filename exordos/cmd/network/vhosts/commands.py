@@ -24,7 +24,6 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
-from exordos.common.table import show_data
 from exordos.common.table import show_resource
 
 ENTITY = "vhost"
@@ -124,6 +123,7 @@ vhosts_group.add_command(add_cmd, aliases=["a", "create"])
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument("uuid", type=str, required=True)
 @click.option("--lb-uuid", type=click.UUID, required=True, help="Load balancer UUID")
@@ -157,6 +157,7 @@ def update_cmd(
     key: tp.TextIO | None,
     proxy_protocol_from: str | None,
     enabled: bool | None,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
@@ -172,7 +173,7 @@ def update_cmd(
     entity = base_client.update_entity(
         client, ENTITY_COLLECTION.format(lb_uuid=lb_uuid), uuid, data
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 vhosts_group.add_command(update_cmd, aliases=["u"])

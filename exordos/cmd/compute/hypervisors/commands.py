@@ -37,7 +37,6 @@ from exordos.cmd.base import output_option
 from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
-from exordos.common.table import show_data
 from exordos.common.table import show_resource
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
@@ -225,6 +224,7 @@ def add_cmd(
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -301,6 +301,7 @@ def update_cmd(
     machine_type: str | None,
     driver_spec: tuple[str, ...],
     driver_spec_full: tuple[str, ...],
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -333,7 +334,7 @@ def update_cmd(
         data["driver_spec"] = {**current_spec, **driver_spec}
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 def is_root() -> bool:

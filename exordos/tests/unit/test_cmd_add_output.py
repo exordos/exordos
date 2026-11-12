@@ -37,14 +37,17 @@ ENTITY = {
 }
 
 
-def _add_commands():
+def _commands(names):
     seen = set()
 
     def visit(command):
         if id(command) in seen:
             return
         seen.add(id(command))
-        if command.name == "add":
+        if (
+            command.name in names
+            and command.callback.__module__ != "exordos.cmd.em.elements.commands"
+        ):
             yield command
         for child in getattr(command, "commands", {}).values():
             yield from visit(child)
@@ -62,6 +65,10 @@ def _arguments(command):
         "driver_spec": "kind=libvirt",
         "node": UUID,
     }
+    if command.name in ("update", "add-or-update"):
+        overrides.update(
+            name="updated", description="updated", resource_name="compute.nodes"
+        )
     if command.callback.__module__ == "exordos.cmd.security.commands":
         overrides["condition"] = "kind=uri_regex"
     if command.callback.__module__ == "exordos.cmd.dbaas.instances.commands":
@@ -101,7 +108,7 @@ def _arguments(command):
 
 
 @pytest.mark.parametrize(
-    "command", _add_commands(), ids=lambda cmd: cmd.callback.__module__
+    "command", _commands({"add"}), ids=lambda cmd: cmd.callback.__module__
 )
 def test_add_cmd_json_returns_native_resource(command):
     module = command.callback.__module__
@@ -130,3 +137,24 @@ def test_add_cmd_json_returns_native_resource(command):
         assert payload == {"driver": UUID, "url": UUID}
     else:
         assert payload == ENTITY
+
+
+@pytest.mark.parametrize(
+    "command",
+    _commands({"update", "add-or-update"}),
+    ids=lambda cmd: cmd.callback.__module__ + "." + cmd.name,
+)
+def test_update_cmd_json_returns_native_resource(command):
+    with (
+        mock.patch.object(base_client, "get_user_api_client"),
+        mock.patch.object(base_client, "get_entity", return_value=ENTITY),
+        mock.patch.object(base_client, "update_entity", return_value=ENTITY),
+        mock.patch.object(base_client, "add_entity", return_value=ENTITY),
+    ):
+        result = CliRunner().invoke(
+            command,
+            [*_arguments(command), "--output", "json"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == ENTITY

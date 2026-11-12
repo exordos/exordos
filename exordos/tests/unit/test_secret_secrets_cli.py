@@ -41,7 +41,7 @@ def _invoke(*args: str):
     )
 
 
-@mock.patch("exordos.cmd.secret.secrets.commands.show_data")
+@mock.patch("exordos.cmd.secret.secrets.commands.show_resource")
 @mock.patch("exordos.cmd.secret.secrets.commands.base_client")
 class TestSecretsCli:
     def test_add_sends_value_and_default(self, client, _show) -> None:

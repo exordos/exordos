@@ -6,12 +6,20 @@ Update bucket
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 buckets update [OPTIONS] UUID                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas s3 buckets update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -71,18 +79,19 @@ Update bucket
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 buckets update [OPTIONS] UUID                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
- Update bucket                                                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --instance-uuid           -i  TEXT                                       UUID of the instance the bucket belongs to [required]                                                                                                                                                                       │
-│    --description                 TEXT                                       Description of the bucket                                                                                                                                                                                                   │
-│    --public/--no-public                                                     Allow anonymous read access to the bucket                                                                                                                                                                                   │
-│    --quota-bytes                 INTEGER RANGE [0<=x<=9223372036854775807]  Size limit of the bucket in bytes, 0 means unlimited                                                                                                                                                                        │
-│    --default-retention-mode      [governance|compliance]                    Default object lock retention mode                                                                                                                                                                                          │
-│    --default-retention-days      INTEGER RANGE [1<=x<=365000]               Default object lock retention period in days                                                                                                                                                                                │
-│    --help                                                                   Show this message and exit.                                                                                                                                                                                                 │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas s3 buckets update [OPTIONS] UUID
+
+ Update bucket
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output                  -o  [json|html|table|yaml]                     Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                 │
+│ *  --instance-uuid           -i  TEXT                                       UUID of the instance the bucket belongs to [required]                                                                                                                                                                        │
+│    --description                 TEXT                                       Description of the bucket                                                                                                                                                                                                    │
+│    --public/--no-public                                                     Allow anonymous read access to the bucket                                                                                                                                                                                    │
+│    --quota-bytes                 INTEGER RANGE [0<=x<=9223372036854775807]  Size limit of the bucket in bytes, 0 means unlimited                                                                                                                                                                         │
+│    --default-retention-mode      [governance|compliance]                    Default object lock retention mode                                                                                                                                                                                           │
+│    --default-retention-days      INTEGER RANGE [1<=x<=365000]               Default object lock retention period in days                                                                                                                                                                                 │
+│    --help                                                                   Show this message and exit.                                                                                                                                                                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

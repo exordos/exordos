@@ -6,12 +6,20 @@ Update idp
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps update [OPTIONS] UUID                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos iam idps update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -87,20 +95,21 @@ Update idp
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps update [OPTIONS] UUID                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                            
- Update idp                                                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos iam idps update [OPTIONS] UUID
+
+ Update idp
+
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name                                -n  TEXT  Name of the idp                                                                                                                                                                                                                                          │
-│ --description                         -D  TEXT  Description of the idp                                                                                                                                                                                                                                   │
-│ --iam-client                          -i  UUID  Uuid of iam_client                                                                                                                                                                                                                                       │
-│ --scope                                   TEXT  scope                                                                                                                                                                                                                                                    │
-│ --nonce-required/--no-nonce-required            Whether nonce is required                                                                                                                                                                                                                                │
-│ --callback                                TEXT  JSON string for callbacks                                                                                                                                                                                                                                │
-│ --clear-tags                                    Remove all tags.                                                                                                                                                                                                                                         │
-│ --tag                                     TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                          │
-│ --help                                          Show this message and exit.                                                                                                                                                                                                                              │
+│ --output                              -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                           │
+│ --name                                -n  TEXT                    Name of the idp                                                                                                                                                                                                                        │
+│ --description                         -D  TEXT                    Description of the idp                                                                                                                                                                                                                 │
+│ --iam-client                          -i  UUID                    Uuid of iam_client                                                                                                                                                                                                                     │
+│ --scope                                   TEXT                    scope                                                                                                                                                                                                                                  │
+│ --nonce-required/--no-nonce-required                              Whether nonce is required                                                                                                                                                                                                              │
+│ --callback                                TEXT                    JSON string for callbacks                                                                                                                                                                                                              │
+│ --clear-tags                                                      Remove all tags.                                                                                                                                                                                                                       │
+│ --tag                                     TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                        │
+│ --help                                                            Show this message and exit.                                                                                                                                                                                                            │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

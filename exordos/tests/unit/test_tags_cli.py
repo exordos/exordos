@@ -174,7 +174,7 @@ def test_update_tags_payload(module_name, group_name, options, expected):
     args = ["-u", UUID] if module_name == "compute.sets" else [UUID]
     with (
         mock.patch.object(module, "base_client") as client,
-        mock.patch.object(module, "show_data"),
+        mock.patch.object(module, "show_resource"),
     ):
         client.get_entity.return_value = {"uuid": UUID}
         result = CliRunner().invoke(
@@ -236,7 +236,7 @@ def test_update_without_tag_options_preserves_tags(module_name, group_name):
     args = ["-u", UUID] if module_name == "compute.sets" else [UUID]
     with (
         mock.patch.object(module, "base_client") as client,
-        mock.patch.object(module, "show_data"),
+        mock.patch.object(module, "show_resource"),
     ):
         client.get_entity.return_value = {"uuid": UUID}
         result = CliRunner().invoke(

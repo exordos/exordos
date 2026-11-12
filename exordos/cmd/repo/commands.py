@@ -34,7 +34,6 @@ from exordos.cmd.repo.elements import commands as elements_commands
 from exordos.cmd.repo.store import commands as store_commands
 from exordos.common.table import get_table
 from exordos.common.table import print_table
-from exordos.common.table import show_data
 from exordos.common.table import show_resource
 from exordos.repo import utils as repo_utils
 
@@ -231,6 +230,7 @@ def repository_add_cmd(
 
 
 @click.command("update", help=f"Update {REPOSITORY_ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -313,6 +313,7 @@ def repository_update_cmd(
     repo_url: str | None,
     repo_user: str | None,
     repo_password: str | None,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -336,7 +337,7 @@ def repository_update_cmd(
         data["driver_spec"] = driver_spec
 
     entity = base_client.update_entity(client, c.REPOSITORY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 repository_group.add_command(repository_add_cmd, aliases=["a"])

@@ -125,6 +125,7 @@ def add_cmd(
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -153,6 +154,7 @@ def update_cmd(
     sync_to_ecosystem: bool | None,
     tags: tuple[str, ...] = (),
     clear_tags: bool = False,
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -164,7 +166,7 @@ def update_cmd(
 
     data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 domains_group.add_command(add_cmd, aliases=["a"])

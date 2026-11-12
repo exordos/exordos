@@ -6,12 +6,20 @@ Update value
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos vs values update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -82,19 +90,20 @@ Update value
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos vs values update [OPTIONS] UUID                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
- Update value                                                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID  Name of the project in which to deploy the value                                                                                                                                                                                                                               │
-│ --name         -n  TEXT  Name of the value                                                                                                                                                                                                                                                              │
-│ --description  -D  TEXT  Description of the value                                                                                                                                                                                                                                                       │
-│ --value        -V  TEXT  value                                                                                                                                                                                                                                                                          │
-│ --variable     -v  TEXT  uuid of the variable                                                                                                                                                                                                                                                           │
-│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos vs values update [OPTIONS] UUID
+
+ Update value
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                  │
+│ --project-id   -p  UUID                    Name of the project in which to deploy the value                                                                                                                                                                                                              │
+│ --name         -n  TEXT                    Name of the value                                                                                                                                                                                                                                             │
+│ --description  -D  TEXT                    Description of the value                                                                                                                                                                                                                                      │
+│ --value        -V  TEXT                    value                                                                                                                                                                                                                                                         │
+│ --variable     -v  TEXT                    uuid of the variable                                                                                                                                                                                                                                          │
+│ --clear-tags                               Remove all tags.                                                                                                                                                                                                                                              │
+│ --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                               │
+│ --help                                     Show this message and exit.                                                                                                                                                                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

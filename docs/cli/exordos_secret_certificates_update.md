@@ -1,3 +1,4 @@
+
 # exordos_secret_certificates_update
 
 Update certificate
@@ -11,6 +12,14 @@ Update certificate
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -78,6 +87,7 @@ Update certificate
     * Usage: `--key`
 
   Unencrypted PEM private key file
+
 * `clear_tags`:
     * Type: boolean
     * Default: `false`
@@ -107,21 +117,18 @@ Update certificate
 
  Update certificate
 
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID               Name of the project in which to deploy │
-│                                       the certificate                        │
-│ --name         -n  TEXT               Name of the certificate                │
-│ --description  -D  TEXT               Description of the certificate         │
-│ --email        -e  TEXT               Email address to use for the           │
-│                                       certificate                            │
-│ --domain       -d  TEXT               Domain of the certificate, replaces    │
-│                                       the current list. Can be repeated      │
-│ --method       -m  [dns_core|manual]  Method (provider) to issue and manage  │
-│                                       the certificate                        │
-│ --cert             FILENAME           PEM certificate or full chain file     │
-│ --key              FILENAME           Unencrypted PEM private key file       │
-│ --clear-tags                          Remove all tags.                       │
-│ --tag              TEXT               Set the complete tag list.             │
-│ --help                                Show this message and exit.            │
-╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                  │
+│ --project-id   -p  UUID                    Name of the project in which to deploy the certificate                                                                                                                                                                                                        │
+│ --name         -n  TEXT                    Name of the certificate                                                                                                                                                                                                                                       │
+│ --description  -D  TEXT                    Description of the certificate                                                                                                                                                                                                                                │
+│ --email        -e  TEXT                    Email address to use for the certificate                                                                                                                                                                                                                      │
+│ --domain       -d  TEXT                    Domain of the certificate, replaces the current list. Can be repeated                                                                                                                                                                                         │
+│ --method       -m  [dns_core|manual]       Method (provider) to issue and manage the certificate                                                                                                                                                                                                         │
+│ --cert             FILENAME                PEM certificate or full chain file                                                                                                                                                                                                                            │
+│ --key              FILENAME                Unencrypted PEM private key file                                                                                                                                                                                                                              │
+│ --clear-tags                               Remove all tags.                                                                                                                                                                                                                                              │
+│ --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                               │
+│ --help                                     Show this message and exit.                                                                                                                                                                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

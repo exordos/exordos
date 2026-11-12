@@ -25,7 +25,6 @@ from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
-from exordos.common.table import show_data
 from exordos.common.table import show_resource
 
 ENTITY = "rsa_key"
@@ -101,6 +100,7 @@ def add_cmd(
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -137,6 +137,7 @@ def update_cmd(
     description: str | None,
     tags: tuple[str, ...] = (),
     clear_tags: bool = False,
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -150,7 +151,7 @@ def update_cmd(
 
     data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 rsa_keys_group.add_command(add_cmd, aliases=["a"])

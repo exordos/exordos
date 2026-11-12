@@ -23,7 +23,6 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
-from exordos.common.table import show_data
 from exordos.common.table import show_resource
 
 ENTITY = "instance"
@@ -154,6 +153,7 @@ def add_cmd(
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -213,6 +213,7 @@ def update_cmd(
     disk_size: int | None,
     nodes_number: int | None,
     sync_replica_number: int | None,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -232,7 +233,7 @@ def update_cmd(
         data["sync_replica_number"] = sync_replica_number
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 instances_group.add_command(add_cmd, aliases=["a"])

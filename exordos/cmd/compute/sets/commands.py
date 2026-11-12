@@ -28,7 +28,6 @@ from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.cmd.compute import common as compute_common
-from exordos.common.table import show_data
 from exordos.common.table import show_resource
 
 ENTITY = "set"
@@ -179,6 +178,7 @@ def add_cmd(
 
 
 @click.command("update", help="Update an existing set")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -241,6 +241,7 @@ def update_cmd(
     image: str | None,
     tags: tuple[str, ...] = (),
     clear_tags: bool = False,
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -288,7 +289,7 @@ def update_cmd(
     entity = base_client.update_entity(
         client, ENTITY_COLLECTION, uuid_or_name, update_data
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 sets_group.add_command(add_cmd, aliases=["a"])

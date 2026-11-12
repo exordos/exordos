@@ -6,12 +6,20 @@ Update record
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns records update [OPTIONS] UUID                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos dns records update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -59,18 +67,19 @@ Update record
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns records update [OPTIONS] UUID                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
- Update record                                                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --record-type      [a|ns|soa|txt]                                                                                                                                                                                                                                                                    │
-│    --ttl              INTEGER                                                                                                                                                                                                                                                                           │
-│    --prio             INTEGER                                                                                                                                                                                                                                                                           │
-│    --disabled                                                                                                                                                                                                                                                                                           │
-│    --record           TEXT                                                                                                                                                                                                                                                                              │
-│ *  --domain-uuid  -d  TEXT            [required]                                                                                                                                                                                                                                                        │
-│    --help                             Show this message and exit.                                                                                                                                                                                                                                       │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos dns records update [OPTIONS] UUID
+
+ Update record
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                               │
+│    --record-type      [a|ns|soa|txt]                                                                                                                                                                                                                                                                     │
+│    --ttl              INTEGER                                                                                                                                                                                                                                                                            │
+│    --prio             INTEGER                                                                                                                                                                                                                                                                            │
+│    --disabled                                                                                                                                                                                                                                                                                            │
+│    --record           TEXT                                                                                                                                                                                                                                                                               │
+│ *  --domain-uuid  -d  TEXT                    [required]                                                                                                                                                                                                                                                 │
+│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

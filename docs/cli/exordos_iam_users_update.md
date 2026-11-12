@@ -6,12 +6,20 @@ Update user
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam users update [OPTIONS] UUID                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam users update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -69,19 +77,20 @@ Update user
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam users update [OPTIONS] UUID                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
- Update user                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name         -n  TEXT  Username of the user                                                                                                                                                                                                                                                           │
-│ --description  -D  TEXT  Description of the user                                                                                                                                                                                                                                                        │
-│ --first-name       TEXT                                                                                                                                                                                                                                                                                 │
-│ --last-name        TEXT                                                                                                                                                                                                                                                                                 │
-│ --surname          TEXT                                                                                                                                                                                                                                                                                 │
-│ --phone            TEXT                                                                                                                                                                                                                                                                                 │
-│ --email            TEXT                                                                                                                                                                                                                                                                                 │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos iam users update [OPTIONS] UUID
+
+ Update user
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                  │
+│ --name         -n  TEXT                    Username of the user                                                                                                                                                                                                                                          │
+│ --description  -D  TEXT                    Description of the user                                                                                                                                                                                                                                       │
+│ --first-name       TEXT                                                                                                                                                                                                                                                                                  │
+│ --last-name        TEXT                                                                                                                                                                                                                                                                                  │
+│ --surname          TEXT                                                                                                                                                                                                                                                                                  │
+│ --phone            TEXT                                                                                                                                                                                                                                                                                  │
+│ --email            TEXT                                                                                                                                                                                                                                                                                  │
+│ --help                                     Show this message and exit.                                                                                                                                                                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

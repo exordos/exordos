@@ -6,12 +6,20 @@ Update account
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas mail accounts update [OPTIONS] UUID                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas mail accounts update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -65,17 +73,18 @@ Update account
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas mail accounts update [OPTIONS] UUID                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
- Update account                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --instance-uuid       -i  TEXT  UUID of the mail instance the account belongs to [required]                                                                                                                                                                                                          │
-│    --name                -n  TEXT  Name of the account                                                                                                                                                                                                                                                  │
-│    --description             TEXT  Description of the account                                                                                                                                                                                                                                           │
-│    --password                TEXT  Password of the account, hashed by the API before it is stored                                                                                                                                                                                                       │
-│    --active/--no-active            Whether the account is allowed to authenticate                                                                                                                                                                                                                       │
-│    --help                          Show this message and exit.                                                                                                                                                                                                                                          │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas mail accounts update [OPTIONS] UUID
+
+ Update account
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output              -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                        │
+│ *  --instance-uuid       -i  TEXT                    UUID of the mail instance the account belongs to [required]                                                                                                                                                                                         │
+│    --name                -n  TEXT                    Name of the account                                                                                                                                                                                                                                 │
+│    --description             TEXT                    Description of the account                                                                                                                                                                                                                          │
+│    --password                TEXT                    Password of the account, hashed by the API before it is stored                                                                                                                                                                                      │
+│    --active/--no-active                              Whether the account is allowed to authenticate                                                                                                                                                                                                      │
+│    --help                                            Show this message and exit.                                                                                                                                                                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

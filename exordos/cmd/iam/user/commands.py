@@ -363,6 +363,7 @@ def info_cmd(ctx: click.Context, user: str, output: str) -> None:
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -418,6 +419,7 @@ def update_cmd(
     surname: str | None,
     phone: str | None,
     email: str | None,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -441,7 +443,7 @@ def update_cmd(
         return
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @users_group.command("confirm_email", help=f"Confirm email of the {ENTITY}")

@@ -26,7 +26,6 @@ from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
-from exordos.common.table import show_data
 from exordos.common.table import show_resource
 
 ENTITY = "certificate"
@@ -146,6 +145,7 @@ def add_cmd(
 
 
 @click.command("update", help="Update certificate")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -211,6 +211,7 @@ def update_cmd(
     key: tp.TextIO | None,
     tags: tuple[str, ...] = (),
     clear_tags: bool = False,
+    output: str = "table",
 ) -> None:
     if method == "dns_core" and (cert is not None or key is not None):
         raise click.UsageError("--cert and --key cannot be used with --method dns_core")
@@ -235,7 +236,7 @@ def update_cmd(
         data["key"] = key.read()
     data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 certificates_group.add_command(add_cmd, aliases=["a"])
