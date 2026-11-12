@@ -6,12 +6,20 @@ Add a new permission to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam permissions add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -54,16 +62,17 @@ Add a new permission to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam permissions add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Add a new permission to the Exordos installation                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --uuid         -u  UUID  UUID of the permission                                                                                                                                                                                                                                                         │
-│ --name         -n  TEXT  Name of the permission                                                                                                                                                                                                                                                         │
-│ --description  -D  TEXT  Description of the permission                                                                                                                                                                                                                                                  │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos iam permissions add [OPTIONS]
+
+ Add a new permission to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                  │
+│ --uuid         -u  UUID                    UUID of the permission                                                                                                                                                                                                                                        │
+│ --name         -n  TEXT                    Name of the permission                                                                                                                                                                                                                                        │
+│ --description  -D  TEXT                    Description of the permission                                                                                                                                                                                                                                 │
+│ --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                               │
+│ --help                                     Show this message and exit.                                                                                                                                                                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

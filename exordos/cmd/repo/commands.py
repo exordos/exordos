@@ -29,6 +29,7 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.clients import repo as repo_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.repo.elements import commands as elements_commands
 from exordos.cmd.repo.store import commands as store_commands
 from exordos.common.table import get_table
@@ -129,6 +130,7 @@ repository_group.add_command(_repository_group.commands["delete"], aliases=["d"]
 
 
 @click.command("add", help=f"Add a new {REPOSITORY_ENTITY}")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -206,6 +208,7 @@ def repository_add_cmd(
     repo_url: str,
     repo_user: str | None,
     repo_password: str | None,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -223,7 +226,7 @@ def repository_add_cmd(
     if driver_spec is not None:
         data["driver_spec"] = driver_spec
     entity = base_client.add_entity(client, c.REPOSITORY_COLLECTION, data)
-    show_data(entity)
+    show_data(entity, output=output)
 
 
 @click.command("update", help=f"Update {REPOSITORY_ENTITY}")

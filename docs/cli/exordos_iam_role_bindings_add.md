@@ -6,12 +6,20 @@ Add a new role_binding to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam role_bindings add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -53,7 +61,7 @@ Add a new role_binding to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam role_bindings add [OPTIONS]                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam role_bindings add [OPTIONS]
+
 ```

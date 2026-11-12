@@ -6,12 +6,20 @@ Add a new account
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas mail accounts add [OPTIONS]                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas mail accounts add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -83,20 +91,21 @@ Add a new account
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas mail accounts add [OPTIONS]                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
- Add a new account                                                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid                -u  UUID  UUID of the account                                                                                                                                                                                                                                                  │
-│ *  --project-id          -p  UUID  UUID of the project in which to create the account [required]                                                                                                                                                                                                        │
-│ *  --instance-uuid       -i  TEXT  UUID of the mail instance to create the account in [required]                                                                                                                                                                                                        │
-│ *  --username                TEXT  SMTP login of the account, the local part of the address [required]                                                                                                                                                                                                  │
-│    --name                -n  TEXT  Name of the account                                                                                                                                                                                                                                                  │
-│    --description             TEXT  Description of the account                                                                                                                                                                                                                                           │
-│    --password                TEXT  Password of the account, hashed by the API before it is stored                                                                                                                                                                                                       │
-│    --active/--no-active            Whether the account is allowed to authenticate                                                                                                                                                                                                                       │
-│    --help                          Show this message and exit.                                                                                                                                                                                                                                          │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas mail accounts add [OPTIONS]
+
+ Add a new account
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output              -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                        │
+│    --uuid                -u  UUID                    UUID of the account                                                                                                                                                                                                                                 │
+│ *  --project-id          -p  UUID                    UUID of the project in which to create the account [required]                                                                                                                                                                                       │
+│ *  --instance-uuid       -i  TEXT                    UUID of the mail instance to create the account in [required]                                                                                                                                                                                       │
+│ *  --username                TEXT                    SMTP login of the account, the local part of the address [required]                                                                                                                                                                                 │
+│    --name                -n  TEXT                    Name of the account                                                                                                                                                                                                                                 │
+│    --description             TEXT                    Description of the account                                                                                                                                                                                                                          │
+│    --password                TEXT                    Password of the account, hashed by the API before it is stored                                                                                                                                                                                      │
+│    --active/--no-active                              Whether the account is allowed to authenticate                                                                                                                                                                                                      │
+│    --help                                            Show this message and exit.                                                                                                                                                                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

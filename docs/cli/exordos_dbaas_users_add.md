@@ -6,12 +6,20 @@ Add a new user
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dbaas users add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos dbaas users add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -69,18 +77,19 @@ Add a new user
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dbaas users add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
- Add a new user                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid           -u  UUID  UUID of the user                                                                                                                                                                                                                                                          │
-│ *  --project-id     -p  UUID  UUID of the project in which to create the user [required]                                                                                                                                                                                                                │
-│ *  --instance-uuid  -i  TEXT  UUID of the instance to create the user in [required]                                                                                                                                                                                                                     │
-│ *  --name           -n  TEXT  Name of the user [required]                                                                                                                                                                                                                                               │
-│    --description        TEXT  Description of the user                                                                                                                                                                                                                                                   │
-│    --password           TEXT  Password of the user                                                                                                                                                                                                                                                      │
-│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos dbaas users add [OPTIONS]
+
+ Add a new user
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│    --uuid           -u  UUID                    UUID of the user                                                                                                                                                                                                                                         │
+│ *  --project-id     -p  UUID                    UUID of the project in which to create the user [required]                                                                                                                                                                                               │
+│ *  --instance-uuid  -i  TEXT                    UUID of the instance to create the user in [required]                                                                                                                                                                                                    │
+│ *  --name           -n  TEXT                    Name of the user [required]                                                                                                                                                                                                                              │
+│    --description        TEXT                    Description of the user                                                                                                                                                                                                                                  │
+│    --password           TEXT                    Password of the user                                                                                                                                                                                                                                     │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

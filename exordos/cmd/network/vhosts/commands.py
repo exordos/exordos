@@ -23,6 +23,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.common.table import show_data
 
 ENTITY = "vhost"
@@ -53,6 +54,7 @@ def _cert(cert: tp.TextIO | None, key: tp.TextIO | None) -> dict | None:
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the vhost")
 @click.option("-p", "--project-id", type=click.UUID, required=True, help="Project UUID")
@@ -96,6 +98,7 @@ def add_cmd(
     key: tp.TextIO | None,
     proxy_protocol_from: str | None,
     disabled: bool,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
@@ -113,7 +116,7 @@ def add_cmd(
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(lb_uuid=lb_uuid), data
     )
-    show_data(entity)
+    show_data(entity, output=output)
 
 
 vhosts_group.add_command(add_cmd, aliases=["a", "create"])

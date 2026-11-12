@@ -23,6 +23,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.common.table import show_data
@@ -45,6 +46,7 @@ certificates_group = create_entity_group(
 
 
 @click.command("add", help="Add a new certificate to the Exordos installation")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -113,6 +115,7 @@ def add_cmd(
     cert: tp.TextIO | None,
     key: tp.TextIO | None,
     tags: tuple[str, ...] = (),
+    output: str = "table",
 ) -> None:
     if method == "manual" and (cert is None or key is None):
         raise click.UsageError("--method manual requires both --cert and --key")
@@ -138,7 +141,7 @@ def add_cmd(
         data["key"] = key.read()
     data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity)
+    show_data(entity, output=output)
 
 
 @click.command("update", help="Update certificate")

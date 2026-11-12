@@ -24,6 +24,7 @@ from exordos import constants as c
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.common.table import show_data
 
 ENTITY = "rule"
@@ -44,6 +45,7 @@ rules_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
     "add",
     help=f"Add a new {ENTITY}",
 )
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -96,6 +98,7 @@ def add_cmd(
     operator: str | None,
     action: tuple[str, ...],
     condition: tuple[str, ...],
+    output: str = "table",
 ) -> None:
     """
     Example for anonymous-registration:
@@ -117,8 +120,8 @@ def add_cmd(
         data["project_id"] = str(project_id)
 
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    click.echo(f"{ENTITY} {entity['uuid']} created")
-    show_data(entity)
+    click.echo(f"{ENTITY} {entity['uuid']} created", err=output.lower() == "json")
+    show_data(entity, output=output)
 
 
 rules_group.add_command(add_cmd, aliases=["a"])

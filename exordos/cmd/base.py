@@ -29,6 +29,19 @@ from exordos.common.table import print_table
 from exordos.common.table import show_data
 
 
+def output_option(f):
+    """Select a resource output format, preserving native JSON values."""
+    options = ["--output"]
+    if not any("-o" in param.opts for param in getattr(f, "__click_params__", [])):
+        options.append("-o")
+    return click.option(
+        *options,
+        default=c.DEFAULT_TABLE_FORMAT,
+        type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+        help="Output format; JSON prints one resource object (an array for bulk creation).",
+    )(f)
+
+
 def tag_options(update: bool = False):
     """Add tag options to a resource create or update command."""
 

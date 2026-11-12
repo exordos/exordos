@@ -6,12 +6,20 @@ Add a new bucket
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 buckets add [OPTIONS]                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas s3 buckets add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -104,23 +112,24 @@ Add a new bucket
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 buckets add [OPTIONS]                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
- Add a new bucket                                                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid                          -u  UUID                                       UUID of the bucket                                                                                                                                                                                                    │
-│ *  --project-id                    -p  UUID                                       UUID of the project in which to create the bucket [required]                                                                                                                                                          │
-│ *  --instance-uuid                 -i  TEXT                                       UUID of the instance to create the bucket in [required]                                                                                                                                                               │
-│ *  --name                          -n  TEXT                                       Name of the bucket [required]                                                                                                                                                                                         │
-│    --description                       TEXT                                       Description of the bucket                                                                                                                                                                                             │
-│    --versioning/--no-versioning                                                   Keep object versions in the bucket, cannot be changed later                                                                                                                                                           │
-│    --object-lock/--no-object-lock                                                 Enable object lock on the bucket, cannot be changed later                                                                                                                                                             │
-│    --public/--no-public                                                           Allow anonymous read access to the bucket                                                                                                                                                                             │
-│    --quota-bytes                       INTEGER RANGE [0<=x<=9223372036854775807]  Size limit of the bucket in bytes, 0 means unlimited                                                                                                                                                                  │
-│    --default-retention-mode            [governance|compliance]                    Default object lock retention mode                                                                                                                                                                                    │
-│    --default-retention-days            INTEGER RANGE [1<=x<=365000]               Default object lock retention period in days                                                                                                                                                                          │
-│    --help                                                                         Show this message and exit.                                                                                                                                                                                           │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas s3 buckets add [OPTIONS]
+
+ Add a new bucket
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output                        -o  [json|html|table|yaml]                     Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                           │
+│    --uuid                          -u  UUID                                       UUID of the bucket                                                                                                                                                                                                     │
+│ *  --project-id                    -p  UUID                                       UUID of the project in which to create the bucket [required]                                                                                                                                                           │
+│ *  --instance-uuid                 -i  TEXT                                       UUID of the instance to create the bucket in [required]                                                                                                                                                                │
+│ *  --name                          -n  TEXT                                       Name of the bucket [required]                                                                                                                                                                                          │
+│    --description                       TEXT                                       Description of the bucket                                                                                                                                                                                              │
+│    --versioning/--no-versioning                                                   Keep object versions in the bucket, cannot be changed later                                                                                                                                                            │
+│    --object-lock/--no-object-lock                                                 Enable object lock on the bucket, cannot be changed later                                                                                                                                                              │
+│    --public/--no-public                                                           Allow anonymous read access to the bucket                                                                                                                                                                              │
+│    --quota-bytes                       INTEGER RANGE [0<=x<=9223372036854775807]  Size limit of the bucket in bytes, 0 means unlimited                                                                                                                                                                   │
+│    --default-retention-mode            [governance|compliance]                    Default object lock retention mode                                                                                                                                                                                     │
+│    --default-retention-days            INTEGER RANGE [1<=x<=365000]               Default object lock retention period in days                                                                                                                                                                           │
+│    --help                                                                         Show this message and exit.                                                                                                                                                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

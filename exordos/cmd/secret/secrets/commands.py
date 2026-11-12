@@ -22,6 +22,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.common.table import show_data
@@ -42,6 +43,7 @@ secrets_group = create_entity_group(
 
 
 @click.command("add", help=f"Add a new {ENTITY} to the Exordos installation")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -95,6 +97,7 @@ def add_cmd(
     value: str | None,
     default_value: str | None,
     tags: tuple[str, ...] = (),
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -114,7 +117,7 @@ def add_cmd(
 
     data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity)
+    show_data(entity, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

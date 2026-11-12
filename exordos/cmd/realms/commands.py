@@ -33,6 +33,7 @@ from exordos import constants as c
 from exordos import utils as exordos_utils
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.base import output_option
 from exordos.cmd.settings import config as settings_config
 from exordos.common.table import get_table
 from exordos.common.table import print_table
@@ -266,6 +267,7 @@ def list_cmd(ctx: click.Context, output: str) -> None:
 
 
 @click.command("add", help=f"Add a new ecosystem {ENTITY}")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -332,6 +334,7 @@ def add_cmd(
     node_image: str | None,
     core_version: str | None,
     ssh_public_key: str | None,
+    output: str = "table",
 ) -> None:
     import questionary
 
@@ -360,7 +363,7 @@ def add_cmd(
             ssh_public_key = f.read()
         data["ssh_public_key"] = ssh_public_key
     data = base_client.add_entity(ecosystem_client, ENTITY_COLLECTION, data)
-    show_data(data)
+    show_data(data, output=output)
 
 
 @click.command("claim", help=f"Claim a warm {ENTITY} from the pool")

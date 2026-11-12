@@ -6,12 +6,20 @@ Add a new repository
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos repo add [OPTIONS]                                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos repo add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -97,22 +105,23 @@ Add a new repository
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos repo add [OPTIONS]                                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
- Add a new repository                                                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid           -u  UUID         UUID of the repository                                                                                                                                                                                                                                             │
-│ *  --project-id     -p  UUID         UUID of the project in which to deploy the repository [required]                                                                                                                                                                                                   │
-│    --name           -n  TEXT         Name of the repository                                                                                                                                                                                                                                             │
-│    --description    -D  TEXT         Description of the repository                                                                                                                                                                                                                                      │
-│    --priority           INTEGER      Priority of the repository (0-4096)                                                                                                                                                                                                                                │
-│    --refresh-rate       INTEGER      Refresh rate of the repository in seconds                                                                                                                                                                                                                          │
-│    --sync-mode          [copy|lazy]  Sync mode of the repository                                                                                                                                                                                                                                        │
-│ *  --repo-url           TEXT         URL of the repository. Example: https://repo.exordos.com/exordos-elements/ [required]                                                                                                                                                                              │
-│    --repo-user          TEXT         Username for the repository                                                                                                                                                                                                                                        │
-│    --repo-password      TEXT         Password for the repository                                                                                                                                                                                                                                        │
-│    --help                            Show this message and exit.                                                                                                                                                                                                                                        │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos repo add [OPTIONS]
+
+ Add a new repository
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│    --uuid           -u  UUID                    UUID of the repository                                                                                                                                                                                                                                   │
+│ *  --project-id     -p  UUID                    UUID of the project in which to deploy the repository [required]                                                                                                                                                                                         │
+│    --name           -n  TEXT                    Name of the repository                                                                                                                                                                                                                                   │
+│    --description    -D  TEXT                    Description of the repository                                                                                                                                                                                                                            │
+│    --priority           INTEGER                 Priority of the repository (0-4096)                                                                                                                                                                                                                      │
+│    --refresh-rate       INTEGER                 Refresh rate of the repository in seconds                                                                                                                                                                                                                │
+│    --sync-mode          [copy|lazy]             Sync mode of the repository                                                                                                                                                                                                                              │
+│ *  --repo-url           TEXT                    URL of the repository. Example: https://repo.exordos.com/exordos-elements/ [required]                                                                                                                                                                    │
+│    --repo-user          TEXT                    Username for the repository                                                                                                                                                                                                                              │
+│    --repo-password      TEXT                    Password for the repository                                                                                                                                                                                                                              │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

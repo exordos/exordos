@@ -6,12 +6,20 @@ Add a new limit
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos limits add [OPTIONS]                                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos limits add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -61,17 +69,18 @@ Add a new limit
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos limits add [OPTIONS]                                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
- Add a new limit                                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid           -u  UUID     UUID of the limit                                                                                                                                                                                                                                                      │
-│ *  --project-id     -p  UUID     Name of the project in which to deploy the limit [required]                                                                                                                                                                                                            │
-│ *  --resource-name  -r  TEXT     Resource name of the limit [required]                                                                                                                                                                                                                                  │
-│    --field-name     -f  TEXT     Resource field name of the limit                                                                                                                                                                                                                                       │
-│ *  --limit          -l  INTEGER  [required]                                                                                                                                                                                                                                                             │
-│    --help                        Show this message and exit.                                                                                                                                                                                                                                            │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos limits add [OPTIONS]
+
+ Add a new limit
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│    --uuid           -u  UUID                    UUID of the limit                                                                                                                                                                                                                                        │
+│ *  --project-id     -p  UUID                    Name of the project in which to deploy the limit [required]                                                                                                                                                                                              │
+│ *  --resource-name  -r  TEXT                    Resource name of the limit [required]                                                                                                                                                                                                                    │
+│    --field-name     -f  TEXT                    Resource field name of the limit                                                                                                                                                                                                                         │
+│ *  --limit          -l  INTEGER                 [required]                                                                                                                                                                                                                                               │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -6,12 +6,20 @@ Add a new vhost
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network vhosts add [OPTIONS]                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network vhosts add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -109,12 +117,13 @@ Add a new vhost
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network vhosts add [OPTIONS]                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                            
- Add a new vhost                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network vhosts add [OPTIONS]
+
+ Add a new vhost
+
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output               -o  [json|html|table|yaml]        Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                 │
 │    --uuid                 -u  UUID                          UUID of the vhost                                                                                                                                                                                                                            │
 │ *  --project-id           -p  UUID                          Project UUID [required]                                                                                                                                                                                                                      │
 │ *  --lb-uuid                  UUID                          Load balancer UUID [required]                                                                                                                                                                                                                │

@@ -6,12 +6,20 @@ Add a new policy
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 policies add [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas s3 policies add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -69,18 +77,19 @@ Add a new policy
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 policies add [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
- Add a new policy                                                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid           -u  UUID  UUID of the policy                                                                                                                                                                                                                                                        │
-│ *  --project-id     -p  UUID  UUID of the project in which to create the policy [required]                                                                                                                                                                                                              │
-│ *  --instance-uuid  -i  TEXT  UUID of the instance to create the policy in [required]                                                                                                                                                                                                                   │
-│ *  --name           -n  TEXT  Name of the policy [required]                                                                                                                                                                                                                                             │
-│    --description        TEXT  Description of the policy                                                                                                                                                                                                                                                 │
-│ *  --content            TEXT  JSON string with the IAM policy document [required]                                                                                                                                                                                                                       │
-│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas s3 policies add [OPTIONS]
+
+ Add a new policy
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│    --uuid           -u  UUID                    UUID of the policy                                                                                                                                                                                                                                       │
+│ *  --project-id     -p  UUID                    UUID of the project in which to create the policy [required]                                                                                                                                                                                             │
+│ *  --instance-uuid  -i  TEXT                    UUID of the instance to create the policy in [required]                                                                                                                                                                                                  │
+│ *  --name           -n  TEXT                    Name of the policy [required]                                                                                                                                                                                                                            │
+│    --description        TEXT                    Description of the policy                                                                                                                                                                                                                                │
+│ *  --content            TEXT                    JSON string with the IAM policy document [required]                                                                                                                                                                                                      │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

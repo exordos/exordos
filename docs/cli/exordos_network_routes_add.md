@@ -6,12 +6,20 @@ Add a new route
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network routes add [OPTIONS]                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network routes add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -118,12 +126,13 @@ Add a new route
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network routes add [OPTIONS]                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                            
- Add a new route                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network routes add [OPTIONS]
+
+ Add a new route
+
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output            -o  [json|html|table|yaml]    Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                        │
 │    --uuid              -u  UUID                      UUID of the route                                                                                                                                                                                                                                   │
 │ *  --project-id        -p  UUID                      Project UUID [required]                                                                                                                                                                                                                             │
 │ *  --lb-uuid               UUID                      Load balancer UUID [required]                                                                                                                                                                                                                       │

@@ -6,12 +6,20 @@ Add a new hypervisor
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute hypervisors add [OPTIONS]                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute hypervisors add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -80,21 +88,22 @@ Add a new hypervisor
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute hypervisors add [OPTIONS]                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
- Add a new hypervisor                                                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --uuid          -u  UUID     UUID of the hypervisor                                                                                                                                                                                                                                                     │
-│ --name          -n  TEXT     Name of the hypervisor                                                                                                                                                                                                                                                     │
-│ --description   -D  TEXT     Description of the hypervisor                                                                                                                                                                                                                                              │
-│ --avail-cores       INTEGER                                                                                                                                                                                                                                                                             │
-│ --avail-ram         INTEGER                                                                                                                                                                                                                                                                             │
-│ --cores-ratio       FLOAT                                                                                                                                                                                                                                                                               │
-│ --ram-ratio         FLOAT                                                                                                                                                                                                                                                                               │
-│ --machine-type  -m  [vm|hw]                                                                                                                                                                                                                                                                             │
-│ --driver-spec       TEXT     Additional filters to pass to the api. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f                                                                                                                                                         │
-│ --help                       Show this message and exit.                                                                                                                                                                                                                                                │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos compute hypervisors add [OPTIONS]
+
+ Add a new hypervisor
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output        -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                 │
+│ --uuid          -u  UUID                    UUID of the hypervisor                                                                                                                                                                                                                                       │
+│ --name          -n  TEXT                    Name of the hypervisor                                                                                                                                                                                                                                       │
+│ --description   -D  TEXT                    Description of the hypervisor                                                                                                                                                                                                                                │
+│ --avail-cores       INTEGER                                                                                                                                                                                                                                                                              │
+│ --avail-ram         INTEGER                                                                                                                                                                                                                                                                              │
+│ --cores-ratio       FLOAT                                                                                                                                                                                                                                                                                │
+│ --ram-ratio         FLOAT                                                                                                                                                                                                                                                                                │
+│ --machine-type  -m  [vm|hw]                                                                                                                                                                                                                                                                              │
+│ --driver-spec       TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f                                                                                                                                           │
+│ --help                                      Show this message and exit.                                                                                                                                                                                                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

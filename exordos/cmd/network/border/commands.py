@@ -22,6 +22,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.common.table import show_data
 
 # ---------------------------------------------------------------------------
@@ -91,6 +92,7 @@ def _parse_forward(spec: str) -> dict:
 
 
 @borders_group.command("add", help="Add a new border (NAT gateway)")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the border")
 @click.option("-n", "--name", type=str, default="border", help="Name of the border")
@@ -150,6 +152,7 @@ def border_add_cmd(
     disk_size: int,
     snat_specs: tuple[str, ...],
     forward_specs: tuple[str, ...],
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if kind == "core":
@@ -172,7 +175,7 @@ def border_add_cmd(
     }
     if node:
         data["node"] = str(node)
-    show_data(base_client.add_entity(client, c.BORDER_COLLECTION, data))
+    show_data(base_client.add_entity(client, c.BORDER_COLLECTION, data), output=output)
 
 
 def _update_rules(ctx: click.Context, border: str, field: str, rules: list) -> None:

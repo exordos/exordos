@@ -22,6 +22,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.common.table import show_data
 
 ENTITY = "limit"
@@ -41,6 +42,7 @@ limits_group = create_entity_group(
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -83,6 +85,7 @@ def add_cmd(
     resource_name: str,
     field_name: str | None,
     limit: int,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -96,7 +99,7 @@ def add_cmd(
     if field_name is not None:
         data["field_name"] = field_name
     data = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(data)
+    show_data(data, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

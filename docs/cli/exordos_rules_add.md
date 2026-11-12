@@ -6,12 +6,19 @@ Add a new rule
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos rules add [OPTIONS]                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos rules add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -71,19 +78,20 @@ Add a new rule
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos rules add [OPTIONS]                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
- Add a new rule                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --uuid         -u  UUID      UUID of the rule                                                                                                                                                                                                                                                           │
-│ --project-id   -p  UUID      UUID of the project                                                                                                                                                                                                                                                        │
-│ --name         -n  TEXT      Name of the rule                                                                                                                                                                                                                                                           │
-│ --description  -D  TEXT      Description of the rule                                                                                                                                                                                                                                                    │
-│ --operator     -o  [OR|AND]                                                                                                                                                                                                                                                                             │
-│ --action           TEXT                                                                                                                                                                                                                                                                                 │
-│ --condition        TEXT                                                                                                                                                                                                                                                                                 │
-│ --help                       Show this message and exit.                                                                                                                                                                                                                                                │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos rules add [OPTIONS]
+
+ Add a new rule
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output           [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                  │
+│ --uuid         -u  UUID                    UUID of the rule                                                                                                                                                                                                                                              │
+│ --project-id   -p  UUID                    UUID of the project                                                                                                                                                                                                                                           │
+│ --name         -n  TEXT                    Name of the rule                                                                                                                                                                                                                                              │
+│ --description  -D  TEXT                    Description of the rule                                                                                                                                                                                                                                       │
+│ --operator     -o  [OR|AND]                                                                                                                                                                                                                                                                              │
+│ --action           TEXT                                                                                                                                                                                                                                                                                  │
+│ --condition        TEXT                                                                                                                                                                                                                                                                                  │
+│ --help                                     Show this message and exit.                                                                                                                                                                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

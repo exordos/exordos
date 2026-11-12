@@ -23,6 +23,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.common.table import show_data
 
 ENTITY = "policy"
@@ -53,6 +54,7 @@ def _parse_content(content: str) -> dict:
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -102,6 +104,7 @@ def add_cmd(
     name: str,
     description: str | None,
     content: str,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -118,7 +121,7 @@ def add_cmd(
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(instance_uuid=instance_uuid), data
     )
-    show_data(entity)
+    show_data(entity, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")

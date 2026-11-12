@@ -6,12 +6,20 @@ Add a new idp to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos iam idps add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -92,21 +100,22 @@ Add a new idp to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos iam idps add [OPTIONS]                                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                            
- Add a new idp to the Exordos installation                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos iam idps add [OPTIONS]
+
+ Add a new idp to the Exordos installation
+
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid                                                 -u  UUID  UUID of the idp                                                                                                                                                                                                                      │
-│    --name                                                 -n  TEXT  Name of the idp                                                                                                                                                                                                                      │
-│    --description                                          -D  TEXT  Description of the idp                                                                                                                                                                                                               │
-│ *  --project-id                                           -p  UUID  Uuid of the project [required]                                                                                                                                                                                                       │
-│ *  --iam-client                                           -i  UUID  Uuid of iam_client [required]                                                                                                                                                                                                        │
-│    --scope                                                    TEXT  scope                                                                                                                                                                                                                                │
-│    --nonce-required,--nonce_required/--no-nonce-required            Whether nonce is required                                                                                                                                                                                                            │
-│ *  --callback                                                 TEXT  JSON string for callbacks [required]                                                                                                                                                                                                 │
-│    --tag                                                      TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                      │
-│    --help                                                           Show this message and exit.                                                                                                                                                                                                          │
+│    --output                                               -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                       │
+│    --uuid                                                 -u  UUID                    UUID of the idp                                                                                                                                                                                                    │
+│    --name                                                 -n  TEXT                    Name of the idp                                                                                                                                                                                                    │
+│    --description                                          -D  TEXT                    Description of the idp                                                                                                                                                                                             │
+│ *  --project-id                                           -p  UUID                    Uuid of the project [required]                                                                                                                                                                                     │
+│ *  --iam-client                                           -i  UUID                    Uuid of iam_client [required]                                                                                                                                                                                      │
+│    --scope                                                    TEXT                    scope                                                                                                                                                                                                              │
+│    --nonce-required,--nonce_required/--no-nonce-required                              Whether nonce is required                                                                                                                                                                                          │
+│ *  --callback                                                 TEXT                    JSON string for callbacks [required]                                                                                                                                                                               │
+│    --tag                                                      TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                    │
+│    --help                                                                             Show this message and exit.                                                                                                                                                                                        │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

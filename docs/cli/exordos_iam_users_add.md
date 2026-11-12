@@ -6,12 +6,20 @@ Add a new user
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam users add [OPTIONS]                                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam users add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -105,26 +113,27 @@ Add a new user
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam users add [OPTIONS]                                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
- Add a new user                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid                       -u  UUID  UUID of the user                                                                                                                                                                                                                                              │
-│    --name                       -n  TEXT  Name of the user                                                                                                                                                                                                                                              │
-│    --password                   -p  TEXT  Password of the user. If not provided, will be asked interactively                                                                                                                                                                                            │
-│    --description                -D  TEXT  Description of the user                                                                                                                                                                                                                                       │
-│    --first_name                     TEXT                                                                                                                                                                                                                                                                │
-│    --last_name                      TEXT                                                                                                                                                                                                                                                                │
-│    --surname                        TEXT                                                                                                                                                                                                                                                                │
-│    --phone                          TEXT                                                                                                                                                                                                                                                                │
-│ *  --email                          TEXT  [required]                                                                                                                                                                                                                                                    │
-│    --email_verified                                                                                                                                                                                                                                                                                     │
-│    --confirmation_code              TEXT                                                                                                                                                                                                                                                                │
-│    --confirmation_code_made_at      TEXT                                                                                                                                                                                                                                                                │
-│    --otp_secret                     TEXT                                                                                                                                                                                                                                                                │
-│    --otp_enabled                                                                                                                                                                                                                                                                                        │
-│    --help                                 Show this message and exit.                                                                                                                                                                                                                                   │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos iam users add [OPTIONS]
+
+ Add a new user
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output                     -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                 │
+│    --uuid                       -u  UUID                    UUID of the user                                                                                                                                                                                                                             │
+│    --name                       -n  TEXT                    Name of the user                                                                                                                                                                                                                             │
+│    --password                   -p  TEXT                    Password of the user. If not provided, will be asked interactively                                                                                                                                                                           │
+│    --description                -D  TEXT                    Description of the user                                                                                                                                                                                                                      │
+│    --first_name                     TEXT                                                                                                                                                                                                                                                                 │
+│    --last_name                      TEXT                                                                                                                                                                                                                                                                 │
+│    --surname                        TEXT                                                                                                                                                                                                                                                                 │
+│    --phone                          TEXT                                                                                                                                                                                                                                                                 │
+│ *  --email                          TEXT                    [required]                                                                                                                                                                                                                                   │
+│    --email_verified                                                                                                                                                                                                                                                                                      │
+│    --confirmation_code              TEXT                                                                                                                                                                                                                                                                 │
+│    --confirmation_code_made_at      TEXT                                                                                                                                                                                                                                                                 │
+│    --otp_secret                     TEXT                                                                                                                                                                                                                                                                 │
+│    --otp_enabled                                                                                                                                                                                                                                                                                         │
+│    --help                                                   Show this message and exit.                                                                                                                                                                                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

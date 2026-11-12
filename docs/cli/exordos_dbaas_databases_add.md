@@ -6,12 +6,20 @@ Add a new database
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dbaas databases add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos dbaas databases add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -69,18 +77,19 @@ Add a new database
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dbaas databases add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Add a new database                                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid           -u  UUID  UUID of the database                                                                                                                                                                                                                                                      │
-│ *  --project-id     -p  UUID  UUID of the project in which to create the database [required]                                                                                                                                                                                                            │
-│ *  --instance-uuid  -i  TEXT  UUID of the instance to create the database in [required]                                                                                                                                                                                                                 │
-│ *  --name           -n  TEXT  Name of the database [required]                                                                                                                                                                                                                                           │
-│    --description        TEXT  Description of the database                                                                                                                                                                                                                                               │
-│ *  --owner              TEXT  UUID or name of the user owning the database [required]                                                                                                                                                                                                                   │
-│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos dbaas databases add [OPTIONS]
+
+ Add a new database
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│    --uuid           -u  UUID                    UUID of the database                                                                                                                                                                                                                                     │
+│ *  --project-id     -p  UUID                    UUID of the project in which to create the database [required]                                                                                                                                                                                           │
+│ *  --instance-uuid  -i  TEXT                    UUID of the instance to create the database in [required]                                                                                                                                                                                                │
+│ *  --name           -n  TEXT                    Name of the database [required]                                                                                                                                                                                                                          │
+│    --description        TEXT                    Description of the database                                                                                                                                                                                                                              │
+│ *  --owner              TEXT                    UUID or name of the user owning the database [required]                                                                                                                                                                                                  │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
