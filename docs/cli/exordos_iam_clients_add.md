@@ -6,12 +6,20 @@ Add a new client to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam clients add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam clients add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -77,19 +85,20 @@ Add a new client to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam clients add [OPTIONS]                                                                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                           
- Add a new client to the Exordos installation                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid                 -u  UUID           UUID of the client                                                                                                                                                                                                                                         │
-│    --name                 -n  TEXT           Name of the client                                                                                                                                                                                                                                         │
-│    --description          -D  TEXT           Description of the client                                                                                                                                                                                                                                  │
-│ *  --project-id           -p  UUID           Name of the project in which to deploy the client [required]                                                                                                                                                                                               │
-│ *  --client-id                TEXT           client_id [required]                                                                                                                                                                                                                                       │
-│ *  --secret                   TEXT           secret [required]                                                                                                                                                                                                                                          │
-│    --signature-algorithm  -s  [HS256|RS256]  signature-algorithm [default: HS256]                                                                                                                                                                                                                       │
-│    --help                                    Show this message and exit.                                                                                                                                                                                                                                │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos iam clients add [OPTIONS]
+
+ Add a new client to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output               -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                       │
+│    --uuid                 -u  UUID                    UUID of the client                                                                                                                                                                                                                                 │
+│    --name                 -n  TEXT                    Name of the client                                                                                                                                                                                                                                 │
+│    --description          -D  TEXT                    Description of the client                                                                                                                                                                                                                          │
+│ *  --project-id           -p  UUID                    Name of the project in which to deploy the client [required]                                                                                                                                                                                       │
+│ *  --client-id                TEXT                    client_id [required]                                                                                                                                                                                                                               │
+│ *  --secret                   TEXT                    secret [required]                                                                                                                                                                                                                                  │
+│    --signature-algorithm  -s  [HS256|RS256]           signature-algorithm [default: HS256]                                                                                                                                                                                                               │
+│    --help                                             Show this message and exit.                                                                                                                                                                                                                        │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

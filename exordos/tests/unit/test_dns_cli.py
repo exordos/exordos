@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import json
 from unittest import mock
 
 from click.testing import CliRunner
@@ -63,3 +64,42 @@ def test_info_cmd_shows_domain_and_records(command, output, records_present):
         mock.call(c.DOMAIN_COLLECTION, name="example.com"),
         mock.call(c.RECORD_COLLECTION.format(domain_uuid=UUID)),
     ]
+
+
+@pytest.mark.parametrize("output", ["json", "JSON"])
+def test_add_cmd_json_preserves_record(output):
+    from exordos.cmd.dns.records import commands
+
+    entity = {
+        "uuid": RECORD_UUID,
+        "type": "TXT",
+        "ttl": 3600,
+        "prio": None,
+        "disabled": False,
+        "record": {"kind": "TXT", "text": "проверка"},
+    }
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(commands.base_client, "add_entity", return_value=entity),
+    ):
+        result = CliRunner().invoke(
+            dns_group,
+            [
+                "records",
+                "add",
+                "--project-id",
+                UUID,
+                "--domain-uuid",
+                UUID,
+                "--record-type",
+                "TXT",
+                "--record",
+                "text=проверка",
+                "-o",
+                output,
+            ],
+            obj=mock.Mock(auth_data={}),
+        )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == entity

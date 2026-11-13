@@ -6,12 +6,20 @@ Attach a policy to a user
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 user-policies add [OPTIONS]                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas s3 user-policies add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -61,17 +69,18 @@ Attach a policy to a user
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 user-policies add [OPTIONS]                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
- Attach a policy to a user                                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid           -u  UUID  UUID of the policy attachment                                                                                                                                                                                                                                             │
-│ *  --project-id     -p  UUID  UUID of the project in which to create the policy attachment [required]                                                                                                                                                                                                   │
-│ *  --instance-uuid  -i  TEXT  UUID of the instance the user and the policy belong to [required]                                                                                                                                                                                                         │
-│ *  --user-uuid          TEXT  UUID of the user to attach the policy to [required]                                                                                                                                                                                                                       │
-│ *  --policy             TEXT  UUID or name of the policy to attach [required]                                                                                                                                                                                                                           │
-│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas s3 user-policies add [OPTIONS]
+
+ Attach a policy to a user
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│    --uuid           -u  UUID                    UUID of the policy attachment                                                                                                                                                                                                                            │
+│ *  --project-id     -p  UUID                    UUID of the project in which to create the policy attachment [required]                                                                                                                                                                                  │
+│ *  --instance-uuid  -i  TEXT                    UUID of the instance the user and the policy belong to [required]                                                                                                                                                                                        │
+│ *  --user-uuid          TEXT                    UUID of the user to attach the policy to [required]                                                                                                                                                                                                      │
+│ *  --policy             TEXT                    UUID or name of the policy to attach [required]                                                                                                                                                                                                          │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

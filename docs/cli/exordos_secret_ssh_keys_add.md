@@ -1,17 +1,25 @@
 
 # exordos_secret_ssh_keys_add
 
-Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or `exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`
+Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or `exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`. Existing SSH keys are skipped; creation continues for the remaining targets.
 
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos secret ssh_keys add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -104,23 +112,25 @@ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_key
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or `exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`               
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --uuid               -u  UUID  UUID of the ssh_key                                                                                                                                                                                                                                                      │
-│ --project-id         -p  UUID  Name of the project in which to deploy the ssh_key                                                                                                                                                                                                                       │
-│ --name               -n  TEXT  Name of the ssh_key                                                                                                                                                                                                                                                      │
-│ --description        -D  TEXT  Description of the ssh_key                                                                                                                                                                                                                                               │
-│ --current-realm                add ssh keys to all current realm nodes and sets. If you want to use another realm, additionally change it by global cli option --realm                                                                                                                                  │
-│ --element                TEXT  element uuid or name                                                                                                                                                                                                                                                     │
-│ --node                   TEXT  node uuids or names                                                                                                                                                                                                                                                      │
-│ --node-set               TEXT  node_set uuids or names                                                                                                                                                                                                                                                  │
-│ --user                   TEXT  user name of the ssh_key                                                                                                                                                                                                                                                 │
-│ --target_public_key      TEXT  key or path to it, for example: /home/user/.ssh/id_rsa.pub                                                                                                                                                                                                               │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│ --help                         Show this message and exit.                                                                                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos secret ssh_keys add [OPTIONS]
+
+ Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or `exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`. Existing SSH
+ keys are skipped; creation continues for the remaining targets.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output             -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                            │
+│ --uuid               -u  UUID                    UUID of the ssh_key                                                                                                                                                                                                                                     │
+│ --project-id         -p  UUID                    Name of the project in which to deploy the ssh_key                                                                                                                                                                                                      │
+│ --name               -n  TEXT                    Name of the ssh_key                                                                                                                                                                                                                                     │
+│ --description        -D  TEXT                    Description of the ssh_key                                                                                                                                                                                                                              │
+│ --current-realm                                  add ssh keys to all current realm nodes and sets. If you want to use another realm, additionally change it by global cli option --realm                                                                                                                 │
+│ --element                TEXT                    element uuid or name                                                                                                                                                                                                                                    │
+│ --node                   TEXT                    node uuids or names                                                                                                                                                                                                                                     │
+│ --node-set               TEXT                    node_set uuids or names                                                                                                                                                                                                                                 │
+│ --user                   TEXT                    user name of the ssh_key                                                                                                                                                                                                                                │
+│ --target_public_key      TEXT                    key or path to it, for example: /home/user/.ssh/id_rsa.pub                                                                                                                                                                                              │
+│ --tag                    TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                         │
+│ --help                                           Show this message and exit.                                                                                                                                                                                                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

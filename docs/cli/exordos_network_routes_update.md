@@ -6,12 +6,20 @@ Update route. Passing --condition or --pool replaces the whole route condition
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network routes update [OPTIONS] UUID                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network routes update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -107,12 +115,13 @@ Update route. Passing --condition or --pool replaces the whole route condition
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network routes update [OPTIONS] UUID                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                            
- Update route. Passing --condition or --pool replaces the whole route condition                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network routes update [OPTIONS] UUID
+
+ Update route. Passing --condition or --pool replaces the whole route condition
+
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output              -o  [json|html|table|yaml]    Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                      │
 │ *  --lb-uuid                 UUID                      Load balancer UUID [required]                                                                                                                                                                                                                     │
 │ *  --vhost-uuid              UUID                      Vhost UUID [required]                                                                                                                                                                                                                             │
 │    --name                -n  TEXT                      Name of the route                                                                                                                                                                                                                                 │

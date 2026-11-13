@@ -6,12 +6,20 @@ Update domain
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns domains update [OPTIONS] UUID                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos dns domains update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -58,16 +66,17 @@ Update domain
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dns domains update [OPTIONS] UUID                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
- Update domain                                                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name               -n  TEXT  Name of the domain                                                                                                                                                                                                                                                       │
-│ --sync-to-ecosystem  -s        Sync the domain to the ecosystem                                                                                                                                                                                                                                         │
-│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│ --help                         Show this message and exit.                                                                                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos dns domains update [OPTIONS] UUID
+
+ Update domain
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output             -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                            │
+│ --name               -n  TEXT                    Name of the domain                                                                                                                                                                                                                                      │
+│ --sync-to-ecosystem  -s                          Sync the domain to the ecosystem                                                                                                                                                                                                                        │
+│ --clear-tags                                     Remove all tags.                                                                                                                                                                                                                                        │
+│ --tag                    TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                         │
+│ --help                                           Show this message and exit.                                                                                                                                                                                                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

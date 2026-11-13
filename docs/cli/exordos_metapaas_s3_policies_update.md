@@ -6,12 +6,20 @@ Update policy
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 policies update [OPTIONS] UUID                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas s3 policies update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -58,16 +66,17 @@ Update policy
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 policies update [OPTIONS] UUID                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
- Update policy                                                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --instance-uuid  -i  TEXT  UUID of the instance the policy belongs to [required]                                                                                                                                                                                                                     │
-│    --name           -n  TEXT  Name of the policy                                                                                                                                                                                                                                                        │
-│    --description        TEXT  Description of the policy                                                                                                                                                                                                                                                 │
-│    --content            TEXT  JSON string with the IAM policy document                                                                                                                                                                                                                                  │
-│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas s3 policies update [OPTIONS] UUID
+
+ Update policy
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│ *  --instance-uuid  -i  TEXT                    UUID of the instance the policy belongs to [required]                                                                                                                                                                                                    │
+│    --name           -n  TEXT                    Name of the policy                                                                                                                                                                                                                                       │
+│    --description        TEXT                    Description of the policy                                                                                                                                                                                                                                │
+│    --content            TEXT                    JSON string with the IAM policy document                                                                                                                                                                                                                 │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

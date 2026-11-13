@@ -6,12 +6,20 @@ Add a new type
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas types add [OPTIONS]                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas types add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -84,20 +92,21 @@ Add a new type
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas types add [OPTIONS]                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
- Add a new type                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid          -u  UUID  UUID of the type                                                                                                                                                                                                                                                           │
-│ *  --project-id    -p  UUID  UUID of the project in which to register the type [required]                                                                                                                                                                                                               │
-│ *  --name          -n  TEXT  Name of the type, the PaaS slug, for example: s3 [required]                                                                                                                                                                                                                │
-│    --description       TEXT  Description of the type                                                                                                                                                                                                                                                    │
-│ *  --element-name  -e  TEXT  Name of the element the PaaS is exposed under, for example: s3aas [required]                                                                                                                                                                                               │
-│ *  --package           TEXT  Pip distribution name, a wheel/sdist URL or an urn:artifacts:<uuid> [required]                                                                                                                                                                                             │
-│    --version       -v  TEXT  Version pin of the package                                                                                                                                                                                                                                                 │
-│    --index-url         TEXT  Pip index URL to install the package from                                                                                                                                                                                                                                  │
-│    --help                    Show this message and exit.                                                                                                                                                                                                                                                │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas types add [OPTIONS]
+
+ Add a new type
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output        -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                              │
+│    --uuid          -u  UUID                    UUID of the type                                                                                                                                                                                                                                          │
+│ *  --project-id    -p  UUID                    UUID of the project in which to register the type [required]                                                                                                                                                                                              │
+│ *  --name          -n  TEXT                    Name of the type, the PaaS slug, for example: s3 [required]                                                                                                                                                                                               │
+│    --description       TEXT                    Description of the type                                                                                                                                                                                                                                   │
+│ *  --element-name  -e  TEXT                    Name of the element the PaaS is exposed under, for example: s3aas [required]                                                                                                                                                                              │
+│ *  --package           TEXT                    Pip distribution name, a wheel/sdist URL or an urn:artifacts:<uuid> [required]                                                                                                                                                                            │
+│    --version       -v  TEXT                    Version pin of the package                                                                                                                                                                                                                                │
+│    --index-url         TEXT                    Pip index URL to install the package from                                                                                                                                                                                                                 │
+│    --help                                      Show this message and exit.                                                                                                                                                                                                                               │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

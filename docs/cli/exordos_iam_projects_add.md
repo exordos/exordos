@@ -6,12 +6,19 @@ Add a new project to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam projects add [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam projects add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -55,7 +62,7 @@ Add a new project to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam projects add [OPTIONS]                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam projects add [OPTIONS]
+
 ```

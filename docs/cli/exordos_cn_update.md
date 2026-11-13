@@ -6,12 +6,20 @@ Update an existing node
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos cn update [OPTIONS]                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos cn update [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid_or_name` (REQUIRED):
     * Type: text
@@ -93,21 +101,22 @@ Update an existing node
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos cn update [OPTIONS]                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
- Update an existing node                                                                                                                                                                                                                                                                                   
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --uuid_or_name  -u  TEXT     UUID or name of the node to update [required]                                                                                                                                                                                                                           │
-│    --cores         -c  INTEGER  Number of cores to allocate for the node                                                                                                                                                                                                                                │
-│    --ram           -r  INTEGER  Amount of RAM in Mb to allocate for the node                                                                                                                                                                                                                            │
-│    --root-disk     -d  INTEGER  Number of GiB of root disk to allocate for the node                                                                                                                                                                                                                     │
-│    --image         -i  TEXT     Name of the image to deploy                                                                                                                                                                                                                                             │
-│    --name          -n  TEXT     Name of the node                                                                                                                                                                                                                                                        │
-│    --description   -D  TEXT     Description of the node                                                                                                                                                                                                                                                 │
-│    --hostname                   Hostname of the node                                                                                                                                                                                                                                                    │
-│    --wait                       Wait until the node is running                                                                                                                                                                                                                                          │
-│    --help                       Show this message and exit.                                                                                                                                                                                                                                             │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos cn update [OPTIONS]
+
+ Update an existing node
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output        -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                              │
+│ *  --uuid_or_name  -u  TEXT                    UUID or name of the node to update [required]                                                                                                                                                                                                             │
+│    --cores         -c  INTEGER                 Number of cores to allocate for the node                                                                                                                                                                                                                  │
+│    --ram           -r  INTEGER                 Amount of RAM in Mb to allocate for the node                                                                                                                                                                                                              │
+│    --root-disk     -d  INTEGER                 Number of GiB of root disk to allocate for the node                                                                                                                                                                                                       │
+│    --image         -i  TEXT                    Name of the image to deploy                                                                                                                                                                                                                               │
+│    --name          -n  TEXT                    Name of the node                                                                                                                                                                                                                                          │
+│    --description   -D  TEXT                    Description of the node                                                                                                                                                                                                                                   │
+│    --hostname          TEXT                    Hostname of the node                                                                                                                                                                                                                                      │
+│    --wait                                      Wait until the node is running                                                                                                                                                                                                                            │
+│    --help                                      Show this message and exit.                                                                                                                                                                                                                               │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -6,12 +6,20 @@ Add a new instance
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas mail instances add [OPTIONS]                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas mail instances add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -91,21 +99,22 @@ Add a new instance
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas mail instances add [OPTIONS]                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                           
- Add a new instance                                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID                                UUID of the instance                                                                                                                                                                                                                          │
-│ *  --project-id   -p  UUID                                UUID of the project in which to deploy the instance [required]                                                                                                                                                                                │
-│ *  --name         -n  TEXT                                Name of the instance [required]                                                                                                                                                                                                               │
-│    --description      TEXT                                Description of the instance                                                                                                                                                                                                                   │
-│ *  --domain       -d  TEXT                                Mail domain to serve, for example: example.com [required]                                                                                                                                                                                     │
-│ *  --version      -v  TEXT                                UUID or name of the mail version [required]                                                                                                                                                                                                   │
-│ *  --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node [required]                                                                                                                                                                                                       │
-│ *  --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB [required]                                                                                                                                                                                                                 │
-│ *  --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB [required]                                                                                                                                                                                                           │
-│    --help                                                 Show this message and exit.                                                                                                                                                                                                                   │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas mail instances add [OPTIONS]
+
+ Add a new instance
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output       -o  [json|html|table|yaml]              Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                   │
+│    --uuid         -u  UUID                                UUID of the instance                                                                                                                                                                                                                           │
+│ *  --project-id   -p  UUID                                UUID of the project in which to deploy the instance [required]                                                                                                                                                                                 │
+│ *  --name         -n  TEXT                                Name of the instance [required]                                                                                                                                                                                                                │
+│    --description      TEXT                                Description of the instance                                                                                                                                                                                                                    │
+│ *  --domain       -d  TEXT                                Mail domain to serve, for example: example.com [required]                                                                                                                                                                                      │
+│ *  --version      -v  TEXT                                UUID or name of the mail version [required]                                                                                                                                                                                                    │
+│ *  --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node [required]                                                                                                                                                                                                        │
+│ *  --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB [required]                                                                                                                                                                                                                  │
+│ *  --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB [required]                                                                                                                                                                                                            │
+│    --help                                                 Show this message and exit.                                                                                                                                                                                                                    │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

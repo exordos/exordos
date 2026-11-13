@@ -45,7 +45,7 @@ def _invoke(*args: str):
     )
 
 
-@mock.patch("exordos.cmd.network.vhosts.commands.show_data")
+@mock.patch("exordos.cmd.network.vhosts.commands.show_resource")
 @mock.patch("exordos.cmd.network.vhosts.commands.base_client")
 class TestVhostsCli:
     def test_add_cmd_http(self, client, _show) -> None:
@@ -147,7 +147,7 @@ class TestVhostsCli:
         )
 
 
-@mock.patch("exordos.cmd.network.routes.commands.show_data")
+@mock.patch("exordos.cmd.network.routes.commands.show_resource")
 @mock.patch("exordos.cmd.network.routes.commands.base_client")
 class TestRoutesCli:
     def test_add_cmd_backend_pool(self, client, _show) -> None:

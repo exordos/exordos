@@ -27,6 +27,20 @@ from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.common.table import fill_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
+
+
+def output_option(f):
+    """Select a resource output format, preserving native JSON values."""
+    options = ["--output"]
+    if not any("-o" in param.opts for param in getattr(f, "__click_params__", [])):
+        options.append("-o")
+    return click.option(
+        *options,
+        default=c.DEFAULT_TABLE_FORMAT,
+        type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+        help="Output format; JSON prints one resource object (an array for bulk creation).",
+    )(f)
 
 
 def tag_options(update: bool = False):
@@ -233,11 +247,15 @@ def create_entity_group(
                     raise click.ClickException(
                         f"{entity_name} with {lookup_field} {uuid} not found"
                     )
+                if output.lower() == "json" and len(entities) > 1:
+                    raise click.ClickException(
+                        f"Multiple {entity_plural} with {lookup_field} {uuid} found"
+                    )
                 for entity in entities:
-                    show_data(entity, output)
+                    show_resource(entity, output)
             else:
                 data = base_client.get_entity(client, url, uuid)
-                show_data(data, output)
+                show_resource(data, output)
 
         entity_group.add_command(show_cmd, aliases=["get", "g"])
 

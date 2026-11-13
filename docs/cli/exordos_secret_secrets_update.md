@@ -6,12 +6,20 @@ Update secret
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret secrets update [OPTIONS] UUID                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos secret secrets update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -82,19 +90,20 @@ Update secret
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret secrets update [OPTIONS] UUID                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
- Update secret                                                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --project-id     -p  UUID  Name of the project in which to deploy the secret                                                                                                                                                                                                                            │
-│ --name           -n  TEXT  Name of the secret                                                                                                                                                                                                                                                           │
-│ --description    -D  TEXT  Description of the secret                                                                                                                                                                                                                                                    │
-│ --value          -v  TEXT  New value of the secret                                                                                                                                                                                                                                                      │
-│ --default-value  -d  TEXT  New value of the secret to fall back on while the value is unset                                                                                                                                                                                                             │
-│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│ --help                     Show this message and exit.                                                                                                                                                                                                                                                  │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos secret secrets update [OPTIONS] UUID
+
+ Update secret
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                │
+│ --project-id     -p  UUID                    Name of the project in which to deploy the secret                                                                                                                                                                                                           │
+│ --name           -n  TEXT                    Name of the secret                                                                                                                                                                                                                                          │
+│ --description    -D  TEXT                    Description of the secret                                                                                                                                                                                                                                   │
+│ --value          -v  TEXT                    New value of the secret                                                                                                                                                                                                                                     │
+│ --default-value  -d  TEXT                    New value of the secret to fall back on while the value is unset                                                                                                                                                                                            │
+│ --clear-tags                                 Remove all tags.                                                                                                                                                                                                                                            │
+│ --tag                TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                             │
+│ --help                                       Show this message and exit.                                                                                                                                                                                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

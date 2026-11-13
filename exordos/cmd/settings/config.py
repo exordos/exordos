@@ -58,7 +58,8 @@ def load_config(
             if not silent:
                 click.echo(
                     f"You don't have a configuration file {cfg_path}. "
-                    f"Please, read the docs https://exordos.github.io/exordos/config/"
+                    f"Please, read the docs https://exordos.github.io/exordos/config/",
+                    err=True,
                 )
             config = {}
     except Exception as e:

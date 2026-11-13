@@ -33,10 +33,11 @@ from exordos import exceptions
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.common.crypto import write_root_owned_file
 from exordos.common.run import run_command
 from exordos.common.run import runsh
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
 
@@ -127,6 +128,7 @@ hypervisors_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @click.command("add", help="Add a new hypervisor")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -195,6 +197,7 @@ def add_cmd(
     ram_ratio: float | None,
     machine_type: str | None,
     driver_spec: tuple[str, ...],
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -217,10 +220,11 @@ def add_cmd(
     if machine_type is not None:
         data["machine_type"] = machine_type
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -297,6 +301,7 @@ def update_cmd(
     machine_type: str | None,
     driver_spec: tuple[str, ...],
     driver_spec_full: tuple[str, ...],
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -329,7 +334,7 @@ def update_cmd(
         data["driver_spec"] = {**current_spec, **driver_spec}
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 def is_root() -> bool:

@@ -6,12 +6,20 @@ Add a repository entry to the settings file
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos settings repo add [OPTIONS] REPO                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos settings repo add [OPTIONS] REPO
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `repo` (REQUIRED):
     * Type: text
@@ -58,7 +66,7 @@ Add a repository entry to the settings file
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos settings repo add [OPTIONS] REPO                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos settings repo add [OPTIONS] REPO
+
 ```

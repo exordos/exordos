@@ -25,8 +25,10 @@ import yaml
 
 from exordos import constants as c
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.base import output_option
 from exordos.cmd.settings.config import get_current_realm
 from exordos.cmd.settings.config import save_config
+from exordos.common.table import show_resource
 
 
 @click.group("settings", help="Modify exordos settings files")
@@ -250,6 +252,7 @@ def list_repos(ctx: click.Context, output: str, show_sensitive: bool) -> None:
 
 
 @repo_group.command("add", help="Add a repository entry to the settings file")
+@output_option
 @click.argument("repo", type=str, required=True)
 @click.option(
     "-d",
@@ -285,6 +288,7 @@ def add_repo(
     url: str,
     username: str | None,
     password: str | None,
+    output: str = "table",
 ) -> None:
     config = ctx.obj.cfg
 
@@ -297,7 +301,10 @@ def add_repo(
     config["repositories"][repo] = repo_config
 
     save_config(config, ctx.obj.cfg_path)
-    click.echo(f"repo '{repo}' set")
+    if output.lower() == "json":
+        show_resource(repo_config, output)
+    else:
+        click.echo(f"repo '{repo}' set")
 
 
 @repo_group.command("delete", help="Delete a repository from the settings file")

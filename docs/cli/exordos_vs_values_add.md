@@ -6,12 +6,20 @@ Add a new value to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos vs values add [OPTIONS]                                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos vs values add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -77,19 +85,20 @@ Add a new value to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos vs values add [OPTIONS]                                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
- Add a new value to the Exordos installation                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID  UUID of the value                                                                                                                                                                                                                                                           │
-│ *  --project-id   -p  UUID  Name of the project in which to deploy the value [required]                                                                                                                                                                                                                 │
-│    --name         -n  TEXT  Name of the value                                                                                                                                                                                                                                                           │
-│    --description  -D  TEXT  Description of the value                                                                                                                                                                                                                                                    │
-│    --var              TEXT  UUID of a variable the value belongs to                                                                                                                                                                                                                                     │
-│    --value        -V  TEXT  value                                                                                                                                                                                                                                                                       │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│    --help                   Show this message and exit.                                                                                                                                                                                                                                                 │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos vs values add [OPTIONS]
+
+ Add a new value to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                               │
+│    --uuid         -u  UUID                    UUID of the value                                                                                                                                                                                                                                          │
+│ *  --project-id   -p  UUID                    Name of the project in which to deploy the value [required]                                                                                                                                                                                                │
+│    --name         -n  TEXT                    Name of the value                                                                                                                                                                                                                                          │
+│    --description  -D  TEXT                    Description of the value                                                                                                                                                                                                                                   │
+│    --var              TEXT                    UUID of a variable the value belongs to                                                                                                                                                                                                                    │
+│    --value        -V  TEXT                    value                                                                                                                                                                                                                                                      │
+│    --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                            │
+│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

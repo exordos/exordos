@@ -6,12 +6,20 @@ Add a new secret to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret secrets add [OPTIONS]                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos secret secrets add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -78,19 +86,20 @@ Add a new secret to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos secret secrets add [OPTIONS]                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
- Add a new secret to the Exordos installation                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid           -u  UUID  UUID of the secret                                                                                                                                                                                                                                                        │
-│ *  --project-id     -p  UUID  Name of the project in which to deploy the secret [required]                                                                                                                                                                                                              │
-│    --name           -n  TEXT  Name of the secret                                                                                                                                                                                                                                                        │
-│    --description    -D  TEXT  Description of the secret                                                                                                                                                                                                                                                 │
-│    --value          -v  TEXT  Value of the secret                                                                                                                                                                                                                                                       │
-│    --default-value  -d  TEXT  Value of the secret to fall back on while the value is unset                                                                                                                                                                                                              │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos secret secrets add [OPTIONS]
+
+ Add a new secret to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│    --uuid           -u  UUID                    UUID of the secret                                                                                                                                                                                                                                       │
+│ *  --project-id     -p  UUID                    Name of the project in which to deploy the secret [required]                                                                                                                                                                                             │
+│    --name           -n  TEXT                    Name of the secret                                                                                                                                                                                                                                       │
+│    --description    -D  TEXT                    Description of the secret                                                                                                                                                                                                                                │
+│    --value          -v  TEXT                    Value of the secret                                                                                                                                                                                                                                      │
+│    --default-value  -d  TEXT                    Value of the secret to fall back on while the value is unset                                                                                                                                                                                             │
+│    --tag                TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                          │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

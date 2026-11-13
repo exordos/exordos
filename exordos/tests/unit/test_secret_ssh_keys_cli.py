@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import json
 from unittest import mock
 
 from bazooka import exceptions as bazooka_exc
@@ -81,7 +82,7 @@ class TestSshKeysPruneCli:
         client.delete_entity.assert_not_called()
 
 
-@mock.patch("exordos.cmd.secret.ssh_keys.commands.show_data")
+@mock.patch("exordos.cmd.secret.ssh_keys.commands.show_resource")
 @mock.patch("exordos.cmd.secret.ssh_keys.commands.base_client.get_user_api_client")
 class TestSshKeysAddCli:
     @pytest.mark.parametrize("all_conflicts", [False, True])
@@ -109,7 +110,7 @@ class TestSshKeysAddCli:
             show_data.assert_not_called()
         else:
             assert "new-key to target second created" in result.output
-            show_data.assert_called_once_with(created)
+            show_data.assert_called_once_with(created, output="table")
 
     def test_add_cmd_propagates_other_errors(self, get_client, show_data) -> None:
         client = get_client.return_value
@@ -125,3 +126,31 @@ class TestSshKeysAddCli:
         assert result.exception is error
         assert client.create.call_count == 1
         show_data.assert_not_called()
+
+
+@pytest.mark.parametrize("conflicts", [0, 1, 2])
+def test_add_cmd_json_batches_created_keys(conflicts):
+    from exordos.cmd.secret.ssh_keys import commands
+
+    client = mock.Mock()
+    client.filter.side_effect = [
+        [{"uuid": name, "name": name, "project_id": "project"}]
+        for name in ("first", "second")
+    ]
+    keys = [
+        {"uuid": "key-first", "target": {"kind": "node"}},
+        {"uuid": "key-second", "target": {"kind": "node"}},
+    ]
+    client.create.side_effect = [
+        bazooka_exc.ConflictError(mock.Mock()) if i < conflicts else key
+        for i, key in enumerate(keys)
+    ]
+    with mock.patch.object(
+        commands.base_client, "get_user_api_client", return_value=client
+    ):
+        result = _invoke(
+            "ssh_keys", "add", "--node", "first", "--node", "second", "--output", "json"
+        )
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout) == keys[conflicts:]
+    assert result.stderr.count("already exists") == conflicts

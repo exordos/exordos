@@ -6,12 +6,20 @@ Update an existing set
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute sets update [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute sets update [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid_or_name` (REQUIRED):
     * Type: text
@@ -93,21 +101,22 @@ Update an existing set
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute sets update [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Update an existing set                                                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --uuid_or_name  -u  TEXT     UUID or name of the set to update [required]                                                                                                                                                                                                                            │
-│    --cores         -c  INTEGER  Number of cores to allocate for the set                                                                                                                                                                                                                                 │
-│    --ram           -r  INTEGER  Amount of RAM in Mb to allocate for the set                                                                                                                                                                                                                             │
-│    --name          -n  TEXT     Name of the set                                                                                                                                                                                                                                                         │
-│    --description   -D  TEXT     Description of the set                                                                                                                                                                                                                                                  │
-│    --root-disk     -d  INTEGER  Number of GiB of root disk to allocate for the set                                                                                                                                                                                                                      │
-│    --image         -i  TEXT     Name of the image to deploy                                                                                                                                                                                                                                             │
-│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│    --help                       Show this message and exit.                                                                                                                                                                                                                                             │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos compute sets update [OPTIONS]
+
+ Update an existing set
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output        -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                              │
+│ *  --uuid_or_name  -u  TEXT                    UUID or name of the set to update [required]                                                                                                                                                                                                              │
+│    --cores         -c  INTEGER                 Number of cores to allocate for the set                                                                                                                                                                                                                   │
+│    --ram           -r  INTEGER                 Amount of RAM in Mb to allocate for the set                                                                                                                                                                                                               │
+│    --name          -n  TEXT                    Name of the set                                                                                                                                                                                                                                           │
+│    --description   -D  TEXT                    Description of the set                                                                                                                                                                                                                                    │
+│    --root-disk     -d  INTEGER                 Number of GiB of root disk to allocate for the set                                                                                                                                                                                                        │
+│    --image         -i  TEXT                    Name of the image to deploy                                                                                                                                                                                                                               │
+│    --clear-tags                                Remove all tags.                                                                                                                                                                                                                                          │
+│    --tag               TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                           │
+│    --help                                      Show this message and exit.                                                                                                                                                                                                                               │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

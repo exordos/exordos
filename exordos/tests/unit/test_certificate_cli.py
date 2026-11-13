@@ -39,7 +39,7 @@ def _invoke(cmd: tp.Any, *args: str) -> tuple[tp.Any, MagicMock, MagicMock]:
         patch.object(commands.base_client, "get_user_api_client"),
         patch.object(commands.base_client, "add_entity") as add_mock,
         patch.object(commands.base_client, "update_entity") as update_mock,
-        patch.object(commands, "show_data"),
+        patch.object(commands, "show_resource"),
     ):
         result = CliRunner().invoke(cmd, list(args), obj=ctx_obj)
     return result, add_mock, update_mock

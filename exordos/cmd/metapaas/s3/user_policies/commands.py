@@ -22,7 +22,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import show_data
+from exordos.cmd.base import output_option
+from exordos.common.table import show_resource
 
 ENTITY = "policy attachment"
 ENTITY_COLLECTION = c.S3_USER_POLICY_COLLECTION
@@ -45,6 +46,7 @@ user_policies_group = create_entity_group(
 
 
 @click.command("add", help="Attach a policy to a user")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -86,6 +88,7 @@ def add_cmd(
     instance_uuid: str,
     user_uuid: str,
     policy: str,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -107,7 +110,7 @@ def add_cmd(
         ENTITY_COLLECTION.format(instance_uuid=instance_uuid, user_uuid=user_uuid),
         data,
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 user_policies_group.add_command(add_cmd, aliases=["a"])

@@ -6,12 +6,20 @@ Update limit
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos limits update [OPTIONS] UUID                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos limits update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: uuid
@@ -50,15 +58,16 @@ Update limit
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos limits update [OPTIONS] UUID                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
- Update limit                                                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --project-id     -p  UUID     Uuid of the project                                                                                                                                                                                                                                                       │
-│ --resource-name  -r  TEXT     Resource name of the limit                                                                                                                                                                                                                                                │
-│ --limit          -l  INTEGER                                                                                                                                                                                                                                                                            │
-│ --help                        Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos limits update [OPTIONS] UUID
+
+ Update limit
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                │
+│ --project-id     -p  UUID                    Uuid of the project                                                                                                                                                                                                                                         │
+│ --resource-name  -r  TEXT                    Resource name of the limit                                                                                                                                                                                                                                  │
+│ --limit          -l  INTEGER                                                                                                                                                                                                                                                                             │
+│ --help                                       Show this message and exit.                                                                                                                                                                                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

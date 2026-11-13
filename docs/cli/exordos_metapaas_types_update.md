@@ -6,12 +6,20 @@ Update type
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas types update [OPTIONS] UUID                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas types update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -73,18 +81,19 @@ Update type
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas types update [OPTIONS] UUID                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                           
- Update type                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name          -n  TEXT  Name of the type, the PaaS slug, for example: s3                                                                                                                                                                                                                              │
-│ --description       TEXT  Description of the type                                                                                                                                                                                                                                                       │
-│ --element-name  -e  TEXT  Name of the element the PaaS is exposed under, for example: s3aas                                                                                                                                                                                                             │
-│ --package           TEXT  Pip distribution name, a wheel/sdist URL or an urn:artifacts:<uuid>                                                                                                                                                                                                           │
-│ --version       -v  TEXT  Version pin of the package                                                                                                                                                                                                                                                    │
-│ --index-url         TEXT  Pip index URL to install the package from                                                                                                                                                                                                                                     │
-│ --help                    Show this message and exit.                                                                                                                                                                                                                                                   │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas types update [OPTIONS] UUID
+
+ Update type
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output        -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                 │
+│ --name          -n  TEXT                    Name of the type, the PaaS slug, for example: s3                                                                                                                                                                                                             │
+│ --description       TEXT                    Description of the type                                                                                                                                                                                                                                      │
+│ --element-name  -e  TEXT                    Name of the element the PaaS is exposed under, for example: s3aas                                                                                                                                                                                            │
+│ --package           TEXT                    Pip distribution name, a wheel/sdist URL or an urn:artifacts:<uuid>                                                                                                                                                                                          │
+│ --version       -v  TEXT                    Version pin of the package                                                                                                                                                                                                                                   │
+│ --index-url         TEXT                    Pip index URL to install the package from                                                                                                                                                                                                                    │
+│ --help                                      Show this message and exit.                                                                                                                                                                                                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

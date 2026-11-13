@@ -33,10 +33,12 @@ from exordos import constants as c
 from exordos import utils as exordos_utils
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
+from exordos.cmd.base import output_option
 from exordos.cmd.settings import config as settings_config
 from exordos.common.table import get_table
 from exordos.common.table import print_table
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 from exordos.infra.driver import libvirt as libvirt_infra
 from exordos.infra.libvirt import libvirt
 from exordos.logger import ClickLogger
@@ -266,6 +268,7 @@ def list_cmd(ctx: click.Context, output: str) -> None:
 
 
 @click.command("add", help=f"Add a new ecosystem {ENTITY}")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -332,6 +335,7 @@ def add_cmd(
     node_image: str | None,
     core_version: str | None,
     ssh_public_key: str | None,
+    output: str = "table",
 ) -> None:
     import questionary
 
@@ -360,7 +364,7 @@ def add_cmd(
             ssh_public_key = f.read()
         data["ssh_public_key"] = ssh_public_key
     data = base_client.add_entity(ecosystem_client, ENTITY_COLLECTION, data)
-    show_data(data)
+    show_resource(data, output=output)
 
 
 @click.command("claim", help=f"Claim a warm {ENTITY} from the pool")
@@ -591,7 +595,7 @@ def show_cmd(ctx: click.Context, name_uuid: str, output: str) -> None:
     ecosystem_client = get_ecosystem_client(ctx)
     try:
         data = base_client.get_entity(ecosystem_client, ENTITY_COLLECTION, name_uuid)
-        show_data(data, output)
+        show_resource(data, output)
     except Exception:
         raise click.ClickException(f"{ENTITY} {name_uuid} not found")
 

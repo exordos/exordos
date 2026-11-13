@@ -23,7 +23,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import show_data
+from exordos.cmd.base import output_option
+from exordos.common.table import show_resource
 
 ENTITY = "route"
 ENTITY_COLLECTION = c.ROUTE_COLLECTION
@@ -113,6 +114,7 @@ def _build_condition(
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
+@output_option
 @click.pass_context
 @click.option("-u", "--uuid", type=click.UUID, default=None, help="UUID of the route")
 @click.option("-p", "--project-id", type=click.UUID, required=True, help="Project UUID")
@@ -137,6 +139,7 @@ def add_cmd(
     pool: sys_uuid.UUID | None,
     backend_protocol: str,
     allowed_ips: tuple[str, ...],
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {
@@ -154,7 +157,7 @@ def add_cmd(
         ENTITY_COLLECTION.format(lb_uuid=lb_uuid, vhost_uuid=vhost_uuid),
         data,
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 routes_group.add_command(add_cmd, aliases=["a", "create"])
@@ -167,6 +170,7 @@ routes_group.add_command(add_cmd, aliases=["a", "create"])
         "the whole route condition"
     ),
 )
+@output_option
 @click.pass_context
 @click.argument("uuid", type=str, required=True)
 @click.option("--lb-uuid", type=click.UUID, required=True, help="Load balancer UUID")
@@ -189,6 +193,7 @@ def update_cmd(
     pool: sys_uuid.UUID | None,
     backend_protocol: str,
     allowed_ips: tuple[str, ...],
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {"name": name, "description": description, "enabled": enabled}
@@ -211,7 +216,7 @@ def update_cmd(
         uuid,
         data,
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 routes_group.add_command(update_cmd, aliases=["u"])

@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import json
 import os
 import typing as tp
 import uuid as sys_uuid
@@ -25,10 +26,11 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.common import compute
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "ssh_key"
 ENTITY_COLLECTION = c.SSH_KEY_COLLECTION
@@ -53,6 +55,7 @@ ssh_keys_group = create_entity_group(
     f"`exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`. "
     "Existing SSH keys are skipped; creation continues for the remaining targets.",
 )
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -135,6 +138,7 @@ def add_cmd(
     user: str,
     target_public_key: str | None,
     tags: tuple[str, ...] = (),
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -204,6 +208,7 @@ def add_cmd(
         project_id = targets[0]["project_id"]
     data["project_id"] = str(project_id)
 
+    created = []
     for target in targets:
         data_copy = data.copy()
         if not data_copy.get("uuid"):
@@ -216,13 +221,25 @@ def add_cmd(
                 client, ENTITY_COLLECTION, data_copy, handle_conflict_error=False
             )
         except bazooka_exc.ConflictError:
-            click.echo(f"{ENTITY} to target {target['name']} already exists, skipping")
+            click.echo(
+                f"{ENTITY} to target {target['name']} already exists, skipping",
+                err=output.lower() == "json",
+            )
             continue
-        click.echo(f"{ENTITY} {entity['uuid']} to target {target['name']} created")
-        show_data(entity)
+        click.echo(
+            f"{ENTITY} {entity['uuid']} to target {target['name']} created",
+            err=output.lower() == "json",
+        )
+        if output.lower() == "json":
+            created.append(entity)
+        else:
+            show_resource(entity, output=output)
+    if output.lower() == "json":
+        click.echo(json.dumps(created, ensure_ascii=False))
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -259,6 +276,7 @@ def update_cmd(
     description: str | None,
     tags: tuple[str, ...] = (),
     clear_tags: bool = False,
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -272,7 +290,7 @@ def update_cmd(
 
     data.update(tag_data)
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @click.command(

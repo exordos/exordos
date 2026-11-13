@@ -6,12 +6,20 @@ Add a new instance
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dbaas instances add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos dbaas instances add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -97,22 +105,23 @@ Add a new instance
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos dbaas instances add [OPTIONS]                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                           
- Add a new instance                                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid                 -u  UUID                                UUID of the instance                                                                                                                                                                                                                  │
-│ *  --project-id           -p  UUID                                UUID of the project in which to deploy the instance [required]                                                                                                                                                                        │
-│ *  --name                 -n  TEXT                                Name of the instance [required]                                                                                                                                                                                                       │
-│    --description              TEXT                                Description of the instance                                                                                                                                                                                                           │
-│ *  --version              -v  TEXT                                UUID or name of the postgres version [required]                                                                                                                                                                                       │
-│ *  --cpu                      INTEGER RANGE [1<=x<=128]           Number of CPU cores per node [required]                                                                                                                                                                                               │
-│ *  --ram                      INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB [required]                                                                                                                                                                                                         │
-│ *  --disk-size                INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB [required]                                                                                                                                                                                                   │
-│    --nodes-number             INTEGER RANGE [1<=x<=16]            Number of nodes in the cluster [default: 1]                                                                                                                                                                                           │
-│    --sync-replica-number      INTEGER RANGE [0<=x<=15]            Number of synchronous replicas                                                                                                                                                                                                        │
-│    --help                                                         Show this message and exit.                                                                                                                                                                                                           │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos dbaas instances add [OPTIONS]
+
+ Add a new instance
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output               -o  [json|html|table|yaml]              Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                           │
+│    --uuid                 -u  UUID                                UUID of the instance                                                                                                                                                                                                                   │
+│ *  --project-id           -p  UUID                                UUID of the project in which to deploy the instance [required]                                                                                                                                                                         │
+│ *  --name                 -n  TEXT                                Name of the instance [required]                                                                                                                                                                                                        │
+│    --description              TEXT                                Description of the instance                                                                                                                                                                                                            │
+│ *  --version              -v  TEXT                                UUID or name of the postgres version [required]                                                                                                                                                                                        │
+│ *  --cpu                      INTEGER RANGE [1<=x<=128]           Number of CPU cores per node [required]                                                                                                                                                                                                │
+│ *  --ram                      INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB [required]                                                                                                                                                                                                          │
+│ *  --disk-size                INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB [required]                                                                                                                                                                                                    │
+│    --nodes-number             INTEGER RANGE [1<=x<=16]            Number of nodes in the cluster [default: 1]                                                                                                                                                                                            │
+│    --sync-replica-number      INTEGER RANGE [0<=x<=15]            Number of synchronous replicas                                                                                                                                                                                                         │
+│    --help                                                         Show this message and exit.                                                                                                                                                                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

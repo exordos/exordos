@@ -23,7 +23,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import show_data
+from exordos.cmd.base import output_option
+from exordos.common.table import show_resource
 
 ENTITY = "policy"
 ENTITY_COLLECTION = c.S3_POLICY_COLLECTION
@@ -53,6 +54,7 @@ def _parse_content(content: str) -> dict:
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -102,6 +104,7 @@ def add_cmd(
     name: str,
     description: str | None,
     content: str,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -118,10 +121,11 @@ def add_cmd(
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(instance_uuid=instance_uuid), data
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -161,6 +165,7 @@ def update_cmd(
     name: str | None,
     description: str | None,
     content: str | None,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -174,7 +179,7 @@ def update_cmd(
     entity = base_client.update_entity(
         client, ENTITY_COLLECTION.format(instance_uuid=instance_uuid), uuid, data
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 policies_group.add_command(add_cmd, aliases=["a"])

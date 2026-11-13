@@ -386,7 +386,7 @@ class TestInitCmdRegistration:
             patch.object(
                 hv_commands.base_client, "register_agent_and_write_key"
             ) as register_and_write_mock,
-            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "show_resource"),
             patch.object(hv_commands, "reset_agent_meta_file") as reset_meta_mock,
             patch.object(
                 hv_commands,
@@ -450,7 +450,7 @@ class TestInitCmdRegistration:
             patch.object(
                 hv_commands.base_client, "add_entity", return_value={"uuid": "x"}
             ) as add_entity_mock,
-            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "show_resource"),
             patch.object(hv_commands, "reset_agent_meta_file"),
             patch.object(hv_commands, "write_agent_config"),
             patch.object(hv_commands.base_client, "register_agent_and_write_key"),
@@ -496,7 +496,7 @@ class TestInitCmdRegistration:
             patch.object(
                 hv_commands.base_client, "add_entity", return_value={"uuid": "x"}
             ) as add_entity_mock,
-            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "show_resource"),
             patch.object(hv_commands, "reset_agent_meta_file"),
             patch.object(hv_commands, "write_agent_config"),
             patch.object(hv_commands.base_client, "register_agent_and_write_key"),
@@ -534,7 +534,7 @@ class TestInitCmdRegistration:
             patch.object(
                 hv_commands.base_client, "add_entity", return_value={"uuid": "x"}
             ) as add_entity_mock,
-            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "show_resource"),
             patch.object(hv_commands, "reset_agent_meta_file"),
             patch.object(hv_commands, "write_agent_config"),
             patch.object(hv_commands.base_client, "register_agent_and_write_key"),
@@ -623,7 +623,7 @@ class TestInitCmdRegistration:
                 hv_commands.base_client, "get_user_api_client"
             ) as get_client_mock,
             patch.object(hv_commands.base_client, "add_entity", return_value={}),
-            patch.object(hv_commands, "show_data"),
+            patch.object(hv_commands, "show_resource"),
             patch.object(hv_commands, "reset_agent_meta_file"),
             patch.object(hv_commands, "write_agent_config"),
             patch.object(hv_commands.base_client, "register_agent_and_write_key"),

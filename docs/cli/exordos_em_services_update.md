@@ -6,12 +6,20 @@ Update service
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos em services update [OPTIONS] UUID                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos em services update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -66,17 +74,18 @@ Update service
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos em services update [OPTIONS] UUID                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                           
- Update service                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --project-id   -p  UUID  Name of the project in which to deploy the service                                                                                                                                                                                                                             │
-│ --name         -n  TEXT  Name of the service                                                                                                                                                                                                                                                            │
-│ --description  -D  TEXT  Description of the service                                                                                                                                                                                                                                                     │
-│ --clear-tags  Remove all tags.                                                                                                                                                                                                                                                                          │
-│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │
-│ --help                   Show this message and exit.                                                                                                                                                                                                                                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos em services update [OPTIONS] UUID
+
+ Update service
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                  │
+│ --project-id   -p  UUID                    Name of the project in which to deploy the service                                                                                                                                                                                                            │
+│ --name         -n  TEXT                    Name of the service                                                                                                                                                                                                                                           │
+│ --description  -D  TEXT                    Description of the service                                                                                                                                                                                                                                    │
+│ --clear-tags                               Remove all tags.                                                                                                                                                                                                                                              │
+│ --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                               │
+│ --help                                     Show this message and exit.                                                                                                                                                                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

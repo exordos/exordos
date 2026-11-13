@@ -22,13 +22,13 @@ from bazooka import exceptions as bazooka_exc
 import rich_click as click
 
 from exordos import constants as c
-from exordos import logger
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
 from exordos.cmd.compute import common as compute_common
-from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "set"
 ENTITY_COLLECTION = c.SET_COLLECTION
@@ -53,6 +53,7 @@ sets_group = create_entity_group(
 
 
 @click.command("add", help="Add a new set to the Exordos installation")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -141,10 +142,10 @@ def add_cmd(
     replicas: int,
     wait: bool,
     tags: tuple[str, ...] = (),
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    log = logger.ClickLogger()
     if uuid is None:
         uuid = sys_uuid.uuid4()
     data = {
@@ -164,16 +165,20 @@ def add_cmd(
     data.update(tag_data)
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
-        show_data(entity)
+        show_resource(entity, output=output)
         return
     while entity["status"] != "ACTIVE":
-        log.info(f"Waiting for set to be ready. Status: {entity['status']}")
+        click.echo(
+            f"Waiting for set to be ready. Status: {entity['status']}",
+            err=output.lower() == "json",
+        )
         time.sleep(2)
         entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help="Update an existing set")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -236,6 +241,7 @@ def update_cmd(
     image: str | None,
     tags: tuple[str, ...] = (),
     clear_tags: bool = False,
+    output: str = "table",
 ) -> None:
     tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
@@ -283,7 +289,7 @@ def update_cmd(
     entity = base_client.update_entity(
         client, ENTITY_COLLECTION, uuid_or_name, update_data
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 sets_group.add_command(add_cmd, aliases=["a"])

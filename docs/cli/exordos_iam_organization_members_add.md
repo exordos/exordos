@@ -6,12 +6,19 @@ Add a new organization_member to the Exordos installation
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam organization_members add [OPTIONS]                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos iam organization_members add [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -52,16 +59,17 @@ Add a new organization_member to the Exordos installation
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos iam organization_members add [OPTIONS]                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                           
- Add a new organization_member to the Exordos installation                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --uuid               -u  UUID            UUID of the organization_member                                                                                                                                                                                                                             │
-│ *  --organization-uuid  -o  UUID            organization uuid [required]                                                                                                                                                                                                                                │
-│ *  --user                   UUID            user uuid [required]                                                                                                                                                                                                                                        │
-│    --role               -r  [member|owner]                                                                                                                                                                                                                                                              │
-│    --help                                   Show this message and exit.                                                                                                                                                                                                                                 │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos iam organization_members add [OPTIONS]
+
+ Add a new organization_member to the Exordos installation
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output                 [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                         │
+│    --uuid               -u  UUID                    UUID of the organization_member                                                                                                                                                                                                                      │
+│ *  --organization-uuid  -o  UUID                    organization uuid [required]                                                                                                                                                                                                                         │
+│ *  --user                   UUID                    user uuid [required]                                                                                                                                                                                                                                 │
+│    --role               -r  [member|owner]                                                                                                                                                                                                                                                               │
+│    --help                                           Show this message and exit.                                                                                                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

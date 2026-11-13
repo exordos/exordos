@@ -22,7 +22,8 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import show_data
+from exordos.cmd.base import output_option
+from exordos.common.table import show_resource
 
 ENTITY = "role_binding"
 ENTITY_COLLECTION = c.ROLE_BINDING_COLLECTION
@@ -40,6 +41,7 @@ role_bindings_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 @role_bindings_group.command(
     "add", help=f"Add a new {ENTITY} to the Exordos installation"
 )
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -73,6 +75,7 @@ def add_cmd(
     project_id: sys_uuid.UUID | None,
     user: sys_uuid.UUID,
     role: sys_uuid.UUID,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -86,4 +89,4 @@ def add_cmd(
     if project_id is not None:
         data["project"] = f"{c.PROJECT_COLLECTION}{project_id}"
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity)
+    show_resource(entity, output=output)

@@ -22,7 +22,9 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "user"
 ENTITY_COLLECTION = c.USER_COLLECTION
@@ -39,6 +41,7 @@ users_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP)
 
 
 @click.command("add", help=f"Add a new {ENTITY}")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -137,6 +140,7 @@ def add_cmd(
     confirmation_code_made_at: str | None,
     otp_secret: str | None,
     otp_enabled: bool,
+    output: str = "table",
 ) -> None:
     import questionary
 
@@ -171,7 +175,7 @@ def add_cmd(
         data["otp_secret"] = otp_secret
 
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @users_group.command("reset_password", help=f"Reset password of the {ENTITY}")
@@ -359,6 +363,7 @@ def info_cmd(ctx: click.Context, user: str, output: str) -> None:
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -414,6 +419,7 @@ def update_cmd(
     surname: str | None,
     phone: str | None,
     email: str | None,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -437,7 +443,7 @@ def update_cmd(
         return
 
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @users_group.command("confirm_email", help=f"Confirm email of the {ENTITY}")

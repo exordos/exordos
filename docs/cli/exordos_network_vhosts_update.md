@@ -6,12 +6,20 @@ Update vhost
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network vhosts update [OPTIONS] UUID                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network vhosts update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -91,12 +99,13 @@ Update vhost
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                            
- Usage: exordos network vhosts update [OPTIONS] UUID                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                            
- Update vhost                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                            
+
+ Usage: exordos network vhosts update [OPTIONS] UUID
+
+ Update vhost
+
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output               -o  [json|html|table|yaml]        Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                 │
 │ *  --lb-uuid                  UUID                          Load balancer UUID [required]                                                                                                                                                                                                                │
 │    --name                 -n  TEXT                          Name of the vhost                                                                                                                                                                                                                            │
 │    --description          -D  TEXT                          Description                                                                                                                                                                                                                                  │

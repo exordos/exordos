@@ -23,7 +23,8 @@ from exordos import constants as c
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import show_data
+from exordos.cmd.base import output_option
+from exordos.common.table import show_resource
 
 ENTITY = "record"
 ENTITY_COLLECTION = c.RECORD_COLLECTION
@@ -89,6 +90,13 @@ records_group = create_entity_group(
     type=str,
     required=True,
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="Output format; JSON prints one resource object.",
+)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -99,6 +107,7 @@ def add_cmd(
     disabled: bool,
     record: tuple[str, ...],
     domain_uuid: str,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
@@ -118,13 +127,14 @@ def add_cmd(
     entity = base_client.add_entity(
         client, ENTITY_COLLECTION.format(domain_uuid=domain_uuid), data
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 records_group.add_command(add_cmd, aliases=["a"])
 
 
 @click.command("update", help=f"Update {ENTITY}")
+@output_option
 @click.pass_context
 @click.argument(
     "uuid",
@@ -170,6 +180,7 @@ def update_cmd(
     disabled: bool | None,
     record: tuple[str, ...] | None,
     domain_uuid: str,
+    output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
@@ -188,7 +199,7 @@ def update_cmd(
     entity = base_client.update_entity(
         client, ENTITY_COLLECTION.format(domain_uuid=domain_uuid), uuid, data
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 records_group.add_command(update_cmd, aliases=["u"])

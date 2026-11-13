@@ -6,12 +6,20 @@ Update instance
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas s3 instances update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -64,17 +72,18 @@ Update instance
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 instances update [OPTIONS] UUID                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                           
- Update instance                                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --name         -n  TEXT                                Name of the instance                                                                                                                                                                                                                             │
-│ --description      TEXT                                Description of the instance                                                                                                                                                                                                                      │
-│ --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node                                                                                                                                                                                                                     │
-│ --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB                                                                                                                                                                                                                               │
-│ --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB, shrink is not supported                                                                                                                                                                                                │
-│ --help                                                 Show this message and exit.                                                                                                                                                                                                                      │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas s3 instances update [OPTIONS] UUID
+
+ Update instance
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --output       -o  [json|html|table|yaml]              Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                      │
+│ --name         -n  TEXT                                Name of the instance                                                                                                                                                                                                                              │
+│ --description      TEXT                                Description of the instance                                                                                                                                                                                                                       │
+│ --cpu              INTEGER RANGE [1<=x<=128]           Number of CPU cores per node                                                                                                                                                                                                                      │
+│ --ram              INTEGER RANGE [512<=x<=1073741824]  RAM per node in MB                                                                                                                                                                                                                                │
+│ --disk-size        INTEGER RANGE [8<=x<=1073741824]    Disk size per node in GB, shrink is not supported                                                                                                                                                                                                 │
+│ --help                                                 Show this message and exit.                                                                                                                                                                                                                       │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

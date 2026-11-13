@@ -6,12 +6,20 @@ Add a new node or update an existing one
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute cn add-or-update [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute cn add-or-update [OPTIONS]
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -101,7 +109,7 @@ Add a new node or update an existing one
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos compute cn add-or-update [OPTIONS]                                                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos compute cn add-or-update [OPTIONS]
+
 ```

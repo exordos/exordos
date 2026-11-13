@@ -22,12 +22,13 @@ from bazooka import exceptions as bazooka_exc
 import rich_click as click
 
 from exordos import constants as c
-from exordos import logger
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.compute import common as compute_common
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 
 ENTITY = "node"
 ENTITY_COLLECTION = c.NODE_COLLECTION
@@ -125,6 +126,13 @@ def _validate_hostname(hostname: str) -> None:
     default=False,
     help="Wait until the node is running",
 )
+@click.option(
+    "--output",
+    "-o",
+    default=c.DEFAULT_TABLE_FORMAT,
+    type=click.Choice(c.TABLE_FORMATS, case_sensitive=False),
+    help="Output format; JSON prints one resource object.",
+)
 def add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -137,9 +145,9 @@ def add_cmd(
     description: str,
     hostname: str | None,
     wait: bool,
+    output: str,
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    log = logger.ClickLogger()
     if uuid is None:
         uuid = sys_uuid.uuid4()
     data = {
@@ -160,16 +168,20 @@ def add_cmd(
         data["hostname"] = hostname
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
-        show_data(entity)
+        show_resource(entity, output=output)
         return
     while entity["status"] != "ACTIVE":
-        log.info(f"Waiting for node to be ready. Status: {entity['status']}")
+        click.echo(
+            f"Waiting for node to be ready. Status: {entity['status']}",
+            err=output.lower() == "json",
+        )
         time.sleep(2)
         entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @click.command("update", help="Update an existing node")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -243,6 +255,7 @@ def update_cmd(
     description: str | None,
     hostname: str | None,
     wait: bool,
+    output: str = "table",
 ) -> None:
     if hostname is not None:
         _validate_hostname(hostname)
@@ -295,17 +308,20 @@ def update_cmd(
         client, ENTITY_COLLECTION, uuid_or_name, update_data
     )
     if not wait:
-        show_data(entity)
+        show_resource(entity, output=output)
         return
-    log = logger.ClickLogger()
     while entity["status"] != "ACTIVE":
-        log.info(f"Waiting for node to be ready. Status: {entity['status']}")
+        click.echo(
+            f"Waiting for node to be ready. Status: {entity['status']}",
+            err=output.lower() == "json",
+        )
         time.sleep(2)
         entity = base_client.get_entity(client, ENTITY_COLLECTION, uuid_or_name)
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @cn_group.command("add-or-update", help="Add a new node or update an existing one")
+@output_option
 @click.pass_context
 @click.option(
     "-u",
@@ -391,6 +407,7 @@ def add_or_update_node_cmd(
     description: str,
     hostname: str | None,
     wait: bool,
+    output: str = "table",
 ) -> None:
     if hostname is not None:
         _validate_hostname(hostname)
@@ -409,6 +426,7 @@ def add_or_update_node_cmd(
             description=description,
             hostname=hostname,
             wait=wait,
+            output=output,
         )
 
     try:
@@ -426,6 +444,7 @@ def add_or_update_node_cmd(
             description=description,
             hostname=hostname,
             wait=wait,
+            output=output,
         )
 
     data = {
@@ -443,14 +462,16 @@ def add_or_update_node_cmd(
         data["hostname"] = hostname
     entity = base_client.update_entity(client, ENTITY_COLLECTION, uuid, data)
     if not wait:
-        show_data(entity)
+        show_resource(entity, output=output)
         return None
-    log = logger.ClickLogger()
     while entity["status"] != "ACTIVE":
-        log.info(f"Waiting for node to be ready. Status: {entity['status']}")
+        click.echo(
+            f"Waiting for node to be ready. Status: {entity['status']}",
+            err=output.lower() == "json",
+        )
         time.sleep(2)
         entity = client.get(c.NODE_COLLECTION, uuid=uuid)
-    show_data(entity)
+    show_resource(entity, output=output)
     return None
 
 

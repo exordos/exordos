@@ -1,3 +1,4 @@
+
 # exordos_secret_certificates_add
 
 Add a new certificate to the Exordos installation
@@ -11,6 +12,14 @@ Add a new certificate to the Exordos installation
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid`:
     * Type: uuid
@@ -81,6 +90,7 @@ Add a new certificate to the Exordos installation
     * Usage: `--key`
 
   Unencrypted PEM private key file
+
 * `tags`:
     * Type: text
     * Default: `sentinel.unset`
@@ -103,23 +113,18 @@ Add a new certificate to the Exordos installation
 
  Add a new certificate to the Exordos installation
 
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│    --uuid         -u  UUID               UUID of the certificate             │
-│ *  --project-id   -p  UUID               Name of the project in which to     │
-│                                          deploy the certificate [required]   │
-│    --name         -n  TEXT               Name of the certificate             │
-│    --description  -D  TEXT               Description of the certificate      │
-│ *  --email        -e  TEXT               Email address to use for the        │
-│                                          certificate [required]              │
-│ *  --domain       -d  TEXT               Domain of the certificate,          │
-│                                          wildcards are allowed. Can be       │
-│                                          repeated [required]                 │
-│    --method       -m  [dns_core|manual]  Method (provider) to issue and      │
-│                                          manage the certificate [default:    │
-│                                          dns_core]                           │
-│    --cert             FILENAME           PEM certificate or full chain file  │
-│    --key              FILENAME           Unencrypted PEM private key file    │
-│    --tag              TEXT               Set the complete tag list.          │
-│    --help                                Show this message and exit.         │
-╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                               │
+│    --uuid         -u  UUID                    UUID of the certificate                                                                                                                                                                                                                                    │
+│ *  --project-id   -p  UUID                    Name of the project in which to deploy the certificate [required]                                                                                                                                                                                          │
+│    --name         -n  TEXT                    Name of the certificate                                                                                                                                                                                                                                    │
+│    --description  -D  TEXT                    Description of the certificate                                                                                                                                                                                                                             │
+│ *  --email        -e  TEXT                    Email address to use for the certificate [required]                                                                                                                                                                                                        │
+│ *  --domain       -d  TEXT                    Domain of the certificate, wildcards are allowed. Can be repeated [required]                                                                                                                                                                               │
+│    --method       -m  [dns_core|manual]       Method (provider) to issue and manage the certificate [default: dns_core]                                                                                                                                                                                  │
+│    --cert             FILENAME                PEM certificate or full chain file                                                                                                                                                                                                                         │
+│    --key              FILENAME                Unencrypted PEM private key file                                                                                                                                                                                                                           │
+│    --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                            │
+│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

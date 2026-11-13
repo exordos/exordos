@@ -6,12 +6,20 @@ Update user
 ## Usage
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 users update [OPTIONS] UUID                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
+
+ Usage: exordos metapaas s3 users update [OPTIONS] UUID
+
 ```
 
 ## Options
+
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
 
 * `uuid` (REQUIRED):
     * Type: text
@@ -43,14 +51,15 @@ Update user
 ## CLI Help
 
 ```console
-                                                                                                                                                                                                                                                                                                           
- Usage: exordos metapaas s3 users update [OPTIONS] UUID                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                           
- Update user                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                           
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --instance-uuid  -i  TEXT  UUID of the instance the user belongs to [required]                                                                                                                                                                                                                       │
-│    --description        TEXT  Description of the user                                                                                                                                                                                                                                                   │
-│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+ Usage: exordos metapaas s3 users update [OPTIONS] UUID
+
+ Update user
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
+│ *  --instance-uuid  -i  TEXT                    UUID of the instance the user belongs to [required]                                                                                                                                                                                                      │
+│    --description        TEXT                    Description of the user                                                                                                                                                                                                                                  │
+│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

@@ -40,6 +40,7 @@ def check_latest_version(echo_on_latest: bool = False) -> bool:
                 f"New version available: {latest_tag} (current: {exordos_version.version_info}) "
                 f"Update by:\ncurl -fsSL {c.EXORDOS_REPO_URL}/install.sh | sh",
                 fg="yellow",
+                err=True,
             )
             return False
         else:
@@ -50,7 +51,9 @@ def check_latest_version(echo_on_latest: bool = False) -> bool:
                 )
     except Exception as err:
         click.secho(
-            f"Failed to check for the latest version on GitHub: {err}", fg="red"
+            f"Failed to check for the latest version on GitHub: {err}",
+            fg="red",
+            err=True,
         )
     return True
 
