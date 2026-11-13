@@ -15,6 +15,7 @@
 #    under the License.
 from __future__ import annotations
 
+import fnmatch
 import os
 import pathlib
 import subprocess
@@ -23,6 +24,7 @@ import time
 import typing as tp
 import uuid as sys_uuid
 
+from bazooka import exceptions as bazooka_exc
 from packaging import version as packaging_version
 from rich.prompt import Confirm
 from rich.text import Text
@@ -260,6 +262,8 @@ def _select_element_by_name(
         elements = [e for e in elements if e["uuid"] != exclude_uuid]
 
     if not elements:
+        if newer_than is not None:
+            return None
         raise click.ClickException(f"No elements found with name '{name}'")
 
     # Filter out development versions unless version is explicitly provided
@@ -267,6 +271,8 @@ def _select_element_by_name(
         elements = [e for e in elements if version_lib.is_stable_version(e["version"])]
 
     if not elements:
+        if newer_than is not None:
+            return None
         raise click.ClickException(
             f"No stable versions found for element '{name}'. "
             "Use --version to install a development version."
@@ -409,7 +415,62 @@ def _select_current_element_by_name(
     return active_elements[0]
 
 
-@click.command("install", help="Install one or more elements")
+def _expand_element_targets(
+    client: "CollectionBaseClient", targets: list[str], installed_only: bool = False
+) -> list[tuple[str, bool]]:
+    """Return targets with a flag forcing expanded matches to resolve by name."""
+    names = None
+    expanded = []
+    for target in targets:
+        if os.path.isfile(target) or not any(char in target for char in "*?["):
+            matches = [target]
+            name_only = False
+        else:
+            if names is None:
+                elements = base_client.list_entities(
+                    client,
+                    base_client.add_fields_to_url(
+                        c.REPOSITORY_ELEMENT_COLLECTION,
+                        ("name", "installation_state", "status")
+                        if installed_only
+                        else ("name",),
+                    ),
+                )
+                names = sorted(
+                    {
+                        e["name"]
+                        for e in elements
+                        if not installed_only
+                        or e.get("installation_state") == "INSTALLED"
+                        or (
+                            e.get("installation_state") is None
+                            and e.get("status") in ("ACTIVE", "IN_PROGRESS")
+                        )
+                    }
+                )
+            matches = (
+                [target]
+                if target in names
+                else [name for name in names if fnmatch.fnmatchcase(name, target)]
+            )
+            name_only = True
+            if not matches:
+                raise click.ClickException(f"No elements match pattern '{target}'")
+        for match in matches:
+            if not any(value == match for value, _ in expanded):
+                expanded.append((match, name_only))
+    return expanded
+
+
+@click.command(
+    "install",
+    help="Install elements by UUID, name, name glob, or manifest path.\n\n"
+    "Name globs support *, ?, and [abc] and match case-sensitively. "
+    "Quote patterns to prevent shell expansion: "
+    "exordos ee install 'ecosystem_ui_*'. "
+    "Each matching name is installed once, using the usual version selection. "
+    "An unmatched pattern is an error.",
+)
 @click.option(
     "-v",
     "--version",
@@ -461,8 +522,8 @@ def install_cmd(
             return
         targets = [selected]
 
-    for target in targets:
-        if os.path.isfile(target):
+    for target, name_only in _expand_element_targets(client, targets):
+        if not name_only and os.path.isfile(target):
             manifest_path = pathlib.Path(target)
             manifest_data = utils.load_yaml(str(manifest_path))
             name = manifest_data.get("name")
@@ -495,13 +556,25 @@ def install_cmd(
             )
             continue
 
-        if utils.is_valid_uuid(target):
+        if not name_only and utils.is_valid_uuid(target):
             element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=target)
         else:
             element = _select_element_by_name(client, target, version)
 
         element_uuid = element["uuid"]
-        repo_utils.install_element(client, element_uuid)
+        try:
+            repo_utils.install_element(client, element_uuid)
+        except bazooka_exc.BadRequestError as exc:
+            if (
+                "Element with the same name is already installed"
+                not in exc.cause.response.text
+            ):
+                raise
+            click.echo(
+                f"Element {element['name']} is already installed, skipping. "
+                "Use update to change its version."
+            )
+            continue
 
         installed_name = f"{element['name']} ({element['version']})"
         click.echo(
@@ -572,11 +645,12 @@ def _update_element_by_uuid_or_name(
     uuid_or_name: str,
     version: str | None,
     y: bool,
+    name_only: bool = False,
 ) -> None:
     """Update a single element selected by UUID or name."""
     import questionary
 
-    if utils.is_valid_uuid(uuid_or_name):
+    if not name_only and utils.is_valid_uuid(uuid_or_name):
         current_element = client.get(c.REPOSITORY_ELEMENT_COLLECTION, uuid=uuid_or_name)
     else:
         current_element = _select_current_element_by_name(client, uuid_or_name)
@@ -625,7 +699,15 @@ def _update_element_by_uuid_or_name(
     )
 
 
-@click.command("update", help="Update one or more elements")
+@click.command(
+    "update",
+    help="Update elements by UUID, name, name glob, or manifest path.\n\n"
+    "Name globs support *, ?, and [abc] and match case-sensitively. "
+    "Quote patterns to prevent shell expansion: "
+    "exordos ee update 'ecosystem_ui_*'. "
+    "Globs select installed elements only; each matching name is updated once. "
+    "An unmatched pattern is an error.",
+)
 @click.option(
     "-v",
     "--version",
@@ -680,13 +762,17 @@ def update_cmd(
             click.echo("No element selected, aborting")
             return
 
-    for target in targets:
-        if os.path.isfile(target):
+    for target, name_only in _expand_element_targets(
+        client, targets, installed_only=True
+    ):
+        if not name_only and os.path.isfile(target):
             _update_element_from_manifest(
                 client, pathlib.Path(target), y, project_id, timeout
             )
         else:
-            _update_element_by_uuid_or_name(client, target, version, y)
+            _update_element_by_uuid_or_name(
+                client, target, version, y, name_only=name_only
+            )
 
 
 @click.command("uninstall", help="Uninstall elements by UUID or name")
