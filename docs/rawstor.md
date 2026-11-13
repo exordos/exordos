@@ -203,8 +203,8 @@ The guest must expand its partitions and filesystem separately.
 ## Rawstor version
 
 The default Debian version is `99.0.0`, with Python binding
-`99.0.0+0.62c4ceb`, from
-[Actions run 43012990263](https://github.com/rawstor/librawstor/actions/runs/43012990263).
+`99.0.0+0.41a2714`, from
+[Actions run 43517230510](https://github.com/rawstor/librawstor/actions/runs/43517230510).
 Core bundles its packages and SHA256 checksums. CLI downloads OST, vhost,
 librawstor and bindings from the same run. Set `RAWSTOR_VERSION` for a release,
 `RAWSTOR_ARTIFACT_RUN` for another CI run, and `RAWSTOR_WHEEL_VERSION` when its
@@ -235,3 +235,16 @@ a majority when one data node is unavailable.
 The LIST wire format distinguishes chunks (`1`) from objects (`2`); update
 clients, MDS and OST together. Read-only mirrored opens also require quorum;
 Rawstor only bypasses it when `FORCE` is explicitly combined with `READONLY`.
+
+## Tenant-aware build compatibility
+
+Build 43517230510 introduces tenant metadata and a mandatory handshake. Update
+librawstor, Python bindings, MDS, OST and vhost together. Existing pre-tenant MDS
+databases and object metadata are incompatible; Rawstor provides no migration.
+Installing packages does not convert or delete existing data. Recreate
+disposable development storage before using the new build.
+
+Exordos uses `project_id` as the Rawstor tenant UUID. The hypervisor registers
+it on first disk creation and preserves it in the vhost configuration. A nil
+project UUID cannot own Rawstor objects. Tenant labels are ownership metadata,
+not authentication or an access-control boundary in this Rawstor build.
