@@ -85,6 +85,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_auth_enable-otp/"/>
     </url>
     <url>
+        <loc>https://github.com/exordos/exordos/cli/exordos_auth_login/</loc>
+        <lastmod>2026-11-13</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_auth_login/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_auth_login/"/>
+    </url>
+    <url>
         <loc>https://github.com/exordos/exordos/cli/exordos_autocomplete/</loc>
         <lastmod>2026-11-13</lastmod>
         <changefreq>daily</changefreq>
@@ -3338,6 +3345,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_auth_enable-otp/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_auth_enable-otp/"/>
+    </url>
+    <url>
+        <loc>https://github.com/exordos/exordos/ru/cli/exordos_auth_login/</loc>
+        <lastmod>2026-11-13</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://github.com/exordos/exordos/ru/cli/exordos_auth_login/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/exordos/exordos/cli/exordos_auth_login/"/>
     </url>
     <url>
         <loc>https://github.com/exordos/exordos/ru/cli/exordos_autocomplete/</loc>
