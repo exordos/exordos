@@ -15,6 +15,8 @@
 #    under the License.
 from __future__ import annotations
 
+from contextlib import redirect_stdout
+import sys
 import uuid as sys_uuid
 
 import rich_click as click
@@ -27,6 +29,19 @@ from exordos.cmd.auth import qr
 @click.group("auth", help="Authentication and current user management commands")
 def auth_group():
     pass
+
+
+@click.command("login", help="Authenticate and print the access token")
+@click.pass_context
+def login_cmd(ctx: click.Context) -> None:
+    with redirect_stdout(sys.stderr):
+        client = base_client.get_user_api_client(ctx.obj.auth_data)
+        client._auth.authenticate()
+        token = client._auth.get_auth_header()["Authorization"].removeprefix("Bearer ")
+    click.echo(token)
+
+
+auth_group.add_command(login_cmd)
 
 
 @click.command("disable-otp", help="Disable two-factor authentication")
