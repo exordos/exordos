@@ -186,3 +186,63 @@ def test_download_inventory_reports_missing_repository_file(tmp_path, category):
     assert "HTTP 404 Not Found" in message
     assert "published in the repository" in message
     assert "<html>" not in message
+
+
+@pytest.mark.parametrize("placement", ["core", "local"])
+def test_bootstrap_passes_hypervisor_fields_to_spec(placement):
+    import dataclasses
+
+    from click.testing import CliRunner
+
+    from exordos.stand import models
+
+    fields = {
+        "name": "compute-host",
+        "description": "Bootstrap host",
+        "avail_cores": 12,
+        "avail_ram": 32768,
+        "cores_ratio": 4.0,
+        "ram_ratio": 1.5,
+    }
+    args = [
+        "--inventory",
+        "test-inventory",
+        "--launch-mode",
+        "core",
+        "--pool-agent-placement",
+        placement,
+    ]
+    for key, value in fields.items():
+        args.extend(["--hyper-" + key.replace("_", "-"), str(value)])
+    captured = []
+    hypervisor_model = models.Hypervisor
+
+    def capture(**kwargs):
+        captured.append(dataclasses.asdict(hypervisor_model(**kwargs)))
+        raise RuntimeError("stop before provisioning")
+
+    with (
+        mock.patch.object(commands.repo_fs, "FSRepoDriver"),
+        mock.patch.object(commands, "_get_core_image_uri_from_manifest"),
+        mock.patch.object(commands.subprocess, "call", return_value=0),
+        mock.patch.object(commands.hv_commands, "local_agent_node_uuid"),
+        mock.patch.object(commands.hv_commands, "generate_node_private_key_base64"),
+        mock.patch.object(commands.stand_models, "Hypervisor", side_effect=capture),
+    ):
+        result = CliRunner().invoke(commands.bootstrap_cmd, args)
+
+    assert isinstance(result.exception, RuntimeError), result.output
+    assert str(result.exception) == "stop before provisioning"
+    assert len(captured) == 1
+    for key, value in fields.items():
+        assert captured[0][key] == value
+
+
+@pytest.mark.parametrize("option", ["--hyper-cores-ratio", "--hyper-ram-ratio"])
+def test_bootstrap_rejects_negative_hypervisor_ratios(option):
+    from click.testing import CliRunner
+
+    result = CliRunner().invoke(commands.bootstrap_cmd, [option, "-1"])
+    assert result.exit_code == 2
+    assert option in result.output
+    assert "not in the range" in result.output

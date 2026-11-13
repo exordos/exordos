@@ -155,3 +155,26 @@ without definitions, a non-empty `repo_url` is added to the bootstrap repositori
 Existing repositories, including those specified with `--repository`, are
 preserved. If the exact URL is already in the list, it is not added again.
 An absent or empty `repo_url` leaves the repository list unchanged.
+
+### Initial hypervisor settings
+
+The optional `hypervisor` object in `realm_spec.json` configures the initial
+hypervisor:
+
+```json
+{
+  "hypervisor": {
+    "name": "realm-host",
+    "description": "Realm hypervisor",
+    "avail_cores": 16,
+    "avail_ram": 65536,
+    "cores_ratio": 4.0,
+    "ram_ratio": 1.5
+  }
+}
+```
+
+RAM is in MB. Ratios must be nonnegative. Omitted fields use CLI defaults;
+explicit `--hyper-*` options override individual fields from the realm spec,
+including zero values and empty descriptions. `--stand-spec` takes precedence
+over both sources. Existing pools are not updated by bootstrap.

@@ -30,6 +30,7 @@ import rich.panel
 import rich.progress
 import rich.status
 import rich.table
+from click.core import ParameterSource
 import rich_click as click
 import yaml
 
@@ -433,6 +434,16 @@ REALM_SPEC_REQUIRED_KEYS = (
 )
 
 
+REALM_SPEC_HYPERVISOR_FIELDS = (
+    "name",
+    "description",
+    "avail_cores",
+    "avail_ram",
+    "cores_ratio",
+    "ram_ratio",
+)
+
+
 def _load_realm_spec(path: str) -> dict:
     """Load and validate a realm spec delivered by the exordos ecosystem.
 
@@ -488,6 +499,23 @@ def _load_realm_spec(path: str) -> dict:
         raise click.UsageError(
             "Realm spec repository must be a definition or a list of URLs or definitions"
         )
+
+    hypervisor = spec.get("hypervisor", {})
+    if not isinstance(hypervisor, dict):
+        raise click.UsageError("Realm spec hypervisor must be an object")
+    unknown = hypervisor.keys() - set(REALM_SPEC_HYPERVISOR_FIELDS)
+    if unknown:
+        raise click.UsageError(
+            f"Unknown realm spec hypervisor fields: {', '.join(sorted(unknown))}"
+        )
+    for option in bootstrap_cmd.params:
+        field = option.name.removeprefix("hyper_")
+        if option.name.startswith("hyper_") and field in hypervisor:
+            if hypervisor[field] is None:
+                raise click.UsageError(
+                    f"Realm spec hypervisor.{field} must not be null"
+                )
+            hypervisor[field] = option.type.convert(hypervisor[field], option, None)
 
     return spec
 
@@ -915,6 +943,42 @@ def _resolve_hypervisor_placement(
     ),
 )
 @click.option(
+    "--hyper-name",
+    type=str,
+    default="hypervisor",
+    help="Name of the hypervisor.",
+)
+@click.option(
+    "--hyper-description",
+    type=str,
+    default="",
+    help="Description of the hypervisor.",
+)
+@click.option(
+    "--hyper-avail-cores",
+    type=int,
+    default=None,
+    help="CPU cores available for VMs.",
+)
+@click.option(
+    "--hyper-avail-ram",
+    type=int,
+    default=None,
+    help="RAM available for VMs, in MB.",
+)
+@click.option(
+    "--hyper-cores-ratio",
+    type=click.FloatRange(min=0.0),
+    default=None,
+    help="CPU overcommit ratio for the hypervisor.",
+)
+@click.option(
+    "--hyper-ram-ratio",
+    type=click.FloatRange(min=0.0),
+    default=None,
+    help="RAM overcommit ratio for the hypervisor.",
+)
+@click.option(
     "--hyper-storage-pool",
     default="default",
     type=str,
@@ -1057,6 +1121,12 @@ def bootstrap_cmd(
     save_admin_password_file: str | None,
     pool_agent_placement: str,
     hyper_connection_uri: str,
+    hyper_name: str,
+    hyper_description: str,
+    hyper_avail_cores: int | None,
+    hyper_avail_ram: int | None,
+    hyper_cores_ratio: float | None,
+    hyper_ram_ratio: float | None,
     hyper_storage_pool: str,
     hyper_machine_prefix: str,
     hyper_iface_rom_file: str,
@@ -1236,8 +1306,22 @@ def bootstrap_cmd(
         # the core seeds its matching NodeEncryptionKey at bootstrap.
         hyper_private_key = hv_commands.generate_node_private_key_base64()
 
+    hypervisor_fields = {
+        "name": hyper_name,
+        "description": hyper_description,
+        "avail_cores": hyper_avail_cores,
+        "avail_ram": hyper_avail_ram,
+        "cores_ratio": hyper_cores_ratio,
+        "ram_ratio": hyper_ram_ratio,
+    }
+    if realm_spec_data is not None:
+        for field, value in realm_spec_data.get("hypervisor", {}).items():
+            if ctx.get_parameter_source(f"hyper_{field}") == ParameterSource.DEFAULT:
+                hypervisor_fields[field] = value
+
     # Single hypervisor at bootstrap time is supported at the moment
     hypervisor = stand_models.Hypervisor(
+        **hypervisor_fields,
         network=stand_main_network.name,
         network_type="bridge" if bridge else "network",
         connection_uri=hyper_connection_uri,
