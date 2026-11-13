@@ -6867,13 +6867,21 @@
 
 
 <h1 id="exordos_secret_ssh_keys_add">exordos_secret_ssh_keys_add<a class="headerlink" href="#exordos_secret_ssh_keys_add" title="Permanent link">#</a></h1>
-<p>Add a new ssh_key to the Exordos installation, examples: <code>exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub</code> or <code>exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub</code></p>
+<p>Add a new ssh_key to the Exordos installation, examples: <code>exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub</code> or <code>exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub</code>. Existing SSH keys are skipped; creation continues for the remaining targets.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos secret ssh_keys add [OPTIONS]</span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
+<ul>
+<li><code>output</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>table</code></li>
+<li>Usage: <code>--output
+-o</code></li>
+</ul>
+</li>
+</ul>
+<p>Output format; JSON prints one resource object (an array for bulk creation).</p>
 <ul>
 <li><code>uuid</code>:<ul>
 <li>Type: uuid</li>
@@ -6987,25 +6995,26 @@
 </ul>
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos secret ssh_keys add [OPTIONS]                                                                                                                                                                                                                                                              </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or `exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`               </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --uuid               -u  UUID  UUID of the ssh_key                                                                                                                                                                                                                                                      │</span>
-<span class="go">│ --project-id         -p  UUID  Name of the project in which to deploy the ssh_key                                                                                                                                                                                                                       │</span>
-<span class="go">│ --name               -n  TEXT  Name of the ssh_key                                                                                                                                                                                                                                                      │</span>
-<span class="go">│ --description        -D  TEXT  Description of the ssh_key                                                                                                                                                                                                                                               │</span>
-<span class="go">│ --current-realm                add ssh keys to all current realm nodes and sets. If you want to use another realm, additionally change it by global cli option --realm                                                                                                                                  │</span>
-<span class="go">│ --element                TEXT  element uuid or name                                                                                                                                                                                                                                                     │</span>
-<span class="go">│ --node                   TEXT  node uuids or names                                                                                                                                                                                                                                                      │</span>
-<span class="go">│ --node-set               TEXT  node_set uuids or names                                                                                                                                                                                                                                                  │</span>
-<span class="go">│ --user                   TEXT  user name of the ssh_key                                                                                                                                                                                                                                                 │</span>
-<span class="go">│ --target_public_key      TEXT  key or path to it, for example: /home/user/.ssh/id_rsa.pub                                                                                                                                                                                                               │</span>
-<span class="go">│ --tag  TEXT  Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                                                            │</span>
-<span class="go">│ --help                         Show this message and exit.                                                                                                                                                                                                                                              │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos secret ssh_keys add [OPTIONS]</span>
+
+<span class="go"> Add a new ssh_key to the Exordos installation, examples: `exordos secret ssh_keys add --node 2cc70850-3df7-4234-b9c1-0e20ed3672c7 --user ubuntu --target_public_key ~/.ssh/id_rsa.pub` or `exordos secret ssh_keys add --element dbaas --user ubuntu --target_public_key ~/.ssh/id_rsa.pub`. Existing SSH</span>
+<span class="go"> keys are skipped; creation continues for the remaining targets.</span>
+
+<span class="go">╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span class="go">│ --output             -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                            │</span>
+<span class="go">│ --uuid               -u  UUID                    UUID of the ssh_key                                                                                                                                                                                                                                     │</span>
+<span class="go">│ --project-id         -p  UUID                    Name of the project in which to deploy the ssh_key                                                                                                                                                                                                      │</span>
+<span class="go">│ --name               -n  TEXT                    Name of the ssh_key                                                                                                                                                                                                                                     │</span>
+<span class="go">│ --description        -D  TEXT                    Description of the ssh_key                                                                                                                                                                                                                              │</span>
+<span class="go">│ --current-realm                                  add ssh keys to all current realm nodes and sets. If you want to use another realm, additionally change it by global cli option --realm                                                                                                                 │</span>
+<span class="go">│ --element                TEXT                    element uuid or name                                                                                                                                                                                                                                    │</span>
+<span class="go">│ --node                   TEXT                    node uuids or names                                                                                                                                                                                                                                     │</span>
+<span class="go">│ --node-set               TEXT                    node_set uuids or names                                                                                                                                                                                                                                 │</span>
+<span class="go">│ --user                   TEXT                    user name of the ssh_key                                                                                                                                                                                                                                │</span>
+<span class="go">│ --target_public_key      TEXT                    key or path to it, for example: /home/user/.ssh/id_rsa.pub                                                                                                                                                                                              │</span>
+<span class="go">│ --tag                    TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                         │</span>
+<span class="go">│ --help                                           Show this message and exit.                                                                                                                                                                                                                             │</span>
+<span class="go">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 

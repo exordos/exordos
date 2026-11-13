@@ -6869,11 +6869,19 @@
 <h1 id="exordos_iam_tokens_add">exordos_iam_tokens_add<a class="headerlink" href="#exordos_iam_tokens_add" title="Permanent link">#</a></h1>
 <p>Issue a new token. The signed token is in the answer to this command and nowhere else: copy it now, a read never returns it</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos iam tokens add [OPTIONS]                                                                                                                                                                                                                                                                   </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos iam tokens add [OPTIONS]</span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
+<ul>
+<li><code>output</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>table</code></li>
+<li>Usage: <code>--output
+-o</code></li>
+</ul>
+</li>
+</ul>
+<p>Output format; JSON prints one resource object (an array for bulk creation).</p>
 <ul>
 <li><code>uuid</code>:<ul>
 <li>Type: uuid</li>
@@ -6941,20 +6949,20 @@
 </ul>
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos iam tokens add [OPTIONS]                                                                                                                                                                                                                                                                   </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Issue a new token. The signed token is in the answer to this command and nowhere else: copy it now, a read never returns it                                                                                                                                                                               </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ --uuid        -u  UUID                  UUID of the token                                                                                                                                                                                                                                               │</span>
-<span class="go">│ --user            UUID                  UUID of the user the token authenticates. Defaults to the account running the command; naming another user takes the iam.token.create_all permission                                                                                                            │</span>
-<span class="go">│ --iam-client      UUID                  UUID of the IAM client that signs the token [default: 00000000-0000-0000-0000-000000000000]                                                                                                                                                                     │</span>
-<span class="go">│ --scope       -s  TEXT                  Scope of the token, e.g. 'project:&lt;uuid&gt;'                                                                                                                                                                                                                       │</span>
-<span class="go">│ --days        -d  INTEGER RANGE [x&gt;=1]  How many days the token lives before it is spent [default: 30]                                                                                                                                                                                                  │</span>
-<span class="go">│ --no-expire                             Keep the token alive instead: the platform renews it before it expires, for as long as the token exists                                                                                                                                                         │</span>
-<span class="go">│ --help                                  Show this message and exit.                                                                                                                                                                                                                                     │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos iam tokens add [OPTIONS]</span>
+
+<span class="go"> Issue a new token. The signed token is in the answer to this command and nowhere else: copy it now, a read never returns it</span>
+
+<span class="go">╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span class="go">│ --output      -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                                   │</span>
+<span class="go">│ --uuid        -u  UUID                    UUID of the token                                                                                                                                                                                                                                              │</span>
+<span class="go">│ --user            UUID                    UUID of the user the token authenticates. Defaults to the account running the command; naming another user takes the iam.token.create_all permission                                                                                                           │</span>
+<span class="go">│ --iam-client      UUID                    UUID of the IAM client that signs the token [default: 00000000-0000-0000-0000-000000000000]                                                                                                                                                                    │</span>
+<span class="go">│ --scope       -s  TEXT                    Scope of the token, e.g. 'project:&lt;uuid&gt;'                                                                                                                                                                                                                      │</span>
+<span class="go">│ --days        -d  INTEGER RANGE [x&gt;=1]    How many days the token lives before it is spent [default: 30]                                                                                                                                                                                                 │</span>
+<span class="go">│ --no-expire                               Keep the token alive instead: the platform renews it before it expires, for as long as the token exists                                                                                                                                                        │</span>
+<span class="go">│ --help                                    Show this message and exit.                                                                                                                                                                                                                                    │</span>
+<span class="go">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 

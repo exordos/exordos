@@ -6869,11 +6869,19 @@
 <h1 id="exordos_dbaas_databases_add">exordos_dbaas_databases_add<a class="headerlink" href="#exordos_dbaas_databases_add" title="Permanent link">#</a></h1>
 <p>Add a new database</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos dbaas databases add [OPTIONS]                                                                                                                                                                                                                                                              </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos dbaas databases add [OPTIONS]</span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
+<ul>
+<li><code>output</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>table</code></li>
+<li>Usage: <code>--output
+-o</code></li>
+</ul>
+</li>
+</ul>
+<p>Output format; JSON prints one resource object (an array for bulk creation).</p>
 <ul>
 <li><code>uuid</code>:<ul>
 <li>Type: uuid</li>
@@ -6942,20 +6950,20 @@
 </ul>
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos dbaas databases add [OPTIONS]                                                                                                                                                                                                                                                              </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Add a new database                                                                                                                                                                                                                                                                                        </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│    --uuid           -u  UUID  UUID of the database                                                                                                                                                                                                                                                      │</span>
-<span class="go">│ *  --project-id     -p  UUID  UUID of the project in which to create the database [required]                                                                                                                                                                                                            │</span>
-<span class="go">│ *  --instance-uuid  -i  TEXT  UUID of the instance to create the database in [required]                                                                                                                                                                                                                 │</span>
-<span class="go">│ *  --name           -n  TEXT  Name of the database [required]                                                                                                                                                                                                                                           │</span>
-<span class="go">│    --description        TEXT  Description of the database                                                                                                                                                                                                                                               │</span>
-<span class="go">│ *  --owner              TEXT  UUID or name of the user owning the database [required]                                                                                                                                                                                                                   │</span>
-<span class="go">│    --help                     Show this message and exit.                                                                                                                                                                                                                                               │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos dbaas databases add [OPTIONS]</span>
+
+<span class="go"> Add a new database</span>
+
+<span class="go">╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span class="go">│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │</span>
+<span class="go">│    --uuid           -u  UUID                    UUID of the database                                                                                                                                                                                                                                     │</span>
+<span class="go">│ *  --project-id     -p  UUID                    UUID of the project in which to create the database [required]                                                                                                                                                                                           │</span>
+<span class="go">│ *  --instance-uuid  -i  TEXT                    UUID of the instance to create the database in [required]                                                                                                                                                                                                │</span>
+<span class="go">│ *  --name           -n  TEXT                    Name of the database [required]                                                                                                                                                                                                                          │</span>
+<span class="go">│    --description        TEXT                    Description of the database                                                                                                                                                                                                                              │</span>
+<span class="go">│ *  --owner              TEXT                    UUID or name of the user owning the database [required]                                                                                                                                                                                                  │</span>
+<span class="go">│    --help                                       Show this message and exit.                                                                                                                                                                                                                              │</span>
+<span class="go">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 

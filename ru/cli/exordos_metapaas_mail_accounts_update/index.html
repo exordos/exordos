@@ -6869,11 +6869,19 @@
 <h1 id="exordos_metapaas_mail_accounts_update">exordos_metapaas_mail_accounts_update<a class="headerlink" href="#exordos_metapaas_mail_accounts_update" title="Permanent link">#</a></h1>
 <p>Update account</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos metapaas mail accounts update [OPTIONS] UUID                                                                                                                                                                                                                                               </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos metapaas mail accounts update [OPTIONS] UUID</span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
+<ul>
+<li><code>output</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>table</code></li>
+<li>Usage: <code>--output
+-o</code></li>
+</ul>
+</li>
+</ul>
+<p>Output format; JSON prints one resource object (an array for bulk creation).</p>
 <ul>
 <li>
 <p><code>uuid</code> (REQUIRED):</p>
@@ -6941,19 +6949,19 @@
 </ul>
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos metapaas mail accounts update [OPTIONS] UUID                                                                                                                                                                                                                                               </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Update account                                                                                                                                                                                                                                                                                            </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│ *  --instance-uuid       -i  TEXT  UUID of the mail instance the account belongs to [required]                                                                                                                                                                                                          │</span>
-<span class="go">│    --name                -n  TEXT  Name of the account                                                                                                                                                                                                                                                  │</span>
-<span class="go">│    --description             TEXT  Description of the account                                                                                                                                                                                                                                           │</span>
-<span class="go">│    --password                TEXT  Password of the account, hashed by the API before it is stored                                                                                                                                                                                                       │</span>
-<span class="go">│    --active/--no-active            Whether the account is allowed to authenticate                                                                                                                                                                                                                       │</span>
-<span class="go">│    --help                          Show this message and exit.                                                                                                                                                                                                                                          │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos metapaas mail accounts update [OPTIONS] UUID</span>
+
+<span class="go"> Update account</span>
+
+<span class="go">╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span class="go">│    --output              -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                        │</span>
+<span class="go">│ *  --instance-uuid       -i  TEXT                    UUID of the mail instance the account belongs to [required]                                                                                                                                                                                         │</span>
+<span class="go">│    --name                -n  TEXT                    Name of the account                                                                                                                                                                                                                                 │</span>
+<span class="go">│    --description             TEXT                    Description of the account                                                                                                                                                                                                                          │</span>
+<span class="go">│    --password                TEXT                    Password of the account, hashed by the API before it is stored                                                                                                                                                                                      │</span>
+<span class="go">│    --active/--no-active                              Whether the account is allowed to authenticate                                                                                                                                                                                                      │</span>
+<span class="go">│    --help                                            Show this message and exit.                                                                                                                                                                                                                         │</span>
+<span class="go">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 

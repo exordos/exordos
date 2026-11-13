@@ -6869,9 +6869,7 @@
 <h1 id="exordos_compute_cn_add">exordos_compute_cn_add<a class="headerlink" href="#exordos_compute_cn_add" title="Permanent link">#</a></h1>
 <p>Add a new node to the Exordos installation</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos compute cn add [OPTIONS]                                                                                                                                                                                                                                                                   </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos compute cn add [OPTIONS]</span>
 </code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
 <ul>
@@ -6973,6 +6971,16 @@
 </ul>
 <p>Wait until the node is running</p>
 <ul>
+<li><code>output</code>:<ul>
+<li>Type: choice</li>
+<li>Default: <code>table</code></li>
+<li>Usage: <code>--output
+-o</code></li>
+</ul>
+</li>
+</ul>
+<p>Output format; JSON prints one resource object.</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -6982,24 +6990,24 @@
 </ul>
 <p>Show this message and exit.</p>
 <h2 id="cli-help">CLI Help<a class="headerlink" href="#cli-help" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Usage: exordos compute cn add [OPTIONS]                                                                                                                                                                                                                                                                   </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go"> Add a new node to the Exordos installation                                                                                                                                                                                                                                                                </span>
-<span class="go">                                                                                                                                                                                                                                                                                                           </span>
-<span class="go">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="go">│    --uuid         -u  UUID     UUID of the node                                                                                                                                                                                                                                                         │</span>
-<span class="go">│ *  --project-id   -p  UUID     Name of the project in which to deploy the node [required]                                                                                                                                                                                                               │</span>
-<span class="go">│    --cores        -c  INTEGER  Number of cores to allocate for the node [default: 1]                                                                                                                                                                                                                    │</span>
-<span class="go">│    --ram          -r  INTEGER  Amount of RAM in Mb to allocate for the node [default: 1024]                                                                                                                                                                                                             │</span>
-<span class="go">│    --root-disk    -d  INTEGER  Number of GiB of root disk to allocate for the node [default: 10]                                                                                                                                                                                                        │</span>
-<span class="go">│ *  --image        -i  TEXT     Name of the image to deploy [required]                                                                                                                                                                                                                                   │</span>
-<span class="go">│    --name         -n  TEXT     Name of the node                                                                                                                                                                                                                                                         │</span>
-<span class="go">│    --description  -D  TEXT     Description of the node                                                                                                                                                                                                                                                  │</span>
-<span class="go">│    --hostname                  Hostname of the node                                                                                                                                                                                                                                                     │</span>
-<span class="go">│    --wait                      Wait until the node is running                                                                                                                                                                                                                                           │</span>
-<span class="go">│    --help                      Show this message and exit.                                                                                                                                                                                                                                              │</span>
-<span class="go">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<div class="highlight"><pre><span></span><code><span class="go"> Usage: exordos compute cn add [OPTIONS]</span>
+
+<span class="go"> Add a new node to the Exordos installation</span>
+
+<span class="go">╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span class="go">│    --uuid         -u  UUID                    UUID of the node                                                                                                                                                                                                                                           │</span>
+<span class="go">│ *  --project-id   -p  UUID                    Name of the project in which to deploy the node [required]                                                                                                                                                                                                 │</span>
+<span class="go">│    --cores        -c  INTEGER                 Number of cores to allocate for the node [default: 1]                                                                                                                                                                                                      │</span>
+<span class="go">│    --ram          -r  INTEGER                 Amount of RAM in Mb to allocate for the node [default: 1024]                                                                                                                                                                                               │</span>
+<span class="go">│    --root-disk    -d  INTEGER                 Number of GiB of root disk to allocate for the node [default: 10]                                                                                                                                                                                          │</span>
+<span class="go">│ *  --image        -i  TEXT                    Name of the image to deploy [required]                                                                                                                                                                                                                     │</span>
+<span class="go">│    --name         -n  TEXT                    Name of the node                                                                                                                                                                                                                                           │</span>
+<span class="go">│    --description  -D  TEXT                    Description of the node                                                                                                                                                                                                                                    │</span>
+<span class="go">│    --hostname         TEXT                    Hostname of the node                                                                                                                                                                                                                                       │</span>
+<span class="go">│    --wait                                     Wait until the node is running                                                                                                                                                                                                                             │</span>
+<span class="go">│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object.                                                                                                                                                                                                            │</span>
+<span class="go">│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │</span>
+<span class="go">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
 
 
