@@ -1,7 +1,7 @@
 
 # exordos_ee_update
 
-Update one or more elements
+Update elements; without elements or --version, update all to latest
 
 ## Usage
 
@@ -62,7 +62,7 @@ Update one or more elements
                                                                                                                                                                                                                                                                                                            
  Usage: exordos ee update [OPTIONS] [UUID_OR_NAME_OR_PATH]...                                                                                                                                                                                                                                              
                                                                                                                                                                                                                                                                                                            
- Update one or more elements                                                                                                                                                                                                                                                                               
+ Update elements; without elements or --version, update all to latest
                                                                                                                                                                                                                                                                                                            
 ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --version     -v  TEXT   version of the element                                                                                                                                                                                                                                                         │
