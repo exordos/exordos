@@ -40,7 +40,15 @@ FIELDS_MAP = {
 }
 
 
-vv_group = create_entity_group(ENTITY, ENTITY_COLLECTION, FIELDS_MAP, "vv")
+vv_group = create_entity_group(
+    ENTITY,
+    ENTITY_COLLECTION,
+    FIELDS_MAP,
+    "vv",
+    post_fetch_handler=lambda entities, _: sorted(
+        entities, key=lambda entity: entity.get("name", "")
+    ),
+)
 
 
 @vv_group.command(
