@@ -12,19 +12,19 @@ Add a new set to the Exordos installation
 ```
 
 ## Options
-
-* `output`:
-    * Type: choice
-    * Default: `table`
-    * Usage: `--output
+* `output`: 
+  * Type: choice 
+  * Default: `table`
+  * Usage: `--output
 -o`
 
   Output format; JSON prints one resource object (an array for bulk creation).
 
-* `uuid`:
-    * Type: uuid
-    * Default: `none`
-    * Usage: `-u
+
+* `uuid`: 
+  * Type: uuid 
+  * Default: `none`
+  * Usage: `-u
 --uuid`
 
   UUID of the set
@@ -145,25 +145,27 @@ Add a new set to the Exordos installation
 ## CLI Help
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
- Add a new set to the Exordos installation
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
+ Add a new set to the Exordos installation                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                               │
-│    --uuid         -u  UUID                    UUID of the set                                                                                                                                                                                                                                            │
-│ *  --project-id   -p  UUID                    UUID of the project in which to deploy the set [required]                                                                                                                                                                                                  │
-│    --cores        -c  INTEGER                 Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                                          │
-│    --ram          -r  INTEGER                 Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                                                   │
-│    --root-disk    -d  INTEGER                 Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                                              │
-│ *  --image        -i  TEXT                    Name of the image to deploy [required]                                                                                                                                                                                                                     │
-│    --name         -n  TEXT                    Name of the set                                                                                                                                                                                                                                            │
-│    --description  -D  TEXT                    Description of the set                                                                                                                                                                                                                                     │
-│    --replicas         INTEGER                 Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                                         │
-│    --wait                                     Wait until the set is active                                                                                                                                                                                                                               │
-│    --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                            │
-│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+│    --output                    -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                  │
+│    --uuid                      -u  UUID                    UUID of the set                                                                                                                                                                                                                               │
+│ *  --project-id                -p  UUID                    UUID of the project in which to deploy the set [required]                                                                                                                                                                                     │
+│    --cores                     -c  INTEGER                 Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                             │
+│    --ram                       -r  INTEGER                 Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                                      │
+│    --root-disk                 -d  INTEGER                 Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                                 │
+│ *  --image                     -i  TEXT                    Name of the image to deploy [required]                                                                                                                                                                                                        │
+│    --tier                          [cold|warm|hot]         Storage tier to schedule the root disk onto [default: WARM]                                                                                                                                                                                   │
+│    --ephemeral/--no-ephemeral                              Whether the root disk is ephemeral storage [default: ephemeral]                                                                                                                                                                               │
+│    --name                      -n  TEXT                    Name of the set                                                                                                                                                                                                                               │
+│    --description               -D  TEXT                    Description of the set                                                                                                                                                                                                                        │
+│    --replicas                      INTEGER                 Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                            │
+│    --wait                                                  Wait until the set is active                                                                                                                                                                                                                  │
+│    --tag                           TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                               │
+│    --help                                                  Show this message and exit.                                                                                                                                                                                                                   │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
