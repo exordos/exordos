@@ -25,9 +25,8 @@ from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.cmd.base import tag_options
 from exordos.cmd.base import tags_payload
-from exordos.common.table import fill_table
-from exordos.common.table import print_table
 from exordos.common.table import show_resource
+from exordos.common.table import show_resources
 
 ENTITY = "permission"
 ENTITY_COLLECTION = c.PERMISSION_COLLECTION
@@ -121,7 +120,7 @@ def by_role_cmd(ctx: click.Context, role: str, output: str) -> None:
             )
         )
     permissions.sort(key=lambda x: x["name"])
-    print_table(fill_table(permissions, FIELDS_MAP), output)
+    show_resources(permissions, FIELDS_MAP, output)
 
 
 permissions_group.add_command(add_cmd, aliases=["a"])
