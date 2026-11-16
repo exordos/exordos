@@ -89,7 +89,8 @@ def test_add_cmd_nonce_required(flag: str | None, expected: bool) -> None:
     assert data["nonce_required"] is expected
 
 
-def test_list_cmd_shows_project_and_client_uuid() -> None:
+@pytest.mark.parametrize("output", ["table", "json"])
+def test_list_cmd_shows_project_and_client_uuid(output) -> None:
     project = "00000000-0000-0000-0000-0000000000aa"
     iam_client = "00000000-0000-0000-0000-0000000000bb"
     idp = {
@@ -105,12 +106,17 @@ def test_list_cmd_shows_project_and_client_uuid() -> None:
         mock.patch("exordos.cmd.base.base_client.list_entities", return_value=[idp]),
         mock.patch("exordos.cmd.base.base_client.get_user_api_client"),
     ):
-        result = CliRunner().invoke(iam_group, ["i", "list", "-o", "json"], obj=_ctx())
+        result = CliRunner().invoke(
+            iam_group, ["i", "list", "-o", output], obj=_ctx(), env={"COLUMNS": "400"}
+        )
 
     assert result.exit_code == 0, result.exception
     assert project in result.output
     assert iam_client in result.output
-    assert "/v1/iam/clients/" not in result.output
+    if output == "json":
+        assert json.loads(result.stdout) == [idp]
+    else:
+        assert "/v1/iam/clients/" not in result.output
 
 
 def test_update_cmd_sends_only_given_fields() -> None:

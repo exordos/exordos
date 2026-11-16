@@ -20,8 +20,7 @@ import rich_click as click
 from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
-from exordos.common.table import fill_table
-from exordos.common.table import print_table
+from exordos.common.table import show_resources
 
 ENTITY = "store"
 ENTITY_COLLECTION = c.REPOSITORY_STORE_ELEMENT_COLLECTION
@@ -62,4 +61,4 @@ def latest_stable_elements_cmd(
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     entities = base_client.list_entities(client, LATEST_STABLE_URL)
-    print_table(fill_table(entities, FIELDS_MAP), output)
+    show_resources(entities, FIELDS_MAP, output)

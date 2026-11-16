@@ -25,9 +25,9 @@ from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.common.table import fill_table
-from exordos.common.table import print_table
 from exordos.common.table import show_data
 from exordos.common.table import show_resource
+from exordos.common.table import show_resources
 
 
 def output_option(f):
@@ -160,7 +160,7 @@ def create_entity_group(
             "--watch",
             show_default=True,
             is_flag=True,
-            help=f"Watch the list of {entity_plural}",
+            help=f"Watch the list of {entity_plural} (not supported with JSON output)",
         )
         @click.option(
             "--interval",
@@ -179,6 +179,8 @@ def create_entity_group(
             interval: float,
             **kwargs,
         ) -> None:
+            if watch and output.lower() == "json":
+                raise click.UsageError("--watch cannot be combined with --output json")
             client = base_client.get_user_api_client(ctx.obj.auth_data)
             filters = utils.convert_input_multiply(filters)
             url = entity_collection.format(**kwargs)
@@ -207,7 +209,7 @@ def create_entity_group(
                 )
                 if post_fetch_handler:
                     entities = post_fetch_handler(entities, kwargs)
-                print_table(fill_table(entities, fields_map, fields), output)
+                show_resources(entities, fields_map, output, fields)
 
         if extra_options:
             list_cmd.params.extend(extra_options)

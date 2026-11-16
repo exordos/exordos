@@ -42,7 +42,7 @@ List vhosts
     * Usage: `-w
 --watch`
 
-  Watch the list of vhosts
+  Watch the list of vhosts (not supported with JSON output)
 
 * `interval`:
     * Type: float range
@@ -75,7 +75,7 @@ List vhosts
 │    --filters   -f  TEXT                    Additional filters to pass to the api. The format is 'key=value'. For example: --f parent=11111111-1111-1111-1111-11111111111 --filters status=NEW                                                                                                           │
 │    --fields        TEXT                    fields to show, defaults to all, for example: --fields name --fields status                                                                                                                                                                                  │
 │    --output    -o  [json|html|table|yaml]  the output format, defaults to table                                                                                                                                                                                                                         │
-│    --watch     -w                          Watch the list of vhosts                                                                                                                                                                                                                                     │
+│    --watch     -w                          Watch the list of vhosts (not supported with JSON output)                                                                                                                                                                                                    │
 │    --interval      FLOAT RANGE [x>=0.1]    Refresh interval in seconds.                                                                                                                                                                                                                                 │
 │ *  --lb-uuid       UUID                    [required]                                                                                                                                                                                                                                                   │
 │    --help                                  Show this message and exit.                                                                                                                                                                                                                                  │

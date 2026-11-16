@@ -160,3 +160,16 @@ def show_resource(data: dict, output: str = "table") -> None:
         click.echo(json.dumps(data, ensure_ascii=False))
     else:
         show_data(data, output)
+
+
+def show_resources(
+    data: list[dict],
+    fields_map: dict,
+    output: str = "table",
+    fields: tp.Optional[tuple[str, ...]] = None,
+) -> None:
+    """Print native JSON resources without converting them to table cells."""
+    if output.lower() == "json":
+        click.echo(json.dumps(data, ensure_ascii=False))
+    else:
+        print_table(fill_table(data, fields_map, fields), output)
