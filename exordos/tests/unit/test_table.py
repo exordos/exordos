@@ -175,6 +175,7 @@ def test_show_data_json_keeps_field_value_rows(capsys):
         {"field": "spec", "value": "{'enabled': True}"},
     ]
 
+
 class TestFillTable:
     def test_callable_field_returning_a_bool_is_rendered(self) -> None:
         fields_map = {
