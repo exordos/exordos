@@ -203,8 +203,8 @@ The guest must expand its partitions and filesystem separately.
 ## Rawstor version
 
 The default Debian version is `99.0.0`, with Python binding
-`99.0.0+0.19267e6`, from
-[Actions run 44049992498](https://github.com/rawstor/librawstor/actions/runs/44049992498).
+`99.0.0+0.6c915fe`, from
+[Actions run 44059493520](https://github.com/rawstor/librawstor/actions/runs/44059493520).
 Core bundles its packages and SHA256 checksums. CLI downloads OST, vhost,
 librawstor and bindings from the same run. Set `RAWSTOR_VERSION` for a release,
 `RAWSTOR_ARTIFACT_RUN` for another CI run, and `RAWSTOR_WHEEL_VERSION` when its
@@ -238,7 +238,7 @@ Rawstor only bypasses it when `FORCE` is explicitly combined with `READONLY`.
 
 ## Tenant-aware build compatibility
 
-Build 44049992498 introduces tenant metadata and a mandatory handshake. Update
+Build 44059493520 introduces tenant metadata and a mandatory handshake. Update
 librawstor, Python bindings, MDS, OST and vhost together. Existing pre-tenant MDS
 databases and object metadata are incompatible; Rawstor provides no migration.
 Installing packages does not convert or delete existing data. Recreate
@@ -256,7 +256,6 @@ The integration currently starts MDS, OST and vhost with explicit
 authenticated. TLS and SPIFFE issuance are maintained in a separate branch
 layered on the storage integration.
 
-Build 44049992498 exposes service command-line arguments, but its Python
-bindings do not yet expose insecure initialization. Agent-side operation
-requires a subsequent build with that public API; the service flag alone
-does not configure the bindings.
+Agents and the API explicitly call `rawstor.initialize(insecure=True)` before
+loading native `Target` or `Location` types. This matches the service transport
+mode; setting any `RAWSTOR_TLS_*` options in insecure mode is rejected.
