@@ -203,8 +203,8 @@ The guest must expand its partitions and filesystem separately.
 ## Rawstor version
 
 The default Debian version is `99.0.0`, with Python binding
-`99.0.0+0.41a2714`, from
-[Actions run 43517230510](https://github.com/rawstor/librawstor/actions/runs/43517230510).
+`99.0.0+0.19267e6`, from
+[Actions run 44049992498](https://github.com/rawstor/librawstor/actions/runs/44049992498).
 Core bundles its packages and SHA256 checksums. CLI downloads OST, vhost,
 librawstor and bindings from the same run. Set `RAWSTOR_VERSION` for a release,
 `RAWSTOR_ARTIFACT_RUN` for another CI run, and `RAWSTOR_WHEEL_VERSION` when its
@@ -238,7 +238,7 @@ Rawstor only bypasses it when `FORCE` is explicitly combined with `READONLY`.
 
 ## Tenant-aware build compatibility
 
-Build 43517230510 introduces tenant metadata and a mandatory handshake. Update
+Build 44049992498 introduces tenant metadata and a mandatory handshake. Update
 librawstor, Python bindings, MDS, OST and vhost together. Existing pre-tenant MDS
 databases and object metadata are incompatible; Rawstor provides no migration.
 Installing packages does not convert or delete existing data. Recreate
@@ -246,5 +246,17 @@ disposable development storage before using the new build.
 
 Exordos uses `project_id` as the Rawstor tenant UUID. The hypervisor registers
 it on first disk creation and preserves it in the vhost configuration. A nil
-project UUID cannot own Rawstor objects. Tenant labels are ownership metadata,
-not authentication or an access-control boundary in this Rawstor build.
+project UUID cannot own Rawstor objects. This integration runs Rawstor in explicit insecure mode: tenant UUIDs record
+ownership and filter listings, but do not authenticate callers.
+
+## Transport mode
+
+The integration currently starts MDS, OST and vhost with explicit
+`EXTRA_ARGS="--insecure"`. Connections are plaintext and peers are not
+authenticated. TLS and SPIFFE issuance are maintained in a separate branch
+layered on the storage integration.
+
+Build 44049992498 exposes service command-line arguments, but its Python
+bindings do not yet expose insecure initialization. Agent-side operation
+requires a subsequent build with that public API; the service flag alone
+does not configure the bindings.
