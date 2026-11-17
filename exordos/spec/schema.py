@@ -265,8 +265,13 @@ def walk_replace(
         for key, value in node.items():
             if isinstance(value, str):
                 parsed_var = parse_variable(value, manifest)
-                if parsed_var.valid and parsed_var.is_variable:
-                    if parsed_var.resource_type == "$core.vs.variables":
+                if (
+                    value.startswith('f"') and value.endswith('"') and "{$" in value
+                ) or (parsed_var.valid and parsed_var.is_variable):
+                    if (
+                        value.startswith('f"')
+                        or parsed_var.resource_type == "$core.vs.variables"
+                    ):
                         example = search_parameter_example(
                             scheme, resource_type, key, path + (key,)
                         )
@@ -282,8 +287,13 @@ def walk_replace(
         for i, item in enumerate(node):
             if isinstance(item, str):
                 parsed_var = parse_variable(item, manifest)
-                if parsed_var.valid and parsed_var.is_variable:
-                    if parsed_var.resource_type == "$core.vs.variables":
+                if (item.startswith('f"') and item.endswith('"') and "{$" in item) or (
+                    parsed_var.valid and parsed_var.is_variable
+                ):
+                    if (
+                        item.startswith('f"')
+                        or parsed_var.resource_type == "$core.vs.variables"
+                    ):
                         example = search_parameter_example(
                             scheme, resource_type, item, path + (i,)
                         )

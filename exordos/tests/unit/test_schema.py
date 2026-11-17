@@ -172,3 +172,82 @@ class TestMutateManifest:
             "callback": "any_string",
         }
         schema.validate_yaml(mutated, scheme)
+
+
+@pytest.mark.parametrize("in_list", [False, True])
+@pytest.mark.parametrize(
+    "url",
+    [
+        'f"https://{$core.vs.variables.$oidc_ui_domain:value}"',
+        'f"https://{$core.nodes.$node:name}/{$core.nodes.$node:uuid}"',
+    ],
+)
+def test_mutate_manifest_interpolated_redirect_url(in_list, url) -> None:
+    url_schema = {
+        "type": "string",
+        "pattern": "^https://[a-z.]+$",
+        "example": "https://example.com",
+    }
+    action_schema = {
+        "type": "object",
+        "properties": {
+            "kind": {"type": "string", "enum": ["redirect"]},
+            "url": ({"type": "array", "items": url_schema} if in_list else url_schema),
+            "code": {"type": "integer", "minimum": 300, "maximum": 399},
+        },
+    }
+    scheme = make_scheme(
+        {
+            "properties": {
+                "condition": {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "actions": {"type": "array", "items": action_schema},
+                            },
+                        }
+                    ],
+                },
+            },
+        }
+    )
+    action = {"kind": "redirect", "url": [url] if in_list else url, "code": 301}
+    manifest = {
+        "resources": {
+            "$core.nodes": {
+                "redirect": {"condition": {"actions": [action]}},
+            }
+        }
+    }
+
+    with pytest.raises(ValueError):
+        schema.validate_yaml(manifest, scheme)
+    schema.mutate_manifest(manifest, scheme)
+
+    assert action["url"] == (
+        ["https://example.com"] if in_list else "https://example.com"
+    )
+    schema.validate_yaml(manifest, scheme)
+    action["code"] = 400
+    with pytest.raises(ValueError):
+        schema.validate_yaml(manifest, scheme)
+
+
+def test_mutate_manifest_literal_invalid_url() -> None:
+    scheme = make_scheme(
+        {
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "pattern": "^https://",
+                    "example": "https://example.com",
+                }
+            }
+        }
+    )
+    manifest = {"resources": {"$core.nodes": {"redirect": {"url": "invalid"}}}}
+
+    schema.mutate_manifest(manifest, scheme)
+
+    with pytest.raises(ValueError):
+        schema.validate_yaml(manifest, scheme)
