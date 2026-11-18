@@ -17,6 +17,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 from click.testing import CliRunner
+import pytest
 
 from exordos.cmd.em.elements import commands
 
@@ -198,3 +199,83 @@ def test_install_cmd_preserves_interactive_selection() -> None:
         )
     assert result.exit_code == 0, result.output
     install.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "args, expected",
+    [
+        (["--dev", "-y", "empty"], "dev_new"),
+        (["-y", "empty"], "stable"),
+    ],
+)
+def test_update_cmd_selects_release_channel(args, expected) -> None:
+    candidates = [
+        {**EMPTY, "uuid": "stable", "version": "2.0.0"},
+        {**EMPTY, "uuid": "dev_old", "version": "1.0.0-dev+20260101.abc"},
+        {**EMPTY, "uuid": "dev_new", "version": "1.0.0-dev+20260201.def"},
+    ]
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            commands, "_select_current_element_by_name", return_value=EMPTY
+        ),
+        mock.patch.object(
+            commands.base_client, "list_entities", return_value=candidates
+        ),
+        mock.patch.object(commands.base_client, "action_entity") as action,
+    ):
+        result = CliRunner().invoke(
+            commands.update_cmd, args, obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 0, result.output
+    assert action.call_args.kwargs["target"] == expected
+
+
+def test_update_cmd_dev_does_not_downgrade() -> None:
+    current = {**EMPTY, "version": "2.0.0"}
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            commands, "_select_current_element_by_name", return_value=current
+        ),
+        mock.patch.object(
+            commands.base_client,
+            "list_entities",
+            return_value=[{**EMPTY, "uuid": "dev", "version": "1.0.0-dev+abc"}],
+        ),
+        mock.patch.object(commands.base_client, "action_entity") as action,
+    ):
+        result = CliRunner().invoke(
+            commands.update_cmd,
+            ["--dev", "-y", "empty"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    assert "already up to date" in result.output
+    action.assert_not_called()
+
+
+def test_update_cmd_dev_without_development_versions() -> None:
+    with mock.patch.object(commands.base_client, "list_entities", return_value=[EMPTY]):
+        with pytest.raises(
+            commands.click.ClickException, match="No development versions"
+        ):
+            commands._select_element_by_name(mock.Mock(), "empty", None, dev=True)
+
+
+def test_update_cmd_dev_rejects_explicit_version() -> None:
+    with mock.patch.object(commands.base_client, "get_user_api_client") as get_client:
+        result = CliRunner().invoke(
+            commands.update_cmd, ["--dev", "--version", "1.0.0", "empty"]
+        )
+    assert result.exit_code == 2
+    assert "--dev and --version cannot be used together" in result.output
+    get_client.assert_not_called()
+
+
+def test_update_cmd_dev_rejects_manifest_path(tmp_path) -> None:
+    manifest = tmp_path / "element.yaml"
+    manifest.write_text("name: empty\nversion: 1.0.0\n")
+    result = CliRunner().invoke(commands.update_cmd, ["--dev", str(manifest)])
+    assert result.exit_code == 2
+    assert "--dev cannot be used with manifest paths" in result.output
