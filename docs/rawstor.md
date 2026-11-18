@@ -203,8 +203,8 @@ The guest must expand its partitions and filesystem separately.
 ## Rawstor version
 
 The default Debian version is `99.0.0`, with Python binding
-`99.0.0+0.6c915fe`, from
-[Actions run 44059493520](https://github.com/rawstor/librawstor/actions/runs/44059493520).
+`99.0.0+0.eee4365`, from
+[Actions run 44297955553](https://github.com/rawstor/librawstor/actions/runs/44297955553).
 Core bundles its packages and SHA256 checksums. CLI downloads OST, vhost,
 librawstor and bindings from the same run. Set `RAWSTOR_VERSION` for a release,
 `RAWSTOR_ARTIFACT_RUN` for another CI run, and `RAWSTOR_WHEEL_VERSION` when its
@@ -236,17 +236,17 @@ The LIST wire format distinguishes chunks (`1`) from objects (`2`); update
 clients, MDS and OST together. Read-only mirrored opens also require quorum;
 Rawstor only bypasses it when `FORCE` is explicitly combined with `READONLY`.
 
-## Tenant-aware build compatibility
+## Account-aware build compatibility
 
-Build 44059493520 introduces tenant metadata and a mandatory handshake. Update
-librawstor, Python bindings, MDS, OST and vhost together. Existing pre-tenant MDS
+Build 44297955553 introduces account metadata and a mandatory handshake. Update
+librawstor, Python bindings, MDS, OST and vhost together. Existing pre-account MDS
 databases and object metadata are incompatible; Rawstor provides no migration.
 Installing packages does not convert or delete existing data. Recreate
 disposable development storage before using the new build.
 
-Exordos uses `project_id` as the Rawstor tenant UUID. The hypervisor registers
+Exordos uses `project_id` as the Rawstor account UUID. The hypervisor registers
 it on first disk creation and preserves it in the vhost configuration. A nil
-project UUID cannot own Rawstor objects. This integration runs Rawstor in explicit insecure mode: tenant UUIDs record
+project UUID cannot own Rawstor objects. This integration runs Rawstor in explicit insecure mode: account UUIDs record
 ownership and filter listings, but do not authenticate callers.
 
 ## Transport mode
@@ -259,3 +259,8 @@ layered on the storage integration.
 Agents and the API explicitly call `rawstor.initialize(insecure=True)` before
 loading native `Target` or `Location` types. This matches the service transport
 mode; setting any `RAWSTOR_TLS_*` options in insecure mode is rejected.
+
+Build 44297955553 also renames the MDS SQLite schema from
+`tenants`/`tenant_id` to `accounts`/`account_id`. Existing databases with the
+old names are not migrated by this build. A package update does not convert
+that metadata or delete existing storage.
