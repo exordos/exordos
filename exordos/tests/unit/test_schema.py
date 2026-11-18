@@ -169,6 +169,192 @@ class TestMutateManifest:
 
         assert mutated["resources"]["$core.nodes"]["grafana_idp"]["callback"] == {
             "kind": "callback_uri",
-            "callback": "any_string",
+            "callback": "any_string/login/generic_oauth",
         }
         schema.validate_yaml(mutated, scheme)
+
+
+@pytest.mark.parametrize("in_list", [False, True])
+@pytest.mark.parametrize(
+    "url",
+    [
+        'f"https://{$core.vs.variables.$oidc_ui_domain:value}"',
+        'f"https://{$core.nodes.$node:name}/{$core.nodes.$node:uuid}"',
+    ],
+)
+def test_mutate_manifest_interpolated_redirect_url(in_list, url) -> None:
+    expected = (
+        "https://example.com/path" if "$core.nodes" in url else "https://example.com"
+    )
+    url_schema = {
+        "type": "string",
+        "pattern": "^https://[a-z.]+(?:/path)?$",
+        "example": expected,
+    }
+    action_schema = {
+        "type": "object",
+        "properties": {
+            "kind": {"type": "string", "enum": ["redirect"]},
+            "url": ({"type": "array", "items": url_schema} if in_list else url_schema),
+            "code": {"type": "integer", "minimum": 300, "maximum": 399},
+        },
+    }
+    scheme = make_scheme(
+        {
+            "properties": {
+                "condition": {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "actions": {"type": "array", "items": action_schema},
+                            },
+                        }
+                    ],
+                },
+            },
+        }
+    )
+    action = {"kind": "redirect", "url": [url] if in_list else url, "code": 301}
+    manifest = {
+        "resources": {
+            "$core.nodes": {
+                "redirect": {"condition": {"actions": [action]}},
+            }
+        }
+    }
+
+    with pytest.raises(ValueError):
+        schema.validate_yaml(manifest, scheme)
+    schema.mutate_manifest(manifest, scheme)
+
+    assert action["url"] == ([expected] if in_list else expected)
+    schema.validate_yaml(manifest, scheme)
+    action["code"] = 400
+    with pytest.raises(ValueError):
+        schema.validate_yaml(manifest, scheme)
+
+
+def test_mutate_manifest_literal_invalid_url() -> None:
+    scheme = make_scheme(
+        {
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "pattern": "^https://",
+                    "example": "https://example.com",
+                }
+            }
+        }
+    )
+    manifest = {"resources": {"$core.nodes": {"redirect": {"url": "invalid"}}}}
+
+    schema.mutate_manifest(manifest, scheme)
+
+    with pytest.raises(ValueError):
+        schema.validate_yaml(manifest, scheme)
+
+
+@pytest.mark.parametrize("in_list", [False, True])
+@pytest.mark.parametrize(
+    "value,field",
+    [
+        ('f"https://{$bad}"', {"type": "string", "example": "https://example.com"}),
+        (
+            'f"https://{$core.vs.variables.$domain:value"',
+            {"type": "string", "example": "https://example.com"},
+        ),
+        ('f"{$core.vs.variables.$code:value}"', {"type": "integer", "example": 301}),
+        (
+            'f"http://{$core.vs.variables.$domain:value}"',
+            {
+                "type": "string",
+                "pattern": "^https://",
+                "example": "https://example.com",
+            },
+        ),
+    ],
+)
+def test_mutate_manifest_invalid_interpolation(in_list, value, field):
+    scheme = make_scheme(
+        {
+            "properties": {
+                "value": {"type": "array", "items": field} if in_list else field
+            }
+        }
+    )
+    manifest = {
+        "resources": {"$core.nodes": {"node": {"value": [value] if in_list else value}}}
+    }
+    with pytest.raises(ValueError):
+        schema.mutate_manifest(manifest, scheme)
+        schema.validate_yaml(manifest, scheme)
+
+
+@pytest.mark.parametrize("composition", ["allOf", "anyOf", "oneOf"])
+@pytest.mark.parametrize("in_list", [False, True])
+def test_mutate_manifest_interpolation_composed_schema(composition, in_list):
+    field = {composition: [{"$ref": "#/components/schemas/Url"}]}
+    scheme = make_scheme(
+        {
+            "properties": {
+                "value": {"type": "array", "items": field} if in_list else field
+            }
+        }
+    )
+    scheme["components"]["schemas"]["Url"] = {
+        "type": "string",
+        "pattern": "^https://",
+        "example": "https://example.com",
+    }
+    value = 'f"https://{$core.vs.variables.$domain:value}"'
+    manifest = {
+        "resources": {"$core.nodes": {"node": {"value": [value] if in_list else value}}}
+    }
+    schema.mutate_manifest(manifest, scheme)
+    schema.validate_yaml(manifest, scheme)
+    assert manifest["resources"]["$core.nodes"]["node"]["value"] == (
+        ["https://example.com"] if in_list else "https://example.com"
+    )
+
+
+def test_interpolation_example_preserves_scheme_with_http_example():
+    value = 'f"https://{$core.vs.variables.$domain:value}"'
+    assert (
+        schema.interpolation_example(value, {}, "http://example.com")
+        == "https://example.com"
+    )
+
+
+@pytest.mark.parametrize("in_list", [False, True])
+@pytest.mark.parametrize("example", ["http://example.com", "https://example.com/other"])
+def test_mutate_manifest_interpolated_url_fixed_path(in_list, example):
+    field = {
+        "type": "string",
+        "pattern": r"^https://[a-z.]+/login/callback\?next=/home$",
+        "example": example,
+    }
+    scheme = make_scheme(
+        {
+            "properties": {
+                "url": {"type": "array", "items": field} if in_list else field,
+            }
+        }
+    )
+    value = 'f"https://{$core.vs.variables.$domain:value}/login/callback?next=/home"'
+    manifest = {
+        "resources": {
+            "$core.nodes": {
+                "node": {
+                    "url": [value] if in_list else value,
+                }
+            }
+        }
+    }
+
+    schema.mutate_manifest(manifest, scheme)
+
+    expected = "https://example.com/login/callback?next=/home"
+    assert manifest["resources"]["$core.nodes"]["node"]["url"] == (
+        [expected] if in_list else expected
+    )
+    schema.validate_yaml(manifest, scheme)
