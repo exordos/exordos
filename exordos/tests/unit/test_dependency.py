@@ -88,19 +88,24 @@ class TestDependency:
         assert dep._endpoint == "https://repo.exordos.com/ipxe/latest/undionly.kpxe"
         assert dep.local_path is None
 
-    def test_http_fetch(self, build_config: tp.Dict[str, tp.Any]) -> None:
+    def test_http_fetch(self, build_config: tp.Dict[str, tp.Any], tmp_path) -> None:
         dep = deps.HttpDependency.from_config(
             build_config["deps"][1],
             "/tmp",
         )
 
-        os.makedirs("/tmp/___deps_dir", exist_ok=True)
-        dep.fetch("/tmp/___deps_dir")
+        with patch("bazooka.get") as mock_get:
+            response = mock_get.return_value.__enter__.return_value
+            response.iter_content.return_value = [b"first chunk", b"second chunk"]
 
-        try:
-            assert os.path.exists("/tmp/___deps_dir/undionly.kpxe")
-        finally:
-            shutil.rmtree("/tmp/___deps_dir")
+            dep.fetch(str(tmp_path))
+
+        mock_get.assert_called_once_with(dep._endpoint, stream=True)
+        response.raise_for_status.assert_called_once_with()
+        response.iter_content.assert_called_once_with(chunk_size=dep.CHUNK_SIZE)
+        downloaded = tmp_path / "undionly.kpxe"
+        assert downloaded.read_bytes() == b"first chunksecond chunk"
+        assert dep.local_path == str(downloaded)
 
     def test_git_from_config(self, build_git_config: tp.Dict[str, tp.Any]) -> None:
         work_dir = "/tmp/work_dir"
