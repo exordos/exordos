@@ -18,6 +18,7 @@ import dataclasses
 import os
 import re
 import typing as tp
+from urllib import parse
 
 import rich_click as click
 import yaml
@@ -295,7 +296,22 @@ def interpolation_example(value: str, manifest: dict, example: tp.Any) -> str:
             r"^[a-zA-Z][a-zA-Z0-9+.-]*://", scheme_prefix.group(), candidate
         )
     matched = re.fullmatch(pattern, candidate)
-    fragments = iter(matched.groups() if matched else [str(example)] * len(references))
+    fragments = [str(example)] * len(references)
+    if matched:
+        fragments = list(matched.groups())
+    elif scheme_prefix:
+        # A fixed path may be absent from the example. Extract the authority
+        # for host references instead of embedding a complete URL as a host.
+        authority_end = re.search(r"[/#?]", body[scheme_prefix.end() :])
+        authority_end = (
+            scheme_prefix.end() + authority_end.start() if authority_end else len(body)
+        )
+        authority = parse.urlsplit(str(example)).netloc
+        if authority:
+            for i, match in enumerate(references):
+                if match.start() < authority_end:
+                    fragments[i] = authority
+    fragments = iter(fragments)
     result, offset = "", 0
     for match in references:
         result += body[offset : match.start()] + next(fragments)

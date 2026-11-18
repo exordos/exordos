@@ -323,3 +323,38 @@ def test_interpolation_example_preserves_scheme_with_http_example():
         schema.interpolation_example(value, {}, "http://example.com")
         == "https://example.com"
     )
+
+
+@pytest.mark.parametrize("in_list", [False, True])
+@pytest.mark.parametrize("example", ["http://example.com", "https://example.com/other"])
+def test_mutate_manifest_interpolated_url_fixed_path(in_list, example):
+    field = {
+        "type": "string",
+        "pattern": r"^https://[a-z.]+/login/callback\?next=/home$",
+        "example": example,
+    }
+    scheme = make_scheme(
+        {
+            "properties": {
+                "url": {"type": "array", "items": field} if in_list else field,
+            }
+        }
+    )
+    value = 'f"https://{$core.vs.variables.$domain:value}/login/callback?next=/home"'
+    manifest = {
+        "resources": {
+            "$core.nodes": {
+                "node": {
+                    "url": [value] if in_list else value,
+                }
+            }
+        }
+    }
+
+    schema.mutate_manifest(manifest, scheme)
+
+    expected = "https://example.com/login/callback?next=/home"
+    assert manifest["resources"]["$core.nodes"]["node"]["url"] == (
+        [expected] if in_list else expected
+    )
+    schema.validate_yaml(manifest, scheme)
