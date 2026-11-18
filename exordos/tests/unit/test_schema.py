@@ -169,7 +169,7 @@ class TestMutateManifest:
 
         assert mutated["resources"]["$core.nodes"]["grafana_idp"]["callback"] == {
             "kind": "callback_uri",
-            "callback": "any_string",
+            "callback": "any_string/login/generic_oauth",
         }
         schema.validate_yaml(mutated, scheme)
 
@@ -183,10 +183,13 @@ class TestMutateManifest:
     ],
 )
 def test_mutate_manifest_interpolated_redirect_url(in_list, url) -> None:
+    expected = (
+        "https://example.com/path" if "$core.nodes" in url else "https://example.com"
+    )
     url_schema = {
         "type": "string",
-        "pattern": "^https://[a-z.]+$",
-        "example": "https://example.com",
+        "pattern": "^https://[a-z.]+(?:/path)?$",
+        "example": expected,
     }
     action_schema = {
         "type": "object",
@@ -224,9 +227,7 @@ def test_mutate_manifest_interpolated_redirect_url(in_list, url) -> None:
         schema.validate_yaml(manifest, scheme)
     schema.mutate_manifest(manifest, scheme)
 
-    assert action["url"] == (
-        ["https://example.com"] if in_list else "https://example.com"
-    )
+    assert action["url"] == ([expected] if in_list else expected)
     schema.validate_yaml(manifest, scheme)
     action["code"] = 400
     with pytest.raises(ValueError):
@@ -251,3 +252,74 @@ def test_mutate_manifest_literal_invalid_url() -> None:
 
     with pytest.raises(ValueError):
         schema.validate_yaml(manifest, scheme)
+
+
+@pytest.mark.parametrize("in_list", [False, True])
+@pytest.mark.parametrize(
+    "value,field",
+    [
+        ('f"https://{$bad}"', {"type": "string", "example": "https://example.com"}),
+        (
+            'f"https://{$core.vs.variables.$domain:value"',
+            {"type": "string", "example": "https://example.com"},
+        ),
+        ('f"{$core.vs.variables.$code:value}"', {"type": "integer", "example": 301}),
+        (
+            'f"http://{$core.vs.variables.$domain:value}"',
+            {
+                "type": "string",
+                "pattern": "^https://",
+                "example": "https://example.com",
+            },
+        ),
+    ],
+)
+def test_mutate_manifest_invalid_interpolation(in_list, value, field):
+    scheme = make_scheme(
+        {
+            "properties": {
+                "value": {"type": "array", "items": field} if in_list else field
+            }
+        }
+    )
+    manifest = {
+        "resources": {"$core.nodes": {"node": {"value": [value] if in_list else value}}}
+    }
+    with pytest.raises(ValueError):
+        schema.mutate_manifest(manifest, scheme)
+        schema.validate_yaml(manifest, scheme)
+
+
+@pytest.mark.parametrize("composition", ["allOf", "anyOf", "oneOf"])
+@pytest.mark.parametrize("in_list", [False, True])
+def test_mutate_manifest_interpolation_composed_schema(composition, in_list):
+    field = {composition: [{"$ref": "#/components/schemas/Url"}]}
+    scheme = make_scheme(
+        {
+            "properties": {
+                "value": {"type": "array", "items": field} if in_list else field
+            }
+        }
+    )
+    scheme["components"]["schemas"]["Url"] = {
+        "type": "string",
+        "pattern": "^https://",
+        "example": "https://example.com",
+    }
+    value = 'f"https://{$core.vs.variables.$domain:value}"'
+    manifest = {
+        "resources": {"$core.nodes": {"node": {"value": [value] if in_list else value}}}
+    }
+    schema.mutate_manifest(manifest, scheme)
+    schema.validate_yaml(manifest, scheme)
+    assert manifest["resources"]["$core.nodes"]["node"]["value"] == (
+        ["https://example.com"] if in_list else "https://example.com"
+    )
+
+
+def test_interpolation_example_preserves_scheme_with_http_example():
+    value = 'f"https://{$core.vs.variables.$domain:value}"'
+    assert (
+        schema.interpolation_example(value, {}, "http://example.com")
+        == "https://example.com"
+    )

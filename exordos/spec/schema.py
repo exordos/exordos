@@ -129,20 +129,24 @@ def resolve_schema_ref(scheme: dict, schema: dict) -> dict:
 def search_nested_example(scheme: dict, model: dict, path: tuple) -> tp.Any:
     model = resolve_schema_ref(scheme, model)
     if not path:
-        return model.get("example")
-    key, *remaining = path
-    child = (
-        model.get("items", {})
-        if isinstance(key, int)
-        else model.get("properties", {}).get(key, {})
-    )
-    example = search_nested_example(scheme, child, tuple(remaining))
-    if example is not None:
-        return example
-    for variant in model.get("oneOf", []):
-        example = search_nested_example(scheme, variant, path)
+        example = model.get("example")
         if example is not None:
             return example
+    else:
+        key, *remaining = path
+        child = (
+            model.get("items", {})
+            if isinstance(key, int)
+            else model.get("properties", {}).get(key, {})
+        )
+        example = search_nested_example(scheme, child, tuple(remaining))
+        if example is not None:
+            return example
+    for composition in ("oneOf", "allOf", "anyOf"):
+        for variant in model.get(composition, []):
+            example = search_nested_example(scheme, variant, path)
+            if example is not None:
+                return example
     return None
 
 
@@ -254,6 +258,52 @@ def parse_variable(var: str, manifest: dict) -> Parsed:
     return result
 
 
+def interpolation_example(value: str, manifest: dict, example: tp.Any) -> str:
+    """Keep fixed text and string type while substituting dynamic fragments."""
+    body = value[2:-1]
+    matches = list(re.finditer(r"\\?\{(.*?)}", body))
+    references = []
+    for match in matches:
+        if match.group().startswith("\\"):
+            continue
+        reference = match.group(1)
+        parsed = parse_variable(reference, manifest)
+        if (
+            not re.fullmatch(r"\$[\w-]+(?:\.\$?[\w-]+)+:[\w.-]+", reference)
+            or not parsed.valid
+            or not parsed.is_resource
+        ):
+            raise ValueError(f"Invalid interpolated reference: {reference}")
+        references.append(match)
+    if "{$" in re.sub(r"\\?\{.*?}", "", body):
+        raise ValueError(f"Invalid interpolation: {value}")
+
+    if example is None:
+        return value if references else body
+
+    # Match the destination example against the fixed parts of the expression.
+    # Only captured dynamic fragments may be replaced; literals stay intact.
+    pattern, offset = "", 0
+    for match in references:
+        pattern += re.escape(body[offset : match.start()]) + "(.*?)"
+        offset = match.end()
+    pattern += re.escape(body[offset:])
+    candidate = str(example)
+    scheme_prefix = re.match(r"[a-zA-Z][a-zA-Z0-9+.-]*://", body)
+    if scheme_prefix:
+        candidate = re.sub(
+            r"^[a-zA-Z][a-zA-Z0-9+.-]*://", scheme_prefix.group(), candidate
+        )
+    matched = re.fullmatch(pattern, candidate)
+    fragments = iter(matched.groups() if matched else [str(example)] * len(references))
+    result, offset = "", 0
+    for match in references:
+        result += body[offset : match.start()] + next(fragments)
+        offset = match.end()
+    result += body[offset:]
+    return re.sub(r"\\(\{.*?})", r"\1", result)
+
+
 def walk_replace(
     resource_type: str,
     manifest: dict,
@@ -261,50 +311,31 @@ def walk_replace(
     node: tp.Union[dict, list, str],
     path: tuple = (),
 ):
-    if isinstance(node, dict):
-        for key, value in node.items():
-            if isinstance(value, str):
-                parsed_var = parse_variable(value, manifest)
-                if (
-                    value.startswith('f"') and value.endswith('"') and "{$" in value
-                ) or (parsed_var.valid and parsed_var.is_variable):
-                    if (
-                        value.startswith('f"')
-                        or parsed_var.resource_type == "$core.vs.variables"
-                    ):
-                        example = search_parameter_example(
-                            scheme, resource_type, key, path + (key,)
-                        )
-                    else:
-                        example = search_parameter_example(
-                            scheme, parsed_var.resource_type, parsed_var.value
-                        )
-                    if example is not None:
-                        node[key] = example
+    if not isinstance(node, (dict, list)):
+        return
+    entries = node.items() if isinstance(node, dict) else enumerate(node)
+    for key, value in entries:
+        if not isinstance(value, str):
+            walk_replace(resource_type, manifest, scheme, value, path + (key,))
+            continue
+        if value.startswith('f"') and value.endswith('"'):
+            example = search_parameter_example(
+                scheme, resource_type, str(key), path + (key,)
+            )
+            node[key] = interpolation_example(value, manifest, example)
+            continue
+        parsed_var = parse_variable(value, manifest)
+        if parsed_var.valid and parsed_var.is_variable:
+            if parsed_var.resource_type == "$core.vs.variables":
+                example = search_parameter_example(
+                    scheme, resource_type, str(key), path + (key,)
+                )
             else:
-                walk_replace(resource_type, manifest, scheme, value, path + (key,))
-    elif isinstance(node, list):
-        for i, item in enumerate(node):
-            if isinstance(item, str):
-                parsed_var = parse_variable(item, manifest)
-                if (item.startswith('f"') and item.endswith('"') and "{$" in item) or (
-                    parsed_var.valid and parsed_var.is_variable
-                ):
-                    if (
-                        item.startswith('f"')
-                        or parsed_var.resource_type == "$core.vs.variables"
-                    ):
-                        example = search_parameter_example(
-                            scheme, resource_type, item, path + (i,)
-                        )
-                    else:
-                        example = search_parameter_example(
-                            scheme, parsed_var.resource_type, parsed_var.value
-                        )
-                    if example is not None:
-                        node[i] = example
-            else:
-                walk_replace(resource_type, manifest, scheme, item, path + (i,))
+                example = search_parameter_example(
+                    scheme, parsed_var.resource_type, parsed_var.value
+                )
+            if example is not None:
+                node[key] = example
 
 
 def remove_middle_parts(input_string):
