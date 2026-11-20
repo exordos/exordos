@@ -234,6 +234,22 @@ class TestSelectElementByName:
         with pytest.raises(click.ClickException, match="No elements found"):
             em_elements._select_element_by_name(client, "foo", None)
 
+    @pytest.mark.parametrize("version_filter", [None, "2.0.0"])
+    def test_select_element_by_name_only_current_version(self, version_filter) -> None:
+        client = self._client([{"name": "foo", "version": "1.0.0", "uuid": "u"}])
+        if version_filter is None:
+            assert (
+                em_elements._select_element_by_name(
+                    client, "foo", None, exclude_uuid="u", newer_than="1.0.0"
+                )
+                is None
+            )
+        else:
+            with pytest.raises(click.ClickException, match="No elements found"):
+                em_elements._select_element_by_name(
+                    client, "foo", version_filter, exclude_uuid="u"
+                )
+
     def test_no_stable_versions_raises(self) -> None:
         client = self._client(
             [{"name": "foo", "version": "1.0.0-dev+abc.12345678", "uuid": "u"}]
