@@ -244,6 +244,7 @@ class TestS3UserPolicies:
         assert collection == (
             f"/v1/types/s3/instances/{INSTANCE_UUID}/users/{USER_UUID}/policies/"
         )
+        assert "uuid" not in data
         assert data["user"] == (
             f"/v1/types/s3/instances/{INSTANCE_UUID}/users/{USER_UUID}"
         )
