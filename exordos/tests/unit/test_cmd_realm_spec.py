@@ -343,3 +343,97 @@ def test_config_drive_preserves_repository_definition(tmp_path):
             repository=("https://public.example/repo/", repository),
         )
     assert captured[0]["repository"] == ["https://public.example/repo/", repository]
+
+
+@pytest.mark.parametrize("overrides", [False, True])
+def test_bootstrap_uses_realm_spec_hypervisor_unless_cli_overrides(tmp_path, overrides):
+    fields = {
+        "name": "realm-host",
+        "description": "Realm hypervisor",
+        "avail_cores": 16,
+        "avail_ram": 65536,
+        "cores_ratio": 4.0,
+        "ram_ratio": 1.5,
+    }
+    spec = _valid_spec() | {
+        "hypervisor": fields,
+        "ssh_public_key": "ssh-ed25519 AAAA test",
+    }
+    path = tmp_path / "realm_spec.json"
+    path.write_text(json.dumps(spec))
+    inventory = mock.Mock(images=["core.raw"], manifests=["core.yaml"], version="1.0.0")
+    args = [
+        "--inventory",
+        "1.0.0",
+        "--launch-mode",
+        "core",
+        "--realm-spec",
+        str(path),
+        "--no-update-realm",
+        "--no-start",
+    ]
+    if overrides:
+        # Explicit values equal to CLI defaults still override the spec.
+        args += [
+            "--hyper-name",
+            "hypervisor",
+            "--hyper-description",
+            "",
+            "--hyper-avail-cores",
+            "0",
+            "--hyper-avail-ram",
+            "0",
+            "--hyper-cores-ratio",
+            "0",
+            "--hyper-ram-ratio",
+            "1",
+        ]
+    with (
+        mock.patch.object(
+            commands, "get_element_inventory_from_url", return_value=inventory
+        ),
+        mock.patch.object(
+            commands, "_get_core_image_uri_from_manifest", return_value=None
+        ),
+        mock.patch.object(commands.subprocess, "call", return_value=0),
+        mock.patch.object(commands, "_bootstrap_core", return_value=None) as bootstrap,
+        mock.patch.object(commands, "_print_bootstrap_summary"),
+    ):
+        result = CliRunner().invoke(commands.bootstrap_cmd, args)
+    assert result.exit_code == 0, result.output
+    host = bootstrap.call_args.kwargs["hypervisors"][0]
+    expected = (
+        fields
+        if not overrides
+        else {
+            "name": "hypervisor",
+            "description": "",
+            "avail_cores": 0,
+            "avail_ram": 0,
+            "cores_ratio": 0.0,
+            "ram_ratio": 1.0,
+        }
+    )
+    for field, value in expected.items():
+        assert getattr(host, field) == value
+
+
+@pytest.mark.parametrize(
+    "hypervisor",
+    [
+        None,
+        [],
+        "host",
+        {"cores_ratio": -1},
+        {"ram_ratio": -1},
+        {"cores_ratio": "invalid"},
+        {"avail_ram": "invalid"},
+        {"cores_ratio": None},
+        {"unknown": 1},
+    ],
+)
+def test_load_realm_spec_rejects_invalid_hypervisor(tmp_path, hypervisor):
+    path = tmp_path / "realm_spec.json"
+    path.write_text(json.dumps(_valid_spec() | {"hypervisor": hypervisor}))
+    with pytest.raises(click.UsageError):
+        _load_realm_spec(str(path))
