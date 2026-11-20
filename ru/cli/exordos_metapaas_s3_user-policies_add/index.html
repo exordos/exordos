@@ -6897,16 +6897,6 @@
 </ul>
 <p>Output format; JSON prints one resource object (an array for bulk creation).</p>
 <ul>
-<li><code>uuid</code>:<ul>
-<li>Type: uuid</li>
-<li>Default: <code>none</code></li>
-<li>Usage: <code>-u
---uuid</code></li>
-</ul>
-</li>
-</ul>
-<p>UUID of the policy attachment</p>
-<ul>
 <li><code>project_id</code> (REQUIRED):<ul>
 <li>Type: uuid</li>
 <li>Default: <code>sentinel.unset</code></li>
@@ -6960,7 +6950,6 @@
 
 <span class="go">╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
 <span class="go">│    --output         -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │</span>
-<span class="go">│    --uuid           -u  UUID                    UUID of the policy attachment                                                                                                                                                                                                                            │</span>
 <span class="go">│ *  --project-id     -p  UUID                    UUID of the project in which to create the policy attachment [required]                                                                                                                                                                                  │</span>
 <span class="go">│ *  --instance-uuid  -i  TEXT                    UUID of the instance the user and the policy belong to [required]                                                                                                                                                                                        │</span>
 <span class="go">│ *  --user-uuid          TEXT                    UUID of the user to attach the policy to [required]                                                                                                                                                                                                      │</span>
