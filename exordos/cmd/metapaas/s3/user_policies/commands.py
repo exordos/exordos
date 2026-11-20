@@ -49,13 +49,6 @@ user_policies_group = create_entity_group(
 @output_option
 @click.pass_context
 @click.option(
-    "-u",
-    "--uuid",
-    type=click.UUID,
-    default=None,
-    help=f"UUID of the {ENTITY}",
-)
-@click.option(
     "-p",
     "--project-id",
     type=click.UUID,
@@ -83,7 +76,6 @@ user_policies_group = create_entity_group(
 )
 def add_cmd(
     ctx: click.Context,
-    uuid: sys_uuid.UUID | None,
     project_id: sys_uuid.UUID,
     instance_uuid: str,
     user_uuid: str,
@@ -91,14 +83,11 @@ def add_cmd(
     output: str = "table",
 ) -> None:
     client = base_client.get_user_api_client(ctx.obj.auth_data)
-    if uuid is None:
-        uuid = sys_uuid.uuid4()
     policy_uuid = base_client.get_entity(
         client, c.S3_POLICY_COLLECTION.format(instance_uuid=instance_uuid), policy
     )["uuid"]
     instance_url = f"{c.S3_INSTANCE_COLLECTION}{instance_uuid}"
     data = {
-        "uuid": str(uuid),
         "project_id": str(project_id),
         "instance": instance_url,
         "user": f"{instance_url}/users/{user_uuid}",
