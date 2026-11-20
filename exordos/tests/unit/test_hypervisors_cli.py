@@ -1676,8 +1676,34 @@ class TestZfsSnapshotCommands:
 
 
 class TestRawstorArtifacts:
-    def test_ci_artifact_packages_use_the_pinned_run_and_install_dependencies(self):
+    def test_default_packages_and_wheel_use_release_assets(self):
         with patch.object(hv_commands, "run_command") as run:
+            run.return_value.stdout = "/tmp/rawstor-packages-private"
+            hv_commands.install_rawstor_packages(["librawstor", "rawstor-vhost"])
+            wheel = hv_commands.prepare_rawstor_wheel()
+        downloads = [c.args[0][1] for c in run.call_args_list if c.args[0][0] == "wget"]
+        base = "https://github.com/rawstor/librawstor/releases/download/v0.3.0/"
+        assert downloads == [
+            base + "librawstor_0.3.0_amd64.deb",
+            base + "rawstor-vhost_0.3.0_amd64.deb",
+        ]
+        assert (
+            wheel
+            == base
+            + "rawstor-0.3.0-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+        )
+
+    def test_ci_artifact_packages_use_the_pinned_run_and_install_dependencies(self):
+        with (
+            patch.object(hv_commands, "RAWSTOR_VERSION", "99.0.0"),
+            patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", "44297955553"),
+            patch.object(
+                hv_commands,
+                "RAWSTOR_DEB_URL",
+                "https://nightly.link/rawstor/librawstor/actions/artifacts/14425078163.zip",
+            ),
+            patch.object(hv_commands, "run_command") as run,
+        ):
             run.return_value.stdout = "/tmp/rawstor-packages-private"
             hv_commands.install_rawstor_packages(["librawstor", "rawstor-ost"], True)
         commands = [c.args[0] for c in run.call_args_list]
@@ -1706,6 +1732,13 @@ class TestRawstorArtifacts:
 
     def test_ci_wheel_is_extracted_before_pip_installs_it(self):
         with (
+            patch.object(hv_commands, "RAWSTOR_ARTIFACT_RUN", "44297955553"),
+            patch.object(hv_commands, "RAWSTOR_WHEEL_VERSION", "99.0.0+0.eee4365"),
+            patch.object(
+                hv_commands,
+                "RAWSTOR_WHEEL_URL",
+                "https://nightly.link/rawstor/librawstor/actions/artifacts/14425391229.zip",
+            ),
             patch.object(
                 hv_commands.tempfile, "mkdtemp", return_value="/tmp/rawstor-wheel-test"
             ),

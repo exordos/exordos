@@ -387,34 +387,21 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
-RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "99.0.0")
-RAWSTOR_ARTIFACT_RUN = os.environ.get(
-    "RAWSTOR_ARTIFACT_RUN", "44297955553" if RAWSTOR_VERSION == "99.0.0" else ""
-)
-RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", "99.0.0+0.eee4365")
+RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "0.3.0")
+RAWSTOR_ARTIFACT_RUN = os.environ.get("RAWSTOR_ARTIFACT_RUN", "")
+RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", RAWSTOR_VERSION)
 RAWSTOR_ARTIFACTS_URL = (
     f"https://nightly.link/rawstor/librawstor/actions/runs/{RAWSTOR_ARTIFACT_RUN}"
 )
-RAWSTOR_DEB_URL = (
-    "https://nightly.link/rawstor/librawstor/actions/artifacts/14425078163.zip"
-    if RAWSTOR_ARTIFACT_RUN == "44297955553"
-    else f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip"
-)
+RAWSTOR_DEB_URL = f"{RAWSTOR_ARTIFACTS_URL}/librawstor.deb.zip"
 RAWSTOR_RELEASES_URL = "https://github.com/rawstor/librawstor/releases/download"
-# The bindings' abi3 wheel works unmodified across interpreter versions
-# (unlike the per-interpreter python3.X-rawstor system packages), so one
-# URL covers whichever version `python3 -m venv` (install_agent_venv) uses.
+# The abi3 wheel works across Python versions used by the agent's venv.
 RAWSTOR_WHEEL_URL = (
-    f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/rawstor-{RAWSTOR_VERSION}"
+    f"{RAWSTOR_RELEASES_URL}/v{RAWSTOR_VERSION}/rawstor-{RAWSTOR_WHEEL_VERSION}"
     "-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
 )
-
 if RAWSTOR_ARTIFACT_RUN:
-    RAWSTOR_WHEEL_URL = (
-        "https://nightly.link/rawstor/librawstor/actions/artifacts/14425391229.zip"
-        if RAWSTOR_ARTIFACT_RUN == "44297955553"
-        else f"{RAWSTOR_ARTIFACTS_URL}/python3-rawstor.whl.zip"
-    )
+    RAWSTOR_WHEEL_URL = f"{RAWSTOR_ARTIFACTS_URL}/python3-rawstor.whl.zip"
 
 
 def prepare_rawstor_wheel() -> str:
