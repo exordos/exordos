@@ -33,11 +33,6 @@ None
     * Default: `none`
     * Usage: `--failure-domain`
 
-* `chunk_size`:
-    * Type: text
-    * Default: `none`
-    * Usage: `--chunk-size`
-
 * `mirrors`:
     * Type: integer range
     * Default: `none`
