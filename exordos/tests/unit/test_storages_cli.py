@@ -296,7 +296,7 @@ def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
     assert data["driver_spec"]["bind_address"] == "host:7778"
 
 
-def test_pool_add_accepts_replication_and_chunk_policy(api):
+def test_pool_add_accepts_replication_policy(api):
     result = invoke(
         [
             "pools",
@@ -307,8 +307,6 @@ def test_pool_add_accepts_replication_and_chunk_policy(api):
             "replicated",
             "--mirrors",
             "2",
-            "--chunk-size",
-            "256MiB",
             "--failure-domain",
             "rack",
             "--tier",
@@ -319,7 +317,6 @@ def test_pool_add_accepts_replication_and_chunk_policy(api):
     assert result.exit_code == 0, result.output
     data = api.add.call_args.args[2]
     assert data["driver_spec"]["mirrors"] == 2
-    assert data["driver_spec"]["chunk_size"] == 256 << 20
     assert data["driver_spec"]["failure_domain"] == "rack"
     assert data["tier"] == "WARM"
     assert data["ephemeral"] is False
@@ -331,7 +328,6 @@ def test_pool_update_does_not_reset_unspecified_policy(api):
         "driver_spec": {
             "kind": "rawstor",
             "mirrors": 2,
-            "chunk_size": 1 << 30,
             "failure_domain": "rack",
         },
     }
@@ -341,16 +337,16 @@ def test_pool_update_does_not_reset_unspecified_policy(api):
         "driver_spec": {
             "kind": "rawstor",
             "mirrors": 3,
-            "chunk_size": 1 << 30,
             "failure_domain": "rack",
         }
     }
 
 
-@pytest.mark.parametrize("chunk", ["0", "3GiB", "2GiB", "bogus"])
-def test_pool_rejects_invalid_chunk_size(api, chunk):
+def test_pool_chunk_size_option_is_not_exposed(api):
+    for command in (["pools", "add", "--help"], ["pools", "update", "--help"]):
+        assert "--chunk-size" not in invoke(command).output
     result = invoke(
-        ["pools", "add", "--cluster", "storage1", "--name", "p", "--chunk-size", chunk]
+        ["pools", "add", "--cluster", "storage1", "--name", "p", "--chunk-size", "1GiB"]
     )
     assert result.exit_code != 0
     api.add.assert_not_called()

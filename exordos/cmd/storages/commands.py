@@ -25,7 +25,6 @@ import uuid as sys_uuid
 import rich_click as click
 
 from exordos import constants as c
-from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.base import create_entity_group
@@ -119,9 +118,6 @@ pools_group = create_entity_group(
         "Ephemeral": "ephemeral",
         "Mirrors": lambda e: e["driver_spec"]["mirrors"],
         "Failure domain": lambda e: e["driver_spec"]["failure_domain"],
-        "Chunk size": lambda e: utils.human_readable_size(
-            e["driver_spec"]["chunk_size"]
-        ),
     },
     group_name="pools",
     post_fetch_handler=_filter_cluster,
@@ -570,25 +566,6 @@ def nodes_update_cmd(ctx, identifier, **kwargs):
     show_data(base_client.update_entity(client, NODE_COLLECTION, identifier, data))
 
 
-def _chunk_size(ctx, param, value):
-    if value is None:
-        return None
-    text = value.upper().removesuffix("IB").removesuffix("B")
-    factor = 1
-    if text[-1:] in ("K", "M", "G"):
-        factor = {"K": 1 << 10, "M": 1 << 20, "G": 1 << 30}[text[-1]]
-        text = text[:-1]
-    try:
-        size = int(text) * factor
-    except ValueError:
-        raise click.BadParameter("Use a byte count or a size such as 256MiB or 1GiB")
-    if size <= 0 or size & (size - 1) or size > 1 << 30:
-        raise click.BadParameter(
-            "Chunk size must be a power of two no larger than 1GiB"
-        )
-    return size
-
-
 def _pool_options(f):
     for option in [
         click.option(
@@ -598,7 +575,6 @@ def _pool_options(f):
         ),
         click.option("--ephemeral/--no-ephemeral", default=None),
         click.option("--mirrors", type=click.IntRange(1, 255), default=None),
-        click.option("--chunk-size", callback=_chunk_size, default=None),
         click.option(
             "--failure-domain",
             type=click.Choice(["ost", "server", "rack", "row", "dc"]),
@@ -628,11 +604,7 @@ def pools_add_cmd(ctx, cluster, name, uuid, **kwargs):
     )
     data["driver_spec"] = {
         "kind": "rawstor",
-        **{
-            key: data.pop(key)
-            for key in ("mirrors", "chunk_size", "failure_domain")
-            if key in data
-        },
+        **{key: data.pop(key) for key in ("mirrors", "failure_domain") if key in data},
     }
     show_data(base_client.add_entity(client, POOL_COLLECTION, data))
 
@@ -647,11 +619,7 @@ def pools_update_cmd(ctx, identifier, **kwargs):
     if "tier" in data:
         data["tier"] = data["tier"].upper()
     client = _client(ctx)
-    spec = {
-        key: data.pop(key)
-        for key in ("mirrors", "chunk_size", "failure_domain")
-        if key in data
-    }
+    spec = {key: data.pop(key) for key in ("mirrors", "failure_domain") if key in data}
     if spec:
         previous = base_client.get_entity(client, POOL_COLLECTION, identifier)[
             "driver_spec"
