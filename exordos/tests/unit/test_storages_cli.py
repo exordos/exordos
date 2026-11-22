@@ -602,12 +602,18 @@ def test_cluster_add_passes_managed_ost_count_and_data_size(api):
             "3",
             "--size",
             "30",
+            "--cpu",
+            "4",
+            "--ram",
+            "4096",
         ]
     )
     assert result.exit_code == 0, result.output
     payload = api.add.call_args.args[2]
     assert payload["nodes"] == 3
     assert payload["size"] == 30
+    assert payload["cpu"] == 4
+    assert payload["ram"] == 4096
 
 
 def test_cluster_add_defaults_to_no_managed_nodes(api):
@@ -615,3 +621,4 @@ def test_cluster_add_defaults_to_no_managed_nodes(api):
     assert result.exit_code == 0, result.output
     payload = api.add.call_args.args[2]
     assert payload["nodes"] == 0 and payload["size"] == 10
+    assert "cpu" not in payload and "ram" not in payload
