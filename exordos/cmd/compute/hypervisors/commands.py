@@ -387,7 +387,7 @@ def _install_packages(add_sudo: bool = False) -> None:
     run_command(cmd, env=dict(DEBIAN_FRONTEND="noninteractive"), sudo=add_sudo)
 
 
-RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "0.3.1")
+RAWSTOR_VERSION = os.environ.get("RAWSTOR_VERSION", "0.3.2")
 RAWSTOR_ARTIFACT_RUN = os.environ.get("RAWSTOR_ARTIFACT_RUN", "")
 RAWSTOR_WHEEL_VERSION = os.environ.get("RAWSTOR_WHEEL_VERSION", RAWSTOR_VERSION)
 RAWSTOR_ARTIFACTS_URL = (
