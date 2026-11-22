@@ -28,6 +28,10 @@ from exordos.clients import repo
 from exordos.common import version as version_lib
 
 REGEXP = re.compile(r"\$(.+?)(?:\:(.+))?$")
+INTERPOLATED_REFERENCE = re.compile(
+    r"\$[\w-]+(?:\.\$?[\w-]+)+:"
+    r"(?:[\w.-]+|(?:get_uri|to_str|index|join)\s*\([^):{}]*\))"
+)
 
 
 @dataclasses.dataclass
@@ -270,7 +274,7 @@ def interpolation_example(value: str, manifest: dict, example: tp.Any) -> str:
         reference = match.group(1)
         parsed = parse_variable(reference, manifest)
         if (
-            not re.fullmatch(r"\$[\w-]+(?:\.\$?[\w-]+)+:[\w.-]+", reference)
+            not INTERPOLATED_REFERENCE.fullmatch(reference)
             or not parsed.valid
             or not parsed.is_resource
         ):

@@ -325,6 +325,28 @@ def test_interpolation_example_preserves_scheme_with_http_example():
     )
 
 
+@pytest.mark.parametrize("selector", ["join(ipsv4)", "index(ipsv4, 0)"])
+def test_interpolation_example_accepts_resource_methods(selector):
+    manifest = {
+        "imports": {"communal_s3": {"link": "$s3aas.types.s3.instances.$communal_s3"}}
+    }
+    value = (
+        f'f"http://{{$notification_pg_backup.imports.$communal_s3:{selector}}}:9000"'
+    )
+
+    assert schema.interpolation_example(
+        value, manifest, "http://s3.example.com:9000"
+    ) == ("http://s3.example.com:9000")
+
+
+@pytest.mark.parametrize("selector", ["unknown(ipsv4)", "join(ipsv4"])
+def test_interpolation_example_rejects_invalid_resource_methods(selector):
+    value = f'f"http://{{$s3aas.types.s3.instances.$communal_s3:{selector}}}:9000"'
+
+    with pytest.raises(ValueError, match="Invalid interpolated reference"):
+        schema.interpolation_example(value, {}, "http://s3.example.com:9000")
+
+
 @pytest.mark.parametrize("in_list", [False, True])
 @pytest.mark.parametrize("example", ["http://example.com", "https://example.com/other"])
 def test_mutate_manifest_interpolated_url_fixed_path(in_list, example):
