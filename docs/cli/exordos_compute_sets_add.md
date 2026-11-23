@@ -6,9 +6,9 @@ Add a new set to the Exordos installation
 ## Usage
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
@@ -99,6 +99,30 @@ Add a new set to the Exordos installation
 
   Wait until the set is active
 
+* `network`:
+    * Type: uuid
+    * Default: `none`
+    * Usage: `--network`
+
+  Logical network; the scheduler selects a local segment
+
+* `placement_kind`:
+    * Type: choice
+    * Default: `none`
+    * Usage: `--placement-kind`
+
+* `placement_scope`:
+    * Type: choice
+    * Default: `none`
+    * Usage: `--placement-scope`
+
+* `ephemeral`:
+    * Type: boolean
+    * Default: `none`
+    * Usage: `--ephemeral`
+
+  Root disk policy; OpenStack Cinder requires --durable
+
 * `tags`:
     * Type: text
     * Default: `sentinel.unset`
@@ -116,24 +140,28 @@ Add a new set to the Exordos installation
 ## CLI Help
 
 ```console
-
- Usage: exordos compute sets add [OPTIONS]
-
- Add a new set to the Exordos installation
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute sets add [OPTIONS]                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
+ Add a new set to the Exordos installation                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                            
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --output       -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                               │
-│    --uuid         -u  UUID                    UUID of the set                                                                                                                                                                                                                                            │
-│ *  --project-id   -p  UUID                    UUID of the project in which to deploy the set [required]                                                                                                                                                                                                  │
-│    --cores        -c  INTEGER                 Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                                          │
-│    --ram          -r  INTEGER                 Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                                                   │
-│    --root-disk    -d  INTEGER                 Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                                              │
-│ *  --image        -i  TEXT                    Name of the image to deploy [required]                                                                                                                                                                                                                     │
-│    --name         -n  TEXT                    Name of the set                                                                                                                                                                                                                                            │
-│    --description  -D  TEXT                    Description of the set                                                                                                                                                                                                                                     │
-│    --replicas         INTEGER                 Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                                         │
-│    --wait                                     Wait until the set is active                                                                                                                                                                                                                               │
-│    --tag              TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                            │
-│    --help                                     Show this message and exit.                                                                                                                                                                                                                                │
+│    --output               -o  [json|html|table|yaml]              Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                           │
+│    --uuid                 -u  UUID                                UUID of the set                                                                                                                                                                                                                        │
+│ *  --project-id           -p  UUID                                UUID of the project in which to deploy the set [required]                                                                                                                                                                              │
+│    --cores                -c  INTEGER                             Number of cores to allocate for each node in the set [default: 1]                                                                                                                                                                      │
+│    --ram                  -r  INTEGER                             Amount of RAM in Mb to allocate for each node in the set [default: 1024]                                                                                                                                                               │
+│    --root-disk            -d  INTEGER                             Number of GiB of root disk to allocate for each node in the set [default: 10]                                                                                                                                                          │
+│ *  --image                -i  TEXT                                Name of the image to deploy [required]                                                                                                                                                                                                 │
+│    --name                 -n  TEXT                                Name of the set                                                                                                                                                                                                                        │
+│    --description          -D  TEXT                                Description of the set                                                                                                                                                                                                                 │
+│    --replicas                 INTEGER                             Number of replicas (nodes) in the set [default: 1]                                                                                                                                                                                     │
+│    --wait                                                         Wait until the set is active                                                                                                                                                                                                           │
+│    --network                  UUID                                Logical network; the scheduler selects a local segment                                                                                                                                                                                 │
+│    --placement-kind           [soft-anti-affinity|anti-affinity]                                                                                                                                                                                                                                         │
+│    --placement-scope          [site|pool]                                                                                                                                                                                                                                                                │
+│    --ephemeral/--durable                                          Root disk policy; OpenStack Cinder requires --durable                                                                                                                                                                                  │
+│    --tag                      TEXT                                Set the complete tag list. Repeat for each tag.                                                                                                                                                                                        │
+│    --help                                                         Show this message and exit.                                                                                                                                                                                                            │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

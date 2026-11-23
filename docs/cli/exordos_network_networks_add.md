@@ -67,6 +67,25 @@ Add a new network
 
   private: this project only; public: visible/allocatable to everyone
 
+* `driver_spec_file`:
+    * Type: filename
+    * Default: `none`
+    * Usage: `--driver-spec-file`
+
+  JSON driver specification for a local network
+
+* `cidr`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--cidr`
+
+  Logical network address pool; subnets allocate /23 blocks
+
+* `connectivity`:
+    * Type: choice
+    * Default: `none`
+    * Usage: `--connectivity`
+
 * `help`:
     * Type: boolean
     * Default: `false`

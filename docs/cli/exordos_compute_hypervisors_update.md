@@ -6,9 +6,9 @@ Update hypervisor
 ## Usage
 
 ```console
-
- Usage: exordos compute hypervisors update [OPTIONS] UUID
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute hypervisors update [OPTIONS] UUID                                                                                                                                                                                                                                                   
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
@@ -73,7 +73,7 @@ Update hypervisor
     * Default: `sentinel.unset`
     * Usage: `--driver-spec`
 
-  Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f
+  Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f. OpenStack accepts volume_type and key_name, separately from other hypervisor fields.
 
 * `driver_spec_full`:
     * Type: text
@@ -81,6 +81,18 @@ Update hypervisor
     * Usage: `--driver-spec-full`
 
   Full Driver Specification. The format is 'key=value'. For example: --driver-spec-full a=b --driver-spec-full e=f
+
+* `site`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--site`
+
+  Failure domain for placement anti-affinity
+
+* `network_defaults_file`:
+    * Type: filename
+    * Default: `none`
+    * Usage: `--network-defaults-file`
 
 * `help`:
     * Type: boolean
@@ -92,22 +104,24 @@ Update hypervisor
 ## CLI Help
 
 ```console
-
- Usage: exordos compute hypervisors update [OPTIONS] UUID
-
- Update hypervisor
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos compute hypervisors update [OPTIONS] UUID                                                                                                                                                                                                                                                   
+                                                                                                                                                                                                                                                                                                            
+ Update hypervisor                                                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                            
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --output            -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                             │
-│ --name              -n  TEXT                    Name of the hypervisor                                                                                                                                                                                                                                   │
-│ --description       -D  TEXT                    Description of the hypervisor                                                                                                                                                                                                                            │
-│ --avail-cores           INTEGER                                                                                                                                                                                                                                                                          │
-│ --avail-ram             INTEGER                                                                                                                                                                                                                                                                          │
-│ --cores-ratio           FLOAT                                                                                                                                                                                                                                                                            │
-│ --ram-ratio             FLOAT                                                                                                                                                                                                                                                                            │
-│ --machine-type      -m  [vm|hw]                                                                                                                                                                                                                                                                          │
-│ --driver-spec           TEXT                    Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f                                                                                                                                                        │
-│ --driver-spec-full      TEXT                    Full Driver Specification. The format is 'key=value'. For example: --driver-spec-full a=b --driver-spec-full e=f                                                                                                                                         │
-│ --help                                          Show this message and exit.                                                                                                                                                                                                                              │
+│ --output                 -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                        │
+│ --name                   -n  TEXT                    Name of the hypervisor                                                                                                                                                                                                                              │
+│ --description            -D  TEXT                    Description of the hypervisor                                                                                                                                                                                                                       │
+│ --avail-cores                INTEGER                                                                                                                                                                                                                                                                     │
+│ --avail-ram                  INTEGER                                                                                                                                                                                                                                                                     │
+│ --cores-ratio                FLOAT                                                                                                                                                                                                                                                                       │
+│ --ram-ratio                  FLOAT                                                                                                                                                                                                                                                                       │
+│ --machine-type           -m  [vm|hw]                                                                                                                                                                                                                                                                     │
+│ --driver-spec                TEXT                    Driver Specification. The format is 'key=value'. For example: --driver-spec a=b --driver-spec e=f. OpenStack accepts volume_type and key_name, separately from other hypervisor fields.                                                             │
+│ --driver-spec-full           TEXT                    Full Driver Specification. The format is 'key=value'. For example: --driver-spec-full a=b --driver-spec-full e=f                                                                                                                                    │
+│ --site                       TEXT                    Failure domain for placement anti-affinity                                                                                                                                                                                                          │
+│ --network-defaults-file      FILENAME                                                                                                                                                                                                                                                                    │
+│ --help                                               Show this message and exit.                                                                                                                                                                                                                         │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

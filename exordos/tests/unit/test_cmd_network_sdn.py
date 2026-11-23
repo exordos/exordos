@@ -85,6 +85,79 @@ def test_network_add_builds_driver_spec():
     assert data["access"] == "private"
 
 
+def test_network_add_accepts_local_driver_spec_file(tmp_path):
+    import json
+
+    source = tmp_path / "network.json"
+    spec = {"driver": "ovs_evpn", "mtu": 1400}
+    source.write_text(json.dumps(spec))
+    add, _ = _run(
+        networks_commands.network_add_cmd,
+        ["-n", "application", "-p", PROJECT, "--driver-spec-file", str(source)],
+    )
+    assert add.call_args.args[2]["driver_spec"] == spec
+
+
+def test_network_update_sends_the_complete_driver_spec(tmp_path):
+    source = tmp_path / "network.json"
+    source.write_text('{"driver":"ovs_evpn","mtu":1400}')
+    _, update = _run(
+        networks_commands.network_update_cmd,
+        [PROJECT, "--driver-spec-file", str(source)],
+    )
+    assert update.call_args.args[3]["driver_spec"]["driver"] == "ovs_evpn"
+
+
+def test_logical_network_uses_address_pool_without_inline_sites():
+    add, _ = _run(
+        networks_commands.network_add_cmd,
+        [
+            "-n",
+            "application",
+            "-p",
+            PROJECT,
+            "--cidr",
+            "10.80.0.0/16",
+            "--connectivity",
+            "auto",
+        ],
+    )
+    data = add.call_args.args[2]
+    assert data["cidr"] == "10.80.0.0/16"
+    assert data["connectivity"] == {"driver": "auto"}
+    assert "driver_spec" not in data
+
+
+def test_subnet_placement_sends_hypervisor_uuids_and_omits_cidr():
+    add, _ = _run(
+        subnets_commands.subnet_add_cmd,
+        ["-n", "cloud", "-p", PROJECT, "-N", SUBNET, "--hypervisor", NODE],
+    )
+    data = add.call_args.args[2]
+    assert data["hypervisors"] == [NODE]
+    assert "cidr" not in data
+
+
+def test_subnet_import_sends_network_and_hypervisor_references():
+    _, update = _run(
+        subnets_commands.subnet_update_cmd,
+        [SUBNET, "--network", PROJECT, "--hypervisor", NODE],
+    )
+    assert update.call_args.args[3] == {"network": PROJECT, "hypervisors": [NODE]}
+
+
+def test_network_driver_file_rejects_non_object(tmp_path):
+    source = tmp_path / "network.json"
+    source.write_text("[]")
+    result = testing.CliRunner().invoke(
+        networks_commands.network_add_cmd,
+        ["-n", "application", "-p", PROJECT, "--driver-spec-file", str(source)],
+        obj=mock.MagicMock(),
+    )
+    assert result.exit_code != 0
+    assert "JSON object" in result.output
+
+
 def test_subnet_add_resolves_network_and_parses_routes():
     add_entity, _ = _run(
         subnets_commands.subnet_add_cmd,

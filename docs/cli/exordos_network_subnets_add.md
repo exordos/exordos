@@ -61,13 +61,27 @@ Add a new subnet to a network
 
   Network the subnet belongs to (UUID or name)
 
-* `cidr` (REQUIRED):
+* `cidr`:
     * Type: text
-    * Default: `sentinel.unset`
+    * Default: `none`
     * Usage: `-c
 --cidr`
 
-  CIDR, e.g. 10.100.0.0/24
+  CIDR; logical networks allocate /23 when omitted
+
+* `hypervisors`:
+    * Type: uuid
+    * Default: `sentinel.unset`
+    * Usage: `--hypervisor`
+
+  Placement hypervisor UUID (repeatable for local SDN)
+
+* `gateway_file`:
+    * Type: filename
+    * Default: `none`
+    * Usage: `--gateway-file`
+
+  JSON gateway overrides
 
 * `dhcp`:
     * Type: boolean
