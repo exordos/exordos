@@ -1682,15 +1682,15 @@ class TestRawstorArtifacts:
             hv_commands.install_rawstor_packages(["librawstor", "rawstor-vhost"])
             wheel = hv_commands.prepare_rawstor_wheel()
         downloads = [c.args[0][1] for c in run.call_args_list if c.args[0][0] == "wget"]
-        base = "https://github.com/rawstor/librawstor/releases/download/v0.3.2/"
+        base = "https://github.com/rawstor/librawstor/releases/download/v0.3.3/"
         assert downloads == [
-            base + "librawstor_0.3.2_amd64.deb",
-            base + "rawstor-vhost_0.3.2_amd64.deb",
+            base + "librawstor_0.3.3_amd64.deb",
+            base + "rawstor-vhost_0.3.3_amd64.deb",
         ]
         assert (
             wheel
             == base
-            + "rawstor-0.3.2-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
+            + "rawstor-0.3.3-cp39-abi3-manylinux1_x86_64.manylinux_2_5_x86_64.whl"
         )
 
     def test_ci_artifact_packages_use_the_pinned_run_and_install_dependencies(self):
