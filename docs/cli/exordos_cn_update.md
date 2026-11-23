@@ -6,9 +6,9 @@ Update an existing node
 ## Usage
 
 ```console
-
- Usage: exordos cn update [OPTIONS]
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos cn update [OPTIONS]                                                                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                                                                            
 ```
 
 ## Options
@@ -101,11 +101,11 @@ Update an existing node
 ## CLI Help
 
 ```console
-
- Usage: exordos cn update [OPTIONS]
-
- Update an existing node
-
+                                                                                                                                                                                                                                                                                                            
+ Usage: exordos cn update [OPTIONS]                                                                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                                                                            
+ Update an existing node                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                            
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --output        -o  [json|html|table|yaml]  Output format; JSON prints one resource object (an array for bulk creation).                                                                                                                                                                              │
 │ *  --uuid_or_name  -u  TEXT                    UUID or name of the node to update [required]                                                                                                                                                                                                             │

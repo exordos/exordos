@@ -167,10 +167,31 @@ Bootstrap exordos locally
 
 * `hyper_iface_rom_file`:
     * Type: text
-    * Default: `/usr/share/qemu/1af41041.rom`
+    * Default: `none`
     * Usage: `--hyper-iface-rom-file`
 
-  A path to the custom ROM file of a network interface.
+  A path to the custom ROM file of a network interface. The default (none) uses the stock ROM + undionly.kpxe chain, which works with any guest RAM size.
+
+* `hyper_ovs`:
+    * Type: boolean
+    * Default: `none`
+    * Usage: `--hyper-ovs`
+
+  OVS-backed hypervisor (SDN): guests' overlay ports plug into the host's br-int. Requires openvswitch + the SDN agent on the hypervisor host.
+
+* `evpn_rr_address`:
+    * Type: text
+    * Default: `none`
+    * Usage: `--evpn-rr-address`
+
+  SDN route-reflector address advertised to the overlay hypervisors. In a multi-hypervisor realm the RR runs on the control node, but the extra hypervisors reach it through the control node's flat address (Border forwards 179). Defaults to the core node's own IP.
+
+* `evpn_peer_prefixes`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--evpn-peer-prefix`
+
+  Extra CIDR the route reflector accepts passive BGP neighbours from, beyond the installation network — e.g. the flat network the overlay hypervisors peer from. Repeatable.
 
 * `no_start`:
     * Type: boolean
@@ -296,7 +317,11 @@ Bootstrap exordos locally
 │ --hyper-connection-uri          TEXT                                 Connection URI for the hypervisor, e.g. 'qemu+tcp://10.0.0.1/system' or 'qemu+ssh://user@10.0.0.1/system'. Only used with --pool-agent-placement=core; if not set there, the main network's first address is used (qemu+tcp).      │
 │ --hyper-storage-pool            TEXT                                 Storage pool for the hypervisor. [default: default]                                                                                                                                                                                │
 │ --hyper-machine-prefix          TEXT                                 A prefix for new VMs. [default: vm-]                                                                                                                                                                                               │
-│ --hyper-iface-rom-file          TEXT                                 A path to the custom ROM file of a network interface. [default: /usr/share/qemu/1af41041.rom]                                                                                                                                      │
+│ --hyper-iface-rom-file          TEXT                                 A path to the custom ROM file of a network interface. The default (none) uses the stock ROM + undionly.kpxe chain, which works with any guest RAM size.                                                                            │
+│ --hyper-ovs                                                          OVS-backed hypervisor (SDN): guests' overlay ports plug into the host's br-int. Requires openvswitch + the SDN agent on the hypervisor host.                                                                                       │
+│ --evpn-rr-address               TEXT                                 SDN route-reflector address advertised to the overlay hypervisors. In a multi-hypervisor realm the RR runs on the control node, but the extra hypervisors reach it through the control node's flat address (Border forwards 179).  │
+│                                                                      Defaults to the core node's own IP.                                                                                                                                                                                                │
+│ --evpn-peer-prefix              TEXT                                 Extra CIDR the route reflector accepts passive BGP neighbours from, beyond the installation network — e.g. the flat network the overlay hypervisors peer from. Repeatable.                                                         │
 │ --no-start                                                           Do not start the stand after creation                                                                                                                                                                                              │
 │ --no-registration                                                    Don't register in ecosystem.                                                                                                                                                                                                       │
 │ --disable-telemetry                                                  Disable telemetry. Anonymized data only is sent by default.                                                                                                                                                                        │

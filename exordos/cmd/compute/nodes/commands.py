@@ -27,6 +27,7 @@ from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
 from exordos.cmd.compute import common as compute_common
+from exordos.cmd.network import common as net_common
 from exordos.common.table import show_data
 from exordos.common.table import show_resource
 
@@ -120,6 +121,32 @@ def _validate_hostname(hostname: str) -> None:
     help="Hostname of the node",
 )
 @click.option(
+    "--network",
+    type=str,
+    default=None,
+    help=("Network for the primary port (UUID or name)."),
+)
+@click.option(
+    "--auto-floating-ip",
+    is_flag=True,
+    help="Allocate a floating IP for the primary port.",
+)
+@click.option(
+    "--floating-network",
+    type=str,
+    default=None,
+    help="Floating pool network (UUID or name); requires --auto-floating-ip.",
+)
+@click.option(
+    "--no-network",
+    is_flag=True,
+    default=False,
+    help=(
+        "Send an empty default_network request: disable the SDN auto-port "
+        "while retaining legacy flat placement when configured."
+    ),
+)
+@click.option(
     "--wait",
     type=bool,
     is_flag=True,
@@ -144,6 +171,10 @@ def add_cmd(
     name: str,
     description: str,
     hostname: str | None,
+    network: str | None,
+    auto_floating_ip: bool,
+    floating_network: str | None,
+    no_network: bool,
     wait: bool,
     output: str,
 ) -> None:
@@ -166,6 +197,27 @@ def add_cmd(
     if hostname is not None:
         _validate_hostname(hostname)
         data["hostname"] = hostname
+    if no_network and (network or auto_floating_ip or floating_network):
+        raise click.ClickException(
+            "--no-network cannot be combined with network or floating IP options"
+        )
+    if floating_network and not auto_floating_ip:
+        raise click.ClickException("--floating-network requires --auto-floating-ip")
+    if no_network:
+        data["default_network"] = {}
+    elif network or auto_floating_ip:
+        request = {}
+        if network:
+            request["network"] = net_common.resolve(
+                client, c.NETWORK_COLLECTION, network
+            )
+        if auto_floating_ip:
+            request["auto_floating_ip"] = True
+        if floating_network:
+            request["floating_network"] = net_common.resolve(
+                client, c.NETWORK_COLLECTION, floating_network
+            )
+        data["default_network"] = request
     entity = base_client.add_entity(client, ENTITY_COLLECTION, data)
     if not wait:
         show_resource(entity, output=output)

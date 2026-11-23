@@ -538,6 +538,13 @@ def install_cmd(
             name = manifest_data.get("name")
             e_version = manifest_data.get("version")
 
+            if base_client.list_entities(client, c.ELEMENT_COLLECTION, name=name):
+                click.echo(
+                    f"Element {name} is already installed, skipping. "
+                    "Use update to change its version."
+                )
+                continue
+
             driver_spec = {"kind": "database"}
             repository = repo_utils.ensure_repository(
                 client,

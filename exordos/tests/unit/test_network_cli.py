@@ -324,3 +324,26 @@ class TestRoutesCli:
         assert result.exit_code != 0
         assert "require --pool or --condition" in result.output
         client.update_entity.assert_not_called()
+
+
+def test_a_rule_names_an_address_or_a_group():
+    """One place in the syntax answers one question — where the far end is,
+    or who it is. An address stays an address; anything else is a group the
+    command resolves before sending, so a typo cannot silently become a
+    prefix that matches nothing."""
+    from exordos.cmd.network import common as net_common
+
+    assert net_common.parse_filter_rule("ingress:tcp:443@10.0.0.0/8") == {
+        "direction": "ingress",
+        "protocol": "tcp",
+        "port": 443,
+        "remote_ip": "10.0.0.0/8",
+    }
+    assert net_common.parse_filter_rule("ingress:tcp:5432@db") == {
+        "direction": "ingress",
+        "protocol": "tcp",
+        "port": 5432,
+        "remote_group_ref": "db",
+    }
+    # A single address is still an address, not a group called "10.0.0.7".
+    assert "remote_ip" in net_common.parse_filter_rule("ingress:any@10.0.0.7")

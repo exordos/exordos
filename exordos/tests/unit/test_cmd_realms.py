@@ -321,3 +321,29 @@ def test_delete_cmd_skips_local_stands_without_virsh() -> None:
     assert "Unable to list local stands" not in result.output
     infra.list_stands.assert_not_called()
     infra.delete_stand.assert_not_called()
+
+
+def _ordered_body(*args: str) -> dict:
+    with (
+        mock.patch.object(commands, "get_ecosystem_client"),
+        mock.patch.object(commands, "show_data"),
+        mock.patch.object(commands.base_client, "add_entity") as add_entity,
+    ):
+        result = CliRunner().invoke(
+            commands.add_cmd,
+            ["--name", "realm", "--admin-password", "secret", *args],
+            obj=SimpleNamespace(auth_data={}, cfg={}),
+        )
+
+    assert result.exit_code == 0, result.output
+    return add_entity.call_args.args[2]
+
+
+def test_add_cmd_orders_the_hypervisors_it_was_asked_for() -> None:
+    assert _ordered_body("--hypervisor-count", "2")["hypervisor_count"] == 2
+
+
+def test_add_cmd_leaves_the_hypervisor_count_to_the_ecosystem_when_unset() -> None:
+    # Sending 0 and saying nothing mean the same to the ecosystem today, but
+    # only one of them keeps saying it if that default ever moves.
+    assert "hypervisor_count" not in _ordered_body()
