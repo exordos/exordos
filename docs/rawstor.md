@@ -1,4 +1,4 @@
-# Rawstor storage
+# RawStor storage
 
 ## Create a cluster
 
@@ -102,7 +102,7 @@ sharing a pool also share its free space and cannot be counted independently.
 dedicated backing filesystem; sharing one between OSTs would count its free
 space more than once. Multiple OSTs on one host need separate backing filesystems
 and bind ports. `--bind` defaults to the host and port of the advertised endpoint.
-Rawstor resolves DNS names to IPv4 addresses, including listen addresses.
+RawStor resolves DNS names to IPv4 addresses, including listen addresses.
 Use an explicit local `--bind` when the advertised address is not local.
 Listening on every interface requires an explicit `--bind 0.0.0.0:PORT`.
 When adding on the same host without `--endpoint`, CLI detects the host address
@@ -176,7 +176,7 @@ The estimate is conservative for pending disks and is a placement upper bound
 for completed inventory. MDS performs the final placement and can reject an
 allocation when its weighted placement cannot fit. Deleting a pending disk
 releases its reservation; deleting an allocated disk releases physical space
-when OST cleanup is reflected in the next sample. Rawstor disks support grow-only resizing.
+when OST cleanup is reflected in the next sample. RawStor disks support grow-only resizing.
 
 ## Grow a disk
 
@@ -197,13 +197,13 @@ After the object grows, the agent sends `SIGHUP` to its running vhost backend.
 The backend reopens its queues and notifies QEMU of the larger disk without
 restarting the VM. Failed notifications are retried during discovery; an
 inactive backend reads the new size when it next starts. Existing hypervisors
-must have the matching updated Rawstor library, Python binding and vhost package.
+must have the matching updated RawStor library, Python binding and vhost package.
 The guest must expand its partitions and filesystem separately.
 
-## Rawstor version
+## RawStor version
 
 The default Debian packages and Python binding are version `0.3.4`, from
-[Rawstor v0.3.4](https://github.com/rawstor/librawstor/releases/tag/v0.3.4).
+[RawStor v0.3.4](https://github.com/rawstor/librawstor/releases/tag/v0.3.4).
 Core downloads release packages during image provisioning and checks their
 pinned SHA256 checksums. CLI downloads OST, vhost,
 librawstor and bindings from the same release. Set `RAWSTOR_VERSION` for a release,
@@ -215,7 +215,7 @@ pointing to the matching `gcl_sdk` checkout on `feat/rawstor`.
 ## Driver configuration
 
 Storage pools keep `cluster`, `name`, `tier` and `ephemeral` as common fields.
-Rawstor settings are nested in `driver_spec`:
+RawStor settings are nested in `driver_spec`:
 
 ```json
 {"kind": "rawstor", "mirrors": 2, "failure_domain": "server"}
@@ -228,25 +228,25 @@ CLI options remain unchanged; commands construct the nested API configuration.
 
 The pinned build requires a strict majority for writable mirrors. With two
 data copies and no witness, both copies must remain available for writes.
-Exordos includes the MDS as a metadata-only witness in the topology. Rawstor
+Exordos includes the MDS as a metadata-only witness in the topology. RawStor
 places a witness for even mirror counts, allowing a two-copy mirror to retain
 a majority when one data node is unavailable.
 
 The LIST wire format distinguishes chunks (`1`) from objects (`2`); update
 clients, MDS and OST together. Read-only mirrored opens also require quorum;
-Rawstor only bypasses it when `FORCE` is explicitly combined with `READONLY`.
+RawStor only bypasses it when `FORCE` is explicitly combined with `READONLY`.
 
 ## Account-aware build compatibility
 
 Build 44297955553 introduces account metadata and a mandatory handshake. Update
 librawstor, Python bindings, MDS, OST and vhost together. Existing pre-account MDS
-databases and object metadata are incompatible; Rawstor provides no migration.
+databases and object metadata are incompatible; RawStor provides no migration.
 Installing packages does not convert or delete existing data. Recreate
 disposable development storage before using the new build.
 
-Exordos uses `project_id` as the Rawstor account UUID. The hypervisor registers
+Exordos uses `project_id` as the RawStor account UUID. The hypervisor registers
 it on first disk creation and preserves it in the vhost configuration. A nil
-project UUID cannot own Rawstor objects. This integration runs Rawstor in explicit insecure mode: account UUIDs record
+project UUID cannot own RawStor objects. This integration runs RawStor in explicit insecure mode: account UUIDs record
 ownership and filter listings, but do not authenticate callers.
 
 ## Transport mode

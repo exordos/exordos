@@ -416,7 +416,7 @@ class TestInitCmdRegistration:
         assert storage == '[{"name": "default"}]'
 
     def test_add_installs_rawstor_packages_but_no_local_pool(self) -> None:
-        """Rawstor initialization only installs the vhost-attaching packages -
+        """RawStor initialization only installs the vhost-attaching packages -
         it doesn't claim a local rawstor pool (storage nodes are initialized
         and registered separately), so driver_spec must not carry rawstor_pools.
         """
