@@ -202,8 +202,8 @@ The guest must expand its partitions and filesystem separately.
 
 ## RawStor version
 
-The default Debian packages and Python binding are version `0.3.4`, from
-[RawStor v0.3.4](https://github.com/rawstor/librawstor/releases/tag/v0.3.4).
+The default Debian packages and Python binding are version `0.3.5`, from
+[RawStor v0.3.5](https://github.com/rawstor/librawstor/releases/tag/v0.3.5).
 Core downloads release packages during image provisioning and checks their
 pinned SHA256 checksums. CLI downloads OST, vhost,
 librawstor and bindings from the same release. Set `RAWSTOR_VERSION` for a release,
