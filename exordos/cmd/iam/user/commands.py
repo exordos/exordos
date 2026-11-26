@@ -446,6 +446,29 @@ def update_cmd(
     show_resource(entity, output=output)
 
 
+@users_group.command(
+    "admin_change_email",
+    help="Change a user's email immediately (requires iam.user.change_email)",
+)
+@click.pass_context
+@click.argument("user", type=click.UUID, required=True)
+@click.option("--email", required=True, help="New email address")
+def admin_change_email(
+    ctx: click.Context,
+    user: sys_uuid.UUID,
+    email: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    base_client.action_entity(
+        client,
+        ENTITY_COLLECTION,
+        "admin_change_email",
+        user,
+        new_email=email,
+    )
+    click.echo(f"Email changed for {ENTITY} {user}")
+
+
 @users_group.command("confirm_email", help=f"Confirm email of the {ENTITY}")
 @click.pass_context
 @click.argument(
