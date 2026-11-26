@@ -74,6 +74,14 @@ Create an OST resource for a registered agent to reconcile
     * Default: ``
     * Usage: `--description`
 
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
+
 * `help`:
     * Type: boolean
     * Default: `false`

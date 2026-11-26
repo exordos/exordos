@@ -28,9 +28,11 @@ from exordos import constants as c
 from exordos.clients import base_client
 from exordos.cmd.aliases import ClickAliasedGroup
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
 from exordos.cmd.compute.hypervisors import commands as hyper_commands
 from exordos.common.run import run_command
 from exordos.common.table import show_data
+from exordos.common.table import show_resource
 from exordos.logger import ClickLogger
 
 DISK_TIERS = ["COLD", "WARM", "HOT"]
@@ -161,8 +163,11 @@ def _validate_uri(value, scheme):
 @click.option("--description", default="")
 @click.option("--host", default=None, help="Core address reachable from hypervisors")
 @click.option("--port", type=click.IntRange(1, 65535), default=None)
+@output_option
 @click.pass_context
-def clusters_add_cmd(ctx, storage_type, name, uuid, description, host, port):
+def clusters_add_cmd(
+    ctx, storage_type, name, uuid, description, host, port, output="table"
+):
     client = _client(ctx)
     clusters = base_client.list_entities(client, c.STORAGE_CLUSTER_COLLECTION)
     used_ports = {
@@ -196,24 +201,26 @@ def clusters_add_cmd(ctx, storage_type, name, uuid, description, host, port):
             "driver_spec": {"kind": storage_type, "endpoint": endpoint},
         },
     )
-    show_data(entity)
+    show_resource(entity, output=output)
 
 
 @clusters_group.command("update")
 @click.argument("identifier")
 @click.option("--name", default=None)
 @click.option("--description", default=None)
+@output_option
 @click.pass_context
-def clusters_update_cmd(ctx, identifier, name, description):
+def clusters_update_cmd(ctx, identifier, name, description, output="table"):
     data = {
         key: value
         for key, value in {"name": name, "description": description}.items()
         if value is not None
     }
-    show_data(
+    show_resource(
         base_client.update_entity(
             _client(ctx), c.STORAGE_CLUSTER_COLLECTION, identifier, data
-        )
+        ),
+        output=output,
     )
 
 
@@ -453,6 +460,7 @@ def _select_local_storage_agent(client):
     help="dc/row/rack/server; outer levels may be omitted",
 )
 @click.option("--description", default="")
+@output_option
 @click.pass_context
 def nodes_add_cmd(
     ctx,
@@ -465,6 +473,7 @@ def nodes_add_cmd(
     endpoint,
     failure_domain_path,
     description,
+    output="table",
 ):
     client = _client(ctx)
     agent_entity = (
@@ -517,7 +526,7 @@ def nodes_add_cmd(
         data["uuid"] = str(uuid)
     if location is not None:
         data["driver_spec"]["location"] = location
-    show_data(base_client.add_entity(client, NODE_COLLECTION, data))
+    show_resource(base_client.add_entity(client, NODE_COLLECTION, data), output=output)
 
 
 @nodes_group.command("update")
@@ -527,8 +536,9 @@ def nodes_add_cmd(
 @click.option("--endpoint", default=None)
 @click.option("--bind", "bind_address", default=None)
 @click.option("--failure-domain-path", default=None)
+@output_option
 @click.pass_context
-def nodes_update_cmd(ctx, identifier, **kwargs):
+def nodes_update_cmd(ctx, identifier, output="table", **kwargs):
     data = {key: value for key, value in kwargs.items() if value is not None}
     if "endpoint" in data:
         _validate_uri(data["endpoint"], "ost")
@@ -546,7 +556,10 @@ def nodes_update_cmd(ctx, identifier, **kwargs):
         if "endpoint" in spec and "bind_address" not in spec:
             previous.pop("bind_address", None)
         data["driver_spec"] = {**previous, **spec}
-    show_data(base_client.update_entity(client, NODE_COLLECTION, identifier, data))
+    show_resource(
+        base_client.update_entity(client, NODE_COLLECTION, identifier, data),
+        output=output,
+    )
 
 
 def _pool_options(f):
@@ -574,8 +587,9 @@ def _pool_options(f):
 @click.option("--name", required=True)
 @click.option("--uuid", type=click.UUID, default=None)
 @_pool_options
+@output_option
 @click.pass_context
-def pools_add_cmd(ctx, cluster, name, uuid, **kwargs):
+def pools_add_cmd(ctx, cluster, name, uuid, output="table", **kwargs):
     client = _client(ctx)
     data = {key: value for key, value in kwargs.items() if value is not None}
     if "tier" in data:
@@ -589,15 +603,16 @@ def pools_add_cmd(ctx, cluster, name, uuid, **kwargs):
         "kind": "rawstor",
         **{key: data.pop(key) for key in ("mirrors", "failure_domain") if key in data},
     }
-    show_data(base_client.add_entity(client, POOL_COLLECTION, data))
+    show_resource(base_client.add_entity(client, POOL_COLLECTION, data), output=output)
 
 
 @pools_group.command("update")
 @click.argument("identifier")
 @click.option("--name", default=None)
 @_pool_options
+@output_option
 @click.pass_context
-def pools_update_cmd(ctx, identifier, **kwargs):
+def pools_update_cmd(ctx, identifier, output="table", **kwargs):
     data = {key: value for key, value in kwargs.items() if value is not None}
     if "tier" in data:
         data["tier"] = data["tier"].upper()
@@ -608,7 +623,10 @@ def pools_update_cmd(ctx, identifier, **kwargs):
             "driver_spec"
         ]
         data["driver_spec"] = {**previous, **spec}
-    show_data(base_client.update_entity(client, POOL_COLLECTION, identifier, data))
+    show_resource(
+        base_client.update_entity(client, POOL_COLLECTION, identifier, data),
+        output=output,
+    )
 
 
 storages_group.add_command(clusters_group, aliases=["c"])

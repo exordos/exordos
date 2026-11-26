@@ -45,6 +45,14 @@ Create a core MDS with persistent and ephemeral COLD pools
     * Default: `none`
     * Usage: `--port`
 
+* `output`:
+    * Type: choice
+    * Default: `table`
+    * Usage: `--output
+-o`
+
+  Output format; JSON prints one resource object (an array for bulk creation).
+
 * `help`:
     * Type: boolean
     * Default: `false`
