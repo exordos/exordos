@@ -78,6 +78,11 @@ def _arguments(command):
         "exordos.cmd.metapaas.s3.instances.commands",
     ):
         overrides["version"] = UUID
+    if (
+        command.callback.__module__ == "exordos.cmd.storages.commands"
+        and command.name == "add"
+    ):
+        overrides.update(host="core.example", agent=UUID, endpoint="ost://host:7777")
     args = []
     for param in command.params:
         if param.name == "output" or param.name == "help":
@@ -120,6 +125,10 @@ def test_add_cmd_json_returns_native_resource(command):
         stack.enter_context(
             mock.patch.object(base_client, "add_entity", return_value=ENTITY)
         )
+        if module == "exordos.cmd.storages.commands":
+            stack.enter_context(
+                mock.patch.object(base_client, "list_entities", return_value=[])
+            )
         if module == "exordos.cmd.realms.commands":
             stack.enter_context(mock.patch(f"{module}.get_ecosystem_client"))
         if module == "exordos.cmd.settings.commands":

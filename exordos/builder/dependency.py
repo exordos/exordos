@@ -71,7 +71,7 @@ class LocalPathDependency(base.AbstractDependency):
 
     def fetch(self, output_dir: str) -> None:
         """Fetch the dependency."""
-        path = os.path.normpath(self._path)
+        path = os.path.abspath(self._path)
 
         if os.path.isdir(path):
             name = os.path.basename(path)
@@ -148,7 +148,7 @@ class LocalEnvPathDependency(base.AbstractDependency):
         if not os.path.isabs(path):
             path = os.path.join(self._work_dir, path)
 
-        path = os.path.normpath(path)
+        path = os.path.abspath(path)
 
         if os.path.isdir(path):
             name = os.path.basename(path)
