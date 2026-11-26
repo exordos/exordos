@@ -246,7 +246,7 @@ def test_nodes_add_declares_ost_via_api(api):
     assert data["driver_spec"]["location"] == "file:///data/ost1"
     assert data["driver_spec"]["bind_address"] == "host:7777"
     assert data["driver_spec"]["failure_domain_path"] == "dc1/row1/rack1/host1"
-    assert data["driver_spec"]["weight"] == 100
+    assert "weight" not in data["driver_spec"]
 
 
 def test_nodes_add_allocates_the_next_port_on_the_same_host(api):
@@ -580,3 +580,10 @@ def test_cluster_filter_fetches_cluster_even_with_name_only_projection(api, kind
     result = invoke([kind, "list", "--cluster", CLUSTER_UUID, "--fields", "name"])
     assert result.exit_code == 0, result.output
     assert "cluster" in api.list.call_args.args[1]
+
+
+@pytest.mark.parametrize("command", ["add", "update"])
+def test_nodes_do_not_expose_weight_option(command):
+    result = invoke(["nodes", command, "--help"])
+    assert result.exit_code == 0
+    assert "--weight" not in result.output

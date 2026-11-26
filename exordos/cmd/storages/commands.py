@@ -98,7 +98,6 @@ nodes_group = create_entity_group(
         "Cluster": "cluster",
         "Endpoint": lambda e: e["driver_spec"]["endpoint"],
         "Failure domain path": lambda e: e["driver_spec"]["failure_domain_path"],
-        "Weight": lambda e: e["driver_spec"]["weight"],
         "Agent": "agent",
         "Status": "status",
     },
@@ -415,12 +414,6 @@ def _select_local_storage_agent(client):
     return selected
 
 
-def _weight(ctx, param, value):
-    if value is not None and not 1 <= value <= (1 << 63) - 1:
-        raise click.BadParameter("Weight must be a positive integer")
-    return value
-
-
 @nodes_group.command(
     "add",
     help="Create an OST resource for a registered agent to reconcile",
@@ -459,13 +452,6 @@ def _weight(ctx, param, value):
     required=True,
     help="dc/row/rack/server; outer levels may be omitted",
 )
-@click.option(
-    "--weight",
-    type=int,
-    callback=_weight,
-    default=100,
-    show_default=True,
-)
 @click.option("--description", default="")
 @click.pass_context
 def nodes_add_cmd(
@@ -478,7 +464,6 @@ def nodes_add_cmd(
     bind_address,
     endpoint,
     failure_domain_path,
-    weight,
     description,
 ):
     client = _client(ctx)
@@ -526,7 +511,6 @@ def nodes_add_cmd(
             "bind_address": bind_address,
             "endpoint": endpoint.rstrip("/"),
             "failure_domain_path": failure_domain_path,
-            "weight": weight,
         },
     }
     if uuid is not None:
@@ -543,7 +527,6 @@ def nodes_add_cmd(
 @click.option("--endpoint", default=None)
 @click.option("--bind", "bind_address", default=None)
 @click.option("--failure-domain-path", default=None)
-@click.option("--weight", type=int, callback=_weight, default=None)
 @click.pass_context
 def nodes_update_cmd(ctx, identifier, **kwargs):
     data = {key: value for key, value in kwargs.items() if value is not None}
@@ -553,7 +536,7 @@ def nodes_update_cmd(ctx, identifier, **kwargs):
     client = _client(ctx)
     spec = {
         key: data.pop(key)
-        for key in ("endpoint", "bind_address", "failure_domain_path", "weight")
+        for key in ("endpoint", "bind_address", "failure_domain_path")
         if key in data
     }
     if spec:

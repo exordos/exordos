@@ -69,11 +69,6 @@ Create an OST resource for a registered agent to reconcile
 
   dc/row/rack/server; outer levels may be omitted
 
-* `weight`:
-    * Type: integer range
-    * Default: `100`
-    * Usage: `--weight`
-
 * `description`:
     * Type: text
     * Default: ``

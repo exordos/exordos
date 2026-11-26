@@ -43,11 +43,6 @@ None
     * Default: `none`
     * Usage: `--failure-domain-path`
 
-* `weight`:
-    * Type: integer range
-    * Default: `none`
-    * Usage: `--weight`
-
 * `help`:
     * Type: boolean
     * Default: `false`
