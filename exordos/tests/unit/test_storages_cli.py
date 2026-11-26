@@ -587,3 +587,38 @@ def test_nodes_do_not_expose_weight_option(command):
     result = invoke(["nodes", command, "--help"])
     assert result.exit_code == 0
     assert "--weight" not in result.output
+
+
+def test_cluster_add_passes_managed_ost_count_and_data_size(api):
+    result = invoke(
+        [
+            "clusters",
+            "add",
+            "--type",
+            "rawstor",
+            "--name",
+            "storage1",
+            "--nodes",
+            "3",
+            "--size",
+            "30",
+            "--cpu",
+            "4",
+            "--ram",
+            "4096",
+        ]
+    )
+    assert result.exit_code == 0, result.output
+    payload = api.add.call_args.args[2]
+    assert payload["nodes"] == 3
+    assert payload["size"] == 30
+    assert payload["cpu"] == 4
+    assert payload["ram"] == 4096
+
+
+def test_cluster_add_defaults_to_no_managed_nodes(api):
+    result = invoke(["clusters", "add", "--type", "rawstor", "--name", "storage1"])
+    assert result.exit_code == 0, result.output
+    payload = api.add.call_args.args[2]
+    assert payload["nodes"] == 0 and payload["size"] == 10
+    assert "cpu" not in payload and "ram" not in payload

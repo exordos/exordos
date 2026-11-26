@@ -163,10 +163,47 @@ def _validate_uri(value, scheme):
 @click.option("--description", default="")
 @click.option("--host", default=None, help="Core address reachable from hypervisors")
 @click.option("--port", type=click.IntRange(1, 65535), default=None)
+@click.option(
+    "--nodes",
+    type=click.IntRange(min=0),
+    default=0,
+    show_default=True,
+    help="Number of managed OST virtual machines",
+)
+@click.option(
+    "--size",
+    type=click.IntRange(min=1),
+    default=10,
+    show_default=True,
+    help="Data disk size per OST VM in GiB",
+)
+@click.option(
+    "--cpu",
+    type=click.IntRange(min=1),
+    default=None,
+    help="vCPUs per OST VM (server default if omitted)",
+)
+@click.option(
+    "--ram",
+    type=click.IntRange(min=1),
+    default=None,
+    help="RAM per OST VM in MiB (server default if omitted)",
+)
 @output_option
 @click.pass_context
 def clusters_add_cmd(
-    ctx, storage_type, name, uuid, description, host, port, output="table"
+    ctx,
+    storage_type,
+    name,
+    uuid,
+    description,
+    host,
+    port,
+    nodes,
+    size,
+    cpu,
+    ram,
+    output="table",
 ):
     client = _client(ctx)
     clusters = base_client.list_entities(client, c.STORAGE_CLUSTER_COLLECTION)
@@ -191,16 +228,19 @@ def clusters_add_cmd(
     host = f"[{host}]" if ":" in host and not host.startswith("[") else host
     endpoint = f"mds://{host}:{port}/"
     _validate_uri(endpoint, "mds")
-    entity = base_client.add_entity(
-        client,
-        c.STORAGE_CLUSTER_COLLECTION,
-        {
-            "uuid": str(uuid or sys_uuid.uuid4()),
-            "name": name,
-            "description": description,
-            "driver_spec": {"kind": storage_type, "endpoint": endpoint},
-        },
-    )
+    payload = {
+        "uuid": str(uuid or sys_uuid.uuid4()),
+        "name": name,
+        "description": description,
+        "driver_spec": {"kind": storage_type, "endpoint": endpoint},
+        "nodes": nodes,
+        "size": size,
+    }
+    if cpu is not None:
+        payload["cpu"] = cpu
+    if ram is not None:
+        payload["ram"] = ram
+    entity = base_client.add_entity(client, c.STORAGE_CLUSTER_COLLECTION, payload)
     show_resource(entity, output=output)
 
 
