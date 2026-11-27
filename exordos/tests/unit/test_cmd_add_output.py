@@ -71,6 +71,8 @@ def _arguments(command):
         )
     if command.callback.__module__ == "exordos.cmd.security.commands":
         overrides["condition"] = "kind=uri_regex"
+    if command.callback.__module__ == "exordos.cmd.repo.elements.commands":
+        overrides["tags"] = "env:prod"
     if command.callback.__module__ == "exordos.cmd.dbaas.instances.commands":
         overrides["version"] = UUID
     if command.callback.__module__ in (

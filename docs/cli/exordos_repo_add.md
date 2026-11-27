@@ -95,6 +95,13 @@ Add a new repository
 
   Password for the repository
 
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -122,6 +129,7 @@ Add a new repository
 │ *  --repo-url           TEXT                    URL of the repository. Example: https://repo.exordos.com/exordos-elements/ [required]                                                                                                                                                                    │
 │    --repo-user          TEXT                    Username for the repository                                                                                                                                                                                                                              │
 │    --repo-password      TEXT                    Password for the repository                                                                                                                                                                                                                              │
+│    --tag                TEXT                    Set the complete tag list. Repeat for each tag.                                                                                                                                                                                                          │
 │    --help                                       Show this message and exit.                                                                                                                                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

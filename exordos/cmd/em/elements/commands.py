@@ -33,6 +33,8 @@ import rich_click as click
 from exordos import utils
 from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.common import compute
 from exordos.common import ssh
 from exordos.common import version as version_lib
@@ -717,7 +719,9 @@ def _update_element_by_uuid_or_name(
     "Quote patterns to prevent shell expansion: "
     "exordos ee update 'ecosystem_ui_*'. "
     "Globs select installed elements only; each matching name is updated once. "
-    "An unmatched pattern is an error.",
+    "An unmatched pattern is an error. "
+    "With --tag or --clear-tags, only installed element tags are changed; "
+    "the element version is not updated.",
 )
 @click.option(
     "--dev",
@@ -750,6 +754,7 @@ def _update_element_by_uuid_or_name(
 )
 @click.argument("uuid_or_name_or_path", nargs=-1)
 @click.pass_context
+@tag_options(update=True)
 def update_cmd(
     ctx: click.Context,
     dev: bool,
@@ -758,9 +763,31 @@ def update_cmd(
     project_id: sys_uuid.UUID,
     timeout: float,
     uuid_or_name_or_path: tuple[str, ...],
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
     """Update elements from repository API by UUID, name, or manifest path"""
     import questionary
+
+    tag_data = tags_payload(tags, clear_tags)
+    if tag_data:
+        if dev or version is not None:
+            raise click.UsageError(
+                "Tag updates cannot be combined with --dev or --version"
+            )
+        if not uuid_or_name_or_path:
+            raise click.UsageError("Specify an installed element UUID, name, or glob")
+        if any(os.path.isfile(target) for target in uuid_or_name_or_path):
+            raise click.UsageError("Tag updates cannot be used with manifest paths")
+        client = base_client.get_user_api_client(ctx.obj.auth_data)
+        for target, _ in _expand_element_targets(
+            client, list(uuid_or_name_or_path), installed_only=True
+        ):
+            entity = base_client.update_entity(
+                client, ENTITY_COLLECTION, target, tag_data
+            )
+            show_resource(entity)
+        return
 
     if dev and version is not None:
         raise click.UsageError("--dev and --version cannot be used together")

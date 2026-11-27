@@ -22,7 +22,12 @@ from packaging import version as packaging_version
 import rich_click as click
 
 from exordos import constants as c
+from exordos.clients import base_client
 from exordos.cmd.base import create_entity_group
+from exordos.cmd.base import output_option
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
+from exordos.common.table import show_resource
 
 ELEMENT_ENTITY = "repo element"
 
@@ -104,3 +109,28 @@ _elements_group = create_entity_group(
 
 elements_group.add_command(_elements_group.commands["list"], aliases=["l"])
 elements_group.add_command(_elements_group.commands["show"], aliases=["get", "g"])
+
+
+@click.command("update", help="Update repo element tags by UUID or unique name")
+@click.argument("uuid", type=str)
+@tag_options(update=True)
+@output_option
+@click.pass_context
+def update_cmd(
+    ctx: click.Context,
+    uuid: str,
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
+    output: str = "table",
+) -> None:
+    data = tags_payload(tags, clear_tags)
+    if not data:
+        raise click.UsageError("Provide at least one --tag or use --clear-tags.")
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    entity = base_client.update_entity(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, uuid, data
+    )
+    show_resource(entity, output=output)
+
+
+elements_group.add_command(update_cmd, aliases=["u"])
