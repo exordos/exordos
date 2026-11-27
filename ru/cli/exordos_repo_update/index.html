@@ -5121,6 +5121,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../exordos_repo_elements_update/" class="md-nav__link">
+        exordos_repo_elements_update
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../exordos_repo_list/" class="md-nav__link">
         exordos_repo_list
       </a>
@@ -7000,6 +7014,24 @@
 </ul>
 <p>Password for the repository</p>
 <ul>
+<li><code>clear_tags</code>:<ul>
+<li>Type: boolean</li>
+<li>Default: <code>false</code></li>
+<li>Usage: <code>--clear-tags</code></li>
+</ul>
+</li>
+</ul>
+<p>Remove all tags.</p>
+<ul>
+<li><code>tags</code>:<ul>
+<li>Type: text</li>
+<li>Default: <code>sentinel.unset</code></li>
+<li>Usage: <code>--tag</code></li>
+</ul>
+</li>
+</ul>
+<p>Set the complete tag list. Repeat for each tag.</p>
+<ul>
 <li><code>help</code>:<ul>
 <li>Type: boolean</li>
 <li>Default: <code>false</code></li>
@@ -7025,6 +7057,8 @@
 <span class="go">│ --repo-url           TEXT                                     URL of the repository. Example: https://repo.exordos.com/exordos-elements/                                                                                                                                                                 │</span>
 <span class="go">│ --repo-user          TEXT                                     Username for the repository                                                                                                                                                                                                                │</span>
 <span class="go">│ --repo-password      TEXT                                     Password for the repository                                                                                                                                                                                                                │</span>
+<span class="go">│ --clear-tags                                                  Remove all tags.                                                                                                                                                                                                                           │</span>
+<span class="go">│ --tag                TEXT                                     Set the complete tag list. Repeat for each tag.                                                                                                                                                                                            │</span>
 <span class="go">│ --help                                                        Show this message and exit.                                                                                                                                                                                                                │</span>
 <span class="go">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 </code></pre></div>
