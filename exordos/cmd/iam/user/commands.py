@@ -446,6 +446,74 @@ def update_cmd(
     show_resource(entity, output=output)
 
 
+@users_group.command(
+    "request_email_change", help="Request a new email address for your own account"
+)
+@click.pass_context
+@click.argument("user", type=click.UUID, required=True)
+@click.option("--email", required=True, help="New email address")
+@click.option("--password", prompt=True, hide_input=True, help="Current password")
+@click.option("--otp-code", default=None, help="OTP code, required when MFA is enabled")
+def request_email_change(
+    ctx: click.Context,
+    user: sys_uuid.UUID,
+    email: str,
+    password: str,
+    otp_code: str | None,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    data = {"new_email": email, "password": password}
+    if otp_code is not None:
+        data["otp_code"] = otp_code
+    base_client.action_entity(
+        client, ENTITY_COLLECTION, "request_email_change", user, **data
+    )
+    click.echo(f"Email change requested for {ENTITY} {user}; check your new address")
+
+
+@users_group.command(
+    "confirm_email_change", help="Confirm a pending email change with its emailed code"
+)
+@click.pass_context
+@click.argument("user", type=click.UUID, required=True)
+@click.option(
+    "--code", prompt=True, hide_input=True, help="Email change confirmation code"
+)
+def confirm_email_change(
+    ctx: click.Context,
+    user: sys_uuid.UUID,
+    code: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    base_client.action_entity(
+        client, ENTITY_COLLECTION, "confirm_email_change", user, code=code
+    )
+    click.echo(f"Email change confirmed for {ENTITY} {user}")
+
+
+@users_group.command(
+    "admin_change_email",
+    help="Change a user's email immediately (requires iam.user.change_email)",
+)
+@click.pass_context
+@click.argument("user", type=click.UUID, required=True)
+@click.option("--email", required=True, help="New email address")
+def admin_change_email(
+    ctx: click.Context,
+    user: sys_uuid.UUID,
+    email: str,
+) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    base_client.action_entity(
+        client,
+        ENTITY_COLLECTION,
+        "admin_change_email",
+        user,
+        new_email=email,
+    )
+    click.echo(f"Email changed for {ENTITY} {user}")
+
+
 @users_group.command("confirm_email", help=f"Confirm email of the {ENTITY}")
 @click.pass_context
 @click.argument(

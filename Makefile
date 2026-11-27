@@ -11,6 +11,9 @@ DBAAS_DATABASE_UUID = 44444444-4444-4444-4444-444444444444
 DBAAS_DATABASE_NAME = mydb
 TOKEN_UUID = 55555555-5555-5555-5555-555555555555
 TOKEN_DAYS = 30
+USER_UUID = 66666666-6666-6666-6666-666666666666
+NEW_EMAIL = new@example.com
+OTP_CODE =
 ifeq ($(SSH_KEY),)
 	SSH_KEY = ~/.ssh/id_rsa.pub
 endif
@@ -98,6 +101,19 @@ role_permissions:
 
 reset_password:
 	./dist/exordos iam u reset_password dae92b97-ee63-4376-9743-f735120ea7db --new-password 123456789
+
+
+# Email changes (override USER_UUID and NEW_EMAIL on the make command line)
+admin_change_email:
+	./dist/exordos iam users admin_change_email "$(USER_UUID)" --email "$(NEW_EMAIL)"
+
+# Prompts for the current password; set OTP_CODE when MFA is enabled
+request_email_change:
+	./dist/exordos iam users request_email_change "$(USER_UUID)" --email "$(NEW_EMAIL)" $(if $(OTP_CODE),--otp-code "$(OTP_CODE)")
+
+# Prompts for the code sent to the new email address
+confirm_email_change:
+	./dist/exordos iam users confirm_email_change "$(USER_UUID)"
 
 
 # IAM token commands
