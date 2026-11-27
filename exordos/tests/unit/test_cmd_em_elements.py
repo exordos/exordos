@@ -524,3 +524,88 @@ def test_update_cmd_dev_rejects_manifest_path(tmp_path) -> None:
     result = CliRunner().invoke(commands.update_cmd, ["--dev", str(manifest)])
     assert result.exit_code == 2
     assert "--dev cannot be used with manifest paths" in result.output
+
+
+@pytest.mark.parametrize("target", ["demo", "11111111-1111-1111-1111-111111111111"])
+@pytest.mark.parametrize(
+    "options,tags",
+    [
+        (["--tag", "env:prod", "--tag", "team a"], ["env:prod", "team a"]),
+        (["--clear-tags"], []),
+    ],
+)
+def test_update_cmd_tags_without_version_update(target, options, tags):
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(commands.base_client, "update_entity") as update,
+        mock.patch.object(commands, "_update_element_by_uuid_or_name") as upgrade,
+        mock.patch.object(commands, "show_resource"),
+    ):
+        result = CliRunner().invoke(
+            commands.ee_group,
+            ["update", target, *options],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    update.assert_called_once_with(
+        get_client.return_value, commands.ENTITY_COLLECTION, target, {"tags": tags}
+    )
+    upgrade.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "args",
+    [[], ["demo", "--clear-tags"], ["demo", "--dev"], ["demo", "--version", "1.0.0"]],
+)
+def test_update_cmd_tags_rejects_invalid_options_before_request(args):
+    with mock.patch.object(commands.base_client, "get_user_api_client") as get_client:
+        result = CliRunner().invoke(
+            commands.update_cmd,
+            [*args, "--tag", "prod"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 2, result.output
+    get_client.assert_not_called()
+
+
+def test_update_cmd_tags_rejects_manifest_before_request(tmp_path):
+    manifest = tmp_path / "manifest.yaml"
+    manifest.write_text("name: demo")
+    with mock.patch.object(commands.base_client, "get_user_api_client") as get_client:
+        result = CliRunner().invoke(
+            commands.update_cmd,
+            [str(manifest), "--tag", "prod"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 2, result.output
+    get_client.assert_not_called()
+
+
+def test_update_cmd_tags_glob_updates_only_installed_elements_once():
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            commands.base_client,
+            "list_entities",
+            return_value=[
+                {"name": "demo-a", "installation_state": "INSTALLED"},
+                {"name": "demo-b", "installation_state": "UNINSTALLED"},
+            ],
+        ),
+        mock.patch.object(commands.base_client, "update_entity") as update,
+        mock.patch.object(commands, "_update_element_by_uuid_or_name") as upgrade,
+        mock.patch.object(commands, "show_resource"),
+    ):
+        result = CliRunner().invoke(
+            commands.update_cmd,
+            ["demo-*", "demo-a", "--tag", "prod"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    assert update.call_count == 1
+    assert update.call_args.args[1:] == (
+        commands.ENTITY_COLLECTION,
+        "demo-a",
+        {"tags": ["prod"]},
+    )
+    upgrade.assert_not_called()

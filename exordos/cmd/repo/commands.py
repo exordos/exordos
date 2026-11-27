@@ -30,6 +30,8 @@ from exordos.clients import base_client
 from exordos.clients import repo as repo_client
 from exordos.cmd.base import create_entity_group
 from exordos.cmd.base import output_option
+from exordos.cmd.base import tag_options
+from exordos.cmd.base import tags_payload
 from exordos.cmd.repo.elements import commands as elements_commands
 from exordos.cmd.repo.store import commands as store_commands
 from exordos.common.table import get_table
@@ -196,6 +198,7 @@ repository_group.add_command(_repository_group.commands["delete"], aliases=["d"]
     default=None,
     help="Password for the repository",
 )
+@tag_options()
 def repository_add_cmd(
     ctx: click.Context,
     uuid: sys_uuid.UUID | None,
@@ -209,7 +212,9 @@ def repository_add_cmd(
     repo_user: str | None,
     repo_password: str | None,
     output: str = "table",
+    tags: tuple[str, ...] = (),
 ) -> None:
+    tag_data = tags_payload(tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     if uuid is None:
         uuid = sys_uuid.uuid4()
@@ -225,6 +230,7 @@ def repository_add_cmd(
     driver_spec = _build_driver_spec(repo_url, repo_user, repo_password)
     if driver_spec is not None:
         data["driver_spec"] = driver_spec
+    data.update(tag_data)
     entity = base_client.add_entity(client, c.REPOSITORY_COLLECTION, data)
     show_resource(entity, output=output)
 
@@ -300,6 +306,7 @@ def repository_add_cmd(
     default=None,
     help="Password for the repository",
 )
+@tag_options(update=True)
 def repository_update_cmd(
     ctx: click.Context,
     uuid: str,
@@ -314,7 +321,10 @@ def repository_update_cmd(
     repo_user: str | None,
     repo_password: str | None,
     output: str = "table",
+    tags: tuple[str, ...] = (),
+    clear_tags: bool = False,
 ) -> None:
+    tag_data = tags_payload(tags, clear_tags)
     client = base_client.get_user_api_client(ctx.obj.auth_data)
     data = {}
     if project_id is not None:
@@ -336,6 +346,7 @@ def repository_update_cmd(
     if driver_spec is not None:
         data["driver_spec"] = driver_spec
 
+    data.update(tag_data)
     entity = base_client.update_entity(client, c.REPOSITORY_COLLECTION, uuid, data)
     show_resource(entity, output=output)
 

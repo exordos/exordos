@@ -12,6 +12,7 @@
 #    under the License.
 
 from importlib import import_module
+import json
 from types import SimpleNamespace
 from unittest import mock
 
@@ -26,6 +27,7 @@ GROUPS = [
     ("configs", "configs_group"),
     ("dns.domains", "domains_group"),
     ("em.services", "services_group"),
+    ("repo", "repository_group"),
     ("iam.idp", "idps_group"),
     ("iam.permission", "permissions_group"),
     ("network.lb", "lbs_group"),
@@ -38,7 +40,9 @@ GROUPS = [
 ]
 
 
-@pytest.mark.parametrize("module_name,group_name", GROUPS)
+@pytest.mark.parametrize(
+    "module_name,group_name", [item for item in GROUPS if item[0] != "repo"]
+)
 @pytest.mark.parametrize(
     "options,tags",
     [
@@ -110,6 +114,7 @@ def test_tags_formats_parent_collection():
 
 
 CREATE_ARGS = {
+    "repo": ["-p", UUID, "--repo-url", "https://repo.example.com/"],
     "compute.sets": ["-p", UUID, "-i", "image"],
     "dns.domains": ["-p", UUID],
     "em.services": ["-p", UUID],
@@ -246,3 +251,60 @@ def test_update_without_tag_options_preserves_tags(module_name, group_name):
         )
     assert result.exit_code == 0, result.output
     assert "tags" not in client.update_entity.call_args.args[3]
+
+
+@pytest.mark.parametrize("target", [UUID, "demo"])
+@pytest.mark.parametrize(
+    "options,expected",
+    [
+        (["--tag", "env:prod", "--tag", "team a"], ["env:prod", "team a"]),
+        (["--clear-tags"], []),
+    ],
+)
+def test_update_repo_element_tags_payload(target, options, expected):
+    from exordos.cmd.repo.elements import commands as module
+
+    with mock.patch.object(module.base_client, "get_user_api_client") as get_client:
+        client = get_client.return_value
+        client.filter.return_value = [{"uuid": UUID}]
+        client.update.return_value = {"uuid": UUID, "tags": expected}
+        result = CliRunner().invoke(
+            module.elements_group,
+            ["update", target, *options, "-o", "json"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 0, result.output
+    client.update.assert_called_once_with(
+        module.c.REPOSITORY_ELEMENT_COLLECTION, UUID, tags=expected
+    )
+    assert json.loads(result.output) == {"uuid": UUID, "tags": expected}
+
+
+@pytest.mark.parametrize("options", [[], ["--tag", "prod", "--clear-tags"]])
+def test_update_repo_element_rejects_invalid_tags_before_request(options):
+    from exordos.cmd.repo.elements import commands as module
+
+    with mock.patch.object(module.base_client, "get_user_api_client") as get_client:
+        result = CliRunner().invoke(
+            module.elements_group,
+            ["update", UUID, *options],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 2, result.output
+    get_client.assert_not_called()
+
+
+def test_update_repo_element_rejects_ambiguous_name():
+    from exordos.cmd.repo.elements import commands as module
+
+    with mock.patch.object(module.base_client, "get_user_api_client") as get_client:
+        client = get_client.return_value
+        client.filter.return_value = [{"uuid": UUID}, {"uuid": "other"}]
+        result = CliRunner().invoke(
+            module.elements_group,
+            ["update", "demo", "--tag", "prod"],
+            obj=SimpleNamespace(auth_data={}),
+        )
+    assert result.exit_code == 1, result.output
+    assert "Multiple entities" in result.output
+    client.update.assert_not_called()

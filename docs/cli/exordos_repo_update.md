@@ -99,6 +99,20 @@ Update repository
 
   Password for the repository
 
+* `clear_tags`:
+    * Type: boolean
+    * Default: `false`
+    * Usage: `--clear-tags`
+
+  Remove all tags.
+
+* `tags`:
+    * Type: text
+    * Default: `sentinel.unset`
+    * Usage: `--tag`
+
+  Set the complete tag list. Repeat for each tag.
+
 * `help`:
     * Type: boolean
     * Default: `false`
@@ -126,6 +140,8 @@ Update repository
 │ --repo-url           TEXT                                     URL of the repository. Example: https://repo.exordos.com/exordos-elements/                                                                                                                                                                 │
 │ --repo-user          TEXT                                     Username for the repository                                                                                                                                                                                                                │
 │ --repo-password      TEXT                                     Password for the repository                                                                                                                                                                                                                │
+│ --clear-tags                                                  Remove all tags.                                                                                                                                                                                                                           │
+│ --tag                TEXT                                     Set the complete tag list. Repeat for each tag.                                                                                                                                                                                            │
 │ --help                                                        Show this message and exit.                                                                                                                                                                                                                │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
