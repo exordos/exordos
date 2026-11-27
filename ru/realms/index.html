@@ -6824,6 +6824,19 @@
     Bootstrap управляемого реалма
   </a>
   
+    <nav class="md-nav" aria-label="Bootstrap управляемого реалма">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#настройки-начального-гипервизора" class="md-nav__link">
+    Настройки начального гипервизора
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -7019,6 +7032,25 @@ bootstrap.</p>
 Существующие репозитории, включая заданные через <code>--repository</code>, сохраняются.
 Если точно такой же URL уже есть в списке, повторно он не добавляется.
 Отсутствующее или пустое поле <code>repo_url</code> не меняет список репозиториев.</p>
+<h3 id="настройки-начального-гипервизора">Настройки начального гипервизора<a class="headerlink" href="#настройки-начального-гипервизора" title="Permanent link">#</a></h3>
+<p>Необязательный объект <code>hypervisor</code> в <code>realm_spec.json</code> задаёт настройки
+начального гипервизора:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"hypervisor"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"realm-host"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Realm hypervisor"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"avail_cores"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"avail_ram"</span><span class="p">:</span><span class="w"> </span><span class="mi">65536</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"cores_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">4.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"ram_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>RAM задаётся в МБ, коэффициенты должны быть неотрицательными. Пропущенные поля
+используют значения по умолчанию CLI. Явные опции <code>--hyper-*</code> перекрывают
+соответствующие поля из realm spec, включая нули и пустое описание.
+<code>--stand-spec</code> имеет приоритет над обоими источниками. Bootstrap не обновляет
+настройки существующих пулов.</p>
 
 
 

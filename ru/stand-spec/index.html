@@ -6844,6 +6844,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#настройки-гипервизора-при-bootstrap" class="md-nav__link">
+    Настройки гипервизора при bootstrap
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6927,6 +6934,21 @@
 <span class="w">    </span><span class="nt">cores</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </code></pre></div>
 <p>Этот стенд создает один узел инициализации и два физических узла, каждый с 2 ГБ ОЗУ и 2 ядрами CPU.</p>
+<h2 id="настройки-гипервизора-при-bootstrap">Настройки гипервизора при bootstrap<a class="headerlink" href="#настройки-гипервизора-при-bootstrap" title="Permanent link">#</a></h2>
+<p>Параметры планирования начального гипервизора задаются при bootstrap Core:</p>
+<div class="highlight"><pre><span></span><code><span class="go">exordos bootstrap --inventory &lt;inventory&gt; --launch-mode core \</span>
+<span class="go">  --hyper-name compute-host --hyper-cores-ratio 4 --hyper-ram-ratio 1.5</span>
+</code></pre></div>
+<p>Также доступны <code>--hyper-description</code>, <code>--hyper-avail-cores</code> и
+<code>--hyper-avail-ram</code> (МБ). Коэффициенты должны быть неотрицательными; если их не
+задать, Core использует <code>1.0</code>. Опции работают с обоими режимами
+<code>--pool-agent-placement</code>: <code>core</code> и <code>local</code>.</p>
+<p>При <code>--stand-spec</code> задавайте <code>name</code>, <code>description</code>, <code>avail_cores</code>, <code>avail_ram</code>,
+<code>cores_ratio</code> и <code>ram_ratio</code> в записях <code>hypervisors</code>. Спецификация стенда имеет
+приоритет над CLI-опциями гипервизора. Существующие пулы пропускаются по URI
+подключения; bootstrap не обновляет их настройки.</p>
+<p>Образ Core также должен поддерживать новые поля bootstrap: обновить нужно и
+CLI, и Core.</p>
 
 
 

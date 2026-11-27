@@ -6824,6 +6824,19 @@
     Bootstrapping a managed realm
   </a>
   
+    <nav class="md-nav" aria-label="Bootstrapping a managed realm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-hypervisor-settings" class="md-nav__link">
+    Initial hypervisor settings
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -7041,6 +7054,24 @@ without definitions, a non-empty <code>repo_url</code> is added to the bootstrap
 Existing repositories, including those specified with <code>--repository</code>, are
 preserved. If the exact URL is already in the list, it is not added again.
 An absent or empty <code>repo_url</code> leaves the repository list unchanged.</p>
+<h3 id="initial-hypervisor-settings">Initial hypervisor settings<a class="headerlink" href="#initial-hypervisor-settings" title="Permanent link">#</a></h3>
+<p>The optional <code>hypervisor</code> object in <code>realm_spec.json</code> configures the initial
+hypervisor:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"hypervisor"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"realm-host"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Realm hypervisor"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"avail_cores"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"avail_ram"</span><span class="p">:</span><span class="w"> </span><span class="mi">65536</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"cores_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">4.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"ram_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>RAM is in MB. Ratios must be nonnegative. Omitted fields use CLI defaults;
+explicit <code>--hyper-*</code> options override individual fields from the realm spec,
+including zero values and empty descriptions. <code>--stand-spec</code> takes precedence
+over both sources. Existing pools are not updated by bootstrap.</p>
 
 
 

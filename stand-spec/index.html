@@ -6844,6 +6844,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#hypervisor-settings-at-bootstrap" class="md-nav__link">
+    Hypervisor settings at bootstrap
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6927,6 +6934,21 @@
 <span class="w">    </span><span class="nt">cores</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </code></pre></div>
 <p>This stand creates one bootstrap node and two baremetal nodes, each with 2 GB RAM and 2 CPU cores.</p>
+<h2 id="hypervisor-settings-at-bootstrap">Hypervisor settings at bootstrap<a class="headerlink" href="#hypervisor-settings-at-bootstrap" title="Permanent link">#</a></h2>
+<p>Set the initial hypervisor's scheduling parameters when bootstrapping Core:</p>
+<div class="highlight"><pre><span></span><code><span class="go">exordos bootstrap --inventory &lt;inventory&gt; --launch-mode core \</span>
+<span class="go">  --hyper-name compute-host --hyper-cores-ratio 4 --hyper-ram-ratio 1.5</span>
+</code></pre></div>
+<p>Additional options are <code>--hyper-description</code>, <code>--hyper-avail-cores</code> and
+<code>--hyper-avail-ram</code> (MB). Ratios must be nonnegative; omitted ratios default to
+<code>1.0</code> in Core. These options work with both <code>--pool-agent-placement core</code> and
+<code>--pool-agent-placement local</code>.</p>
+<p>With <code>--stand-spec</code>, set <code>name</code>, <code>description</code>, <code>avail_cores</code>, <code>avail_ram</code>,
+<code>cores_ratio</code> and <code>ram_ratio</code> in each <code>hypervisors</code> entry instead. The stand
+specification takes precedence over the hypervisor CLI options. Existing pools
+are skipped by connection URI; bootstrap does not update their settings.</p>
+<p>The Core image must also support these bootstrap fields; update both CLI and
+Core when using them.</p>
 
 
 
