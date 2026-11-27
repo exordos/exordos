@@ -146,6 +146,24 @@ def show_cmd(ctx: click.Context, name: str, output: str) -> None:
     print_table(table, msg="Exports:")
 
 
+@ee_group.command("manifest", help="Print the raw element manifest as YAML")
+@click.argument("uuid_name")
+@click.pass_context
+def manifest_cmd(ctx: click.Context, uuid_name: str) -> None:
+    client = base_client.get_user_api_client(ctx.obj.auth_data)
+    element = base_client.get_entity(client, c.ELEMENT_COLLECTION, uuid_name)
+    manifest_ref = element.get("manifest", "")
+    if not manifest_ref:
+        raise click.ClickException(
+            f"Element {element['name']} has no manifest reference"
+        )
+    manifest_uuid = manifest_ref.rstrip("/").split("/")[-1]
+    repo_element = base_client.get_entity(
+        client, c.REPOSITORY_ELEMENT_COLLECTION, manifest_uuid
+    )
+    utils.dump_yaml(repo_element["manifest"], click.get_text_stream("stdout"))
+
+
 @ee_group.command("ips", help="Show element ips")
 @click.argument("name")
 @click.pass_context

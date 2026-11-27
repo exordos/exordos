@@ -19,11 +19,63 @@ from unittest import mock
 from bazooka import exceptions as bazooka_exc
 from click.testing import CliRunner
 import pytest
+import yaml
 
 from exordos.cmd.em.elements import commands
 
 EMPTY = {"uuid": "e1", "name": "empty", "version": "0.0.14", "status": "ACTIVE"}
 DEPENDENT = {"uuid": "e2", "name": "dependent", "version": "1.0.0", "status": "ACTIVE"}
+
+
+@pytest.mark.parametrize("target", ["empty", "11111111-1111-1111-1111-111111111111"])
+@pytest.mark.parametrize("suffix", ["", "/"])
+def test_manifest_cmd_prints_only_manifest(target, suffix) -> None:
+    manifest = {
+        "name": "empty",
+        "version": "0.0.14",
+        "resources": {"$core.compute.nodes": {"node": {"name": "example"}}},
+        "requirements": [],
+    }
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client") as get_client,
+        mock.patch.object(
+            commands.base_client,
+            "get_entity",
+            side_effect=[
+                {**EMPTY, "manifest": f"/v1/em/manifests/manifest-id{suffix}"},
+                {"uuid": "manifest-id", "manifest": manifest},
+            ],
+        ) as get_entity,
+    ):
+        result = CliRunner().invoke(
+            commands.ee_group, ["manifest", target], obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 0, result.output
+    assert yaml.safe_load(result.output) == manifest
+    assert result.output.startswith("name: empty\n")
+    assert get_entity.call_args_list == [
+        mock.call(get_client.return_value, commands.c.ELEMENT_COLLECTION, target),
+        mock.call(
+            get_client.return_value,
+            commands.c.REPOSITORY_ELEMENT_COLLECTION,
+            "manifest-id",
+        ),
+    ]
+
+
+def test_manifest_cmd_missing_manifest_reference() -> None:
+    with (
+        mock.patch.object(commands.base_client, "get_user_api_client"),
+        mock.patch.object(
+            commands.base_client, "get_entity", return_value=EMPTY
+        ) as get_entity,
+    ):
+        result = CliRunner().invoke(
+            commands.ee_group, ["manifest", "empty"], obj=SimpleNamespace(auth_data={})
+        )
+    assert result.exit_code == 1
+    assert "Element empty has no manifest reference" in result.output
+    get_entity.assert_called_once()
 
 
 def test_list_cmd_orders_elements_by_name() -> None:
