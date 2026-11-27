@@ -133,6 +133,12 @@ class Hypervisor:
     connection_uri: str
     storage_pool: str = "default"
     kind: str = "libvirt"
+    name: str = "hypervisor"
+    description: str = ""
+    avail_cores: int | None = None
+    avail_ram: int | None = None
+    cores_ratio: float | None = None
+    ram_ratio: float | None = None
     # Required by the "exordos_local_hyper" kind: the node uuid of the
     # local universal agent (LocalPoolAgentDriver) this pool is pinned to.
     node: str | None = None
